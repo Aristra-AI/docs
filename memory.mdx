@@ -7,17 +7,17 @@ Aristra remembers what you tell it about yourself, how you like it to work, and 
 
 ## Your profile
 
-Your name, your occupation and the **About you** note on your account's **Profile** page start every chat, whatever the Memory switch says. You typed them, so they are a setting, not something Aristra learned.
+Your name, your occupation and the **About you** note on your account's **Profile** page start every chat, whatever the Memory switch says, except an incognito chat while Memory is off. In a chat with other people in it, only your name and occupation are used. You typed them, so they are a setting, not something Aristra learned.
 
 ## What Aristra saves as you chat
 
-When you tell Aristra something worth keeping (a correction, a lasting preference, a fact about you, a decision, or "remember this"), it saves it right away and says so in the chat. It updates or forgets a memory when you correct it or ask. It doesn't save secrets or sensitive details, or anything a web page or file told it to keep. Chats with other people in them write no memory.
+When you tell Aristra something worth keeping (a correction, a lasting preference, a fact about you, a decision, or "remember this"), it saves it right away and says so in the chat. It updates or forgets a memory when you correct it or ask. It never saves secrets such as keys or passwords, saves sensitive details only when you ask it to, and doesn't save what a web page or file told it to keep. Chats with other people in them write no memory.
 
 You can ask too: "remember that I prefer short answers", "forget where I work".
 
 ## Learning from your past chats
 
-Each night Aristra reads your chats in your account since its last look, and keeps what will matter later: a fact about you, how you like answers, a decision or a plan. It keeps at most 15 new memories a night. Each one quotes what you said and names the chat it came from, and a newer one can replace an older memory that it changed.
+Each night Aristra reads your chats in your account since its last look, and keeps what will matter later: a fact about you, how you like answers, a decision or a plan. It keeps at most 15 new or updated memories a night. Each one quotes what you said and names the chat it came from, and a newer one can replace an older memory that it changed.
 
 It also rewrites the summary of you that starts every chat, with what you are working on, open loops, and recent decisions and topics.
 
@@ -31,13 +31,13 @@ It also rewrites the summary of you that starts every chat, with what you are wo
 Your account has two switches, under **Personalization** on the website and under **Settings › Memory** in Aristra Desktop:
 
 - **Memory**: while it is off, nothing is used or saved. Once it is back on, Aristra may learn from chats still in your history.
-- **Search and reference past chats**: lets Aristra look up your earlier chats when you ask about them.
+- **Search and reference past chats**: lets Aristra search your earlier chats and bring them up when they help.
 
 A chat records the Memory switch when it starts. Turning Memory off reaches every chat at once; turning it back on reaches chats you start afterwards.
 
 ## Incognito chats
 
-An incognito chat is never learned from and saves nothing to your memory. On the web and in Aristra Desktop's Chat tab, it can still use what Aristra already remembers. In [Aristra Code](/code/guides/memory), an incognito chat neither reads nor saves your memory. See [Chats](/chats#incognito-chats).
+An incognito chat is never learned from and saves nothing to your memory. On the web and in Aristra Desktop's Chat tab, it can still use what Aristra already remembers. In the terminal, `aristra --cloud --incognito` starts an incognito chat in Aristra Cloud, which works the same way. A chat [Aristra Code](/code/guides/memory) runs on your computer has no incognito mode. See [Chats](/chats#incognito-chats).
 
 ## Read and change your memory
 
@@ -52,7 +52,7 @@ Open **Memory** in the website's sidebar (in Aristra Desktop, **Settings › Mem
 
 ## Import
 
-**Import** on the Memory page brings in what another assistant remembers about you. It gives you a prompt to paste into ChatGPT, Claude or another assistant; paste or upload what it answers. Up to 500 memories a day. Imported memories reach the summary the next night.
+**Import** on the Memory page brings in what another assistant remembers about you. It gives you a prompt to paste into ChatGPT, Claude or another assistant; paste or upload what it answers. Up to 500 memories a day, counting what Aristra saved that day. Imported memories reach the summary the next night.
 
 In Aristra Desktop, **Settings › Memory** can also import what Codex and Claude Code remember on your Mac, and keep a copy of your memory as files in `~/Aristra/memory`.
 
