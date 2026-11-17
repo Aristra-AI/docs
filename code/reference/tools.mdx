@@ -33,7 +33,7 @@ An edit that breaks a Python, JSON or TOML file's syntax is reported back to the
 | `schedule_wakeup` | Pick when to look again, for a self-paced `/loop` |
 | `schedule_task` | Save a [scheduled task](/code/guides/background#scheduled-tasks) on this computer, or change one. Always asks you first (*on demand*) |
 | `scheduled_tasks` | List the saved scheduled tasks, or pause, resume, run or remove one (*on demand*) |
-| `session_search` | Search, read or list your past chats on this computer, to pick up earlier work. Not in an incognito chat or one with memory off (*on demand*) |
+| `session_search` | Search, read or list your past chats on this computer, to pick up earlier work. Not in an incognito chat, one with memory off, or while your account's **Memory** or **Search and reference past chats** is off (*on demand*) |
 | `push_notification` | Send you a notification on this computer, when you're away (*on demand*) |
 | `enter_worktree`, `exit_worktree` | Move the chat into a git worktree and back, only when you or your instructions ask (*on demand*) |
 
@@ -49,7 +49,7 @@ An edit that breaks a Python, JSON or TOML file's syntax is reported back to the
 | Tool | Does |
 |---|---|
 | `web_fetch` | Read a page, fetched from your computer. Pages are cached for 15 minutes |
-| `web_search` | Search the web: with your own Brave key if you set one, else through Aristra (fast search, free up to a daily limit, or Brave at $0.0075 a search; see [Usage and prices](/account/usage)). When Aristra's search cannot serve (the day's free searches used up, or the service down), the free public search of Exa, Parallel, Firecrawl or Keenable answers, with only the search words sent (those services may keep them); turn that off with `web.keylessFallback: false` in settings. Up to 200 searches per chat |
+| `web_search` | Search the web: with your own Brave key if you set one, else through Aristra's search ($0.0075 a search from your balance; see [Usage and prices](/account/usage)). When Aristra's search cannot serve (your balance used up, or the service down), the free public search of Exa, Parallel, Firecrawl or Keenable answers, with only the search words sent (those services may keep them); turn that off with `web.keylessFallback: false` in settings. Up to 200 searches per chat |
 | `cloud_browser_*` | A browser Aristra runs in the cloud, for pages that need one |
 | `browser_*` | Aristra Desktop's browser panel: navigate, go back, read, find, click, type, press keys, scroll, select and manage tabs, with your consent per site |
 

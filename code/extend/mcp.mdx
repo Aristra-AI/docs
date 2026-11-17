@@ -27,7 +27,7 @@ The program and its arguments come after `--`. Then:
 aristra mcp test fs        # start it and list its tools
 aristra mcp list           # every server here, its scope and its state
 aristra mcp get fs         # one server's details
-aristra mcp trust fs       # let its tools follow the chat's mode
+aristra mcp trust fs       # let its tools run without asking, in this project
 ```
 
 ## Scopes
@@ -142,8 +142,8 @@ A repository's `.aristra/settings.json` can't add MCP servers: a repository's se
 An MCP server is code you didn't write, and its tools can do anything:
 
 - **Until you trust a server**, each of its tools asks before it runs, unless a rule allows it (in Auto mode, the reviewer decides).
-- **Once you trust a server of your own** (user scope) with `aristra mcp trust <name>`, its tools run without asking, as a rule allowing `mcp__<name>` would. A deny or ask rule still wins, and in Read only a tool the server doesn't mark read-only is refused.
-- **Trusting a local or project server** counts for its project only, and makes only its read-only marks count: those tools run like reads, and its other tools still ask.
+- **Once you trust a server** with `aristra mcp trust <name>`, its tools run without asking, as a rule allowing `mcp__<name>` would. A deny or ask rule still wins, and in Read only a tool the server doesn't mark read-only is refused.
+- **Trust belongs to the server you trusted, in its scope.** A server of your own or a plugin's is trusted everywhere; a local or project server only in its project. A server of the same name from another scope, such as a repository's `.mcp.json` or a run's `--mcp-config`, never gets that trust.
 
 Rules work too: `mcp__github` for all of a server's tools, or `mcp__github__create_issue` for one, in `permissions.allow`, `ask` or `deny`. See [Permissions](/code/configure/permissions).
 

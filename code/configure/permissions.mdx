@@ -125,7 +125,7 @@ In Auto mode, what would otherwise ask goes to a reviewer model instead of you. 
 - **When it blocks**, the agent is told why and not to work around it. When it can't decide, the call is refused, never allowed. An action too long for it to read whole, or a chat with no reviewer (`review.enabled: false`), asks you instead.
 - **After 3 blocks in a row, or 20 in a chat**, it asks you instead.
 - **`/retry`** lets the steps it just blocked run once, as they were.
-- **Who reviews:** on the Aristra plan and the ChatGPT plan, Aristra's reviewer, free. On your own key, a custom endpoint or a local model, that model (or `review.model`), paid as that model is. `autoMode` (`allow`, `soft_deny`, `environment`) and `review.policy` add your own words for it.
+- **Who reviews:** on Aristra's models and the ChatGPT plan, Aristra's reviewer, free. On your own key, a custom endpoint or a local model, that model (or `review.model`), paid as that model is. `autoMode` (`allow`, `soft_deny`, `environment`) and `review.policy` add your own words for it.
 
 ## Changing the mode from the web
 
