@@ -1,0 +1,59 @@
+---
+title: "Editors"
+description: "Use Aristra Code inside Zed and other editors through the Agent Client Protocol, and open it from links."
+---
+
+## Zed and other ACP editors
+
+`aristra acp` serves an editor over the [Agent Client Protocol](https://agentclientprotocol.com). The editor starts it for you.
+
+In Zed, add Aristra as an agent server in your settings:
+
+```json
+{
+  "agent_servers": {
+    "Aristra": { "type": "custom", "command": "aristra", "args": ["acp"] }
+  }
+}
+```
+
+Then start an Aristra thread from Zed's agent panel. If this computer isn't signed in to Aristra yet, Zed asks you to sign in, which opens Aristra's sign-in page in your browser.
+
+An editor thread is an ordinary Aristra Code chat on this computer: `aristra sessions` lists it (run it in that folder, or add `--all`), Aristra Desktop shows it, and its approvals can be answered from any surface.
+
+| In the editor | What happens |
+|---|---|
+| A new thread | A new chat in the editor's folder, with your default model and mode. The folder is trusted for that chat without asking |
+| The mode menu | Manual, Accept edits, Plan, Auto (unless your settings turn Auto off) and Read only. A mode chosen elsewhere reaches the editor too |
+| Your prompt | A turn. Linked files and images are attached; pasted resources are quoted |
+| The thread | The reply and reasoning stream in; each step shows as a tool call with its command, diff and output |
+| A permission request | Each approval, with Yes, an answer that allows more (for this chat, or saved as a rule), and No. A question shows its options |
+| Stop | Stops the turn |
+| Opening an old thread | Replays the chat's history |
+
+Aristra Code uses its own tools (and its own sandbox, when you turn it on), not the editor's file system or terminal, and its own MCP servers from your settings, not the editor's.
+
+<Tip>
+To keep an editor's chats apart from your own (a test account, for example), add `"env": {"ARISTRA_HOME": "/path/to/home"}` to the agent server.
+</Tip>
+
+## Open your editor from Aristra Desktop
+
+Aristra Desktop's **Open in** button opens a chat's folder in VS Code, Cursor, Zed, Windsurf or Xcode (Xcode opens the folder's project), whichever you have installed. In **Review**, each changed file opens at its first change in VS Code, Cursor, Zed or Windsurf.
+
+## Links that open a terminal
+
+An `aristra-cli://open` link opens a terminal with Aristra Code in a folder and a prompt waiting in the composer:
+
+```text
+aristra-cli://open?cwd=/Users/you/code/site&q=Review%20the%20open%20issues
+aristra-cli://open?repo=acme/site&q=Fix%20the%20failing%20build
+```
+
+| Parameter | Means |
+|---|---|
+| `cwd` | The folder, as an absolute path |
+| `repo` | Instead of `cwd`, a GitHub `owner/repo`: the clone you last used it in, else your home folder |
+| `q` | The prompt, up to 5,000 characters. It is put in the composer and never sent until you press Enter |
+
+The folder's trust question is asked as for any folder. On a Mac or Linux, Aristra Code registers the link handler when you run it interactively (again if it is missing or points to an old copy); set `disableDeepLinkRegistration` to `"disable"` to turn that off.

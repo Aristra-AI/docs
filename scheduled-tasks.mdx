@@ -1,0 +1,43 @@
+---
+title: "Scheduled tasks"
+description: "Work Aristra runs for you in the cloud, on a schedule or when something happens in your apps, with your computer off: making one, where results go, approvals, quiet runs and failures. With a plan."
+---
+
+A scheduled task is work Aristra runs for you in the cloud, at set times or when something happens, while your computer is off: a morning summary of your inbox, a weekly report, a reply drafted when an email arrives. Scheduled tasks in the cloud come with a [plan](/account/plans), and each run is paid from your balance like a chat.
+
+Tasks can also run on your own computer, in a folder, with no plan (a task on one of Aristra's models is paid from your balance): see [Background work](/code/guides/background#scheduled-tasks). And a [cloud computer](/surfaces/cloud-computer) can keep its own tasks.
+
+## Make a task
+
+- **On the website:** **Scheduled tasks** in the sidebar, then **New task**: **On a schedule** or **When something happens**.
+- **In a chat:** ask in plain words ("every weekday at 8, summarize my unread email"). Aristra makes the task and shows it in the chat, where you can edit or cancel it.
+- **In Aristra Desktop:** the task form, with **In the cloud** chosen.
+
+A task on a schedule has a title, a schedule (once, hourly, daily, weekdays or weekly, in your time zone) and a prompt. Under **Advanced settings**:
+
+| Option | What it does |
+|---|---|
+| **Project context** | The project whose files, instructions and memory the task uses. Without one, it knows only your profile |
+| **Connectors** | The connected apps it may use |
+| **Updates** | Where results go: **Dashboard** (the website's notifications), **Email** or **Telegram** |
+| **Run limit** | Run until you stop it, or a number of times |
+| **Runs on** | With a cloud computer: Aristra's cloud agent, or your cloud computer |
+| **Auto-retry on failure** | How many times a failed run is tried again |
+| **Validation criteria** | Shown once Auto-retry is on: what each try must meet |
+
+## When something happens
+
+A task can start when something happens in a connected app (a new email in Gmail, a message in Slack, a payment in Stripe, a new issue in GitHub, and more), or when another task finishes. It then runs Aristra with your prompt, or a fixed list of app actions with no AI. Connect the app first; see [Connectors](/connectors).
+
+## Runs
+
+- Each task has one chat, and each run is added to it. **Open in chat**, on a run in the **History** tab, opens it.
+- A run works on its own, in Auto mode. A step that needs your approval waits on its card in the task's chat, and you are told.
+- A run with nothing new to report says so quietly: it is kept, and nothing is sent to you.
+- A run can start up to about two minutes after its time.
+
+## When a run fails
+
+Before each run, Aristra checks your plan, then your balance. A run that could not start or that failed tells you, where the task's updates go, with the reason.
+
+After three failures in a row, the task stops, and the third notice says so: it is paused when your balance or plan was the cause, and turned off otherwise. Turn it back on under **Scheduled tasks** once the cause is fixed. After a plan ends, each run is refused with a notice until the task is paused.

@@ -1,0 +1,105 @@
+---
+title: "Git and pull requests"
+description: "Work in git worktrees, review diffs, commit, open pull requests, follow their checks and reviews with /pr, and let Aristra Code fix what they report with /autofix-pr."
+---
+
+Aristra Code works with git directly: it reads your repository's state at the start of each chat, commits in your repository's style, opens pull requests with your own `gh` login, and can watch a pull request and fix what its checks and reviewers report.
+
+## Worktrees
+
+A worktree is a separate checkout of your repository on its own branch, so a chat can work without touching your folder, and several chats can work at once.
+
+<Tabs>
+  <Tab title="Terminal">
+    ```sh
+    aristra -w                 # a new worktree with a random name
+    aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
+    aristra -w auth-refactor --resume <id>   # move an existing chat into it
+    ```
+
+    When you leave, a worktree with no changes is removed; otherwise you're asked whether to keep it, and the resume command names it.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    In a new Code chat, open the **+** menu under the message box and choose **Work in a new worktree**. The chat's terminal, Review and file actions all use the worktree. The option is there only when the chat's folder is in a git repository.
+
+    The branch menu under the message box lists the branches of the folder's repository. A branch that another worktree has checked out says **Open its worktree**: choosing it adds that worktree as a folder and starts a new chat there, since git switches to a branch in one worktree at a time.
+  </Tab>
+</Tabs>
+
+A new worktree starts from your origin's default branch (fetched when it's over a day old). Settings in `worktree`:
+
+| Setting | Does |
+|---|---|
+| `worktree.baseRef` | `"fresh"` (the default): start from the origin's default branch. `"head"`: start from the current commit |
+| `worktree.symlinkDirectories` | Folders linked from the main checkout instead of copied, such as `node_modules` |
+| `worktree.sparsePaths` | Paths to check out alone, with git's sparse checkout, for large repositories |
+
+A new worktree gets your `.aristra/settings.local.json`, and any ignored files your repository's `.worktreeinclude` names (such as `.env`) are copied in.
+
+Subagents can work in worktrees of their own too; see [Subagents](/code/guides/subagents#worktrees). Aristra Code moves a chat into a worktree only when you or your instructions ask it to.
+
+## Diffs
+
+```text
+/diff
+```
+
+shows your uncommitted changes and what each turn changed, newest first. Left and Right switch between them, Enter shows a file's diff.
+
+In the [fullscreen renderer](/code/terminal#fullscreen), `/diff` opens a panel beside the chat that refreshes as Aristra Code edits: this chat's changes, uncommitted changes or the branch's (Ctrl+X B switches). Click a file to go to it, or **ask** to attach its diff to your next message.
+
+In Aristra Desktop, **Review** (⌥⌘B) shows the same: uncommitted changes, the branch against its base, or the last turn's edits, with each file one click from your editor.
+
+## Commits
+
+Ask for a commit, or run:
+
+```text
+/commit [guidance]
+```
+
+Aristra Code reads `git status`, the diff, the branch and recent commits, stages files by name and writes a message in your repository's style. It never changes your git config, skips hooks, amends, commits secrets, or pushes unless you ask.
+
+## Pull requests
+
+```text
+/create-pr            # commit what's uncommitted, push, and open a pull request
+/create-pr --draft    # as a draft
+```
+
+On a branch with an open pull request, the footer shows `PR #412`, coloured by its review state: green when approved, red with changes requested, yellow awaiting review, dim for a draft. It uses your own `gh` login (or `glab` for GitLab merge requests). `prStatusFooterEnabled: false` hides it.
+
+```text
+/pr [number]
+```
+
+opens the branch's pull request: its status, checks and reviewers, then Overview, Checks, Files and Commits.
+
+| Key | Does |
+|---|---|
+| `m` | Merge (asks to confirm), or the merge queue's action |
+| `a` | Approve |
+| `w` | Turn auto-merge on or off |
+| `d` | Convert to a draft |
+| `o` | Open it on GitHub |
+| `x`, `X` | Re-run a failed check, or every failed check |
+| `s` | Put a failed check in the prompt for Aristra Code |
+| `f` | Put merge conflicts in the prompt |
+| `g` | Refresh |
+
+In Aristra Desktop, the header's **PR #N** opens the same pull request beside the chat, with Reply and Resolve on review comments. On a branch without one, the header offers **Create PR**, **Create draft PR** or **Manually create PR**.
+
+## Auto-fix
+
+```text
+/autofix-pr           # watch the branch's pull request
+/autofix-pr 412       # watch that one
+/autofix-pr stop
+```
+
+With Auto-fix on, Aristra Code checks GitHub every minute and wakes the chat when checks fail, merge conflicts appear, or people who can push to the repository (or apps) leave new review comments. Each wake shows in the chat as its own line, which opens to what GitHub said, and Aristra Code fixes and pushes. In Aristra Desktop, turn on **Auto-fix CI & address comments** in the pull request panel of your own pull request.
+
+<Note>
+`/pr`, the footer and Auto-fix call GitHub's API with your `gh` login. Run `gh auth login` once if you haven't.
+</Note>

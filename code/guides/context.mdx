@@ -1,0 +1,42 @@
+---
+title: "Context"
+description: "What the model sees each turn, how long chats are summarized, and how to see and manage what fills the model's context with /context, /compact and /autocompact."
+---
+
+The model's context is everything it reads on a turn: Aristra Code's instructions, your instruction files, the tools it may use, the conversation so far and your message. It has a size limit, so long chats are summarized as they grow.
+
+## What the model sees
+
+Each turn the model gets:
+
+1. **The system prompt**, built once per chat and kept, so the provider's prompt cache stays warm across turns. Its fixed part comes first and is the same in every chat on the same model, so a new chat on that model, or a change of mode, reads that part from the cache too. It holds how Aristra Code works, your computer and folder, what the mode allows, your [instruction files](/code/guides/memory#instruction-files), and in a git repository a snapshot of it: the branch, the main branch, `git status` and the last five commits.
+2. **The conversation**, with older parts summarized when the chat is long.
+3. **This turn's context**, only when it changed since the turn before: your profile, your account's memory for this folder, the agents it can start, notes about the repository, your skills, your MCP servers' instructions, and the results of background commands that ended.
+4. **Your message** and the files you attached.
+
+## See what fills it
+
+```text
+/context
+```
+
+shows a grid of what fills the model's context: the system prompt, the tools (MCP tools apart), your MCP servers' instructions, your instruction files, your skills, the messages, the space kept for summarizing, and what is free. Below it, each MCP tool and instruction file with its size, and suggestions such as large command outputs or a nearly full window. In the fullscreen renderer the lists are shortened; `/context all` shows them in full. In Aristra Desktop, choose **Context usage** in a chat's `/` menu.
+
+The status line shows how full the context is: yellow at 60%, red at 80%.
+
+## Summarizing (compaction)
+
+When a chat gets close to the model's limit, older command and tool outputs are first saved to a file and cleared from the context. If that isn't enough, Aristra Code summarizes the older messages and the model continues from the summary. The latest exchange stays word for word (`/compact` summarizes everything), and up to five of the files it worked with most recently are read again. The status line counts down as the point approaches.
+
+- `/compact` summarizes now. Add instructions to say what the summary should keep: `/compact keep the API decisions`.
+- `/autocompact <tokens>` sets how full the context gets before summarizing, for the chat's model: 100k to 1M (`500k`, `200000`), or `auto` for the model's own window. `/autocompact` alone shows the current setting. It is saved per model in your settings (`modelSettings.<model>.autoCompactWindow`); `ARISTRA_AUTO_COMPACT_WINDOW` overrides it.
+
+Every surface still shows the whole conversation; only the model works from the summary. Your instruction files are read again after a summary.
+
+<Tip>
+Starting a new chat for a new task is the cheapest way to keep context small. When a large chat sits idle for over an hour, the status line suggests it.
+</Tip>
+
+## Who writes the summary
+
+Your summary model, if you set one (`auxiliary.summary`), else the chat's own model, which writes the summary inside the chat so it reuses the chat's prompt cache. See [Models](/code/configure/models#models-for-work-around-a-chat).

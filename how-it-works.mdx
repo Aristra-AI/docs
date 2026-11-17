@@ -1,67 +1,41 @@
 ---
-title: "How Aristra Code works"
+title: "How Aristra works"
 sidebarTitle: "How it works"
-description: "The Aristra Runtime behind every surface, what a turn does, and where your chats, settings and secrets live."
+description: "Your account, Aristra Cloud and your own computer: where each chat runs, where it is kept, which models it uses and who pays."
 ---
 
-## One agent, many surfaces
+## Your account
 
-The program you type, `aristra`, is a client. The agent itself is the **Aristra Runtime**, a background process on your computer that all your surfaces share: the terminal, [Aristra Desktop](/surfaces/desktop), [editors](/surfaces/editors) and a [remote machine](/surfaces/remote-machines) you reach over SSH.
+Your Aristra account holds what follows you everywhere: your chats in the cloud, your [memory](/memory), your [files](/files), your [projects](/projects), your [Craft](/craft) docs, your [connected apps](/connectors), and your balance and plan. Every surface you sign in to reaches the same account.
 
-```text
- aristra (terminal)    Aristra Desktop    an editor (aristra acp)    aristra --remote <host>
-          \                  |                    |                         |
-           '------------ the runtime protocol on a private socket ---------'
-                                       |
-                            Aristra Runtime (one per user)
-          chats, turns, approvals, permissions, sandbox, tools, models,
-          sign-in and secrets, settings, memory, MCP servers, scheduled tasks
-                                       |
-           HTTPS out only: api.aristralabs.com, the model providers you use,
-                          model servers on this computer
-```
+## Where a chat runs
 
-Because they share one runtime:
+A chat runs in one of three places:
 
-- A chat started in the terminal shows in Aristra Desktop's Code tab, and the other way round.
-- An approval can be answered from any surface that is open. The first answer wins, and the others see who answered.
-- A running turn does not depend on the window or terminal that started it. Quitting the terminal while a turn runs asks whether to keep it running.
+| | Aristra Cloud | Your computer | Your cloud computer |
+|---|---|---|---|
+| What runs it | Aristra's cloud agent | The Aristra Runtime, on your Mac or Linux machine | The Aristra Runtime, on your own computer in Aristra's cloud |
+| Started from | The website, your phone, Aristra Desktop (the Chat tab, and Code tab chats set to run in the cloud), the terminal with `aristra --cloud`, and with a plan Telegram and scheduled tasks | The terminal, Aristra Desktop's Code tab (On this Mac), your editor | Its page on the website, Telegram, its own scheduled tasks |
+| What it works with | Its own sandbox, the web, your files and connected apps | Your folders, your shell and your tools | Its own disk, shell and tools |
+| Models | Aristra's models | Any: Aristra's, your own keys, your ChatGPT plan, a model on your computer | Aristra's models, or your ChatGPT plan |
+| Who pays | Your balance | Your balance for Aristra's models; nothing with your own model | A plan's monthly usage or your top-ups (never the starter credit): its models, its time awake, and its disk, awake or asleep |
+| Kept | In your account | On your computer (`~/.aristra`) | In your account, or on its own disk if you choose |
 
-The runtime starts when a surface needs it and stops on its own after ten idle minutes. It never listens on the network: surfaces reach it through a socket only your user account can open.
+Chats in Aristra Cloud are the same chats on every surface: one started on the web shows in Aristra Desktop's Chat tab and in the terminal's [cloud chats](/code/cloud-chats).
 
-## What a turn does
+A chat on your computer stays there. With a plan, [Remote Control](/code/remote-control) shares it to the web and your phone while the work keeps running on your computer.
 
-When you send a message, Aristra Code runs a loop until the work is done:
+## Aristra Code
 
-1. **Gather context.** Your message, the chat so far, your instruction files (`AGENTS.md` and rules), memory, and the tools it may use go to the model.
-2. **Act.** The model asks for tools: read a file, search, edit, run a command, fetch a page, call an MCP server. Each request goes through your [permissions](/configure/permissions): it runs, asks you, or is refused.
-3. **Check.** Each tool's result goes back to the model, which decides the next step: another tool, or a reply.
+[Aristra Code](/surfaces/aristra-code) is Aristra working in a folder on your computer: it reads and edits files, runs commands and works with git, asking before anything you haven't allowed. The terminal, Aristra Desktop's Code tab and your editor all talk to the same runtime on your computer, so a chat started in one shows in the others. [How Aristra Code works](/code/how-it-works) has the details.
 
-You can step in at any point: send a message to steer the turn at its next step, queue one for after it, or press Esc to stop it. Long conversations are summarized when the model's context fills up; see [Context](/guides/context).
+## What follows you, and what stays
 
-## Chats on your computer and in the cloud
+- **Memory** is kept in your account and reaches every chat you start signed in, on every surface, unless you turn it off. See [Memory](/memory).
+- **Your profile** (your name, occupation and **About you**) starts every chat you start signed in, whatever the Memory switch says. The exceptions are an incognito chat while Memory is off, and a cloud computer that keeps its memory on its own disk. In a chat with other people in it, only your name and occupation are used.
+- **Files** in your account show on the website, in Aristra Desktop and with `/files` in the terminal. A file on your Mac reaches your account only when you save it there. See [Files](/files).
+- **Chats on your computer** are not in your account unless you share them with Remote Control, so Aristra's nightly learning from your chats doesn't read them.
 
-Most chats run on your computer, in a folder you choose, and are saved in `~/.aristra` on this computer. Some run in the cloud instead:
+## Who pays
 
-| | On your computer | In the cloud |
-|---|---|---|
-| Started with | `aristra`, Aristra Desktop's Code tab | `aristra --cloud`, the website, your phone |
-| Saved | In `~/.aristra` on this computer | In your Aristra account |
-| Models | Any source you set up | Aristra's models, from your balance |
-| Needs a plan | No: free with a model of your own | Yes. See [Plans and pricing](/account/plans) |
-| A folder | Its working folder | Optional: a folder on this computer it reads and changes through the runtime |
-
-A chat on your computer can also be continued from your phone and the web with [Remote Control](/surfaces/remote-control); the work still runs here. See [Cloud chats](/surfaces/cloud-chats) for chats run by Aristra's cloud agent.
-
-## Where things live
-
-| What | Where |
-|---|---|
-| The program | `~/.local/bin/aristra`, a link into `~/.local/share/aristra/versions/<version>/` |
-| Your data: chats, settings, logs, secrets | `~/.aristra/` (or `ARISTRA_HOME`) |
-| Your settings | `~/.aristra/settings.json` |
-| A project's settings | `<folder>/.aristra/settings.json` and `settings.local.json` |
-| Instructions for a project | `AGENTS.md` in the repository, and `.aristra/rules/*.md` |
-| The runtime's log | `~/.aristra/logs/runtime.log` (`aristra logs`) |
-
-Secrets such as sign-in tokens and provider keys are sealed with a key kept in your login keychain (or your Linux keyring). Your computer's sign-in is bound to a device key, which on a Mac lives in the Secure Enclave. See [Security and privacy](/security).
+Aristra's models and hosted tools are paid from your balance: a new account's $1 starter credit first, then your plan's monthly usage, then top-ups. A model of your own costs nothing on Aristra. See [Your balance and top-ups](/account/credits).

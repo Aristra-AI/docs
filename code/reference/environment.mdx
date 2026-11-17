@@ -1,0 +1,166 @@
+---
+title: "Files and environment variables"
+sidebarTitle: "Environment"
+description: "What Aristra Code keeps in ~/.aristra and your projects, and every environment variable it reads."
+---
+
+## Your Aristra folder
+
+Everything Aristra Code keeps is in one folder, `~/.aristra` (or `ARISTRA_HOME`), shared by the terminal, Aristra Desktop and every other surface.
+
+```text
+~/.aristra/
+  settings.json                your settings
+  AGENTS.md, rules/*.md        your instructions for every project
+  keybindings.json             your terminal keys
+  runtime.sqlite               every chat on this computer
+  logs/runtime.log             the runtime's log, kept 7 days
+  attachments/<chat>/          a chat's files: attachments, long outputs, checkpoints, cloud downloads
+  exports/                     chats saved with /export
+  diagnostics/                 support bundles
+  credentials.enc              secrets, sealed with a key in your keychain (credentials.json when
+                               credentials.store is file, or there is no keychain)
+  sources.json                 the model sources you connected, and a custom endpoint's address (no secrets)
+  memory/                      your memory as files, on a computer that keeps everything on its own disk
+  skills/<name>/SKILL.md       your skills
+  agents/                      your custom agents
+  workflows/                   your saved workflows, and each run's script and journal
+  plugins/                     installed plugins and marketplaces
+  projects/<repository>/memory/  notes about each repository
+  plans/                       plan mode's plans
+  terminal/history.jsonl       prompts sent from the terminal
+  hooks-approved.json          the hooks you approved
+```
+
+## In a project
+
+```text
+<folder>/
+  AGENTS.md                    instructions for the project (checked in)
+  AGENTS.local.md              your own instructions for it (not checked in)
+  .aristra/
+    settings.json              the project's settings (checked in)
+    settings.local.json        yours, for the project (not checked in)
+    AGENTS.md                  instructions, as AGENTS.md at the top of the folder
+    rules/*.md                 rules, optionally for some paths
+    skills/<name>/SKILL.md     the project's skills
+    agents/                    the project's custom agents
+    workflows/                 the project's saved workflows
+    worktrees/<name>/          worktrees made with aristra -w and by agents
+  .mcp.json                    the project's MCP servers (checked in)
+```
+
+## Elsewhere
+
+| What | Where |
+|---|---|
+| The program | `~/.local/bin/aristra`, a link into `~/.local/share/aristra/versions/<version>/` |
+| Managed policy | macOS: `/Library/Managed Preferences/`, `/Library/Application Support/Aristra/`. Linux: `/etc/aristra/` |
+| The background service | macOS: `~/Library/LaunchAgents/com.aristra.runtime.plist`. Linux: `~/.config/systemd/user/aristra-runtime.service` |
+| The keychain item | macOS login keychain, service `Aristra-credentials`. Linux Secret Service, the same attributes |
+
+## Environment variables
+
+Variables reach the runtime when it starts, from whichever app starts it (the Aristra CLI or Aristra Desktop). A runtime that is already running keeps the variables it started with: after changing one, run `aristra runtime stop` so the next command starts a runtime that sees it. If Aristra Desktop is open, quit it first, or it may start the runtime again without your variable. Only the variables on this page (and proxy, certificate and locale ones) are passed to the runtime. With the background service installed (`aristra service install`), the runtime it starts sees none of your variables.
+
+### General
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_HOME` | Use this folder instead of `~/.aristra` |
+| `ARISTRA_TOKEN` | Sign in with a token from `aristra setup-token`, for CI |
+| `ARISTRA_LOG_LEVEL` | `DEBUG`, `INFO` (default), `WARNING`, `ERROR` |
+| `ARISTRA_CREDENTIALS_STORE` | `auto`, `keychain` or `file` |
+| `ARISTRA_MANAGED_SETTINGS_DIR` | A policy folder to use when no administrator's policy exists |
+| `ARISTRA_DISABLE_TELEMETRY` | `1`: no usage events |
+| `ARISTRA_DISABLE_ERROR_REPORTING` | `1`: no error reports |
+| `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC` | `1`: no usage events, no error reports, and no pull request status checks |
+| `ARISTRA_SILENT_TURN_REMINDER`, `ARISTRA_SILENT_TURN_REMINDER_TURNS`, `ARISTRA_SILENT_TURN_REMINDER_TEXT` | The nudge to say what it is doing after quiet turns: `0` turns it off, after how many turns (default 5), and its text |
+| `ARISTRA_TMPDIR` | The folder whose `aristra-tmp-<uid>` subfolder is every command's `$TMPDIR` |
+| `OLLAMA_HOST` | Where Ollama listens |
+| `BROWSER` | The program that opens sign-in pages (`wslview` on WSL) |
+| `VISUAL`, `EDITOR`, `PAGER` | Your editor, and what Ctrl+O opens output in |
+| `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, `SSL_CERT_FILE`, `NODE_EXTRA_CA_CERTS` and similar | `SSL_CERT_FILE` and the proxy variables are honored for the runtime's own requests; `NODE_EXTRA_CA_CERTS` is passed on to commands |
+
+### The terminal
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_NO_NOTIFY` | Any value: no terminal notifications |
+| `ARISTRA_NO_FLICKER` | `1`: the fullscreen renderer for this launch; `0` keeps the classic one |
+| `IS_SANDBOX` | `1`: Bypass permissions may run as root, in a container you trust |
+| `ARISTRA_REMOTE` | A host to run on, as `--remote <host>` sets it |
+| `NO_COLOR`, `FORCE_COLOR` | Turn the terminal's colors off, or force them on |
+| `ARISTRA_DISABLE_ALTERNATE_SCREEN` | `1`: always the classic renderer |
+| `ARISTRA_DISABLE_MOUSE`, `ARISTRA_DISABLE_MOUSE_CLICKS` | In fullscreen, leave the mouse (or its clicks) to the terminal |
+| `ARISTRA_SCROLL_SPEED` | Rows per mouse wheel notch in fullscreen |
+| `ARISTRA_ENABLE_PROMPT_SUGGESTION` | `0`: no suggested next message |
+| `ARISTRA_IDLE_THRESHOLD_MINUTES`, `ARISTRA_IDLE_TOKEN_THRESHOLD` | When the "new task? /new" hint appears for a large idle chat (defaults 75 minutes and 100,000 tokens) |
+
+### Chats and tools
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_AUTO_COMPACT_WINDOW` | The auto-compact window, over `autoCompactWindow` |
+| `ARISTRA_MAX_TURNS` | Model rounds per turn in `aristra run` |
+| `ARISTRA_MAX_STRUCTURED_OUTPUT_RETRIES` | Tries for a `--json-schema` answer (default 5) |
+| `ARISTRA_DISABLE_GIT_INSTRUCTIONS` | `1`: leave git guidance out of the shell tool |
+| `ARISTRA_DISABLE_WORKFLOWS` | `1`: turn workflows off |
+| `ARISTRA_ENABLE_TASKS` | `false`: use the simpler to-do list instead of the task tools |
+| `ARISTRA_ENABLE_TODO_TOOLS` | `1`: offer the task tools to every model (by default only older models get them; current ones plan without) |
+| `ARISTRA_SUBAGENT_EFFORT` | The reasoning effort a subagent runs at when neither its call nor its definition sets one |
+| `ARISTRA_DISABLE_AGENT_PROGRESS_SUMMARIES` | `1`: no progress labels for subagents |
+| `ARISTRA_WEBFETCH_CACHE_TTL_MS` | How long fetched pages are cached (default 15 minutes) |
+| `ARISTRA_WEBFETCH_DEADLINE_MS` | A page fetch's deadline (default 5 minutes) |
+| `ARISTRA_MAX_WEB_SEARCHES_PER_SESSION` | Searches per chat (default 200) |
+| `ARISTRA_WEB_SEARCH_REFILLS_PER_HOUR` | How fast searches refill (default about 100 an hour) |
+| `ARISTRA_MAX_RETRIES` | How many times a failed model call is tried again (default 10, at most 15) |
+| `ARISTRA_RETRY_WATCHDOG` | `1`: wait out a provider outage instead of failing, for runs nobody watches: up to 300 tries (an overload or a rate limit uses none), waits backing off to 5 minutes, at most 6 hours for one wait. `ARISTRA_RETRY_WATCHDOG_SCOPE=capacity` keeps this to overloads and rate limits; `ARISTRA_RETRY_WATCHDOG_MAX_WAIT_MS` caps the whole wait (no cap by default) |
+| `ARISTRA_STOP_HOOK_BLOCK_CAP` | How many times in a row a `Stop` hook may keep a turn going (default 8; `0` for no limit) |
+| `ARISTRA_DISABLE_SUBSTITUTION_RM_PROMPT`, `ARISTRA_DISABLE_MOUNTED_DRIVE_RM_PROMPT` | Turn off two of the safety prompts for `rm` |
+| `ARISTRA_DISABLE_NOTIFICATION_PRESENCE_CHECK` | Let Aristra Code's own notifications through while you're present |
+
+### MCP servers
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_MCP_TOOL_IDLE_TIMEOUT` | Milliseconds a call may go without a response (`0` for none; default 30 minutes for a program server, 5 for an address) |
+| `ARISTRA_MCP_AUTO_BACKGROUND_MS` | When a long call moves to the background (default 120 seconds; `0` never) |
+
+### Plugins
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL` | Don't add Anthropic's marketplace at the first start |
+| `ARISTRA_DISABLE_AUTOUPDATER` | Don't update plugins in the background |
+| `ARISTRA_FORCE_AUTOUPDATE_PLUGINS` | Update plugins even when `ARISTRA_DISABLE_AUTOUPDATER` is set |
+| `ARISTRA_PLUGIN_AUTOUPDATE_DELAY_MS` | How long after start plugins update (default a random moment in the first 10 minutes) |
+| `ARISTRA_PLUGIN_GIT_TIMEOUT_MS` | A plugin git operation's time limit (default 120 seconds) |
+
+### Installing
+
+| Variable | Effect |
+|---|---|
+| `ARISTRA_NON_INTERACTIVE` | `1`: the install script asks nothing |
+| `ARISTRA_INSTALL_ALLOW_SUDO` | `1`: let the install script install for root through sudo |
+
+### Set by Aristra Code
+
+| Variable | Where |
+|---|---|
+| `ARISTRA_PROJECT_DIR`, `CLAUDE_PROJECT_DIR`, `ARISTRA_HOME` | In a hook's environment |
+| `${ARISTRA_SKILL_DIR}`, `${CLAUDE_SKILL_DIR}` | Replaced in a skill's body with its folder |
+| `${CLAUDE_PLUGIN_ROOT}` | In a plugin's hooks and MCP servers, its folder |
+| `${CLAUDE_PLUGIN_DATA}`, `CLAUDE_PLUGIN_OPTION_<KEY>` | In a plugin's hooks and MCP servers, its data folder and its options |
+| `ARISTRA_MCP_SERVER_NAME`, `ARISTRA_MCP_SERVER_URL` | In an MCP server's `headersHelper` |
+| `TMPDIR`, `TERM=dumb`, `PAGER=cat`, `GIT_PAGER=cat`, `NO_COLOR=1`, `GIT_EDITOR=true` | In every command's environment |
+
+## Exit statuses
+
+| Status | Meaning |
+|---|---|
+| `0` | Done |
+| `1` | Something failed; the reason is on stderr |
+| `2` | A usage mistake |
+| `3` | `aristra run`: completed, but a step was declined because nobody could approve it |
+| `130` | `aristra run`: interrupted with Ctrl+C |

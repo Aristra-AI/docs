@@ -1,0 +1,80 @@
+---
+title: "Chats"
+description: "Start, resume, branch, fork, export and delete chats, go back to an earlier message with checkpoints, and what happens when a turn needs you and nobody is there."
+---
+
+A chat is one conversation with Aristra Code: a folder, a model, a mode and its history. Every surface on your computer sees the same chats.
+
+## Find and resume chats
+
+| You want | Do this |
+|---|---|
+| A new chat in this folder | `aristra`, or `/new` in a chat |
+| This folder's newest chat | `aristra -c` |
+| A chat by id | `aristra resume <id>`, or `aristra attach <id>` |
+| A picker | `aristra resume`, or `/resume` |
+| A list | `aristra sessions` (this folder), `--all` (every folder), `--json` |
+
+A chat keeps the folder it started in, unless you move it into a [worktree](/code/guides/git#worktrees). Its id is printed when you leave a chat, by `aristra sessions`, and in the result of `aristra run --output json`.
+
+Several chats can run at once. Each runs one turn at a time: a message sent while a turn runs joins it at its next step (Enter) or waits for it to end (`/queue`).
+
+## Branch, fork and side questions
+
+| Command | Does |
+|---|---|
+| `/branch [name]` | Copy this chat as it is now into a new chat and carry on in the copy. The original stays as it was |
+| `/fork <directive>` | Start a background agent with this chat's full context to do the directive and report back, while you keep working here |
+| `/btw <question>` | Ask a quick side question about the chat without interrupting a running turn. The answer is shown above the composer and never added to the chat |
+
+## Checkpoints
+
+Each turn of a chat with a folder starts with a checkpoint: before Aristra Code first changes a file with its file tools in a turn, the file is backed up. A chat keeps its newest 100 checkpoints.
+
+Go back to before one of your messages with `/rewind` (or Esc twice on an empty composer) in the terminal, or **Restore to here** on the message in Aristra Desktop:
+
+- **Restore code** puts back the files the agent changed with its file tools since then.
+- **Restore conversation** removes the message and every later one, in every surface, and puts the message back in the composer to edit. The model sees what it saw then, and the chat gets back the mode it had then. A chat that was summarized after that message can't go back to it.
+- **Restore code and conversation** does both.
+
+The code options show only when the agent changed files after that message.
+
+<Note>
+Checkpoints track changes made by Aristra Code's file tools. Changes made by commands it ran (`npm run format`, a migration), or by you, are not undone. Use git for those.
+</Note>
+
+## Titles
+
+A chat's title is written by a model while the first turn runs, or set with `/rename <title>`. `auxiliary.title` in your settings picks the model that writes titles, or `"off"` to keep the first words of your message.
+
+## Export and delete
+
+```sh
+aristra sessions export <id>                 # Markdown, in ~/.aristra/exports/
+aristra sessions export <id> --format json
+aristra sessions delete <id>                 # asks first; --yes to skip
+```
+
+In a chat, `/export` and `/export json` save it, and `/copy` copies the newest reply (`/copy 2` the one before it). When the reply has code blocks, it asks which to copy, unless `copyFullResponse` is on. Deleting a chat removes its history and its files.
+
+## Where chats are kept
+
+Chats on your computer are kept in `~/.aristra/runtime.sqlite`, and files that belong to a chat (attachments, long command outputs, checkpoints) under `~/.aristra/attachments/<chat>/`, readable only by you. A chat's history is not stored anywhere else unless you share it with [Remote Control](/code/remote-control) or it is a [cloud chat](/code/cloud-chats). Each turn still sends the conversation to the chat's model provider (through Aristra when the chat uses Aristra's models); see [Security](/code/security).
+
+## When a turn needs you and nobody is there
+
+An approval waits 30 minutes (`approvals.timeoutMinutes`); one in a chat shared to your phone, or started by a scheduled task, waits 2 hours. When the wait ends, the step is declined, the model is told nobody answered, and the turn goes on without it. With nobody attached, Aristra posts a notification on your computer.
+
+In [non-interactive mode](/code/non-interactive), nobody can answer at all: what would ask is declined at once.
+
+## When a reply is cut off
+
+If the model's reply hits its output limit, Aristra Code asks it to continue where it stopped, up to three times, before ending the turn with a notice.
+
+## If Aristra stops mid-turn
+
+Aristra Code saves as it goes. If the runtime was stopped or your computer restarted during a turn, the turn is marked interrupted with a notice, and each step left unfinished is marked so the model checks before repeating it. Send a message to continue.
+
+## Chats from other agents
+
+Aristra Desktop can bring over your Claude Code and Codex sessions, and `aristra import claude-code` (or `codex`) brings your setup. Each imported session becomes a chat that continues on Aristra Code in its folder.

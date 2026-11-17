@@ -1,0 +1,98 @@
+---
+title: "Tools"
+description: "Every tool Aristra Code can use: files, commands, background work, scheduling, the web, memory, agents, workflows, MCP, and how permissions apply to each."
+---
+
+Tools are the actions Aristra Code can take. Each call goes through your [permissions](/code/configure/permissions): it runs, asks you, goes to Auto mode's reviewer, or is refused. In permission rules, use the tool's name (`shell(npm test:*)`), a group (`read(...)` for `read_file`, `list_dir`, `glob` and `grep`; `edit(...)` for `edit_file`, `write_file`, `notebook_edit` and `apply_patch`), or Claude Code's names (`Bash`, `Edit`, `WebFetch`).
+
+Some tools are sent to the model only when it searches for them, to keep each request small. They are marked *on demand*. This applies while `mcp.toolSearch` is on, the default.
+
+## Files
+
+| Tool | Does | Asks in Manual |
+|---|---|---|
+| `read_file` | Read a file, or a range of its lines. Images too, and PDFs, Word, Excel, PowerPoint, OpenDocument, RTF and EPUB files as their text, read on your computer | No, in the chat's folders |
+| `list_dir` | List a folder | No, in the chat's folders |
+| `glob` | Find files by pattern (100 at a time, with "Showing N of M") | No, in the chat's folders |
+| `grep` | Search file contents | No, in the chat's folders |
+| `edit_file` | Replace text in a file. The file must have been read first (newer Claude models may skip that for a file they can read). An edit to a file changed since is refused unless it still applies exactly once | Yes |
+| `write_file` | Create or overwrite a file | Yes |
+| `apply_patch` | Apply a patch in Codex's format. GPT models get it in place of `edit_file` and `write_file` | Yes |
+| `notebook_edit` | Replace, insert or delete one cell of a Jupyter notebook (*on demand*) | Yes |
+
+An edit that breaks a Python, JSON or TOML file's syntax is reported back to the model. Files in UTF-8 or UTF-16 (little-endian, with its byte-order mark) keep their encoding; the edit tools refuse a file in any other encoding. The edit tools never write into a Word, Excel, PowerPoint, OpenDocument, RTF or EPUB file, or over a PDF, since the model saw only their text: Aristra Code changes those with a library through a command.
+
+## Commands and background work
+
+| Tool | Does |
+|---|---|
+| `shell` | Run a command, in the [sandbox](/code/configure/sandbox) when it's on (off by default). It may run in the background, or ask to run outside the sandbox with a reason |
+| `process_list`, `process_read`, `process_stop` | List, read and stop background commands, agents, workflow runs and monitors |
+| `monitor` | Run a script whose output lines arrive in the chat as events, for up to 30 minutes (5 by default) (*on demand*) |
+| `cron_create`, `cron_delete`, `cron_list` | Schedule prompts in this chat, once or on a cron schedule (*on demand*) |
+| `schedule_wakeup` | Pick when to look again, for a self-paced `/loop` |
+| `schedule_task` | Save a [scheduled task](/code/guides/background#scheduled-tasks) on this computer, or change one. Always asks you first (*on demand*) |
+| `scheduled_tasks` | List the saved scheduled tasks, or pause, resume, run or remove one (*on demand*) |
+| `session_search` | Search, read or list your past chats on this computer, to pick up earlier work. Not in an incognito chat or one with memory off (*on demand*) |
+| `push_notification` | Send you a notification on this computer, when you're away (*on demand*) |
+| `enter_worktree`, `exit_worktree` | Move the chat into a git worktree and back, only when you or your instructions ask (*on demand*) |
+
+## Asking you
+
+| Tool | Does |
+|---|---|
+| `ask_user_question` | Ask you one to four multiple-choice questions. Always asked, in every mode |
+| `enter_plan_mode`, `exit_plan_mode` | Enter plan mode, and ask you to approve the plan |
+
+## The web
+
+| Tool | Does |
+|---|---|
+| `web_fetch` | Read a page, fetched from your computer. Pages are cached for 15 minutes |
+| `web_search` | Search the web: with your own Brave key if you set one, else through Aristra (fast search, free up to a daily limit, or Brave at $0.0075 a search; see [Usage and prices](/account/usage)). When Aristra's search cannot serve (the day's free searches used up, or the service down), the free public search of Exa, Parallel, Firecrawl or Keenable answers, with only the search words sent (those services may keep them); turn that off with `web.keylessFallback: false` in settings. Up to 200 searches per chat |
+| `cloud_browser_*` | A browser Aristra runs in the cloud, for pages that need one |
+| `browser_*` | Aristra Desktop's browser panel: navigate, go back, read, find, click, type, press keys, scroll, select and manage tabs, with your consent per site |
+
+## Agents and workflows
+
+| Tool | Does |
+|---|---|
+| `agent` | Start a [subagent](/code/guides/subagents) or a fork in the background |
+| `send_message` | Message a subagent, or another of your live chats on this computer by name (*on demand*) |
+| `list_agents` | List this chat's agents and your other live chats |
+| `workflow` | Run a [workflow](/code/guides/subagents#workflows) script, or a saved workflow by name |
+| `skill` | Load one of your [skills](/code/extend/skills) |
+| `task_create`, `task_get`, `task_update`, `task_list` | Keep the chat's task list, for models that need one (not current Claude models unless `ARISTRA_ENABLE_TODO_TOOLS=1`); `todo_write` takes their place with `ARISTRA_ENABLE_TASKS=false` (*on demand*) |
+| `update_plan`, `wrap_up` | In chats made in Aristra Desktop: the task list shown above the composer, and the closing recap with next steps |
+
+## Memory, your account's files and Craft
+
+| Tool | Does |
+|---|---|
+| `memory_save`, `memory_update`, `memory_forget`, `memory_search` | Your [account's memory](/code/guides/memory#your-accounts-memory) |
+| `library_search`, `library_read` | The files in your account (**Files** on the website) |
+| `library_save` | Save a copy of a file on this computer to your account's files, only when you ask; saving it again replaces that copy |
+| `craft_list`, `craft_create`, `craft_read`, `craft_edit`, `craft_comment` | Craft docs, in Aristra Desktop |
+| `present_files` | Show files to you as cards |
+| `send_user_file` | Send files to your phone or the web, in a chat shared with [Remote Control](/code/remote-control) (*on demand*) |
+
+## MCP, connectors and code intelligence
+
+| Tool | Does |
+|---|---|
+| `mcp__<server>__<tool>` | A tool of one of your [MCP servers](/code/extend/mcp) |
+| `connectors__<app>__<action>` | An action of an app connected to your Aristra account (needs a plan with connectors) |
+| `tool_search`, `tool_describe`, `tool_call` | Find and use MCP and connector tools without sending them all every turn |
+| `list_mcp_resources`, `read_mcp_resource` | Your MCP servers' resources (*on demand*) |
+| `refresh_mcp_tools` | List your MCP servers' tools again, after one changed (*on demand*) |
+| `lsp` | Go to definitions, find references and read diagnostics through a plugin's language server (*on demand*) |
+
+## Scripts
+
+| Tool | Does |
+|---|---|
+| `structured_output` | Return the answer matching `aristra run --json-schema` |
+
+## What a result looks like to the model
+
+A tool result over 50,000 characters, or over the tool's own limit, is saved to a file the model can open, and the model sees a 2,000-character preview. Content from outside (pages, files, tool output) reaches the model marked as untrusted data, and values that look like secrets are masked.

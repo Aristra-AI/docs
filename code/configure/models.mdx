@@ -1,0 +1,121 @@
+---
+title: "Models"
+description: "Choose the model Aristra Code runs on and who pays for it: your Aristra plan, your ChatGPT plan, your own provider keys, a model on your computer, or a custom endpoint. Fallbacks and usage."
+---
+
+Every chat runs on a model from a **source**, and every source has a **payer**. Aristra Code shows who pays in the footer, in `/model`, in `aristra status` and in `aristra models`, before a turn runs.
+
+| Who pays | Shown as | Sources |
+|---|---|---|
+| Your Aristra plan | Your Aristra balance, at each model's provider price | `aristra` |
+| Your ChatGPT plan | your plan | `chatgpt` |
+| You, with your own key | your key | A provider key you added, a custom endpoint |
+| Nobody | this computer | Ollama, LM Studio, a custom endpoint on your computer or network |
+
+Every chat needs an Aristra sign-in, whatever its source: your account holds your memory and settings across devices.
+
+## Sources
+
+<AccordionGroup>
+  <Accordion title="Your Aristra plan">
+    Aristra's models, paid from your balance: a new account's $1 starter credit first, then a plan's monthly usage, then top-ups. Every model is on every plan, listed with its context window and reasoning levels, and a pricier model uses your balance faster. See [Your balance and top-ups](/account/credits). Each model's price is on [Models and prices](https://app.aristralabs.com/models). Your files and commands stay on your computer; what the model reads goes out in the model call. See [Security](/code/security) for what else leaves.
+
+    Each model has its whole window. Some providers charge more for a long prompt, and so does Aristra, for that request alone: Claude Haiku 5.5 over 100K tokens, GPT-5.4 and later (not mini or nano) over 272K, Gemini 3.1 Pro over 200K.
+  </Accordion>
+  <Accordion title="Your ChatGPT plan">
+    Your ChatGPT subscription supplies the model; Aristra Code runs the turn with its own tools and approvals. Sign in from `/model`: choose **Sign in with your ChatGPT plan**, open the page it shows and enter the code. `/usage` shows the plan's 5-hour and weekly limits.
+  </Accordion>
+  <Accordion title="Your own provider keys">
+    ```sh
+    aristra keys add openai        # asks for the key, hidden
+    aristra keys list              # which are set, never the key itself
+    aristra keys remove openai
+    ```
+
+    | Source | Provider |
+    |---|---|
+    | `openai` | OpenAI |
+    | `anthropic` | Anthropic |
+    | `gemini` | Google Gemini |
+    | `openrouter` | OpenRouter |
+    | `fireworks` | Fireworks AI |
+    | `deepseek` | DeepSeek |
+    | `xai` | xAI |
+    | `moonshot` | Kimi (Moonshot) |
+    | `zai` | Z.AI (GLM) |
+    | `minimax` | MiniMax |
+
+    Keys go to Aristra's credential store, never to a settings file. A chat picks up a changed key on its next turn.
+  </Accordion>
+  <Accordion title="Models on your computer">
+    Ollama (where `OLLAMA_HOST` says, else `localhost:11434`) and LM Studio (`localhost:1234`) are found automatically.
+
+    - `aristra models` and `/model` say whether each local model **fits** your computer's memory, is **tight**, or is **too big**.
+    - Ollama runs models with a short context by default. Under 16,384 tokens the turn fails and says how to raise it: Context length in the Ollama app, or `OLLAMA_CONTEXT_LENGTH`.
+    - `aristra doctor` checks that the local server answers.
+  </Accordion>
+  <Accordion title="A custom endpoint">
+    Any server that speaks Chat Completions, Responses or Anthropic's Messages: a company gateway, a proxy, a self-hosted server. Set it up in Aristra Desktop's Settings › Models. Without Aristra Desktop (on Linux, for example), run `aristra keys add custom`: it asks for the address, the API it speaks, its models, a name and a key. Or give them as `--url`, `--wire chat_completions|responses|anthropic`, `--name` and `--model` (repeat it for each model), with `--no-key` for a server that needs none.
+
+    It is kept in `~/.aristra/sources.json`, and its key in the credential store. The address must be `https://`, or `http://` for a server on your computer. It pays as "this computer" when its address is on your computer or network, else as "your key".
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+Signing in with a Claude subscription isn't offered: use Claude models through your Aristra plan or your own Anthropic key. Google models are used with an API key or through your Aristra plan.
+</Note>
+
+## Choose a model
+
+- `/model` in a chat lists every source with who pays and its models. Choosing one switches the chat and makes it the default for new chats.
+- `/effort [level|auto]` sets how hard the model thinks: `low`, `medium`, `high`, and on some models `xhigh` or `max`.
+- `aristra -m <model> --source <source>` chooses for one chat.
+
+The default lives in your settings:
+
+```json ~/.aristra/settings.json
+{ "model": { "source": "anthropic", "model": "claude-sonnet-5-5", "effort": "high" } }
+```
+
+## When a model call fails
+
+A server error, overload or dropped connection is retried before any text has streamed, up to 10 times (`ARISTRA_MAX_RETRIES`, at most 15), and the status line says so; with a fallback ready, three overloads in a row hand over to it. With no fallback, a rate limit is waited out while each wait is a minute or less. After that, what happens depends on the failure:
+
+| Failure | What follows |
+|---|---|
+| Overloaded, network | Retried, then the next model on your fallback list |
+| Rate limited | The next model on the list; else the turn fails and says when the limit resets |
+| Signed out, balance used up | The next model on the list from another source |
+| Context too long | Summarized and retried |
+| Rejected request, other errors | The next model on your fallback list |
+| Refused | The turn fails. Another model is never asked what one refused |
+
+The fallback list is `model.fallback` in your own settings:
+
+```json ~/.aristra/settings.json
+{
+  "model": {
+    "source": "anthropic", "model": "claude-sonnet-5-5",
+    "fallback": [
+      { "source": "openrouter", "model": "anthropic/claude-sonnet-5-5" },
+      { "source": "aristra", "model": "gemini-3.8-flash" }
+    ]
+  }
+}
+```
+
+**Who pays never changes silently.** A turn moves on its own only to a model the same payer pays for. Moving to another payer asks you first, and a script never switches payer. The fallback list is read only from your own settings, so a repository can't move your chats onto your other keys.
+
+## Models for work around a chat
+
+Titles, summaries of long chats, and the memory backstop call a model too. They use, in order:
+
+1. Yours, from `auxiliary.title`, `auxiliary.summary` and `auxiliary.memory` in your settings, each `{"source": ..., "model": ...}` from one of your own sources (not `aristra`) (`auxiliary.title: "off"` keeps your first words as the title).
+2. On the Aristra plan, its background model: a cheaper, faster model, for titles and the memory backstop. Summaries use the chat's own model.
+3. The chat's own model.
+
+A side model that fails never fails the chat. Auto mode's reviewer has its own model; see [Permissions](/code/configure/permissions#auto-modes-reviewer).
+
+## Usage
+
+`/usage` shows this chat's tokens by model and who paid, how full the context is, and each plan you're signed in to: your Aristra balance in dollars and when it renews, and your ChatGPT plan's limits. It also shows what's contributing to your usage over the last day and week. `aristra run --usage-file <path>` writes a script run's usage.

@@ -3,15 +3,15 @@ title: "Cloud computer"
 description: "Your own computer in Aristra Cloud, with a plan or on top-ups: a real shell, files that stay, tools you install. It sleeps when idle and wakes for your message. Running time and its disk are paid from your balance."
 ---
 
-A cloud computer is your own Linux machine in Aristra's cloud, running the same Aristra Code agent as your terminal and Aristra Desktop. Chats on it work like chats on your Mac: a real shell, files that persist, tools you install, long jobs left running. It is always reachable from the web, your phone and Telegram, because it wakes when you send it something.
+A cloud computer is your own Linux machine in Aristra's cloud, running the same Aristra Code agent as your terminal and Aristra Desktop. Chats on it work like chats on your Mac: a real shell, files that persist, tools you install, long jobs left running. It is always reachable from the web and your phone, and from Telegram with a plan, because it wakes when you send it something.
 
 <Note>
-A cloud computer is different from a [cloud chat](/surfaces/cloud-chats). A cloud chat runs on Aristra's shared cloud agent and keeps nothing between chats but your account. A cloud computer is a machine of your own, with a disk that keeps your files and installed tools.
+A cloud computer is different from a [cloud chat](/code/cloud-chats). A cloud chat runs on Aristra's shared cloud agent and keeps nothing between chats but your account. A cloud computer is a machine of your own, with a disk that keeps your files and installed tools.
 </Note>
 
 ## Set one up
 
-A cloud computer runs on your balance: with a [plan](/account/plans), or on [top-ups](/account/credits) without one. Making one needs at least $2 in your balance. Your plan sets the largest size and disk you can have; without a plan, up to Large with a 100 GB disk.
+A cloud computer runs on your balance: with a [plan](/account/plans), or on [top-ups](/account/credits) without one. With a plan, any balance above zero is enough to make one. Without a plan, you need at least $2 from top-ups; the starter credit doesn't count. Your plan sets the largest size and disk you can have; without a plan, up to Large with a 100 GB disk.
 
 1. Open **Cloud computer** in your account, at `app.aristralabs.com/account/computer`. It is the one place to make, use and manage it.
 2. Pick a size, a disk and where it keeps its data (below), then choose **Create cloud computer**.
@@ -24,9 +24,9 @@ A cloud computer runs on your balance: with a [plan](/account/plans), or on [top
 | Large | 8 shared CPUs, 4 GB memory | $0.0487 an hour | Every plan, and on top-ups |
 | Extra large | 8 shared CPUs, 8 GB memory | $0.0881 an hour | Max |
 
-Medium is enough for most agent work. Small suits messages, scripts and scheduled tasks; builds and a browser want Large. A new size takes effect at once: the computer restarts in a few seconds with everything on its disk.
+Medium is enough for most agent work. Small suits messages, scripts and scheduled tasks; builds and a browser want Large. A new size takes effect at once when it is awake: the computer restarts in a few seconds with everything on its disk. If it is asleep, it wakes with the new size.
 
-**The disk** starts at 10 GB and can grow up to your plan's limit: 25 GB on Plus, 100 GB on Pro and Max, and 100 GB on top-ups. It never shrinks. It costs $0.18 a month for each GB, whether the computer is awake or asleep, because it keeps your data.
+**The disk** is chosen when you make it, from 5 GB (10 GB unless you change it), in steps of 5 GB, and can grow up to your plan's limit: 25 GB on Plus, 100 GB on Pro and Max, and 100 GB on top-ups. It never shrinks. It costs $0.18 a month for each GB, whether the computer is awake or asleep, because it keeps your data.
 
 Model calls and tools are charged as they are anywhere else in Aristra.
 
@@ -38,7 +38,7 @@ You choose when you create it, and can change it on its page. A change applies t
 |---|---|---|
 | Chats | On the computer, and each turn also saved to your account | On the computer only |
 | Memory | Your account's memory, shared with your Mac and the website | Its own memory, in files on its disk |
-| Your account's files, Craft, connectors | Available | Not used; tools you install on it work |
+| Your account's files, Craft, connectors | Your files; Craft and connectors with a plan | Not used; tools you install on it work |
 | On the web and phone | Your chat list shows them, even while it sleeps | Read from the computer when you open them, which wakes it |
 | Prompts it schedules itself | Kept on the computer; replies saved to your account | Kept on the computer; replies stay on it |
 | Scheduled tasks from the website | The task is in your account; the chat each run starts is saved there too | The task is in your account; the chat each run starts stays on the computer |
@@ -46,7 +46,7 @@ You choose when you create it, and can change it on its page. A change applies t
 | Telegram | Each Telegram chat has a chat on the computer, saved to your account | Each Telegram chat has a chat on the computer, kept only there |
 | If you delete it | Chats and memory stay in your account | Everything on it is gone |
 
-With **Kept on the computer only**, Aristra passes your messages and its replies through but keeps nothing of them: no saved messages, titles or search entries. A message waits on Aristra's servers only until the computer picks it up, and a reply only while it streams to you. Its disk is the only copy, so use **Export chats and memory** on its page before you delete it.
+With **Kept on the computer only**, Aristra passes your messages and its replies through but keeps nothing of them: no saved messages, titles or search entries. A message waits on Aristra's servers only until the computer picks it up, and a reply for at most an hour after it finishes, so an open page can catch up. Its disk is the only copy, so use **Export chats and memory** on its page before you delete it.
 
 In both modes Aristra's servers handle your sign-in, your balance, model calls on the Aristra plan (counted for billing, their content not kept), web search and other built-in tools, Telegram, and starting and stopping the computer. A scheduled task you make on the website lives in your account, because the website runs it.
 
@@ -63,10 +63,10 @@ When you switch to **Kept on the computer only**, the page offers to delete the 
 ## Use it from anywhere
 
 - **The web and your phone:** on a new chat, **Where it runs** lists Aristra Cloud, your cloud computer and your other computers; choose the cloud computer to open its page in your account, and send a message there. With **Saved to your account**, the chat opens on the usual chat page; otherwise on the cloud computer's own page.
-- **Telegram:** turn on **Telegram messages go to this computer** on its page. Your private chat with Aristra then runs on it. Send `/new` to start a fresh chat there.
-- **Scheduled tasks:** a task set to run on your cloud computer starts a chat there with its prompt each time it runs, waking it if it sleeps. The task's own history shows that each run started; the reply is in the chat.
+- **Telegram** (with a plan): turn on **Telegram messages go to this computer** on its page. Your private chat with Aristra then runs on it. Send `/new` to start a fresh chat there.
+- **Scheduled tasks** (with a plan): a task set to run on your cloud computer starts a chat there with its prompt each time it runs, waking it if it sleeps. The task's own history shows that each run started; the reply is in the chat.
 - **Its own scheduled tasks:** under **Scheduled tasks** on its page, give it a prompt to run every day, on weekdays, one day a week, every hour or once, at times in your own time zone. The computer keeps them, wakes for each one, and runs it in a new chat, which **Read it** opens. They need no plan: each run is paid from your balance, as its chats are. Reading the list while it sleeps wakes it for a moment.
-- **Aristra Desktop** lists it with your other computers.
+- **Aristra Desktop:** the chats of a cloud computer that saves to your account show in the Code tab under **On other devices**. To start a chat on it, use its page on the web.
 
 ## Its own model
 
@@ -85,7 +85,7 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 - When your balance is low, you get an email (at most once a day).
 - **With a plan, at a zero balance it goes to sleep.** Nothing on it is deleted while you have a plan. It wakes by itself for your next message once your balance is back, from a [top-up](/account/credits) or your plan's monthly reset. The disk's charge for that time is taken from the next money that arrives.
 - **Without a plan, when your top-up balance runs out** it is stopped, and its disk is kept for 30 days. You get an email a week before the disk is deleted. Top up within that time to bring it back with everything on it, or export its data first.
-- **When your plan ends** it keeps running from your top-up balance. With none left it is stopped and its disk kept for 30 days in the same way; renew or top up within that time to bring it back.
+- **When your plan ends** it keeps running from your top-up balance, and an Extra large one drops to Large. With none left it is stopped and its disk kept for 30 days in the same way; renew or top up within that time to bring it back.
 - **If you move to a plan with a smaller limit**, its size drops to that plan's largest at your renewal. Its disk stays as it is, and can no longer grow.
 
 ## Security
@@ -93,4 +93,4 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 - Each cloud computer is its own machine on its own private network: it can't reach other users' machines or Aristra's servers except through the public API, as your Mac does.
 - Aristra Code runs on it as an unprivileged user without `sudo`. Install tools into your home folder (`pip install --user`, `npm install -g`, or `~/bin`).
 - Nothing listens on it: it connects out to your account over HTTPS, authenticated with its own device key, as your Mac does.
-- It holds no credentials of Aristra's. It signs in once with a one-time token when it is first made.
+- It holds no credentials of Aristra's. It signs in with a one-time token when it is first made, and with a new one if it has slept for weeks or moves to another host.

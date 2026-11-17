@@ -1,0 +1,93 @@
+---
+title: "Quickstart"
+description: "Install Aristra Code, sign in, and finish a first task in a project of yours."
+---
+
+This guide takes you from nothing installed to a first finished change. It uses the terminal; the same chat works in [Aristra Desktop](/code/desktop) too.
+
+<Steps>
+  <Step title="Install">
+    ```sh
+    curl -fsSL https://aristralabs.com/install.sh | sh
+    ```
+
+    This installs the newest release for your machine (macOS on Apple silicon or Intel, Linux on x64 or arm64) into your home folder, with no root access. If `~/.local/bin` is not on your `PATH` yet, the installer adds it to your shell profile and says so. Open a new terminal afterwards.
+
+    Check the install:
+
+    ```sh
+    aristra --version
+    aristra doctor
+    ```
+
+    `aristra doctor` checks your setup and marks each line `ok` or `fix`, with how to fix it. On Windows, use WSL2; see [Setup](/code/setup).
+  </Step>
+
+  <Step title="Start it in a project">
+    ```sh
+    cd ~/code/my-project
+    aristra
+    ```
+
+    The first run asks only what it still needs, one screen at a time:
+
+    1. **Sign in to Aristra.** Every chat needs an Aristra account, including chats on your own keys or on a local model. The account is free: see [what is free and what a plan adds](/account/overview). Press Enter to sign in in your browser, on app.aristralabs.com. Without a browser (over SSH, for example), **With a code, on another device** comes first, and you enter the code on any device. While the browser sign-in waits, press c to switch to a code. Esc skips it, and `/login` signs in later.
+    2. **Choose the model new chats start with.** Each choice says who pays: your Aristra balance, your ChatGPT plan, your own key, or "runs on this computer". Change it any time with `/model`.
+    3. **Trust the folder.** Aristra Code reads, edits and runs files in a folder you trust. "No, exit" is selected first; press Down, then Enter, to trust it. The answer is saved for the repository and its subfolders. Your home folder is trusted for this run only.
+    4. **New MCP servers.** If the folder's `.mcp.json` has servers you haven't answered yet, it asks which to use. Starting in Bypass permissions shows a warning to accept first.
+  </Step>
+
+  <Step title="Ask for a change">
+    Type what you want done and press Enter:
+
+    ```text
+    › Find why the date parser fails on leap years and fix it. Run the tests when you are done.
+    ```
+
+    You will see:
+    - The reply stream in as Markdown.
+    - Each step as one line: `Read src/date.ts`, `Search for leap`, `Edit src/date.ts`, `$ npm test`.
+    - Each edit's diff, and each command's output, cut to a few lines. Ctrl+O opens the newest step's full output.
+    - The status line with what it is doing and how full the model's context is, and the footer with the mode, the branch's pull request, the model and who pays.
+  </Step>
+
+  <Step title="Approve what it asks">
+    New chats start in **Manual** mode: reading, searching and commands that only read run on their own (with the sandbox on, so do commands in it), and other changes ask first. An approval shows the exact command or diff with three answers:
+
+    - **Yes** for this one step.
+    - **Yes, and don't ask again** for this kind of step, which saves a rule (or allows edits for the rest of the chat).
+    - **No**.
+
+    Press Tab on Yes or No to add a note the model reads.
+
+    Press Shift+Tab to cycle modes: **Accept edits** (edits in the folder run on their own), **Plan** (explore and propose first), **Auto** (Aristra's reviewer decides what would ask) and back to Manual. See [Permissions](/code/configure/permissions).
+  </Step>
+</Steps>
+
+## Everyday use
+
+| You want to | Do this |
+|---|---|
+| Start in this folder | `aristra` |
+| Start with a prompt | `aristra "explain the build system"` |
+| Continue this folder's newest chat | `aristra -c` |
+| Go back to an earlier chat | `aristra resume`, or `/resume` in a chat |
+| Open a chat running elsewhere | `aristra attach <id>` |
+| Run one turn in a script or CI | `aristra run "fix the lint errors" -o json` |
+| See this folder's chats | `aristra sessions` (`--all` for every folder) |
+| Choose another model | `/model`, or `aristra models` to list them |
+| Add a provider key | `aristra keys add openai` (or `anthropic`, `gemini`, `openrouter`) |
+| Change a setting | `aristra config set permissions.defaultMode acceptEdits` |
+| Bring your Claude Code or Codex setup | `aristra import claude-code` (or `codex`), with a preview first |
+| Check your setup | `aristra doctor` |
+
+In a chat, `/help` lists every command and key.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="The terminal app" icon="terminal" href="/code/terminal">Keys, steering a running turn, queueing, going back.</Card>
+  <Card title="Memory and instructions" icon="brain" href="/code/guides/memory">Teach it your project with `AGENTS.md`.</Card>
+  <Card title="Git and pull requests" icon="code-branch" href="/code/guides/git">Worktrees, diffs, `/pr` and auto-fix.</Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/code/desktop">The same chats in the Mac app's Code tab.</Card>
+</CardGroup>

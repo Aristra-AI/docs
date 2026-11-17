@@ -1,0 +1,117 @@
+---
+title: "Managed policy"
+description: "For administrators: enforce rules, turn off modes, allow or block MCP servers and fix any setting on every computer, through a configuration profile or managed settings files."
+---
+
+An administrator can set a policy that every chat on a computer follows, in the terminal, Aristra Desktop and every other surface: rules no one can override, Auto mode turned off, MCP servers allowed or blocked, telemetry off. It uses the same keys as Claude Code's managed settings.
+
+## Where the policy comes from
+
+Aristra Code reads the first source that has a policy:
+
+| Order | Source | Where |
+|---|---|---|
+| 1 | A macOS configuration profile (MDM) for the user, domain `com.aristralabs.aristra` | `/Library/Managed Preferences/<user>/com.aristralabs.aristra.plist` |
+| 2 | The same profile for the computer | `/Library/Managed Preferences/com.aristralabs.aristra.plist` |
+| 3 | Managed settings files: `managed-settings.json`, then each `managed-settings.d/*.json` merged on top in name order | macOS: `/Library/Application Support/Aristra/`. Linux: `/etc/aristra/` |
+
+A user's own preferences are never read for policy, and no surface can write the policy. Files are read again when they change. Instruction files (`AGENTS.md`, `rules/*.md`) placed beside the managed settings apply to every chat too.
+
+## An example
+
+```json /Library/Application Support/Aristra/managed-settings.json
+{
+  "permissions": {
+    "deny": ["shell(git push:*)", "read(~/.aws/**)", "web_fetch(domain:pastebin.com)"],
+    "ask": ["shell(npm publish:*)"],
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
+  "telemetry": { "usage": false, "errors": false },
+  "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
+  "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
+}
+```
+
+The policy's values win over every user's and folder's settings.
+
+## Rules
+
+- **Deny rules** refuse a call before anything else: no allow rule, session answer, mode (Bypass included) or reviewer overrides them. Their paths also close the sandbox to commands.
+- **Ask rules** ask, Bypass included (in Auto mode, the reviewer decides).
+- **Allow rules** count like the user's, in every folder.
+- **`permissions.allowManagedPermissionRulesOnly: true`** makes the policy's rules the only ones that count. Approvals then offer only Yes and No.
+
+## Modes
+
+- **`permissions.disableAutoMode: "disable"`** turns Auto mode off everywhere. A chat already in Auto asks from its next turn, with a notice.
+- **`permissions.disableBypassPermissionsMode: "disable"`** turns off Bypass permissions mode, and forbids `aristra run --dangerously-skip-sandbox`.
+
+## Sandbox
+
+Any sandbox setting can be fixed, for example `sandbox.allowUnsandboxedCommands: false` so commands always run in the sandbox. With the sandbox on, a repository then can't turn it off, only your own settings, `--settings` and the policy can exclude commands from it, and commands you run with `!` run in it too. Two keys exist only in a policy:
+
+| Key | Does |
+|---|---|
+| `sandbox.network.allowManagedDomainsOnly` | Only the policy's hosts count, and nothing is asked |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | Only the policy's `allowRead` paths count |
+
+## MCP servers
+
+| Key | Meaning |
+|---|---|
+| `deniedMcpServers` | Servers that may never run. Always wins |
+| `allowedMcpServers` | When present, only matching servers may run. An empty list allows none |
+
+| Entry | Matches |
+|---|---|
+| `{"serverName": "github"}` | A server by its name, from any source (settings, `.mcp.json`, plugins) |
+| `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | A program server by its exact command and arguments |
+| `{"serverUrl": "https://mcp.company.example/*"}` | A server by address, `*` matching anything |
+
+When the allow list has command (or address) entries, a program (or address) server must match one of those; its name alone is not enough.
+
+A server the policy rules out is disabled, and `aristra mcp list` says "Your organization's policy does not allow this MCP server."
+
+## Hooks, plugins and workflows
+
+| Key | Does |
+|---|---|
+| `hooks` | Hooks that run for everyone, without each user approving them |
+| `allowManagedHooksOnly` | Only the policy's hooks, and those of plugins it turns on, run |
+| `disableAllHooks` | No hooks run |
+| `enabledPlugins` | Plugins turned on or off for everyone; a managed value wins |
+| `strictKnownMarketplaces` (or `allowedMarketplaces`) | Only these plugin marketplaces may be added |
+| `blockedMarketplaces` | Marketplaces that may never be added |
+| `pluginTrustMessage` | Your words, shown when someone installs a plugin |
+| `disableSideloadFlags` | Refuse `--plugin-dir` |
+| `disableWorkflows` | Turn workflows off |
+
+An `agents/` folder beside the managed settings adds custom agents for everyone, overriding users' agents of the same name.
+
+## Any other setting
+
+Most settings can be fixed the same way: `telemetry.usage`, `telemetry.errors`, `approvals.timeoutMinutes`, `memory.enabled` and so on. Settings read only from each user's own file (`review`, `credentials`, `auxiliary`, `mcp`, `model.fallback`, `runtime.notifications`, `runtime.maxRunningTurns`) can't be fixed by a policy. Aristra Desktop shows telemetry, workflows, the sandbox switch and the free search fallback as set by your organization when the policy fixes them.
+
+## Check it
+
+```sh
+aristra doctor        # says where the policy comes from
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
+```
+
+## Try a policy
+
+On a computer without one, point Aristra Code at a policy folder of your own (stop the runtime first, since it reads the variable when it starts):
+
+```sh
+mkdir -p ~/aristra-policy
+cat > ~/aristra-policy/managed-settings.json <<'EOF'
+{ "permissions": { "deny": ["shell(git push *)"], "disableAutoMode": "disable" } }
+EOF
+aristra runtime stop
+ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
+```
+
+For settings and instructions, `ARISTRA_MANAGED_SETTINGS_DIR` is read only when no administrator's policy exists, so it can never replace them.

@@ -5,14 +5,21 @@
 - Aristra's user documentation, built on [Mintlify](https://mintlify.com).
 - Pages are MDX files with YAML frontmatter (`title`, `description`). Configuration and navigation live in `docs.json`.
 - Run `mint dev` to preview and `mint broken-links` to check links before a change is merged.
-- A page describes the product as it ships. When a feature changes, the page changes with it.
+- A page describes the product as it ships. When a feature changes, the page changes with it. Check a claim against the product before writing it; don't describe what is planned.
+
+## How the site is organized
+
+- **Aristra** (pages at the root, `surfaces/`): Aristra itself, the backbone. Your account, chats, memory, projects, files, Craft, connectors and scheduled tasks, and the surfaces you use it on.
+- **Aristra Code** (`code/`): one surface, Aristra working in folders on your computer, with its own guides, configuration and reference.
+- **Account and plans** (`account/`): the plans, the balance, usage and prices, and export.
 
 ## Naming
 
-- **Aristra Code** is the coding agent, on every surface: Aristra Desktop's Code tab, the Aristra CLI, editors and a cloud computer.
-- **Aristra Desktop** is the Mac app. The `aristra` command is the **Aristra CLI**.
-- **Aristra One** is the website, app.aristralabs.com.
-- **Aristra Cloud** is what a plan pays for.
+- **Aristra** is the assistant. Each place you use it is a **surface**: Aristra One, Aristra Desktop, Aristra Code, Telegram and a cloud computer.
+- **Aristra One** is the website, app.aristralabs.com, and the phone.
+- **Aristra Desktop** is the Mac app. Its two tabs are the **Chat** tab and the **Code** tab.
+- **Aristra Code** is Aristra working in folders on your computer: the terminal, Desktop's Code tab and editors. The `aristra` command is the **Aristra CLI**.
+- **Aristra Cloud** is what a plan pays for: Aristra's models, the cloud agent and everything else Aristra hosts.
 - Chats are "chats". Say "commands", not "slash commands", and "non-interactive mode", not "headless".
 
 ## Style
