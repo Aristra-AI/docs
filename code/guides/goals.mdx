@@ -11,6 +11,8 @@ A goal is a condition Aristra Code checks before it stops. When a turn would end
 /goal clear          # remove it
 ```
 
+A goal is up to 4,000 characters. `/goal` works only in a trusted folder, and not while `disableAllHooks` is set.
+
 In Aristra Desktop, choose **Goal** in a chat's `/` menu.
 
 ## Write a good goal
@@ -30,5 +32,7 @@ Give Aristra Code the command that checks it, in the goal or in your `AGENTS.md`
 - **Met:** the goal clears, and the chat says so.
 - **Not met:** the turn continues with the reason the check gave.
 - **Impossible:** if the check decides the goal can't be reached, the goal clears and the turn ends, with why.
+- **Not met 8 times in a row** with no tool call between: the turn ends anyway, and the goal stays.
+- **Check failed** (no answer in 30 seconds, or no model set up for it): the turn ends, and the goal stays.
 
-While background work in the chat is still running, the check waits for it. Esc stops the turn as usual; the goal stays until you clear it or it is met.
+While background work in the chat is still running, the check waits for it. Esc stops the turn as usual; the goal stays until you clear it, it is met, or the check finds it impossible.
