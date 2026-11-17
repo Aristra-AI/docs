@@ -1,0 +1,56 @@
+/* Aristra's look for the docs, from the apps' design system (packages/design in the main repository). */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+
+/* Code is Geist Mono, as in Aristra Desktop and the website. */
+code, pre, kbd {
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-ligatures: none;
+}
+
+/* The scene: the Code tab's painting, dithered and drawn at whole pixels (one image pixel to one CSS pixel) so its dots
+   stay square; the band is never wider than the painting.
+   The coast at dawn in light mode, the observatory at night in dark, on the grounds the apps use behind it. */
+.aristra-scene {
+  height: 260px;
+  max-width: 720px;
+  margin: 0.5rem 0 2.5rem;
+  border-radius: 12px;
+  background: #f5f1ea url("/images/code-scene-dawn.png") no-repeat;
+  background-size: 720px 450px;
+  background-position: 50% 62%;
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 1px rgba(13, 13, 13, 0.08);
+}
+
+.dark .aristra-scene {
+  background-color: #05070c;
+  background-image: url("/images/code-scene-night.png");
+  background-position: 50% 48%;
+  box-shadow: inset 0 0 0 1px rgba(242, 242, 242, 0.08);
+}
+
+/* A painting as a band: the onboarding meadow, the same in both themes. */
+.aristra-band {
+  height: 220px;
+  margin: 0.5rem 0 2.5rem;
+  border-radius: 12px;
+  background: #f5f1ea no-repeat center / cover;
+  box-shadow: inset 0 0 0 1px rgba(13, 13, 13, 0.08);
+}
+
+.dark .aristra-band {
+  box-shadow: inset 0 0 0 1px rgba(242, 242, 242, 0.08);
+}
+
+.aristra-band-meadow {
+  background-image: url("/images/meadow.jpg");
+  background-position: 50% 55%;
+}
+
+/* On a phone the band shows a third of the painting: the road and the town at dawn, the dome at night. */
+@media (max-width: 640px) {
+  .aristra-scene { height: 200px; background-position: 92% 74%; }
+  .dark .aristra-scene { background-position: 95% 46%; }
+  .aristra-band { height: 160px; }
+}

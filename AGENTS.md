@@ -15,8 +15,9 @@
 
 ## Naming
 
-- **Aristra** is the assistant. Each place you use it is a **surface**: Aristra One, Aristra Desktop, Aristra Code, Telegram and a cloud computer.
-- **Aristra One** is the website, app.aristralabs.com, and the phone.
+- **Aristra** is the assistant. Each place you use it is a **surface**: the web and phone, Aristra Desktop, Aristra Code, Telegram and a cloud computer.
+- **Aristra One** is your account's plan (Free, Plus, Pro or Max) and its account pages, as in Desktop's **Aristra One** menu: your plan, balance, usage and devices. It is never the website.
+- The website is app.aristralabs.com: say "the website" or "on the web".
 - **Aristra Desktop** is the Mac app. Its two tabs are the **Chat** tab and the **Code** tab.
 - **Aristra Code** is Aristra working in folders on your computer: the terminal, Desktop's Code tab and editors. The `aristra` command is the **Aristra CLI**.
 - **Aristra Cloud** is what a plan pays for: Aristra's models, the cloud agent and everything else Aristra hosts.
