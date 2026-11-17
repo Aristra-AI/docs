@@ -25,56 +25,97 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Aristra Code",
-        "icon": "terminal",
+        "tab": "Aristra",
+        "icon": "sparkles",
         "groups": [
           {
-            "group": "Getting started",
-            "pages": ["index", "quickstart", "setup", "how-it-works"]
+            "group": "Get started",
+            "pages": [
+              "glossary"
+            ]
           },
           {
             "group": "Surfaces",
             "pages": [
-              "surfaces/terminal",
-              "surfaces/desktop",
-              "surfaces/editors",
-              "surfaces/remote-control",
-              "surfaces/cloud-chats",
-              "surfaces/cloud-computer",
-              "surfaces/non-interactive",
-              "surfaces/remote-machines"
+              "surfaces/web",
+              "surfaces/cloud-computer"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Aristra Code",
+        "icon": "terminal",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "code/index",
+              "code/quickstart",
+              "code/setup",
+              "code/how-it-works"
+            ]
+          },
+          {
+            "group": "Where it runs",
+            "pages": [
+              "code/terminal",
+              "code/desktop",
+              "code/editors",
+              "code/remote-control",
+              "code/cloud-chats",
+              "code/non-interactive",
+              "code/remote-machines"
             ]
           },
           {
             "group": "Use Aristra Code",
             "pages": [
-              "guides/chats",
-              "guides/memory",
-              "guides/context",
-              "guides/git",
-              "guides/background",
-              "guides/goals",
-              "guides/subagents"
+              "code/guides/chats",
+              "code/guides/memory",
+              "code/guides/context",
+              "code/guides/git",
+              "code/guides/background",
+              "code/guides/goals",
+              "code/guides/subagents"
             ]
           },
           {
             "group": "Extend",
-            "pages": ["extend/mcp", "extend/skills", "extend/hooks", "extend/plugins"]
+            "pages": [
+              "code/extend/mcp",
+              "code/extend/skills",
+              "code/extend/hooks",
+              "code/extend/plugins"
+            ]
           },
           {
             "group": "Configure",
             "pages": [
-              "configure/settings",
-              "configure/permissions",
-              "configure/sandbox",
-              "configure/models",
-              "configure/terminal",
-              "configure/managed-policy"
+              "code/configure/settings",
+              "code/configure/permissions",
+              "code/configure/sandbox",
+              "code/configure/models",
+              "code/configure/terminal",
+              "code/configure/managed-policy"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "code/reference/cli",
+              "code/reference/commands",
+              "code/reference/tools",
+              "code/reference/settings",
+              "code/reference/environment"
             ]
           },
           {
             "group": "Help",
-            "pages": ["security", "troubleshooting"]
+            "pages": [
+              "code/security",
+              "code/troubleshooting"
+            ]
           }
         ]
       },
@@ -84,23 +125,12 @@
         "groups": [
           {
             "group": "Aristra One",
-            "pages": ["account/overview", "account/web", "account/plans", "account/credits", "account/usage", "account/export"]
-          }
-        ]
-      },
-      {
-        "tab": "Reference",
-        "icon": "book",
-        "groups": [
-          {
-            "group": "Reference",
             "pages": [
-              "reference/cli",
-              "reference/commands",
-              "reference/tools",
-              "reference/settings",
-              "reference/environment",
-              "reference/glossary"
+              "account/overview",
+              "account/plans",
+              "account/credits",
+              "account/usage",
+              "account/export"
             ]
           }
         ]

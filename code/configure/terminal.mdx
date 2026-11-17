@@ -1,0 +1,78 @@
+---
+title: "Terminal setup"
+description: "Set up your terminal for Aristra Code: new lines, keybindings, your own status line, the fullscreen renderer and display settings."
+---
+
+## New lines
+
+Shift+Enter adds a new line in Ghostty, kitty and WezTerm out of the box. Elsewhere, run:
+
+```text
+/terminal-setup
+```
+
+It adds a Shift+Enter binding in VS Code, Cursor or Windsurf (backing up their keybindings first), or turns on "Use Option as Meta key" in Apple's Terminal so Option+Enter adds a line. Alt+Enter, Ctrl+J and `\` then Enter work everywhere.
+
+## Keybindings
+
+`~/.aristra/keybindings.json` changes Aristra Code's keys, in the same shape as Claude Code's file. `/keybindings` creates it with every binding and opens it; changes apply a moment after you save.
+
+```json ~/.aristra/keybindings.json
+{
+  "bindings": [
+    { "context": "Chat", "bindings": { "meta+s": "chat:stash", "ctrl+s": null } },
+    { "context": "Global", "bindings": { "ctrl+f": "history:search" } }
+  ]
+}
+```
+
+Write keys as `ctrl+`, `shift+` and `meta+` (or `alt+`, `option+`) before a letter or a name such as `enter`, `escape`, `tab`, `up` or `pageup`. Two keys with a space between are a chord. Binding a key to `null` turns it off. Ctrl+C and Ctrl+D can't be rebound.
+
+| Context | When | Actions (default keys) |
+|---|---|---|
+| `Global` | Always | `app:interrupt` (Ctrl+C), `app:exit` (Ctrl+D), `app:redraw` (Ctrl+L), `app:toggleTodos` (Ctrl+T), `app:toggleTranscript` (Ctrl+O), `history:search` (Ctrl+R) |
+| `Chat` | The composer | `chat:cancel` (Esc), `chat:cycleMode` (Shift+Tab), `chat:modelPicker` (Alt+P), `chat:submit` (Enter), `history:previous` (Up), `history:next` (Down), `chat:externalEditor` (Ctrl+G), `chat:stash` (Ctrl+S), `chat:imagePaste` (Ctrl+V) |
+| `HistorySearch` | Ctrl+R's search | `historySearch:next` (Ctrl+R), `historySearch:accept` (Esc, Tab), `historySearch:execute` (Enter) |
+| `Task` | A command is running | `task:background` (Ctrl+B) |
+| `Confirmation` | An approval | `confirm:yes` (Enter), `confirm:no` (Esc), `confirm:nextField` (Tab), `confirm:cycleMode` (Shift+Tab), `confirm:toggleExplanation` (Ctrl+E) |
+| `Scroll` | Fullscreen's transcript | `scroll:pageUp` (PgUp), `scroll:pageDown` (PgDn), `scroll:top` (Ctrl+Home), `scroll:bottom` (Ctrl+End) |
+| `DiffPanel` | Fullscreen's diff panel | `app:cycleDiffBase` (Ctrl+X B) |
+
+Line-editing keys (Ctrl+A, Ctrl+E, Ctrl+K, Ctrl+U, Ctrl+W, Ctrl+Y) follow readline and aren't in the file.
+
+## Your own status line
+
+`statusLine` runs a command and shows its output under the composer:
+
+```json ~/.aristra/settings.json
+{
+  "statusLine": { "type": "command", "command": "~/bin/status.sh", "padding": 1, "refreshInterval": 10 }
+}
+```
+
+The command reads the chat as JSON on stdin (`session_id`, `cwd`, `permission_mode`, `session_name`, `model`, `workspace`, `version`, `context_window`, `effort` and more), runs again when the chat changes and every `refreshInterval` seconds, and has 5 seconds to answer. Its colours are kept.
+
+## Fullscreen
+
+```text
+/tui fullscreen      # saved in your settings
+/tui default         # back to the classic renderer
+```
+
+`aristra --fullscreen` uses it for one launch. Fullscreen draws on the whole screen with a scrollable transcript, mouse selection, the transcript screen (Ctrl+O) and the diff panel (`/diff`). See [Terminal](/code/terminal#fullscreen).
+
+## Display settings
+
+| Setting | Default | Does |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` for the fullscreen renderer |
+| `copyOnSelect` | `true` | In fullscreen, copy a selection when you let go |
+| `promptSuggestionEnabled` | `true` | Suggest your next message after a reply |
+| `awaySummaryEnabled` | `true` | Leave a recap in a chat you come back to |
+| `spinnerTipsEnabled` | `true` | Show tips while Aristra Code works |
+| `prStatusFooterEnabled` | `true` | Show the branch's pull request in the footer |
+| `terminalProgressBarEnabled` | `true` | Show a progress bar in the terminal's tab while a step runs |
+| `permissionExplainerEnabled` | `true` | Ctrl+E explains a command on its approval |
+| `copyFullResponse` | `false` | `/copy` takes the whole reply without asking which code block |
+
+Environment variables for the terminal (`ARISTRA_NO_NOTIFY`, `ARISTRA_DISABLE_MOUSE`, `ARISTRA_SCROLL_SPEED` and others) are listed in [Environment variables](/code/reference/environment).

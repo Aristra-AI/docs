@@ -1,0 +1,160 @@
+---
+title: "Troubleshooting"
+description: "Fix common problems with signing in, the runtime, models, the sandbox, approvals, MCP servers, hooks and the terminal."
+---
+
+## Start with these
+
+```sh
+aristra doctor          # checks everything and says how to fix each problem
+aristra status          # your account, the runtime, the model sources
+aristra logs -n 200     # the runtime's log; -f follows it
+```
+
+`aristra doctor` checks the versions, your account, the model sources, the sandbox, the credential store, MCP servers, your settings files, git, the managed policy, telemetry, the installation and the terminal. Each line is `ok` or `fix`, with what to do.
+
+For support, `aristra diagnostics export` writes a bundle to `~/.aristra/diagnostics/` with secrets and email addresses removed and no messages. Nothing is sent; look inside before you share it. In a chat, the `/debug` skill reads the log for you.
+
+## Signing in
+
+<AccordionGroup>
+  <Accordion title="&quot;Not signed in&quot; when I start a chat">
+    Every chat needs an Aristra sign-in, including chats on your own keys and local models. Run `aristra login`, or `/login` in a chat.
+  </Accordion>
+  <Accordion title="The browser doesn't open, or I'm on another machine">
+    While the browser sign-in waits, press `c` (or type `/login code` in a chat) to switch to a code you enter at aristralabs.com on any device. `aristra login --device-code` starts with the code. Over SSH the code is the default. On WSL, set `BROWSER=wslview`.
+  </Accordion>
+  <Accordion title="I was signed out by myself">
+    The device was revoked (from the website's device list), or the sign-in expired after 30 days without use. `aristra status` says which. Sign in again.
+  </Accordion>
+</AccordionGroup>
+
+## The runtime
+
+<AccordionGroup>
+  <Accordion title="It won't start">
+    The error says why. Common causes:
+
+    - **`~/.aristra` can be opened by other users.** Run `chmod 700 ~/.aristra`.
+    - **It belongs to another user** (after `sudo aristra ...`). Remove it or fix its owner.
+    - **A store written by a newer runtime.** Update: `aristra update`.
+  </Accordion>
+  <Accordion title="It keeps stopping">
+    A runtime that crashes restarts at once, at most 3 times in 2 minutes; then the terminal says it failed and why. Read `aristra logs`, then run `aristra diagnostics export`.
+  </Accordion>
+  <Accordion title="A setting or environment variable seems ignored">
+    Settings files take effect at once. Environment variables (telemetry, proxies, the managed settings folder) are read when the runtime starts: run `aristra runtime stop`, then your command again.
+  </Accordion>
+</AccordionGroup>
+
+## Models
+
+<AccordionGroup>
+  <Accordion title="&quot;No model source is ready&quot;">
+    Sign in to Aristra, sign in to your ChatGPT plan from `/model`, or add a key with `aristra keys add <provider>`.
+  </Accordion>
+  <Accordion title="Balance used up, or over a plan's limit">
+    The turn says so and when the limit resets. `/usage` shows your balance in dollars and your limits, and `/model` switches to another source. A `model.fallback` list can do this for you, asking before another payer pays. To add to your balance, [top up](/account/credits) from $10.
+  </Accordion>
+  <Accordion title="&quot;This needs an Aristra plan&quot;">
+    Aristra on your computer is free with a model of your own. What else Aristra hosts comes with a [plan](/account/plans): Remote Control and shared chats, connectors, and Craft. Your account's memory comes with every account. Without one, chats in the cloud are paid from your [balance](/account/credits) (a new account starts with $1), and a cloud computer runs on top-ups. `/status` shows your plan; the plans are on Billing in your account.
+  </Accordion>
+  <Accordion title="&quot;Every plan for this launch is taken&quot;">
+    Plans open in batches while Aristra One is new. You were not charged and your account is unchanged. Try again later from Billing.
+  </Accordion>
+  <Accordion title="The free web searches for today are used">
+    Fast search is free up to 50 searches a day, 200 with a plan. They come back over the next 24 hours. To search now, choose Brave under **Web search** on your [Usage](/account/usage) page, at $0.0075 a search, or set your own Brave key on your computer.
+  </Accordion>
+  <Accordion title="&quot;Web search is set to your own Brave key&quot;">
+    You set a Brave key of your own on this computer and it can't be read now. Aristra does not switch to a search paid from your balance without being told. Add the key again in **Settings › Tools**, or remove it there to search with Aristra.
+  </Accordion>
+  <Accordion title="A local model fails with a window under 16K">
+    Ollama runs models with a short context by default. Raise Context length in the Ollama app, or set `OLLAMA_CONTEXT_LENGTH=32768` and restart Ollama.
+  </Accordion>
+</AccordionGroup>
+
+## Commands and the sandbox
+
+<AccordionGroup>
+  <Accordion title="A command can't reach a host">
+    Commands reach the network through the sandbox's proxy. A host you haven't allowed is asked about; one you refused fails with `<sandbox_violations>` after the output. Allow a host ahead with `sandbox.network.allowedDomains` or a `web_fetch(domain:...)` allow rule. A tool that ignores proxy settings (`ping`, some database clients) can't reach the network from the sandbox: approve running it outside, or list it in `sandbox.excludedCommands`.
+  </Accordion>
+  <Accordion title="pip install or gh fails with a certificate error on macOS">
+    These tools check certificates through a macOS service the sandbox closes. Let Aristra Code run them outside the sandbox (ask it to if it doesn't), or set `sandbox.enableWeakerNetworkIsolation: true`. See [Sandbox](/code/configure/sandbox#macos).
+  </Accordion>
+  <Accordion title="A dev server can't listen on a port">
+    Allow localhost: `aristra config set sandbox.network.allowLocalBinding true`.
+  </Accordion>
+  <Accordion title="A command can't write a file it should">
+    Commands may write only the chat's folders, `$TMPDIR` and the paths your rules open, never settings files, `.git/hooks`, `.git/config`, shell startup files and the rest of the protected list. Aristra Code can change those with its file tools, with your approval.
+  </Accordion>
+  <Accordion title="On Linux, the sandbox you turned on doesn't start">
+    Commands then run outside it (the chat says so), or fail when `sandbox.failIfUnavailable` is on. `aristra doctor` names the cause under Sandbox: install bubblewrap, allow user namespaces for it (Ubuntu 24.04 and later), or inside a container set `sandbox.enableWeakerNestedSandbox: true`.
+  </Accordion>
+</AccordionGroup>
+
+## Approvals
+
+<AccordionGroup>
+  <Accordion title="An approval disappeared">
+    Another surface answered it first, or it timed out after 30 minutes and was declined.
+  </Accordion>
+  <Accordion title="A script run exits with status 3">
+    Something asked for approval and nobody could answer. Allow it for the run (`--allow "shell(npm test *)"`), choose a mode (`--permission-mode auto`), or add rules to your settings. `result.permissionDenials` lists what was declined.
+  </Accordion>
+  <Accordion title="Auto mode keeps asking">
+    Its reviewer pauses after blocking 3 steps in a row or 20 in a chat; approving one turns it back on. `/retry` lets the blocked steps run once.
+  </Accordion>
+</AccordionGroup>
+
+## Chats
+
+<AccordionGroup>
+  <Accordion title="&quot;The chat is busy&quot;">
+    A turn is running in it, possibly in another runtime (`aristra run --no-daemon`, a remote session). Wait for it; a hold left by a runtime that died expires after 60 seconds.
+  </Accordion>
+  <Accordion title="A turn was interrupted on its own">
+    The runtime stopped while it ran. The chat says "Aristra stopped while this was running", and the composer offers "Continue from where you left off.": press Enter to send it (in Aristra Desktop, Tab takes it into the composer), or type something else.
+  </Accordion>
+  <Accordion title="A chat is missing from the list">
+    `aristra sessions` lists this folder's chats, `--all` every folder's, `--cloud` your account's. Incognito chats are never listed.
+  </Accordion>
+</AccordionGroup>
+
+## MCP servers, skills and hooks
+
+<AccordionGroup>
+  <Accordion title="An MCP server doesn't connect">
+    `aristra mcp test <name>` starts it and prints why: the program isn't on your `PATH`, with `--sandbox`, it writes somewhere the sandbox refuses (give it `--cwd` or `--writable`), its package is flagged as malware, it needs a sign-in (`aristra mcp login <name>`), or a policy blocks it.
+  </Accordion>
+  <Accordion title="An MCP tool asks every time">
+    The server isn't trusted: `aristra mcp trust <name>`.
+  </Accordion>
+  <Accordion title="A folder's skills, hooks or rules are ignored">
+    The folder isn't trusted. `/folder` says so.
+  </Accordion>
+  <Accordion title="A hook doesn't run">
+    Hooks run only after you approve them: `aristra hooks list`, then `aristra hooks approve <event> <command>`.
+  </Accordion>
+</AccordionGroup>
+
+## The terminal
+
+<AccordionGroup>
+  <Accordion title="Shift+Enter sends instead of adding a line">
+    Run `/terminal-setup`, or use Alt+Enter or Ctrl+J.
+  </Accordion>
+  <Accordion title="No notifications">
+    The terminal notifies in iTerm2, kitty and Ghostty, and with the bell in Apple's Terminal; other terminals get none. Check your terminal's notification settings and that `ARISTRA_NO_NOTIFY` isn't set. Aristra Desktop sends its own notifications.
+  </Accordion>
+</AccordionGroup>
+
+## Start over
+
+```sh
+aristra runtime stop --now
+mv ~/.aristra ~/.aristra.bak     # keeps your chats, settings and secrets aside
+aristra                          # a fresh start: sign in again
+```
+
+To try something without touching your real setup, use another home: `ARISTRA_HOME=~/aristra-scratch aristra`.

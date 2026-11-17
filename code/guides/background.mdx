@@ -1,0 +1,95 @@
+---
+title: "Background work"
+description: "Keep work going while you do something else: background commands, monitors, /loop and scheduled prompts, scheduled tasks, the background service and notifications."
+---
+
+## Background commands
+
+A long command doesn't hold up the chat:
+
+- **At its timeout** (2 minutes by default, up to 10 if the model asks), a command still running moves to the background instead of being stopped, and Aristra Code gets its output so far.
+- **Ctrl+B** while a command runs sends it to the background yourself.
+- **Dev servers and watchers** start in the background when Aristra Code asks for it.
+
+Background commands keep running between turns. When one ends, the chat is told, and Aristra Code reads its output. They stop with their chat and with the runtime, and stopping one ends everything it started.
+
+Start a server as a background command of its own rather than with `&` inside another command: what `&` leaves behind ends with that command in zsh, but keeps running in bash, where job control gives it a process group of its own.
+
+```text
+/tasks
+```
+
+lists everything running in the background: commands, monitors, [agents](/code/guides/subagents) and workflows. Enter opens one (for an agent, what you type there goes to it), and x stops it. The status line counts them ("1 shell", "2 local agents"). In Aristra Desktop they're listed above the message box, each with its output and a Stop button.
+
+## Monitors
+
+A monitor is a background command whose output lines arrive in the chat as events: a log line matching an error, a deploy changing state, a test run finishing. Aristra Code starts one when you ask it to watch something ("tell me if the build fails"). Each monitor runs for 5 minutes by default and at most 30, then stops with a notice; Aristra Code can start it again for a longer watch. Monitors show in `/tasks`.
+
+## Repeat a prompt: /loop
+
+```text
+/loop 5m check the deploy and tell me when it's done
+/loop 30m /code-review
+/loop check CI until it passes        # no interval: Aristra Code picks when to look again
+```
+
+`/loop` runs a prompt or a command on an interval. Without an interval, Aristra Code paces itself, waking when there is something to check.
+
+You can also ask for a schedule in plain words ("every weekday at 9, summarize the open pull requests", "remind me at 2:30 to check the deploy"). Aristra Code schedules the prompt in this chat:
+
+- A scheduled prompt runs only while the chat is idle, never in the middle of a reply.
+- Each chat can have up to 50. A recurring one stops after 7 days.
+- They live in the running Aristra Code: they stop when the runtime stops. For work that should keep going after the chat, Aristra Code saves a scheduled task instead, and asks you first.
+
+## Scheduled tasks
+
+A scheduled task runs a prompt in a folder at set times (once, hourly, daily, weekdays or weekly, in your computer's time): a morning summary of open pull requests, a weekly dependency check. Tasks are saved on your computer, run there, and are free. Each run is a chat of its own, listed in the Code tab's **Inbox** with unread dots, and its approvals wait 2 hours.
+
+There are three ways to make one:
+
+- **Ask in a chat**: "every weekday at 9, check the build and tell me what fails". Aristra Code shows the task before it is saved: its schedule, its prompt, the folder, the model and the permission mode. It asks in every permission mode, because a task keeps running after the chat. The task takes the chat's folder, model and mode; Aristra Code cannot choose others.
+- **In Aristra Desktop**: Chats & tasks, **New** › **Scheduled task**, or ⌘K › **New scheduled task**.
+- **In a terminal**:
+
+```sh
+aristra tasks add "Check the build and report what fails" --every weekday --at 09:00
+aristra tasks add "Summarize last week's commits" --every monday --at 08:30 --name "Weekly notes"
+aristra tasks add "Remind me to send the report" --once "2026-03-01 08:00"
+aristra tasks                      # list them, with each one's next run and last run
+aristra tasks pause <id>           # also: resume, run (once, now), remove
+```
+
+In the terminal app, `/schedule` lists them and `/schedule pause|resume|run|remove <number>` changes one.
+
+What a run can and cannot do:
+
+- A run is a new chat that has not seen the chat the task was made in, so the task's prompt has to stand alone.
+- A run cannot ask you a question, and it cannot schedule tasks.
+- A run with nothing new to report says so quietly: it is kept in the task's list, already read, and you get no notification. A run that failed always tells you, with the reason (for example, no balance left). After three failed runs in a row the task is paused; resume it once the cause is fixed.
+- Runs missed while the computer was asleep or off are made up by one run when it is back, or skipped if you chose that for the task.
+
+Scheduled tasks run on time with every window closed when the background service is on. Without it, a task runs when Aristra Code is next running; a run that starts more than two minutes late is marked missed. Aristra says so once, the first time you have a task and the service is off.
+
+With a [plan](/account/plans), a task can run in Aristra's cloud instead, with your computer off. See [Aristra One on the web](/surfaces/web).
+
+## The background service
+
+```sh
+aristra service install     # keep Aristra Code running, now and at every login
+aristra service status
+aristra service uninstall
+```
+
+On macOS this is a launchd agent, on Linux a systemd user unit. It follows updates. In Aristra Desktop, Settings › **Keep Aristra running in the background** installs the same service. On a Linux server with nobody logged in, run `loginctl enable-linger $USER`.
+
+Without the service, the runtime starts when a surface needs it and stops after 10 idle minutes, but it stays up while a turn runs, a background command runs or an approval waits.
+
+## Notifications
+
+| Surface attached | Who notifies |
+|---|---|
+| The terminal | The terminal, in iTerm2, kitty and Ghostty, and with the bell in Apple's Terminal. `ARISTRA_NO_NOTIFY=1` turns it off |
+| Aristra Desktop | The app |
+| Nobody | Aristra Code, with a system notification. `runtime.notifications: false` turns it off |
+
+You're notified when an approval waits, when a scheduled run ends, and when a change arrives from your phone or the web. Aristra Code can also send you a notification itself, for example when a long task finishes while you're away. It doesn't send one while you're at your computer using Aristra.

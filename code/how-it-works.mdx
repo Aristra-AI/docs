@@ -1,0 +1,67 @@
+---
+title: "How Aristra Code works"
+sidebarTitle: "How it works"
+description: "The Aristra Runtime behind every surface, what a turn does, and where your chats, settings and secrets live."
+---
+
+## One agent, many surfaces
+
+The program you type, `aristra`, is a client. The agent itself is the **Aristra Runtime**, a background process on your computer that all your surfaces share: the terminal, [Aristra Desktop](/code/desktop), [editors](/code/editors) and a [remote machine](/code/remote-machines) you reach over SSH.
+
+```text
+ aristra (terminal)    Aristra Desktop    an editor (aristra acp)    aristra --remote <host>
+          \                  |                    |                         |
+           '------------ the runtime protocol on a private socket ---------'
+                                       |
+                            Aristra Runtime (one per user)
+          chats, turns, approvals, permissions, sandbox, tools, models,
+          sign-in and secrets, settings, memory, MCP servers, scheduled tasks
+                                       |
+           HTTPS out only: api.aristralabs.com, the model providers you use,
+                          model servers on this computer
+```
+
+Because they share one runtime:
+
+- A chat started in the terminal shows in Aristra Desktop's Code tab, and the other way round.
+- An approval can be answered from any surface that is open. The first answer wins, and the others see who answered.
+- A running turn does not depend on the window or terminal that started it. Quitting the terminal while a turn runs asks whether to keep it running.
+
+The runtime starts when a surface needs it and stops on its own after ten idle minutes. It never listens on the network: surfaces reach it through a socket only your user account can open.
+
+## What a turn does
+
+When you send a message, Aristra Code runs a loop until the work is done:
+
+1. **Gather context.** Your message, the chat so far, your instruction files (`AGENTS.md` and rules), memory, and the tools it may use go to the model.
+2. **Act.** The model asks for tools: read a file, search, edit, run a command, fetch a page, call an MCP server. Each request goes through your [permissions](/code/configure/permissions): it runs, asks you, or is refused.
+3. **Check.** Each tool's result goes back to the model, which decides the next step: another tool, or a reply.
+
+You can step in at any point: send a message to steer the turn at its next step, queue one for after it, or press Esc to stop it. Long conversations are summarized when the model's context fills up; see [Context](/code/guides/context).
+
+## Chats on your computer and in the cloud
+
+Most chats run on your computer, in a folder you choose, and are saved in `~/.aristra` on this computer. Some run in the cloud instead:
+
+| | On your computer | In the cloud |
+|---|---|---|
+| Started with | `aristra`, Aristra Desktop's Code tab | `aristra --cloud`, the website, your phone |
+| Saved | In `~/.aristra` on this computer | In your Aristra account |
+| Models | Any source you set up | Aristra's models, from your balance |
+| Needs a plan | No: free with a model of your own | Yes. See [Plans and pricing](/account/plans) |
+| A folder | Its working folder | Optional: a folder on this computer it reads and changes through the runtime |
+
+A chat on your computer can also be continued from your phone and the web with [Remote Control](/code/remote-control); the work still runs here. See [Cloud chats](/code/cloud-chats) for chats run by Aristra's cloud agent.
+
+## Where things live
+
+| What | Where |
+|---|---|
+| The program | `~/.local/bin/aristra`, a link into `~/.local/share/aristra/versions/<version>/` |
+| Your data: chats, settings, logs, secrets | `~/.aristra/` (or `ARISTRA_HOME`) |
+| Your settings | `~/.aristra/settings.json` |
+| A project's settings | `<folder>/.aristra/settings.json` and `settings.local.json` |
+| Instructions for a project | `AGENTS.md` in the repository, and `.aristra/rules/*.md` |
+| The runtime's log | `~/.aristra/logs/runtime.log` (`aristra logs`) |
+
+Secrets such as sign-in tokens and provider keys are sealed with a key kept in your login keychain (or your Linux keyring). Your computer's sign-in is bound to a device key, which on a Mac lives in the Secure Enclave. See [Security and privacy](/code/security).

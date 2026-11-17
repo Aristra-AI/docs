@@ -1,0 +1,132 @@
+---
+title: "Sandbox"
+description: "The sandbox, off by default: turning it on with /sandbox or in Settings, and how it confines commands on macOS and Linux: what they can read, write and reach, the network prompt, localhost, your own proxy, and running a command outside it."
+---
+
+The sandbox is off by default: commands Aristra Code runs on your computer run with your own access, and the [permission checks](/code/configure/permissions) decide which run without asking and which ask first.
+
+Turn it on and commands run in a sandbox. An approval answers "should this run?"; the sandbox decides what a command can reach once it runs. Because a sandboxed command can write only in the chat's folders and reach only hosts you allow, it runs without asking (`sandbox.autoAllowBashIfSandboxed`, on by default). Deny and ask rules still apply, and some commands still get the regular checks: one that sets an unknown variable in front, passes a `NAME=value` argument, names another user's home, redirects to `/dev/tcp`, or removes files after changing folder.
+
+## Turn it on
+
+- **In the terminal:** run `/sandbox` and pick a mode: **with auto-allow** (commands in the sandbox run without asking), **with regular permissions** (they still ask as they would without it) or **No sandbox**. It's saved in the folder's `.aristra/settings.local.json`. `/sandbox exclude "npm run test:*"` adds a command pattern that always runs outside it, in the same file. When a team's [policy](/code/configure/managed-policy) sets the sandbox, `/sandbox` says so and changes nothing.
+- **In Aristra Desktop:** Settings > Permissions > **Run commands in a sandbox**, for every folder.
+- **In settings:** `"sandbox": {"enabled": true}`.
+
+If the sandbox can't start (bubblewrap missing on Linux, say), commands run outside it and the chat says so once. With `sandbox.failIfUnavailable`, a turn doesn't start at all.
+
+## What a command can do
+
+| | Allowed | Refused |
+|---|---|---|
+| **Read** | Everything, except what a `read(...)` deny rule or `sandbox.filesystem.denyRead` names | Those paths |
+| **Write** | The chat's folders, `$TMPDIR`, the paths of your `edit(...)` allow rules and `sandbox.filesystem.allowWrite` | Everything else |
+| **Network** | Through the sandbox's proxy: hosts you allow go through, others are asked about | Every direct connection, and `localhost` unless you allow it |
+
+**Never writable**, whatever the rules say: settings files, the folder's `.aristra/settings*.json` and skills, shell startup files (`.bashrc`, `.zshrc` and the like), `.gitconfig`, `.gitmodules`, `.mcp.json`, `.vscode`, `.idea`, `.git/hooks`, and `.git/config` unless `sandbox.filesystem.allowGitConfig` is on. The rest of `.git` stays writable, so git works. A command can't rename these or the folders above them either.
+
+## How a command runs
+
+- **In your shell's environment.** Aristra Code reads your `.zshrc` (or `.bashrc`) once and keeps its functions, aliases, `PATH` and variables, so `nvm`, `pyenv`, Homebrew's tools and your aliases work, even when Aristra Desktop started the runtime.
+- **`$TMPDIR` persists between commands**, so a file one command leaves there is there for the next. On macOS `/tmp` itself isn't writable; Aristra Code uses `$TMPDIR`.
+- **Timeouts.** A command has 2 minutes by default (the model may ask for up to 10). One still running at its timeout moves to the background instead of being stopped, and the agent gets its output so far. See [Background work](/code/guides/background).
+- **Stopping.** A command that's stopped (Esc, `/tasks`, deleting its chat, the runtime stopping) ends with everything it started: SIGTERM, then SIGKILL after 2 seconds. If the runtime itself crashes, what its commands started still ends.
+
+## The network
+
+A sandboxed command reaches the network only through the sandbox's proxy, which runs on your computer. Its environment points common tools there (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, git over ssh, and others). For each host:
+
+1. A host your `web_fetch(domain:...)` deny rules name is refused.
+2. A host in `sandbox.network.allowedDomains` or your `web_fetch(domain:...)` allow rules goes through. `*.example.com` covers subdomains.
+3. Any other host is asked about, on the command's step:
+
+   > **Network request outside of sandbox**
+   > Host: registry.npmjs.org
+   > Do you want to allow this connection?
+   > 1. Yes
+   > 2. Yes, and don't ask again for registry.npmjs.org
+   > 3. No, and tell Aristra what to do differently (esc)
+
+**Yes** lets that connection through; a later one asks again. **Yes, and don't ask again** saves `web_fetch(domain:registry.npmjs.org)` in the folder's `.aristra/settings.local.json`. **No** refuses the connection; the command sees the failure.
+
+The proxy refuses names that resolve to your own computer, link-local or cloud metadata addresses. It never decrypts traffic. Scripts and scheduled tasks refuse hosts no rule covers instead of asking.
+
+When the sandbox refuses a connection, the command's result ends with what it refused, which the agent reads:
+
+```text
+<sandbox_violations>
+deny network-outbound example.org:443 (user denied)
+</sandbox_violations>
+```
+
+## Let a command use localhost
+
+A dev server, a test fixture server or a local database needs to listen on a port, which the sandbox refuses by default:
+
+```sh
+aristra config set sandbox.network.allowLocalBinding true
+```
+
+This lets commands listen on and connect to `localhost`, and nothing beyond it.
+
+## Use your own proxy
+
+If your network goes through your organization's filtering proxy:
+
+```sh
+aristra config set sandbox.network.httpProxyPort 8080
+```
+
+Commands' HTTP and HTTPS then go to `localhost:8080`, and that proxy decides what they reach. `sandbox.network.socksProxyPort` does the same for SOCKS.
+
+## Run a command outside the sandbox
+
+Some commands need what the sandbox refuses: writing outside the folder, a tool that ignores proxy settings, a service on a Unix socket. Aristra Code may then ask to run one command outside the sandbox, with its reason. It goes through the ordinary checks: it asks in Manual, goes to the reviewer in Auto, and is refused in Read only.
+
+- `sandbox.allowUnsandboxedCommands: false` turns this off.
+- `sandbox.excludedCommands` lists commands that always run outside the sandbox (`docker:*`, `make`), still through the checks. It is a convenience, not a security boundary.
+- `aristra run --dangerously-skip-sandbox` runs every command of a script run outside the sandbox. Use it only where the machine itself is the boundary: a CI runner, a container, a throwaway VM.
+
+## macOS
+
+The sandbox is Seatbelt, deny by default.
+
+- **The keychain isn't reachable** from inside the sandbox. git's keychain credential helper can't read saved logins, so a push or fetch that needs one asks to run outside.
+- **Certificate checks through the system.** `pip` 24.2 and later, and Go tools such as `gh`, check certificates through a macOS system service the sandbox closes, so they fail inside it with a certificate or network error. Aristra Code sees only that error, not the reason, so if it doesn't ask to run the command outside the sandbox on its own, tell it to. `sandbox.enableWeakerNetworkIsolation: true` opens that service for every command instead, which also opens a way out through it.
+
+## Linux
+
+The sandbox is bubblewrap (`bwrap`): the whole filesystem read-only except the writable paths, its own network namespace, with the network relayed to the proxy. When it can't start, commands fail with how to fix it, and `aristra doctor` shows it under Sandbox:
+
+| Problem | Fix |
+|---|---|
+| bubblewrap isn't installed | `sudo apt-get install bubblewrap` or `sudo dnf install bubblewrap` |
+| The system blocks the user namespaces bubblewrap needs (Ubuntu 24.04 and later) | Allow them for bubblewrap with an AppArmor profile |
+| Inside a container, bubblewrap can't mount `/proc` | When the container is your boundary, set `sandbox.enableWeakerNestedSandbox: true` |
+
+## MCP servers
+
+MCP servers that run as programs start unsandboxed; one whose entry says `"sandbox": true` gets a sandbox of its own. See [MCP servers](/code/extend/mcp#sandbox).
+
+## Settings
+
+Sandbox settings come from your own settings, a trusted folder's settings and a managed policy. Lists are joined across them.
+
+| Key | Default | Does |
+|---|---|---|
+| `sandbox.enabled` | `false` | Commands run in the sandbox (`/sandbox`) |
+| `sandbox.failIfUnavailable` | `false` | With `enabled`: a turn doesn't start when the sandbox can't, instead of running commands outside it |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | A sandboxed command runs without asking, unless a deny or ask rule covers it |
+| `sandbox.allowUnsandboxedCommands` | `true` | Whether Aristra Code may ask to run a command outside the sandbox |
+| `sandbox.excludedCommands` | `[]` | Commands that always run outside the sandbox, through the checks |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | More paths to open or close |
+| `sandbox.filesystem.allowGitConfig` | `false` | Let commands write `.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | Hosts commands reach without asking |
+| `sandbox.network.allowLocalBinding` | `false` | Let commands listen on and reach `localhost` |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | none | Send commands' traffic to your own proxy instead |
+| `sandbox.network.allowUnixSockets` | `[]` | Unix sockets a command may connect to (macOS) |
+| `sandbox.ignoreViolations` | `{}` | Refusals not to report back to the agent |
+| `sandbox.enableWeakerNestedSandbox` | `false` | Inside a container that can't mount `/proc` (Linux) |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Open macOS's certificate service for tools like `pip` and `gh` |
+
+Managed policies also have `sandbox.filesystem.allowManagedReadPathsOnly` and `sandbox.network.allowManagedDomainsOnly`. See [Managed policy](/code/configure/managed-policy).

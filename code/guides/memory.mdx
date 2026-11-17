@@ -1,0 +1,117 @@
+---
+title: "Memory and instructions"
+description: "Tell Aristra Code how your project works with AGENTS.md and rules, and how it remembers you and your repositories across chats."
+---
+
+Aristra Code starts each chat knowing three kinds of things:
+
+| | What it is | Who writes it |
+|---|---|---|
+| **Instruction files** | `AGENTS.md` and rules: how your project is built, tested and reviewed | You (or `/init`) |
+| **Your account's memory** | Who you are and how you like to work, on every device. Every account has it, with or without a [plan](/account/plans) | Aristra Code, from what you tell it |
+| **Memory in files** | The same, kept in files on a cloud computer set to **Kept on the computer only** | Aristra Code, from what you tell it |
+| **Notes about a repository** | Corrections, ongoing work and where things live, for one repository on this computer | Aristra Code, as it works |
+
+Signed in, memory is kept in your Aristra account, so it follows you to the web, your phone and your other computers. Keeping it, saving to it, importing into it and searching it cost nothing: a chat that uses your memory pays only for its own tokens.
+
+## Your profile
+
+Your name, your occupation and the **About you** note on your account's Profile page start every chat, with or without a plan and whatever the Memory switch says. You typed them, so they are a setting, not something Aristra learned. They are left out of an incognito chat, and a cloud computer that keeps its own memory does not read them.
+
+## Instruction files
+
+An `AGENTS.md` file tells Aristra Code how your project works: how to build and test it, its conventions, what to avoid. It is the same file other coding agents read. Files are read in layers, later ones weighing more:
+
+| Layer | Files |
+|---|---|
+| Your organization's | `AGENTS.md` and `rules/*.md` beside the [managed policy](/code/configure/managed-policy) |
+| Yours, for every project | `~/.aristra/AGENTS.md` and `~/.aristra/rules/*.md` |
+| Each folder from the top of the disk down to the chat's | `AGENTS.md`, `.aristra/AGENTS.md` and `.aristra/rules/*.md` (checked in), and `AGENTS.local.md` (yours, not checked in) |
+
+A repository set up for Claude Code works as it is: where a folder has none of the names above, Aristra Code reads `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/` and `CLAUDE.local.md`.
+
+```text
+/init       write this folder's AGENTS.md from the code
+/memory     open an instruction file (or the repository's notes) in your editor
+```
+
+### Rules for some files
+
+A rule file can apply only to some paths, with `paths` in its front matter:
+
+```markdown .aristra/rules/api.md
+---
+paths: src/api/**/*.ts
+---
+
+Every handler validates its input with the schemas in src/api/schemas.ts.
+```
+
+It reaches the model the first time Aristra Code reads a matching file. A subfolder's own `AGENTS.md` works the same way: it is read when Aristra Code first reads a file in that subfolder.
+
+### Includes
+
+`@path` in an instruction file includes another file (relative to it, from `~/`, or absolute), up to five levels deep:
+
+```markdown AGENTS.md
+See @docs/testing.md for how to run the test suites.
+```
+
+A checked-in file's includes stay inside the repository. Lines that are HTML comments are left out, so you can leave notes for the people who edit the file.
+
+## Your account's memory
+
+When a chat has memory on, each turn starts with what your Aristra account remembers that is relevant here: who you are, how you like answers, what you know. The same memory reaches your chats on the website, your phone and Aristra Desktop.
+
+Aristra Code remembers, corrects and forgets things with its memory tools, and says so in the chat. You can also just ask: "remember that I prefer pnpm".
+
+- **One chat:** chats start with memory on unless `memory.enabled` is `false` in your settings. Aristra Desktop has a switch per chat.
+- **Everywhere:** the Memory switch in your account settings turns memory off on every device. While it is off, nothing is used or saved. Once it is back on, Aristra may learn from chats still in your history; an incognito chat is never learned from.
+- **Incognito chats** never read or save memory.
+
+A memory saved after Aristra Code read outside content, such as a web page, must quote you, so a page can't plant a memory.
+
+### Learning from your past chats
+
+Each night Aristra reads the chats in your account since the night before (on the web, your phone, and chats you shared from your computers) and keeps what will matter later: a fact about you, how you like answers, a decision or a plan with its date. Each memory quotes what you said and names the chat it came from. It also brings older memories up to date when a newer chat changed them, and rewrites the summary of you that starts every chat, with a section on what you have been working on lately.
+
+- It needs both **Memory** and **Search and reference past chats** on, and reads nothing while either is off. Once both are back on, it reads the chats from that time too. Incognito chats, group chats and chats you started with Memory off are never read; to keep a chat out of memory for good, make it incognito or delete it.
+- Review it on your account's Memory page, under **Learned from your chats**: each item links to its chat, and **Forget** removes it. The page opens on the summary, which you can edit.
+- **Import** on the same page brings in what another assistant, such as ChatGPT or Claude, remembers about you: up to 500 memories a day. Imported memories reach the summary the next night.
+- The chats go to Anthropic's batch service to be read. Aristra deletes each night's batch there once its results are saved; Anthropic never keeps one longer than 29 days. It costs you nothing.
+
+## Memory in files
+
+Your account's memory needs you signed in: signed out, Aristra Code keeps no memory of you. A [cloud computer](/surfaces/cloud-computer) set to **Kept on the computer only** remembers in files on its own disk instead:
+
+```text
+~/.aristra/memory/
+  MEMORY.md            the index, one line per note
+  user_role.md         a note
+  feedback_style.md
+```
+
+Each chat reads the index and the notes that help, and Aristra Code writes and corrects them as it does any file. You can read and edit them yourself. They stay on that computer: nothing is sent to your account.
+
+A computer that kept memory in files before memory came with every account brings those notes into your account's memory the first time it starts a chat signed in (up to 500 on the first day).
+
+## Notes about a repository
+
+As it works, Aristra Code keeps notes about the repository: your corrections ("always run the linter first"), ongoing work and why, and where things live outside the code. They are Markdown files outside the repository, so nothing shows in `git status`:
+
+```text
+~/.aristra/projects/<repository>/memory/
+  MEMORY.md            the index, one line per note
+  feedback_tests.md    a note
+  project_launch.md
+```
+
+Each turn sees the index and up to five notes that clearly help, with their age, and a reminder to check the code before relying on them. Signed in, notes are also copied to your account, so your other computers and web chats in that repository see them.
+
+Notes never repeat what the code, git or your `AGENTS.md` already say. When you correct Aristra Code and it saves nothing, it saves the lesson after the turn, quoting you, and says so.
+
+## Earlier chats on this computer
+
+Ask about earlier work ("what did we decide about the cache?", "the script you wrote last week") and Aristra Code can search, read and list your past chats on this computer, quoting what was said. It searches only what is already here, so it works with or without a plan, and nothing is sent anywhere.
+
+It is not offered in an incognito chat or a chat with memory off, and it never shows an incognito chat or the chat you are in. Chats on the web are searched there instead, with **Search and reference past chats** in your account settings.

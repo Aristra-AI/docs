@@ -1,0 +1,184 @@
+---
+title: "MCP servers"
+description: "Give Aristra Code more tools with Model Context Protocol servers: add them for you, a project or everyone on a repository, approve a project's, trust, sign in with OAuth, and sandboxing a server."
+---
+
+[Model Context Protocol](https://modelcontextprotocol.io) servers give Aristra Code more tools: a database, an issue tracker, a design tool, an internal API. Aristra Code runs them for chats on your computer. Cloud chats use the cloud agent's tools and the connectors in your Aristra account.
+
+## Add a server
+
+A server that runs as a program on your computer:
+
+```sh
+aristra mcp add fs --cwd ~/notes -- npx -y @modelcontextprotocol/server-filesystem ~/notes
+aristra mcp add db --secret DATABASE_URL=postgres://... -- uvx mcp-server-postgres
+```
+
+A server at an address:
+
+```sh
+aristra mcp add sentry --url https://mcp.sentry.dev/mcp
+aristra mcp add internal --url https://tools.example.com/mcp --header Authorization="Bearer ..."
+```
+
+The program and its arguments come after `--`. Then:
+
+```sh
+aristra mcp test fs        # start it and list its tools
+aristra mcp list           # every server here, its scope and its state
+aristra mcp get fs         # one server's details
+aristra mcp trust fs       # let its tools follow the chat's mode
+```
+
+## Scopes
+
+A server is kept in one of three scopes. `-s` (`--scope`) chooses it when you add or remove one.
+
+| Scope | Used in | Shared | Kept in |
+|---|---|---|---|
+| `local` (the default) | This project only | No | Your settings, under the project |
+| `project` | This project | Yes, through the repository | `.mcp.json` in the folder |
+| `user` | All your projects | No | Your settings, under `mcp.servers` |
+
+```sh
+aristra mcp add -s user github -- npx -y @modelcontextprotocol/server-github
+aristra mcp add -s project docs --url https://docs.example.com/mcp
+aristra mcp remove -s local fs
+```
+
+The project is the repository's root, so a local server added in a subfolder or a worktree is there in all of it. When one name is in several scopes, the local one is used over the project's over yours, and over a plugin's. A local or project server that runs as a program runs in the project.
+
+## A project's .mcp.json
+
+A repository can bring its own servers in a `.mcp.json`, the same file Claude Code reads:
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"] },
+    "docs": { "type": "http", "url": "https://docs.example.com/mcp", "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" } }
+  }
+}
+```
+
+It's read from the chat's folder and every folder above it; a closer file wins.
+
+**A project server runs only once you approve it.** When you start `aristra` in the folder, it asks about each new one: use it, use it and every future one in this project, or continue without it. Several come as a list to tick. A chat in a folder in Aristra Desktop asks the same above its composer, and `/mcp` approves or rejects one later.
+
+Your answers are kept in your own settings, never in the repository. `aristra mcp reset-project-choices` forgets them, so you're asked again.
+
+<Note>
+A repository can't approve its own servers. Approvals in the folder's `.aristra` settings count only once you trust the folder, and a rejection counts from anywhere. A run nobody watches (`aristra run`, a scheduled task) can't ask, so it uses a server still waiting for approval, but never a rejected one.
+</Note>
+
+A `.mcp.json` is shared with everyone who has the repository, so it holds no secrets: write `${VAR}` and set the variable in your environment. Trusting a project server applies to this project only.
+
+## The /mcp screen
+
+`/mcp` in a chat lists the servers it sees, grouped by scope, each with its state. Pick one to see its details and:
+
+- approve or reject it, for a project server not yet approved;
+- authenticate, re-authenticate or clear its sign-in, for a server at an address;
+- reconnect;
+- disable or enable it for this project only;
+- view its tools.
+
+`/mcp reconnect`, `/mcp enable` and `/mcp disable` do the same for a server you name, or for all of them.
+
+### From JSON or Claude Desktop
+
+```sh
+aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop (macOS)
+```
+
+`aristra import claude-code` and `aristra import codex` bring over those tools' servers too, with a preview first.
+
+## Where servers are kept
+
+A user server lives in your own settings under `mcp.servers`, and a local one under the project in the same file, never with a secret: values given with `--secret`, `--header` and `--client-secret` go to Aristra's credential store. A project server lives in the folder's `.mcp.json`.
+
+```json ~/.aristra/settings.json
+{
+  "mcp": {
+    "servers": {
+      "fs": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/notes"],
+        "cwd": "/Users/me/notes"
+      },
+      "sentry": { "url": "https://mcp.sentry.dev/mcp" }
+    }
+  },
+  "permissions": { "trustedMcpServers": ["fs"] }
+}
+```
+
+| Field | For | Meaning |
+|---|---|---|
+| `command`, `args` | Programs | The program and its arguments |
+| `env` | Programs | Environment variables that are not secret |
+| `cwd` | Programs | The folder it runs in, which it may write |
+| `writable` | Programs | Other folders it may write |
+| `sandbox` | Programs | `true` runs it in the sandbox (default `false`) |
+| `url` | Addresses | The server's address |
+| `headers` | Addresses | Headers that are not secret |
+| `headersHelper` | Addresses | A command whose JSON output adds headers at each connect |
+| `oauth` | Addresses | `clientId`, `scopes`, `callbackPort`, `authServerMetadataUrl`, for a server that needs them |
+| `alwaysLoad` | Both | `true` keeps its tools always in the model's list, never behind tool search |
+| `timeout` | Both | Seconds a call may take |
+| `enabled` | Both | `false` keeps the entry without starting it |
+
+`${VAR}` and `${VAR:-default}` in `command`, `args`, `env`, `url` and `headers` are read from your login shell's environment.
+
+<Note>
+A repository's `.aristra/settings.json` can't add MCP servers: a repository's servers are its `.mcp.json`, used once you approve them. When the agent changes a `.mcp.json`, it always asks first.
+</Note>
+
+## Trust
+
+An MCP server is code you didn't write, and its tools can do anything:
+
+- **Until you trust a server**, each of its tools asks before it runs, unless a rule allows it (in Auto mode, the reviewer decides).
+- **Once you trust it** (`aristra mcp trust <name>`), its tools follow the chat's mode, and the ones it marks read-only run like reads. A local or project server is trusted for its project only.
+
+Rules work too: `mcp(github.*)` or `mcp(github.create_issue)` in `permissions.allow`, `ask` or `deny`. See [Permissions](/code/configure/permissions).
+
+## Sandbox
+
+A server that runs as a program starts with your access. With `"sandbox": true` (`aristra mcp add --sandbox`) it runs in the sandbox, with the network allowed: it can read everything except your private folders (`~/.ssh`, `~/.aws` and other credentials) and Aristra's data, and write only its own folder (`cwd`), the folders in `writable`, package caches and its own temporary folder.
+
+Before a server starts through `npx`, `bunx`, `uvx` or `pipx`, its package is checked against the OSV database of known malware, and a known-malicious package is refused.
+
+## Sign in with OAuth
+
+A server that needs a sign-in shows "sign-in needed" in `aristra mcp list`:
+
+```sh
+aristra mcp login sentry                 # in a browser on this computer
+aristra mcp login sentry --device-code   # with a code, when the server offers it
+aristra mcp logout sentry
+```
+
+Tokens go to the credential store and are refreshed before they expire. A server that needs a particular OAuth scope gets it from `aristra mcp add-json`, in `oauth.scopes`.
+
+## Resources, prompts and questions
+
+- **Resources.** When a server offers resources, Aristra Code can list and read them.
+- **Prompts** become commands: `/mcp__<server>__<prompt> <arguments>`.
+- **Questions.** A server may ask you something while its tool runs, as a form or a link to open. It is asked like any approval.
+
+## Long calls and many tools
+
+- A call fails when the server sends nothing for 30 minutes (a program) or 5 minutes (an address), unless its `timeout` says otherwise. A call still running after two minutes moves to the background, and its result reaches the chat when it ends.
+- MCP tools stand behind tool search: the model finds the tool it needs instead of receiving hundreds of tool definitions every turn. `mcp.toolSearch: false` sends them all instead, up to 128.
+- A chat's servers connect when the chat opens, so they're ready by your first message. When a server's tools change, Aristra Code lists them again, mid-turn if needed.
+- A server that runs as a program is stopped with SIGINT (a server in Docker shuts down on it), then SIGTERM after 100 ms and SIGKILL after 400 more.
+
+## Servers from plugins
+
+A [plugin](/code/extend/plugins) can bring MCP servers in its `.mcp.json`. They run like your own, named after the plugin.
+
+## For organizations
+
+A managed policy can allow or deny servers by name, command or address. See [Managed policy](/code/configure/managed-policy).

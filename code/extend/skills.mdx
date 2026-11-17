@@ -1,0 +1,75 @@
+---
+title: "Skills"
+description: "Package the work you repeat as SKILL.md files that Aristra Code uses when a task fits, or that you run with /name. Includes the built-in skills."
+---
+
+A skill is a set of instructions for a kind of task: how your team writes release notes, how to cut a hotfix, a checklist for reviewing a migration. It is a `SKILL.md` file in the same format as Claude Code's, so a skill moves between the two unchanged.
+
+## Where skills live
+
+| Where | Used in |
+|---|---|
+| `~/.aristra/skills/<name>/SKILL.md` | Every chat |
+| `<folder>/.aristra/skills/<name>/SKILL.md` | Chats in that folder, once you trust it |
+| A [plugin](/code/extend/plugins) | Every chat, as `plugin-name:skill-name` |
+
+A skill's folder can hold other files beside `SKILL.md` (templates, scripts, examples) that the skill points Aristra Code to. To use your Claude Code skills, copy their folders from `~/.claude/skills/` into `~/.aristra/skills/`, or run `aristra import claude-code`.
+
+## Write a skill
+
+```markdown ~/.aristra/skills/release-notes/SKILL.md
+---
+name: release-notes
+description: Write release notes from the merged pull requests since the last tag
+when_to_use: When the user asks for release notes or a changelog entry
+argument-hint: "[version]"
+---
+
+1. Find the last tag with `git describe --tags --abbrev=0`.
+2. List the merged pull requests since then with `git log <tag>..HEAD --merges --oneline`.
+3. Group them under Added, Changed and Fixed, one line each, in the past tense.
+4. Title the notes "Release $ARGUMENTS". Use the template in ${ARISTRA_SKILL_DIR}/template.md.
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | The skill's name, used as `/name`. Without it, the folder's name |
+| `description` | What it does, shown to the model |
+| `when_to_use` | When to use it, added to what the model sees |
+| `argument-hint` | What to type after `/name`, shown in the command menu |
+| `user-invocable` | `false` keeps it out of the `/` menu (the model can still use it) |
+| `disable-model-invocation` | `true` keeps it from the model (you can still type `/name`) |
+
+In the body, `$ARGUMENTS` is everything typed after `/name`, `$1` to `$9` are its words, and `${ARISTRA_SKILL_DIR}` is the skill's folder.
+
+## How skills are used
+
+- **By Aristra Code.** Each turn, the model sees your skills' names and descriptions. When one fits the task, it loads the skill's full instructions.
+- **By you.** Type `/` and choose a skill, or type `/release-notes 2.4.0`. The skill's instructions are sent with `2.4.0` as its arguments.
+
+`/help` lists your skills under the commands. Saved [workflows](/code/guides/subagents#workflows) and MCP servers' prompts appear in the same menu.
+
+## Built-in skills
+
+| Skill | Does | Aristra Code may use it on its own |
+|---|---|---|
+| `/init` | Writes the folder's `AGENTS.md` from the code | No |
+| `/code-review [level] [target]` (or `/review`) | Reviews the current diff, a pull request, a branch or a path for bugs and cleanups, most severe first | Yes |
+| `/simplify [target]` | Cleans up the changed code without changing what it does | Yes |
+| `/security-review` | A security review of the branch's changes: likely, exploitable vulnerabilities only | Yes |
+| `/update-config [request]` | Changes your settings: permission rules, hooks, the sandbox, MCP servers | Yes |
+| `/fewer-permission-prompts` | Adds the read-only commands and MCP tools you approve most to the folder's allow list | Yes |
+| `/debug [issue]` | Reads Aristra's log to find what went wrong | No |
+| `/verify [what to check]` | Runs the changed app, checks that the change works, and reports PASS, FAIL, BLOCKED or SKIP | No |
+| `/commit [guidance]` | Commits the changes with a message in the repository's style, without skipping hooks, amending or committing secrets | No |
+| `/create-pr [--draft]` | Commits, pushes and opens a pull request | No |
+| `/loop [interval] [prompt]` (or `/proactive`) | Runs a prompt or command on an interval, or self-paced. See [Background work](/code/guides/background#repeat-a-prompt-loop) | Yes |
+| `workflow-authoring` | The full reference for writing [workflow](/code/guides/subagents#workflows) scripts | Only Aristra Code |
+
+`/code-review` takes a level: `low` (one quick pass), `medium`, `high`, `xhigh` and `max` (the most thorough), and `--fix` to apply the findings or `--comment` to post them on the pull request.
+
+A skill of your own named `init` or `security-review` replaces the built-in one.
+
+## Trust
+
+A folder's skills count only after you trust the folder, so a repository you just cloned can't put instructions in front of Aristra Code.
