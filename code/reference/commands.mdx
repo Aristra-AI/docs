@@ -1,11 +1,11 @@
 ---
 title: "Commands"
-description: "Every command you can type in an Aristra Code chat, from /help to /remote-control."
+description: "Every command you can type in Aristra Code in the terminal, from /help to /remote-control."
 ---
 
-Type `/` at the start of the composer to open the command menu: commands and your [skills](/code/extend/skills), filtered as you type. Up and Down choose, Tab completes, Enter runs, Esc closes. An unknown command isn't sent. To send a message that starts with `/`, start it with a space.
+In the terminal, type `/` at the start of the composer to open the command menu: commands and your [skills](/code/extend/skills), filtered as you type. Up and Down choose, Tab completes, Enter runs it (a command that needs an argument waits for you to type one), and Esc closes the menu and clears the composer. An unknown command isn't sent. To send a message that starts with `/`, start it with a space.
 
-For `aristra` subcommands and flags, see the [CLI reference](/code/reference/cli).
+Aristra Desktop's `/` menu has its own short list; see [Desktop's Code view](/code/desktop#in-the-chat). For `aristra` subcommands and flags, see the [CLI reference](/code/reference/cli).
 
 ## The chat
 
@@ -43,7 +43,7 @@ For `aristra` subcommands and flags, see the [CLI reference](/code/reference/cli
 |---|---|
 | `/model` | Choose the model, with who pays for it |
 | `/effort [level\|auto]` | How hard the model thinks: `low`, `medium`, `high`, and on some models `xhigh` or `max` |
-| `/mode [mode]` | Set the permission mode: `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`, `read_only` |
+| `/mode [mode]` | Set the permission mode: `manual` (or `default`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` (when you started `aristra` with `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`), `read_only`. With no mode, the next one. A cloud chat has `manual` and `auto` |
 | `/permissions` | Rules by source, the chat's folders, and steps Auto mode recently blocked |
 | `/sandbox [exclude <pattern>]` | Run commands in the [sandbox](/code/configure/sandbox) (off by default): with auto-allow, with regular permissions, or not at all. `exclude` adds a command that always runs outside it |
 | `/add-dir <path>` | Let this chat work in another folder |
@@ -67,7 +67,7 @@ See [Git and pull requests](/code/guides/git).
 | Command | Does |
 |---|---|
 | `/tasks` (or `/bashes`) | Everything running in the background: agents, workflows, commands. Stop one with x |
-| `/schedule [pause\|resume\|run\|remove N]` | The [scheduled tasks](/code/guides/background#scheduled-tasks) saved on this computer, numbered; change one by its number. To make one, ask in plain words |
+| `/schedule [pause\|resume\|run\|remove N]` (or `/scheduled`) | The [scheduled tasks](/code/guides/background#scheduled-tasks) saved on this computer, numbered; change one by its number. To make one, ask in plain words |
 | `/workflows` | Running and finished workflows: their phases and agents |
 
 See [Background work](/code/guides/background).
@@ -79,8 +79,8 @@ See [Background work](/code/guides/background).
 | `/mcp [reconnect\|enable\|disable [<server>\|all]]` | Manage MCP servers: approve a project's, sign in, reconnect, turn one off for this project, view tools |
 | `/hooks` | Your hooks by event, and which still need approval |
 | `/plugin [subcommand]` (or `/plugins`, `/marketplace`) | Manage plugins and marketplaces |
-| `/reload-plugins [--force]` | Activate plugin changes in this chat |
-| `/<skill> [args]` | Run one of your skills |
+| `/reload-plugins` | Read your plugins again and activate the changes in this chat |
+| `/<skill> [args]` | Run one of your skills or saved workflows (a plugin's as `/<plugin>:<name>`) |
 | `/mcp__<server>__<prompt> [args]` | Run an MCP server's prompt |
 
 ## Your account and setup
@@ -107,4 +107,4 @@ See [Background work](/code/guides/background).
 
 ## Built-in skills
 
-These run as [skills](/code/extend/skills#built-in-skills): `/code-review` (or `/review`), `/simplify`, `/security-review`, `/update-config`, `/fewer-permission-prompts`, `/debug`, `/verify`, `/commit`, `/create-pr` and `/loop` (or `/proactive`), plus `workflow-authoring`, the reference Aristra Code reads when it writes a workflow. `/deep-research <question>` runs Aristra Code's built-in [workflow](/code/guides/subagents#workflows).
+These run as [skills](/code/extend/skills#built-in-skills): `/init`, `/code-review` (or `/review`), `/simplify`, `/security-review`, `/update-config`, `/fewer-permission-prompts`, `/debug`, `/verify`, `/commit`, `/create-pr` and `/loop` (or `/proactive`), plus `workflow-authoring`, the reference Aristra Code reads when it writes a workflow. `/deep-research <question>` runs Aristra Code's built-in [workflow](/code/guides/subagents#workflows).

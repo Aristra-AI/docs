@@ -22,7 +22,7 @@ Every option is in the [CLI reference](/code/reference/cli).
 ## The screen
 
 ```text
-gemini-3.8-flash · Aristra balance · ~/code/my-project · Manual                    the header
+aristra · gemini-3.8-flash · Aristra balance · /Users/you/code/my-project · Manual  the header
 
 › Find why the date parser fails on leap years and fix it.                          your message
 ● Searched for 1 pattern, read 2 files                                              reads and searches, one line
@@ -33,13 +33,13 @@ The parser treated 1900 as a leap year. ...                                     
 ╭──────────────────────────────────────────────────────────────────────────────╮
 │ ›                                                                            │  the composer
 ╰──────────────────────────────────────────────────────────────────────────────╯
- Working · 12s · esc to interrupt                 ████░░░░░░ 41% of the window · 18k tokens
- Manual · asks before changes the rules do not allow (shift+tab)    gemini-3.8-flash
+ ⠋ Working 12 s · esc to interrupt                              ████░░░░░░ 41% of the window
+ Manual · asks before changes the rules do not allow (shift+tab)    gemini-3.8-flash · Aristra balance
 ```
 
 - **Steps.** Each tool call is one line with what it did. Reads and searches in a row fold into one line. An edit shows its diff, a command the head of its output; **Ctrl+O** opens the newest step's full output.
 - **The task list** appears above the composer when the agent keeps one. **Ctrl+T** hides and shows it.
-- **The status line** says what the agent is doing, what runs in the background (`/tasks` lists it), how many approvals wait in other chats, and how full the model's context is (yellow at 60%, red at 80%). `/usage` shows the tokens used.
+- **The status line** says what the agent is doing, what runs in the background (`/tasks` lists it), how many approvals wait in other chats, and how full the model's context is (yellow at 60%, red at 80%; near the limit it says how much is left until auto-compact). `/usage` shows the tokens used.
 - **The footer** shows the mode, the branch's open pull request (`PR #412`, coloured by its review state), the model and who pays.
 - **Suggestions.** After a few replies, the empty composer may suggest your next message in grey: Tab takes it, Enter sends it, typing ignores it.
 
@@ -48,20 +48,20 @@ The parser treated 1900 as a leap year. ...                                     
 | Key | Does |
 |---|---|
 | Enter | Send. While a turn runs, add your message to it at its next step |
-| Shift+Enter, Alt+Enter, Ctrl+J | A new line (run `/terminal-setup` if Shift+Enter doesn't work in your terminal) |
+| Shift+Enter, Alt+Enter, Ctrl+J, or `\` then Enter | A new line (run `/terminal-setup` if Shift+Enter doesn't work in your terminal) |
 | Esc | Stop the running turn. Twice on an empty composer: go back to an earlier message |
-| Shift+Tab | Cycle the mode: Manual, Accept edits, Plan, Auto |
+| Shift+Tab | Cycle the mode: Manual, Accept edits, Plan, Auto (Bypass Permissions after Plan when you started with a bypass flag; in a cloud chat, Manual and Auto) |
 | `!` at the start | Shell mode: run a command yourself |
 | `@` | Mention a file or folder; Tab completes |
 | `/` | Commands and your skills |
 | Ctrl+V | Attach the image on the clipboard |
 | Ctrl+O | The newest step's full output |
 | Alt+P | Choose the model |
-| Ctrl+L | Redraw the screen |
-| Ctrl+X then Tab | In fullscreen, move to the pane above the prompt |
-| Ctrl+Up, Ctrl+Down | In fullscreen, move through the diff panel's files |
+| Ctrl+L | Clear the screen |
+| Ctrl+X then Tab | In fullscreen with the diff panel open, give it the keys (Esc gives them back) |
+| Ctrl+Up, Ctrl+Down (or Alt+Up, Alt+Down) | In fullscreen, move through the diff panel's files |
 | Ctrl+T | Hide or show the task list |
-| Ctrl+B, while a command runs | Send it to the background |
+| Ctrl+B, while a command runs | Send it to the background (Ctrl+B twice in tmux) |
 | Ctrl+R | Search your earlier prompts |
 | Ctrl+G | Edit the draft in your editor |
 | Ctrl+S | Stash the draft; again on an empty composer to bring it back |
@@ -88,11 +88,11 @@ When a step needs your answer, it appears above the composer: what kind of step 
 | Yes, and don't ask again for `rule` | Run it, and save the rule to the folder's `.aristra/settings.local.json`. For a command you can edit the rule first |
 | Yes, and switch to accept edits | Run it, and let the rest of the chat edit files without asking |
 | Yes, allow reading from `X/` | Run it, and let the chat read that folder |
-| No | Don't run it and stop the turn. Tab on No adds a note: the model reads it as the reason and carries on |
+| No | Don't run it and stop the turn. Tab on Yes or No adds a note; on No, the model reads it as the reason and carries on |
 
 Press a number or move and press Enter. **Ctrl+E** on a command explains it: what it does, why, and its risk.
 
-**Plan mode's approval** shows the plan and asks whether to go ahead: with Auto mode, approving edits by hand, or "Tell Aristra what to change" to keep planning. **Ctrl+G** opens the plan in your editor.
+**Plan mode's approval** shows the plan and asks whether to go ahead: with Auto mode (or, where Auto is off, with edits accepted automatically), approving edits by hand, or "Tell Aristra what to change" to keep planning. Shift+Tab approves with what you typed. **Ctrl+G** opens the plan in your editor.
 
 An approval shows in every surface that is open, and the first answer wins. Unanswered, it is declined after 30 minutes (`approvals.timeoutMinutes`).
 
@@ -118,7 +118,7 @@ Changes made by commands, or by you, are not undone. See [Chats](/code/guides/ch
 
 ## Running a command yourself
 
-Type `!` at the start of the composer and Enter runs the command in the chat's folder, as you, outside the sandbox. It runs in the sandbox instead when the sandbox is on and a team's [policy](/code/configure/managed-policy) forbids leaving it. The command and its output show as a step, and the agent reads them with your next message. Esc or Backspace at the start leaves shell mode.
+Type `!` at the start of the composer and Enter runs the command in the chat's folder, as you, outside the sandbox. It runs in the sandbox instead when the sandbox is on and commands may not leave it (`sandbox.allowUnsandboxedCommands: false`, in your settings or a team's [policy](/code/configure/managed-policy)), unless it is an excluded command. While a turn runs, it waits for the turn to end. The command and its output show as a step, and the agent reads them with your next message. Esc or Backspace at the start leaves shell mode.
 
 ## Attachments
 
@@ -142,6 +142,6 @@ The fullscreen renderer draws on the whole screen, keeping the transcript scroll
 
 In fullscreen:
 - PgUp and PgDn scroll half a view; Ctrl+Home and Ctrl+End go to the top and the end. The mouse wheel scrolls.
-- Drag to select; the selection is copied when you let go (`copyOnSelect: false` turns that off). Hold Shift to use the terminal's own selection.
+- Drag to select; the selection is copied when you let go (`copyOnSelect: false` turns that off). Hold Shift (Option in iTerm2 and in VS Code on a Mac, Fn in Apple's Terminal) to use the terminal's own selection.
 - **Ctrl+O** opens the transcript screen: every step with its full output, searchable with `/`.
 - **`/diff`** shows the changed files beside the transcript. See [Git and pull requests](/code/guides/git#diffs).
