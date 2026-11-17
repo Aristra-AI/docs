@@ -18,9 +18,10 @@ Everything Aristra Code keeps is in one folder, `~/.aristra` (or `ARISTRA_HOME`)
   attachments/<chat>/          a chat's files: attachments, long outputs, checkpoints, cloud downloads
   exports/                     chats saved with /export
   diagnostics/                 support bundles
-  credentials.enc              secrets, sealed with a key in your keychain
+  credentials.enc              secrets, sealed with a key in your keychain (credentials.json when
+                               credentials.store is file, or there is no keychain)
   sources.json                 the model sources you connected, and a custom endpoint's address (no secrets)
-  memory/                      your memory as files, while your account has no Aristra plan
+  memory/                      your memory as files, on a computer that keeps everything on its own disk
   skills/<name>/SKILL.md       your skills
   agents/                      your custom agents
   workflows/                   your saved workflows, and each run's script and journal
@@ -40,11 +41,13 @@ Everything Aristra Code keeps is in one folder, `~/.aristra` (or `ARISTRA_HOME`)
   .aristra/
     settings.json              the project's settings (checked in)
     settings.local.json        yours, for the project (not checked in)
+    AGENTS.md                  instructions, as AGENTS.md at the top of the folder
     rules/*.md                 rules, optionally for some paths
     skills/<name>/SKILL.md     the project's skills
     agents/                    the project's custom agents
     workflows/                 the project's saved workflows
     worktrees/<name>/          worktrees made with aristra -w and by agents
+  .mcp.json                    the project's MCP servers (checked in)
 ```
 
 ## Elsewhere
@@ -58,7 +61,7 @@ Everything Aristra Code keeps is in one folder, `~/.aristra` (or `ARISTRA_HOME`)
 
 ## Environment variables
 
-Variables reach the runtime when it starts, from whichever app starts it (the Aristra CLI or Aristra Desktop). A runtime that is already running keeps the variables it started with: after changing one, run `aristra runtime stop` so the next command starts a runtime that sees it. If Aristra Desktop is open, quit it first, or it may start the runtime again without your variable.
+Variables reach the runtime when it starts, from whichever app starts it (the Aristra CLI or Aristra Desktop). A runtime that is already running keeps the variables it started with: after changing one, run `aristra runtime stop` so the next command starts a runtime that sees it. If Aristra Desktop is open, quit it first, or it may start the runtime again without your variable. Only the variables on this page (and proxy, certificate and locale ones) are passed to the runtime. With the background service installed (`aristra service install`), the runtime it starts sees none of your variables.
 
 ### General
 
@@ -71,12 +74,13 @@ Variables reach the runtime when it starts, from whichever app starts it (the Ar
 | `ARISTRA_MANAGED_SETTINGS_DIR` | A policy folder to use when no administrator's policy exists |
 | `ARISTRA_DISABLE_TELEMETRY` | `1`: no usage events |
 | `ARISTRA_DISABLE_ERROR_REPORTING` | `1`: no error reports |
-| `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC` | `1`: neither |
-| `ARISTRA_TMPDIR` | Where sandboxed commands' `$TMPDIR` lives |
+| `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC` | `1`: no usage events, no error reports, and no pull request status checks |
+| `ARISTRA_SILENT_TURN_REMINDER`, `ARISTRA_SILENT_TURN_REMINDER_TURNS`, `ARISTRA_SILENT_TURN_REMINDER_TEXT` | The nudge to say what it is doing after quiet turns: `0` turns it off, after how many turns (default 5), and its text |
+| `ARISTRA_TMPDIR` | The folder whose `aristra-tmp-<uid>` subfolder is every command's `$TMPDIR` |
 | `OLLAMA_HOST` | Where Ollama listens |
 | `BROWSER` | The program that opens sign-in pages (`wslview` on WSL) |
 | `VISUAL`, `EDITOR`, `PAGER` | Your editor, and what Ctrl+O opens output in |
-| `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, `SSL_CERT_FILE`, `NODE_EXTRA_CA_CERTS` and similar | Honored for the runtime's own requests |
+| `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, `SSL_CERT_FILE`, `NODE_EXTRA_CA_CERTS` and similar | `SSL_CERT_FILE` and the proxy variables are honored for the runtime's own requests; `NODE_EXTRA_CA_CERTS` is passed on to commands |
 
 ### The terminal
 
@@ -84,11 +88,14 @@ Variables reach the runtime when it starts, from whichever app starts it (the Ar
 |---|---|
 | `ARISTRA_NO_NOTIFY` | Any value: no terminal notifications |
 | `ARISTRA_NO_FLICKER` | `1`: the fullscreen renderer for this launch; `0` keeps the classic one |
+| `IS_SANDBOX` | `1`: Bypass permissions may run as root, in a container you trust |
+| `ARISTRA_REMOTE` | A host to run on, as `--remote <host>` sets it |
+| `NO_COLOR`, `FORCE_COLOR` | Turn the terminal's colors off, or force them on |
 | `ARISTRA_DISABLE_ALTERNATE_SCREEN` | `1`: always the classic renderer |
 | `ARISTRA_DISABLE_MOUSE`, `ARISTRA_DISABLE_MOUSE_CLICKS` | In fullscreen, leave the mouse (or its clicks) to the terminal |
 | `ARISTRA_SCROLL_SPEED` | Rows per mouse wheel notch in fullscreen |
 | `ARISTRA_ENABLE_PROMPT_SUGGESTION` | `0`: no suggested next message |
-| `ARISTRA_IDLE_THRESHOLD_MINUTES`, `ARISTRA_IDLE_TOKEN_THRESHOLD` | When the "new task? /new" hint appears for a large idle chat |
+| `ARISTRA_IDLE_THRESHOLD_MINUTES`, `ARISTRA_IDLE_TOKEN_THRESHOLD` | When the "new task? /new" hint appears for a large idle chat (defaults 75 minutes and 100,000 tokens) |
 
 ### Chats and tools
 
@@ -117,7 +124,7 @@ Variables reach the runtime when it starts, from whichever app starts it (the Ar
 
 | Variable | Effect |
 |---|---|
-| `ARISTRA_MCP_TOOL_IDLE_TIMEOUT` | Milliseconds a call may go without a response (`0` for none) |
+| `ARISTRA_MCP_TOOL_IDLE_TIMEOUT` | Milliseconds a call may go without a response (`0` for none; default 30 minutes for a program server, 5 for an address) |
 | `ARISTRA_MCP_AUTO_BACKGROUND_MS` | When a long call moves to the background (default 120 seconds; `0` never) |
 
 ### Plugins
@@ -126,9 +133,9 @@ Variables reach the runtime when it starts, from whichever app starts it (the Ar
 |---|---|
 | `ARISTRA_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL` | Don't add Anthropic's marketplace at the first start |
 | `ARISTRA_DISABLE_AUTOUPDATER` | Don't update plugins in the background |
-| `ARISTRA_FORCE_AUTOUPDATE_PLUGINS` | Update plugins even where updates are off |
-| `ARISTRA_PLUGIN_AUTOUPDATE_DELAY_MS` | How long after start plugins update |
-| `ARISTRA_PLUGIN_GIT_TIMEOUT_MS` | A plugin git operation's time limit |
+| `ARISTRA_FORCE_AUTOUPDATE_PLUGINS` | Update plugins even when `ARISTRA_DISABLE_AUTOUPDATER` is set |
+| `ARISTRA_PLUGIN_AUTOUPDATE_DELAY_MS` | How long after start plugins update (default a random moment in the first 10 minutes) |
+| `ARISTRA_PLUGIN_GIT_TIMEOUT_MS` | A plugin git operation's time limit (default 120 seconds) |
 
 ### Installing
 
@@ -144,7 +151,9 @@ Variables reach the runtime when it starts, from whichever app starts it (the Ar
 | `ARISTRA_PROJECT_DIR`, `CLAUDE_PROJECT_DIR`, `ARISTRA_HOME` | In a hook's environment |
 | `${ARISTRA_SKILL_DIR}`, `${CLAUDE_SKILL_DIR}` | Replaced in a skill's body with its folder |
 | `${CLAUDE_PLUGIN_ROOT}` | In a plugin's hooks and MCP servers, its folder |
-| `TMPDIR`, `TERM=dumb`, `PAGER=cat`, `NO_COLOR=1` | In a sandboxed command's environment |
+| `${CLAUDE_PLUGIN_DATA}`, `CLAUDE_PLUGIN_OPTION_<KEY>` | In a plugin's hooks and MCP servers, its data folder and its options |
+| `ARISTRA_MCP_SERVER_NAME`, `ARISTRA_MCP_SERVER_URL` | In an MCP server's `headersHelper` |
+| `TMPDIR`, `TERM=dumb`, `PAGER=cat`, `GIT_PAGER=cat`, `NO_COLOR=1`, `GIT_EDITOR=true` | In every command's environment |
 
 ## Exit statuses
 

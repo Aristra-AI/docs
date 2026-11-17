@@ -15,7 +15,7 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `model.fallback` | `[]` | Up to 10 `{source, model, effort}` tried in order when a call fails. *Yours only* |
 | `autoCompactWindow` | The model's window | How full the context gets before it is summarized: `"auto"` or 100,000 to 1,000,000 tokens |
 | `modelSettings.<model>.autoCompactWindow` | none | The same, for one model. `/autocompact` writes it |
-| `auxiliary.title`, `auxiliary.summary`, `auxiliary.memory` | The plan's background model, else the chat's | `{source, model}` for titles, summaries and the memory backstop. `auxiliary.title: "off"` keeps your first words. *Yours only* |
+| `auxiliary.title`, `auxiliary.summary`, `auxiliary.memory` | The plan's background model, else the chat's | `{source, model}` from one of your own sources (not `aristra`) for titles, summaries and the memory backstop. `auxiliary.title: "off"` keeps your first words. *Yours only* |
 
 ## Permissions
 
@@ -24,14 +24,15 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `permissions.defaultMode` | `default` | The mode new chats start in: `default` (Manual), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`, `read_only` |
 | `permissions.allow`, `ask`, `deny` | `[]` | [Permission rules](/code/configure/permissions#rules) |
 | `permissions.additionalDirectories` | `[]` | More folders the chat may work in |
-| `permissions.trustedMcpServers` | `[]` | MCP servers whose tools follow the chat's mode |
+| `permissions.trustedMcpServers` | `[]` | MCP servers whose tools run without asking. *Yours only* |
 | `permissions.disableAutoMode` | none | `"disable"` turns Auto mode off |
-| `skipDangerousModePermissionPrompt` | `false` | Set when you accept the Bypass permissions warning |
-| `skipAutoPermissionPrompt` | `false` | You opted in to Auto mode; plan mode then keeps its reviewer |
-| `useAutoModeDuringPlan` | `true` | `false`: plan mode asks you even when you opted in to Auto |
+| `skipDangerousModePermissionPrompt` | `false` | Set when you accept the Bypass permissions warning. Not read from a project's `settings.json` |
+| `skipAutoPermissionPrompt` | `false` | You opted in to Auto mode; plan mode then keeps its reviewer. Not read from a project's `settings.json` |
+| `useAutoModeDuringPlan` | `true` | `false`: plan mode asks you even when you opted in to Auto. Not read from a project's `settings.json` |
 | `approvals.timeoutMinutes` | `30` | How long an approval waits before it is declined (1 to 1440) |
 | `projects["<folder>"].trusted` | none | Whether a folder (and its subfolders) is trusted. Set by the trust question. *Yours only* |
 | `projects["<folder>"].permissions` | none | Rules for one folder. *Yours only* |
+| `projects["<folder>"].mcpServers`, `.disabledMcpServers`, `.trustedMcpServers` | none | MCP servers only for that folder, turned off there, or trusted there. *Yours only* |
 
 ## Auto mode's reviewer
 
@@ -40,7 +41,7 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `review.enabled` | `true` | `false`: in Auto mode, what the reviewer would decide asks you instead. *Yours only* |
 | `review.policy` | `""` | Your own guidance for the reviewer, up to 8,000 characters. *Yours only* |
 | `review.model` | none | The reviewing model for chats on your own key or a local model. *Yours only* |
-| `autoMode` | none | `allow`, `soft_deny` and `environment` lists for the reviewer, as Claude Code's |
+| `autoMode` | none | `allow`, `soft_deny` and `environment` lists for the reviewer, as Claude Code's. Not read from a project's `settings.json` |
 
 ## Sandbox
 
@@ -56,10 +57,10 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `sandbox.network.allowedDomains` | `[]` | Hosts commands reach without asking |
 | `sandbox.network.allowLocalBinding` | `false` | Let commands listen on and reach `localhost` |
 | `sandbox.network.httpProxyPort`, `socksProxyPort` | none | Your own proxy on `localhost`, in place of the sandbox's |
-| `sandbox.network.allowUnixSockets`, `allowAllUnixSockets` | `[]`, `false` | Unix sockets commands may connect to (macOS) |
+| `sandbox.network.allowUnixSockets`, `allowAllUnixSockets` | `[]`, `false` | `allowUnixSockets`: socket paths commands may connect to (macOS). `allowAllUnixSockets`: every Unix socket (macOS and Linux) |
 | `sandbox.ignoreViolations` | `{}` | Refusals not to report back, by command |
 | `sandbox.enableWeakerNestedSandbox` | `false` | In a container that can't mount `/proc` (Linux) |
-| `sandbox.enableWeakerNetworkIsolation` | `false` | Open macOS's certificate service for tools like `pip` and `gh` |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Open macOS's certificate service for Go tools such as `gh` behind a proxy with its own certificate authority |
 
 ## Extensions
 
@@ -70,7 +71,7 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `enabledMcpjsonServers`, `disabledMcpjsonServers` | `[]` | A project's [`.mcp.json` servers](/code/extend/mcp#a-projects-mcpjson) approved or rejected. A folder's own approvals count once it's trusted |
 | `enableAllProjectMcpServers` | `false` | Approve every server in a project's `.mcp.json` |
 | `hooks` | `{}` | Your [hooks](/code/extend/hooks), by event |
-| `disableAllHooks` | `false` | Turn off every hook |
+| `disableAllHooks` | `false` | Turn off every hook except a managed policy's |
 | `allowedHttpHookUrls` | any | Where HTTP hooks may send (`*` is a wildcard; `[]` allows none). Every settings file's lists count together |
 | `httpHookAllowedEnvVars` | none | The variables an HTTP hook's headers may use, as well as the hook's own `allowedEnvVars` |
 | `enabledPlugins` | `{}` | Plugins turned on or off, by `plugin@marketplace` |
@@ -109,6 +110,8 @@ Settings live in `~/.aristra/settings.json` (yours), `<folder>/.aristra/settings
 | `disableDeepLinkRegistration` | none | `"disable"`: don't register the `aristra-cli://` link handler |
 
 ## Runtime and privacy
+
+`runtime`, `approvals`, `telemetry` and `web` are read from your own file and a managed policy only; a project's file can't change them. `runtime.maxRunningTurns` and `runtime.notifications` come from your own file only.
 
 | Key | Default | Does |
 |---|---|---|

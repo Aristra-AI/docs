@@ -28,7 +28,7 @@ A user's own preferences are never read for policy, and no surface can write the
     "disableBypassPermissionsMode": "disable"
   },
   "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
-  "telemetry": { "usage": true, "errors": true },
+  "telemetry": { "usage": false, "errors": false },
   "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
   "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
 }
@@ -66,9 +66,11 @@ Any sandbox setting can be fixed, for example `sandbox.allowUnsandboxedCommands:
 
 | Entry | Matches |
 |---|---|
-| `{"serverName": "github"}` | A server by its name in the user's settings |
+| `{"serverName": "github"}` | A server by its name, from any source (settings, `.mcp.json`, plugins) |
 | `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | A program server by its exact command and arguments |
 | `{"serverUrl": "https://mcp.company.example/*"}` | A server by address, `*` matching anything |
+
+When the allow list has command (or address) entries, a program (or address) server must match one of those; its name alone is not enough.
 
 A server the policy rules out is disabled, and `aristra mcp list` says "Your organization's policy does not allow this MCP server."
 
@@ -77,7 +79,7 @@ A server the policy rules out is disabled, and `aristra mcp list` says "Your org
 | Key | Does |
 |---|---|
 | `hooks` | Hooks that run for everyone, without each user approving them |
-| `allowManagedHooksOnly` | Only the policy's hooks run |
+| `allowManagedHooksOnly` | Only the policy's hooks, and those of plugins it turns on, run |
 | `disableAllHooks` | No hooks run |
 | `enabledPlugins` | Plugins turned on or off for everyone; a managed value wins |
 | `strictKnownMarketplaces` (or `allowedMarketplaces`) | Only these plugin marketplaces may be added |
@@ -90,13 +92,13 @@ An `agents/` folder beside the managed settings adds custom agents for everyone,
 
 ## Any other setting
 
-Any setting can be fixed the same way: `telemetry.usage`, `telemetry.errors`, `approvals.timeoutMinutes`, `memory.enabled`, `review.enabled` and so on. Aristra Desktop shows a setting the policy fixes as held.
+Most settings can be fixed the same way: `telemetry.usage`, `telemetry.errors`, `approvals.timeoutMinutes`, `memory.enabled` and so on. Settings read only from each user's own file (`review`, `credentials`, `auxiliary`, `mcp`, `model.fallback`, `runtime.notifications`, `runtime.maxRunningTurns`) can't be fixed by a policy. Aristra Desktop shows telemetry, workflows, the sandbox switch and the free search fallback as set by your organization when the policy fixes them.
 
 ## Check it
 
 ```sh
 aristra doctor        # says where the policy comes from
-aristra config get    # each value in effect, marked "managed" where the policy set it
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
 ```
 
 ## Try a policy
@@ -112,4 +114,4 @@ aristra runtime stop
 ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
 ```
 
-`ARISTRA_MANAGED_SETTINGS_DIR` is read only when no administrator's policy exists, so it can never replace one.
+For settings and instructions, `ARISTRA_MANAGED_SETTINGS_DIR` is read only when no administrator's policy exists, so it can never replace them.
