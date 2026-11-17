@@ -7,18 +7,18 @@ Every plan includes its price in usage each month: Plus is $20 a month and inclu
 
 ## The plans
 
-| | Free account | Plus | Pro | Max |
+| | Free | Plus | Pro | Max |
 |---|---|---|---|---|
 | Price a month | $0 | $20 | $100 | $200 |
-| Usage included each month | None | $20 | $100 | $200 |
-| Aristra Desktop, the Aristra CLI and Aristra Code on your computer | Yes | Yes | Yes | Yes |
+| Aristra Desktop, the CLI and Aristra Code on your computer | Yes | Yes | Yes | Yes |
 | Aristra One on the web | Chats, from your balance | Full | Full | Full |
-| Aristra's models, at the provider's price | All, from your balance | All | All | All |
+| Usage included each month | None | $20 | $100 | $200 |
+| Aristra's models | All, from your balance | All | All | All |
 | Fast web search, free | 50 a day | 200 a day | 200 a day | 200 a day |
 | Brave search and other hosted tools | From your balance | From your usage | From your usage | From your usage |
 | Memory in your account, on every device | Yes | Yes | Yes | Yes |
-| Chat sync and Remote Control | No | Yes | Yes | Yes |
-| Connectors, scheduled cloud tasks and channels | No | Yes | Yes | Yes |
+| Chat sync and remote access to your computers | No | Yes | Yes | Yes |
+| Connectors, scheduled tasks in the cloud and channels | No | Yes | Yes | Yes |
 | Cloud computer | From top-ups, up to 4 GB, 100 GB disk | Up to 4 GB, 25 GB disk | Up to 4 GB, 100 GB disk | Up to 8 GB, 100 GB disk |
 | Files storage | 1 GB | 10 GB | 100 GB | 200 GB |
 | Craft documents in your account | No | Yes | Yes | Yes |
@@ -34,7 +34,7 @@ Choose or change a plan on **Billing**, at `app.aristralabs.com/account/billing`
 Your plan's monthly usage, and your [top-up balance](/account/credits) after it, pay for:
 
 - **Aristra's models**, by the tokens a call uses, at the provider's own price. Each model's price is on [Models and prices](https://app.aristralabs.com/models).
-- **Hosted tools**: Brave search, the code sandbox and cloud browser, images, transcription and document reading. See [Usage and prices](/account/usage).
+- **Hosted tools**: Brave search, web page reads, the code sandbox and cloud browser, images, transcription and document reading. See [Usage and prices](/account/usage).
 - **A cloud computer**: the time it is awake, and its disk whether it is awake or asleep. See [Cloud computer](/surfaces/cloud-computer).
 
 Fast web search is free. A model of your own (your key, your ChatGPT plan, a model on your computer) costs nothing on Aristra.
@@ -44,10 +44,10 @@ Fast web search is free. A model of your own (your key, your ChatGPT plan, a mod
     On your billing date each month. Usage left over does not carry over. Your top-up balance is separate: each top-up lasts 12 months and is used after the month's usage runs out.
   </Accordion>
   <Accordion title="What happens at zero?">
-    Aristra stops before the next paid step and says so. A call that is already running finishes and is charged in full, so your balance can dip a few cents below zero; your next charge, top-up or month pays that back first. [Top up](/account/credits) from $10, switch the chat to a model of your own with `/model`, or wait for the reset. A cloud computer goes to sleep and keeps its disk.
+    Aristra stops before the next paid step and says so. A call that is already running finishes and is charged in full, so your balance can dip a few cents below zero; your next charge, top-up or month pays that back first. [Top up](/account/credits) from $10, switch the chat to a model of your own with `/model`, or wait for the reset. With a plan, a cloud computer goes to sleep and keeps its disk. Without one, when your top-up balance runs out it is stopped and its disk kept for 30 days; a top-up within them brings it back.
   </Accordion>
   <Accordion title="What happens when I change plan?">
-    An upgrade starts at once, and you get the difference between the two plans' monthly usage for the rest of the period. A downgrade starts at the end of the billing period. A cloud computer larger than the new plan allows moves down to its largest size then; its disk stays as it is.
+    An upgrade starts at once, and you get the difference between the two plans' monthly usage, in proportion to the time left in the billing period. A downgrade starts at the end of the billing period. A cloud computer larger than the new plan allows moves down to its largest size then; its disk stays as it is.
   </Accordion>
   <Accordion title="Why does Billing say every plan is taken?">
     Plans open in batches while Aristra One is new. When a batch is taken, Billing says so before you pay, and nothing is charged. Your account keeps working as it is, and more plans open soon.
@@ -74,8 +74,11 @@ Your account stays, as a Free account, and nothing you made is deleted.
 | Craft | Open to read and [export](/account/export). Nothing new is saved to it: new Craft docs are kept on your Mac |
 | Files | All still here, to open and download. With more than a Free account's 1 GB, new files are refused until you remove some; nothing is removed for you |
 | Account memory | Still yours on every device, and Aristra keeps learning, as it does for every account |
-| Cloud computer | Keeps running from your top-up balance. With none left, stopped: its disk is kept for 30 days, and you get an email a week before it is deleted |
+| Cloud computer | Keeps running from your top-up balance, at up to Large (4 GB); a larger one moves down to Large. With none left, stopped: its disk is kept for 30 days, and you get an email a week before it is deleted |
 | Scheduled cloud tasks and channels | Paused. They start again when you renew |
+| Remote Control and your computers | Shared chats stay readable. Following, answering and starting chats on your computers from the web stop until you renew |
+| Connectors | Still listed. You can't connect or change them until you renew |
+| Project API keys | Stop working until you renew |
 | Top-up balance | Still yours. It pays for chats on the web and for Aristra's models and tools on your computer |
 | Aristra Desktop and the Aristra CLI | Keep working with your own model |
 
