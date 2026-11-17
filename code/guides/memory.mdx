@@ -3,7 +3,7 @@ title: "Memory and instructions"
 description: "Tell Aristra Code how your project works with AGENTS.md and rules, and how it remembers you and your repositories across chats."
 ---
 
-Aristra Code starts each chat knowing three kinds of things:
+Aristra Code starts each chat knowing four kinds of things:
 
 | | What it is | Who writes it |
 |---|---|---|
@@ -28,7 +28,7 @@ An `AGENTS.md` file tells Aristra Code how your project works: how to build and 
 | Yours, for every project | `~/.aristra/AGENTS.md` and `~/.aristra/rules/*.md` |
 | Each folder from the top of the disk down to the chat's | `AGENTS.md`, `.aristra/AGENTS.md` and `.aristra/rules/*.md` (checked in), and `AGENTS.local.md` (yours, not checked in) |
 
-A repository set up for Claude Code works as it is: where a folder has none of the names above, Aristra Code reads `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/` and `CLAUDE.local.md`.
+A repository set up for Claude Code works as it is: wherever one of Aristra's names is missing, its Claude Code counterpart is read instead (`CLAUDE.md` for `AGENTS.md`, `.claude/CLAUDE.md`, `.claude/rules/`, `CLAUDE.local.md`). A rules folder is read with its subfolders.
 
 ```text
 /init       write this folder's AGENTS.md from the code
@@ -57,7 +57,7 @@ It reaches the model the first time Aristra Code reads a matching file. A subfol
 See @docs/testing.md for how to run the test suites.
 ```
 
-A checked-in file's includes stay inside the repository. Lines that are HTML comments are left out, so you can leave notes for the people who edit the file.
+Includes stay inside the chat's folder, except in your own `~/.aristra` files. Lines that are HTML comments are left out, so you can leave notes for the people who edit the file.
 
 ## Your account's memory
 
@@ -65,7 +65,7 @@ When a chat has memory on, each turn starts with what your Aristra account remem
 
 Aristra Code remembers, corrects and forgets things with its memory tools, and says so in the chat. You can also just ask: "remember that I prefer pnpm".
 
-- **One chat:** chats start with memory on unless `memory.enabled` is `false` in your settings. Aristra Desktop has a switch per chat.
+- **One chat:** in the terminal, chats start with memory on unless `memory.enabled` is `false` in your settings. In Aristra Desktop, a chat follows your account's Memory switch as it was when the chat started.
 - **Everywhere:** the Memory switch in your account settings turns memory off on every device. While it is off, nothing is used or saved. Once it is back on, Aristra may learn from chats still in your history; an incognito chat is never learned from.
 - **Incognito chats** never read or save memory.
 
@@ -75,7 +75,7 @@ A memory saved after Aristra Code read outside content, such as a web page, must
 
 Each night Aristra reads the chats in your account since the night before (on the web, your phone, and chats you shared from your computers) and keeps what will matter later: a fact about you, how you like answers, a decision or a plan with its date. Each memory quotes what you said and names the chat it came from. It also brings older memories up to date when a newer chat changed them, and rewrites the summary of you that starts every chat, with a section on what you have been working on lately.
 
-- It needs both **Memory** and **Search and reference past chats** on, and reads nothing while either is off. Once both are back on, it reads the chats from that time too. Incognito chats, group chats and chats you started with Memory off are never read; to keep a chat out of memory for good, make it incognito or delete it.
+- It needs both **Memory** and **Search and reference past chats** on, and reads nothing while either is off. Once both are back on, it reads the chats from that time too. Incognito chats, group chats, scheduled tasks' own chats and chats you started with Memory off are never read; to keep a chat out of memory for good, make it incognito or delete it.
 - Review it on your account's Memory page, under **Learned from your chats**: each item links to its chat, and **Forget** removes it. The page opens on the summary, which you can edit.
 - **Import** on the same page brings in what another assistant, such as ChatGPT or Claude, remembers about you: up to 500 memories a day. Imported memories reach the summary the next night.
 - The chats go to Anthropic's batch service to be read. Aristra deletes each night's batch there once its results are saved; Anthropic never keeps one longer than 29 days. It costs you nothing.
@@ -97,16 +97,16 @@ A computer that kept memory in files before memory came with every account bring
 
 ## Notes about a repository
 
-As it works, Aristra Code keeps notes about the repository: your corrections ("always run the linter first"), ongoing work and why, and where things live outside the code. They are Markdown files outside the repository, so nothing shows in `git status`:
+While memory is on, Aristra Code keeps notes about the repository as it works: your corrections ("always run the linter first"), ongoing work and why, and where things live outside the code. They are Markdown files outside the repository, so nothing shows in `git status`:
 
 ```text
-~/.aristra/projects/<repository>/memory/
+~/.aristra/projects/<repository path, with dashes>/memory/   (for example -Users-you-code-app)
   MEMORY.md            the index, one line per note
   feedback_tests.md    a note
   project_launch.md
 ```
 
-Each turn sees the index and up to five notes that clearly help, with their age, and a reminder to check the code before relying on them. Signed in, notes are also copied to your account, so your other computers and web chats in that repository see them.
+Each turn sees the index and up to five notes that clearly help, each once per chat, with their age, and a reminder to check the code before relying on them. Notes are also copied to your account, so your other computers and web chats in that repository see them.
 
 Notes never repeat what the code, git or your `AGENTS.md` already say. When you correct Aristra Code and it saves nothing, it saves the lesson after the turn, quoting you, and says so.
 

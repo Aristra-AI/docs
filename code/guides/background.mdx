@@ -8,18 +8,18 @@ description: "Keep work going while you do something else: background commands, 
 A long command doesn't hold up the chat:
 
 - **At its timeout** (2 minutes by default, up to 10 if the model asks), a command still running moves to the background instead of being stopped, and Aristra Code gets its output so far.
-- **Ctrl+B** while a command runs sends it to the background yourself.
+- **Ctrl+B** (twice inside tmux) while a command runs sends it to the background yourself.
 - **Dev servers and watchers** start in the background when Aristra Code asks for it.
 
 Background commands keep running between turns. When one ends, the chat is told, and Aristra Code reads its output. They stop with their chat and with the runtime, and stopping one ends everything it started.
 
-Start a server as a background command of its own rather than with `&` inside another command: what `&` leaves behind ends with that command in zsh, but keeps running in bash, where job control gives it a process group of its own.
+Aristra Code runs a server as a background command of its own. A command ending in `&` becomes one. A command that backgrounds part of itself with `&`, `nohup`, `disown` or `setsid` is sent back to be split up, since what it leaves running would end with it.
 
 ```text
 /tasks
 ```
 
-lists everything running in the background: commands, monitors, [agents](/code/guides/subagents) and workflows. Enter opens one (for an agent, what you type there goes to it), and x stops it. The status line counts them ("1 shell", "2 local agents"). In Aristra Desktop they're listed above the message box, each with its output and a Stop button.
+lists everything running in the background: commands, monitors, [agents](/code/guides/subagents) and workflows. Enter opens an agent (what you type there goes to it) or a workflow, and x stops any of them. The status line counts them ("1 shell", "2 local agents"). In Aristra Desktop they're listed above the message box, each with its output and a Stop button.
 
 ## Monitors
 
@@ -35,7 +35,7 @@ A monitor is a background command whose output lines arrive in the chat as event
 
 `/loop` runs a prompt or a command on an interval. Without an interval, Aristra Code paces itself, waking when there is something to check.
 
-You can also ask for a schedule in plain words ("every weekday at 9, summarize the open pull requests", "remind me at 2:30 to check the deploy"). Aristra Code schedules the prompt in this chat:
+You can also ask for a schedule in plain words ("every 10 minutes, check the deploy", "remind me at 2:30 to check the deploy"). Aristra Code schedules the prompt in this chat:
 
 - A scheduled prompt runs only while the chat is idle, never in the middle of a reply.
 - Each chat can have up to 50. A recurring one stops after 7 days.
@@ -43,7 +43,7 @@ You can also ask for a schedule in plain words ("every weekday at 9, summarize t
 
 ## Scheduled tasks
 
-A scheduled task runs a prompt in a folder at set times (once, hourly, daily, weekdays or weekly, in your computer's time): a morning summary of open pull requests, a weekly dependency check. Tasks are saved on your computer, run there, and are free. Each run is a chat of its own, listed in the Code tab's **Inbox** with unread dots, and its approvals wait 2 hours.
+A scheduled task runs a prompt in a folder at set times (once, hourly, daily, weekdays or weekly, in your computer's time): a morning summary of open pull requests, a weekly dependency check. Tasks are saved on your computer, run there, and are free. Each run is a chat of its own (or a new message in the chat the task came from, if you asked for that), listed in the Code tab's **Inbox** with unread dots, and its approvals wait 2 hours.
 
 There are three ways to make one:
 
@@ -63,12 +63,12 @@ In the terminal app, `/schedule` lists them and `/schedule pause|resume|run|remo
 
 What a run can and cannot do:
 
-- A run is a new chat that has not seen the chat the task was made in, so the task's prompt has to stand alone.
+- Each run is a new chat that has not seen the chat the task was made in, so the prompt has to stand alone, unless you asked for the runs to come back to that chat (or chose a chat under **Each run** in Aristra Desktop). Then each run is a new message there.
 - A run cannot ask you a question, and it cannot schedule tasks.
 - A run with nothing new to report says so quietly: it is kept in the task's list, already read, and you get no notification. A run that failed always tells you, with the reason (for example, no balance left). After three failed runs in a row the task is paused; resume it once the cause is fixed.
 - Runs missed while the computer was asleep or off are made up by one run when it is back, or skipped if you chose that for the task.
 
-Scheduled tasks run on time with every window closed when the background service is on. Without it, a task runs when Aristra Code is next running; a run that starts more than two minutes late is marked missed. Aristra says so once, the first time you have a task and the service is off.
+Scheduled tasks run on time with every window closed when the background service is on. Without it, a task runs when Aristra Code is next running. A run more than two minutes late counts as missed: one run makes up for it, or it is skipped if you chose that. Tasks run while this computer is signed in to Aristra. Aristra says so once, the first time you have a task and the service is off.
 
 With a [plan](/account/plans), a task can run in Aristra's cloud instead, with your computer off. See [Aristra One on the web](/surfaces/web).
 
@@ -80,9 +80,9 @@ aristra service status
 aristra service uninstall
 ```
 
-On macOS this is a launchd agent, on Linux a systemd user unit. It follows updates. In Aristra Desktop, Settings › **Keep Aristra running in the background** installs the same service. On a Linux server with nobody logged in, run `loginctl enable-linger $USER`.
+On macOS this is a launchd agent, on Linux a systemd user unit. It follows updates. In Aristra Desktop, Settings › General › **Keep Aristra running in the background** installs the same service. On a Linux server with nobody logged in, run `loginctl enable-linger $USER`.
 
-Without the service, the runtime starts when a surface needs it and stops after 10 idle minutes, but it stays up while a turn runs, a background command runs or an approval waits.
+Without the service, the runtime starts when a surface needs it and stops after 10 minutes with nothing connected and nothing running (`runtime.idleExitMinutes`). A turn, a background command or a waiting approval keeps it up.
 
 ## Notifications
 

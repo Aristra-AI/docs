@@ -14,7 +14,7 @@ A worktree is a separate checkout of your repository on its own branch, so a cha
     ```sh
     aristra -w                 # a new worktree with a random name
     aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
-    aristra -w '#412'          # start from pull request 412 (named pr-412)
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
     aristra -w auth-refactor --resume <id>   # move an existing chat into it
     ```
 
@@ -34,6 +34,8 @@ A new worktree starts from your origin's default branch (fetched when it's over 
 | `worktree.baseRef` | `"fresh"` (the default): start from the origin's default branch. `"head"`: start from the current commit |
 | `worktree.symlinkDirectories` | Folders linked from the main checkout instead of copied, such as `node_modules` |
 | `worktree.sparsePaths` | Paths to check out alone, with git's sparse checkout, for large repositories |
+
+A new worktree gets your `.aristra/settings.local.json`, and any ignored files your repository's `.worktreeinclude` names (such as `.env`) are copied in.
 
 Subagents can work in worktrees of their own too; see [Subagents](/code/guides/subagents#worktrees). Aristra Code moves a chat into a worktree only when you or your instructions ask it to.
 
@@ -84,6 +86,7 @@ opens the branch's pull request: its status, checks and reviewers, then Overview
 | `x`, `X` | Re-run a failed check, or every failed check |
 | `s` | Put a failed check in the prompt for Aristra Code |
 | `f` | Put merge conflicts in the prompt |
+| `g` | Refresh |
 
 In Aristra Desktop, the header's **PR #N** opens the same pull request beside the chat, with Reply and Resolve on review comments. On a branch without one, the header offers **Create PR**, **Create draft PR** or **Manually create PR**.
 
@@ -95,7 +98,7 @@ In Aristra Desktop, the header's **PR #N** opens the same pull request beside th
 /autofix-pr stop
 ```
 
-With Auto-fix on, Aristra Code checks GitHub every minute and wakes the chat when checks fail, merge conflicts appear, or reviewers leave new comments. Each wake shows in the chat as its own line, which opens to what GitHub said, and Aristra Code fixes and pushes. In Aristra Desktop, turn on **Auto-fix CI & address comments** in the pull request panel of your own pull request.
+With Auto-fix on, Aristra Code checks GitHub every minute and wakes the chat when checks fail, merge conflicts appear, or people who can push to the repository (or apps) leave new review comments. Each wake shows in the chat as its own line, which opens to what GitHub said, and Aristra Code fixes and pushes. In Aristra Desktop, turn on **Auto-fix CI & address comments** in the pull request panel of your own pull request.
 
 <Note>
 `/pr`, the footer and Auto-fix call GitHub's API with your `gh` login. Run `gh auth login` once if you haven't.

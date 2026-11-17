@@ -15,7 +15,7 @@ A chat is one conversation with Aristra Code: a folder, a model, a mode and its 
 | A picker | `aristra resume`, or `/resume` |
 | A list | `aristra sessions` (this folder), `--all` (every folder), `--json` |
 
-A chat keeps the folder it started in. Its id is printed when you leave a running chat, by `aristra sessions`, and in `aristra run`'s output.
+A chat keeps the folder it started in, unless you move it into a [worktree](/code/guides/git#worktrees). Its id is printed when you leave a chat, by `aristra sessions`, and in the result of `aristra run --output json`.
 
 Several chats can run at once. Each runs one turn at a time: a message sent while a turn runs joins it at its next step (Enter) or waits for it to end (`/queue`).
 
@@ -31,11 +31,13 @@ Several chats can run at once. Each runs one turn at a time: a message sent whil
 
 Each turn of a chat with a folder starts with a checkpoint: before Aristra Code first changes a file with its file tools in a turn, the file is backed up. A chat keeps its newest 100 checkpoints.
 
-Go back to before one of your messages with `/rewind` (or Esc twice) in the terminal, or **Restore to here** on the message in Aristra Desktop:
+Go back to before one of your messages with `/rewind` (or Esc twice on an empty composer) in the terminal, or **Restore to here** on the message in Aristra Desktop:
 
 - **Restore code** puts back the files the agent changed with its file tools since then.
-- **Restore conversation** removes the message and every later one, in every surface, and puts the message back in the composer to edit. The model sees what it saw then.
-- **Both** does both.
+- **Restore conversation** removes the message and every later one, in every surface, and puts the message back in the composer to edit. The model sees what it saw then, and the chat gets back the mode it had then. A chat that was summarized after that message can't go back to it.
+- **Restore code and conversation** does both.
+
+The code options show only when the agent changed files after that message.
 
 <Note>
 Checkpoints track changes made by Aristra Code's file tools. Changes made by commands it ran (`npm run format`, a migration), or by you, are not undone. Use git for those.
@@ -53,7 +55,7 @@ aristra sessions export <id> --format json
 aristra sessions delete <id>                 # asks first; --yes to skip
 ```
 
-In a chat, `/export` and `/export json` save it, and `/copy` copies the newest reply. Deleting a chat removes its history and its files.
+In a chat, `/export` and `/export json` save it, and `/copy` copies the newest reply (`/copy 2` the one before it). When the reply has code blocks, it asks which to copy, unless `copyFullResponse` is on. Deleting a chat removes its history and its files.
 
 ## Where chats are kept
 
