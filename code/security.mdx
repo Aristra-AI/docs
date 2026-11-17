@@ -14,6 +14,10 @@ A chat on your computer is kept in `~/.aristra`. What goes out, and to whom:
 | Your account's memory for this folder | Read from Aristra, tagged with the repository's remote and the folder's name, never its path | Turns of chats with memory on |
 | What Aristra Code saves to memory, and notes about a repository | Aristra | When saved |
 | A web search | Aristra's search, or Brave with your own key | When it searches |
+| The search words, when Aristra's search can't serve | The free public search of Exa, Parallel, Firecrawl or Keenable | Unless `web.keylessFallback` is `false` |
+| A connector's call | Aristra, which runs it | When a chat uses an app connected to your account |
+| Calls to an MCP server you added | That server | When a chat uses it |
+| Your folder's files, when commands run in a cloud sandbox | Aristra's sandbox or E2B | Only if you choose one |
 | A web page | Fetched from your computer directly | When it reads one |
 | A step Auto mode's reviewer checks | Aristra's reviewer, or your own model | In Auto mode, for what would otherwise ask |
 | Content-free usage events and error reports | Aristra | Unless you turn them off |
@@ -34,7 +38,7 @@ Signed in, what Aristra remembers about you is kept in your Aristra account, wit
 | A chat you share to the web | Its turns are saved to your account as a chat, and can be found by **Search and reference past chats** | Not available |
 | What Aristra remembers about you | Your account's memory: read at each turn and written by the memory tools, so it leaves this computer | The same |
 | Notes about a repository | Files on this computer, copied one way to your account | The same |
-| Files | On this computer, unless you save a copy to your account | On this computer |
+| Files | On this computer, unless you save a copy to your account | The same |
 
 Signed out, Aristra keeps no memory of you. A computer that kept memory in files before memory came with every account sends those notes to your account once, the first time it starts a chat signed in.
 
@@ -43,20 +47,20 @@ Signed out, Aristra keeps no memory of you. A computer that kept memory in files
 `aristra login` (or the first run) adds this computer as a device of your Aristra account, in your browser or with a code to enter on any device (over SSH, or with `--device-code`). It creates:
 
 - **A device** on your account, which the website's device list shows and can revoke.
-- **A device key.** On a Mac it is made in the Secure Enclave, so it can't be copied off the chip; on Linux, it is a software key in the credential store. Every renewal of the sign-in is signed with it, so a stolen token is useless elsewhere.
+- **A device key.** On a Mac it is made in the Secure Enclave, so it can't be copied off the chip; on Linux, it is a software key in the credential store. Every renewal of the sign-in is signed with it, so a stolen token is useless elsewhere. A Mac without a Secure Enclave (an Intel Mac without a T2 chip, a virtual machine) signs in without a device key.
 - **Tokens**: an access token that lives 15 minutes, and a refresh token that lives 30 days, kept in the credential store.
 
 `aristra logout` signs out here and revokes the device. Signing the device out from the website revokes it too.
 
 ## Where secrets are kept
 
-Provider keys, MCP secrets and every sign-in are kept in Aristra's credential store, never in a settings file. **Surfaces can write a secret but never read one back**, and tools and commands can't reach the store.
+Provider keys, MCP secrets and every sign-in are kept in Aristra's credential store, never in a settings file. **Surfaces can write a secret but never read one back.** The store is sealed with a key in your keychain; a command you approve runs with your own access, so it could reach it. Add `"deny": ["read(~/.aristra/**)"]` to your permissions to keep the agent's tools and sandboxed commands out.
 
 | Store | Where |
 |---|---|
 | macOS keychain | `~/.aristra/credentials.enc`, sealed with a random key kept in your login keychain |
 | Linux keyring | The same sealed file, with the key in Secret Service |
-| File | `~/.aristra/credentials.json` (readable only by you), where no keychain answers |
+| File | `~/.aristra/credentials.json` (readable only by you), where no keychain answers (on Linux, also when `secret-tool` isn't installed). `ARISTRA_CREDENTIALS_STORE` overrides `credentials.store` |
 
 `credentials.store` (`auto`, `keychain`, `file`) chooses; `aristra doctor` says which is in use.
 
@@ -67,8 +71,8 @@ Provider keys, MCP secrets and every sign-in are kept in Aristra's credential st
 | A web page, file or tool output tells the agent to do something harmful | Permission checks and the sandbox. Outside content reaches the model marked as untrusted. Auto mode's reviewer never sees tool results |
 | A command tries to reach the network or write outside the folder | Approvals for every command that does more than read, and, once you turn it on, the [sandbox](/code/configure/sandbox): the network only through its proxy to hosts you allow, writes only in the chat's folders |
 | A malicious MCP server | Its package is checked against known malware first, its tools ask until you trust it, and `"sandbox": true` runs it in a sandbox |
-| A repository's settings try to allow everything | A folder's rules and mode count only after you trust it. MCP servers, the sandbox, the reviewer and side models come only from your own settings |
-| The agent edits a repository's settings or agent files | Changes to `.aristra`, `.claude`, `.git`, `.vscode`, `.idea`, shell startup files and `.mcp.json` ask in every mode |
+| A repository's settings try to allow everything | A folder's rules, mode and sandbox settings count only after you trust it, and its `.mcp.json` servers ask before they start. The reviewer, where secrets are kept and side models come only from your own settings |
+| The agent edits a repository's settings or agent files | Changes to `.aristra`, `.claude`, `.git`, `.vscode`, `.idea`, shell startup files and `.mcp.json` never run on a rule alone: they ask in every mode, and in Auto the reviewer decides them |
 | A secret leaks into a log | Values that look like secrets are masked in tool results, events, logs and exports |
 | A stolen laptop | Secrets sealed with a key in your login keychain, the sign-in bound to the device key. Revoke the device on the website |
 
@@ -82,7 +86,7 @@ Only your user can talk to the runtime: it listens on a private socket checked a
 
 The runtime logs to `~/.aristra/logs/runtime.log`, masked for secrets, kept seven days. `aristra logs` reads it, `aristra logs -f` follows it, and `ARISTRA_LOG_LEVEL` sets how much it says.
 
-`aristra diagnostics export` writes a support bundle into `~/.aristra/diagnostics/`: versions, checks, your settings files, table sizes (no messages) and logs, masked again with email addresses removed. It sends nothing; look inside before you share it.
+`aristra diagnostics export` writes a support bundle into `~/.aristra/diagnostics/`: versions, checks, your own settings file, table sizes (no messages) and logs, masked again with email addresses removed. It sends nothing; look inside before you share it.
 
 ## Telemetry
 
@@ -93,6 +97,6 @@ Aristra Code sends content-free usage events and error reports. No prompt, reply
 | Settings | `telemetry.usage: false` | `telemetry.errors: false` |
 | Environment | `ARISTRA_DISABLE_TELEMETRY=1` | `ARISTRA_DISABLE_ERROR_REPORTING=1` |
 | Both | `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC=1` | |
-| Aristra Desktop | Settings › General › Privacy | |
+| Aristra Desktop | Settings › General › Privacy › **Share usage data** | **Send error reports** |
 
 The environment variables are read when the runtime starts: run `aristra runtime stop` after setting them. `aristra doctor` says whether each is on.

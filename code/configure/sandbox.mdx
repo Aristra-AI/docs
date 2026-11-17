@@ -5,7 +5,7 @@ description: "The sandbox, off by default: turning it on with /sandbox or in Set
 
 The sandbox is off by default: commands Aristra Code runs on your computer run with your own access, and the [permission checks](/code/configure/permissions) decide which run without asking and which ask first.
 
-Turn it on and commands run in a sandbox. An approval answers "should this run?"; the sandbox decides what a command can reach once it runs. Because a sandboxed command can write only in the chat's folders and reach only hosts you allow, it runs without asking (`sandbox.autoAllowBashIfSandboxed`, on by default). Deny and ask rules still apply, and some commands still get the regular checks: one that sets an unknown variable in front, passes a `NAME=value` argument, names another user's home, redirects to `/dev/tcp`, or removes files after changing folder.
+Turn it on and commands run in a sandbox. An approval answers "should this run?"; the sandbox decides what a command can reach once it runs. Because a sandboxed command can write only in the chat's folders and reach only hosts you allow, it runs without asking (`sandbox.autoAllowBashIfSandboxed`, on by default). Deny and ask rules still apply, and some commands still get the regular checks: one that sets an unknown variable in front, passes a `NAME=value` argument, names another user's home, redirects to `/dev/tcp` or `/dev/udp`, or both removes files and changes folder. Risky `rm` commands and commands too complex to check always ask.
 
 ## Turn it on
 
@@ -23,7 +23,7 @@ If the sandbox can't start (bubblewrap missing on Linux, say), commands run outs
 | **Write** | The chat's folders, `$TMPDIR`, the paths of your `edit(...)` allow rules and `sandbox.filesystem.allowWrite` | Everything else |
 | **Network** | Through the sandbox's proxy: hosts you allow go through, others are asked about | Every direct connection, and `localhost` unless you allow it |
 
-**Never writable**, whatever the rules say: settings files, the folder's `.aristra/settings*.json` and skills, shell startup files (`.bashrc`, `.zshrc` and the like), `.gitconfig`, `.gitmodules`, `.mcp.json`, `.vscode`, `.idea`, `.git/hooks`, and `.git/config` unless `sandbox.filesystem.allowGitConfig` is on. The rest of `.git` stays writable, so git works. A command can't rename these or the folders above them either.
+**Never writable**, whatever the rules say: settings files, the folder's `.aristra/settings*.json` and skills, shell startup files (`.bashrc`, `.zshrc` and the like), `.claude/skills`, `.claude/commands`, `.claude/agents`, `.gitconfig`, `.gitmodules`, `.ripgreprc`, `.mcp.json`, a bare repository's files at the folder's root, `.vscode`, `.idea`, `.git/hooks`, and `.git/config` unless `sandbox.filesystem.allowGitConfig` is on. The rest of `.git` stays writable, so git works. A command can't rename these or the folders above them either.
 
 ## How a command runs
 
@@ -67,7 +67,7 @@ A dev server, a test fixture server or a local database needs to listen on a por
 aristra config set sandbox.network.allowLocalBinding true
 ```
 
-This lets commands listen on and connect to `localhost`, and nothing beyond it.
+This lets commands listen on and connect to `localhost`, and nothing beyond it. On Linux this setting has no effect: each command has its own network, so it can listen on and reach its own `localhost`, but not a server on your computer's `localhost` or one another command started.
 
 ## Use your own proxy
 
@@ -81,7 +81,7 @@ Commands' HTTP and HTTPS then go to `localhost:8080`, and that proxy decides wha
 
 ## Run a command outside the sandbox
 
-Some commands need what the sandbox refuses: writing outside the folder, a tool that ignores proxy settings, a service on a Unix socket. Aristra Code may then ask to run one command outside the sandbox, with its reason. It goes through the ordinary checks: it asks in Manual, goes to the reviewer in Auto, and is refused in Read only.
+Some commands need what the sandbox refuses: writing outside the folder, a tool that ignores proxy settings, a service on a Unix socket (macOS). Aristra Code may then ask to run one command outside the sandbox, with its reason. It goes through the ordinary checks for a command outside the sandbox: in Manual it asks unless it only reads or a rule allows it, Auto sends to the reviewer what would ask, and Read only refuses it.
 
 - `sandbox.allowUnsandboxedCommands: false` turns this off.
 - `sandbox.excludedCommands` lists commands that always run outside the sandbox (`docker:*`, `make`), still through the checks. It is a convenience, not a security boundary.
@@ -96,7 +96,7 @@ The sandbox is Seatbelt, deny by default.
 
 ## Linux
 
-The sandbox is bubblewrap (`bwrap`): the whole filesystem read-only except the writable paths, its own network namespace, with the network relayed to the proxy. When it can't start, commands fail with how to fix it, and `aristra doctor` shows it under Sandbox:
+The sandbox is bubblewrap (`bwrap`): the whole filesystem read-only except the writable paths, its own network namespace, with the network relayed to the proxy. When it can't start, commands run outside it and the chat says why once (with `sandbox.failIfUnavailable`, the turn doesn't start), and `aristra doctor` shows it under Sandbox:
 
 | Problem | Fix |
 |---|---|
@@ -127,6 +127,7 @@ Sandbox settings come from your own settings, a trusted folder's settings and a 
 | `sandbox.network.allowUnixSockets` | `[]` | Unix sockets a command may connect to (macOS) |
 | `sandbox.ignoreViolations` | `{}` | Refusals not to report back to the agent |
 | `sandbox.enableWeakerNestedSandbox` | `false` | Inside a container that can't mount `/proc` (Linux) |
-| `sandbox.enableWeakerNetworkIsolation` | `false` | Open macOS's certificate service for tools like `pip` and `gh` |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Open macOS's certificate service for Go tools such as `gh` behind a proxy with its own certificate authority |
+| `sandbox.network.allowAllUnixSockets` | `false` | Let commands connect to any Unix socket |
 
 Managed policies also have `sandbox.filesystem.allowManagedReadPathsOnly` and `sandbox.network.allowManagedDomainsOnly`. See [Managed policy](/code/configure/managed-policy).

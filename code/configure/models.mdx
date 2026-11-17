@@ -18,9 +18,9 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
 
 <AccordionGroup>
   <Accordion title="Your Aristra plan">
-    Aristra's models, paid with your credits: a plan's monthly credits, then top-up credits. Every model is on every plan, listed with its context window and reasoning levels, and a pricier model uses credits faster. Without a plan, your balance pays for them: a new account's $1 starter credit, then [top-ups](/account/credits). Each model's price is on [Models and prices](https://app.aristralabs.com/models). Only the model call leaves your computer: your files, commands and tools stay here.
+    Aristra's models, paid from your balance: a new account's $1 starter credit first, then a plan's monthly usage, then top-ups. Every model is on every plan, listed with its context window and reasoning levels, and a pricier model uses your balance faster. See [Your balance and top-ups](/account/credits). Each model's price is on [Models and prices](https://app.aristralabs.com/models). Your files and commands stay on your computer; what the model reads goes out in the model call. See [Security](/code/security) for what else leaves.
 
-    Each model has its whole window. Some providers charge more for a long prompt, and so does Aristra, for that request alone: Claude Haiku 5.5 over 100K tokens, GPT-5.4 and later over 272K, Gemini 3.1 Pro over 200K.
+    Each model has its whole window. Some providers charge more for a long prompt, and so does Aristra, for that request alone: Claude Haiku 5.5 over 100K tokens, GPT-5.4 and later (not mini or nano) over 272K, Gemini 3.1 Pro over 200K.
   </Accordion>
   <Accordion title="Your ChatGPT plan">
     Your ChatGPT subscription supplies the model; Aristra Code runs the turn with its own tools and approvals. Sign in from `/model`: choose **Sign in with your ChatGPT plan**, open the page it shows and enter the code. `/usage` shows the plan's 5-hour and weekly limits.
@@ -55,13 +55,9 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
     - `aristra doctor` checks that the local server answers.
   </Accordion>
   <Accordion title="A custom endpoint">
-    Any server that speaks Chat Completions, Responses or Anthropic's Messages: a company gateway, a proxy, a self-hosted server. Set it up in Aristra Desktop's Settings › Models. Without Aristra Desktop (on Linux, for example), put its address in `~/.aristra/sources.json`:
+    Any server that speaks Chat Completions, Responses or Anthropic's Messages: a company gateway, a proxy, a self-hosted server. Set it up in Aristra Desktop's Settings › Models. Without Aristra Desktop (on Linux, for example), run `aristra keys add custom`: it asks for the address, the API it speaks, its models, a name and a key. Or give them as `--url`, `--wire chat_completions|responses|anthropic`, `--name` and `--model` (repeat it for each model), with `--no-key` for a server that needs none.
 
-    ```json
-    { "custom": { "baseUrl": "https://gateway.example.com/v1", "wire": "chat_completions", "name": "Company gateway", "models": ["model-a"] } }
-    ```
-
-    `wire` is `chat_completions`, `responses` or `anthropic`; the address must be `https://`, or `http://` for a server on your computer. Then add its key with `aristra keys add custom` (skip it for a server that needs none). It pays as "this computer" when its address is on your computer or network, else as "your key".
+    It is kept in `~/.aristra/sources.json`, and its key in the credential store. The address must be `https://`, or `http://` for a server on your computer. It pays as "this computer" when its address is on your computer or network, else as "your key".
   </Accordion>
 </AccordionGroup>
 
@@ -83,7 +79,7 @@ The default lives in your settings:
 
 ## When a model call fails
 
-A server error or dropped connection is retried up to 3 times before any text has streamed, and the status line says so. A rate limit asking for a short wait is waited out once. After that, what happens depends on the failure:
+A server error, overload or dropped connection is retried before any text has streamed, up to 10 times (`ARISTRA_MAX_RETRIES`, at most 15), and the status line says so; with a fallback ready, three overloads in a row hand over to it. With no fallback, a rate limit is waited out while each wait is a minute or less. After that, what happens depends on the failure:
 
 | Failure | What follows |
 |---|---|
@@ -91,6 +87,7 @@ A server error or dropped connection is retried up to 3 times before any text ha
 | Rate limited | The next model on the list; else the turn fails and says when the limit resets |
 | Signed out, balance used up | The next model on the list from another source |
 | Context too long | Summarized and retried |
+| Rejected request, other errors | The next model on your fallback list |
 | Refused | The turn fails. Another model is never asked what one refused |
 
 The fallback list is `model.fallback` in your own settings:
@@ -113,8 +110,8 @@ The fallback list is `model.fallback` in your own settings:
 
 Titles, summaries of long chats, and the memory backstop call a model too. They use, in order:
 
-1. Yours, from `auxiliary.title`, `auxiliary.summary` and `auxiliary.memory` in your settings, each `{"source": ..., "model": ...}` (`auxiliary.title: "off"` keeps your first words as the title).
-2. On the Aristra plan, its background model: a cheaper, faster model.
+1. Yours, from `auxiliary.title`, `auxiliary.summary` and `auxiliary.memory` in your settings, each `{"source": ..., "model": ...}` from one of your own sources (not `aristra`) (`auxiliary.title: "off"` keeps your first words as the title).
+2. On the Aristra plan, its background model: a cheaper, faster model, for titles and the memory backstop. Summaries use the chat's own model.
 3. The chat's own model.
 
 A side model that fails never fails the chat. Auto mode's reviewer has its own model; see [Permissions](/code/configure/permissions#auto-modes-reviewer).
