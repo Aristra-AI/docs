@@ -1,0 +1,34 @@
+---
+title: "Goals"
+description: "Set a condition with /goal and Aristra Code keeps working until it holds: tests pass, the build is green, the page renders."
+---
+
+A goal is a condition Aristra Code checks before it stops. When a turn would end, a small model reads the chat and decides whether the goal holds. If it doesn't, the turn goes on, with the reason. If it does, the goal clears and the chat says it was achieved, with how long it took, how many turns and how many tokens.
+
+```text
+/goal all tests in packages/api pass and the linter is clean
+/goal                # show the current goal
+/goal clear          # remove it
+```
+
+In Aristra Desktop, choose **Goal** in a chat's `/` menu.
+
+## Write a good goal
+
+A goal works best when it is something Aristra Code can check by running something, not a matter of opinion:
+
+| Good | Hard to check |
+|---|---|
+| `npm test` passes with no skipped tests | The code is clean |
+| The build succeeds and the bundle is under 200 KB | The app is fast |
+| `/health` returns 200 on the local server | The API works |
+
+Give Aristra Code the command that checks it, in the goal or in your `AGENTS.md`, so each turn can verify instead of guessing.
+
+## How it ends
+
+- **Met:** the goal clears, and the chat says so.
+- **Not met:** the turn continues with the reason the check gave.
+- **Impossible:** if the check decides the goal can't be reached, the goal clears and the turn ends, with why.
+
+While background work in the chat is still running, the check waits for it. Esc stops the turn as usual; the goal stays until you clear it or it is met.

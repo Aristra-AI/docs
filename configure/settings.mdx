@@ -1,0 +1,47 @@
+---
+title: "Settings"
+description: "Where Aristra Code's settings live, how the layers combine, which keys a repository can't change, and how to read and change them."
+---
+
+Settings are JSON files read by the Aristra Runtime, so the terminal, Aristra Desktop and every other surface use the same settings. They never hold a secret: keys and tokens go to the [credential store](/security#where-secrets-are-kept).
+
+## The files
+
+| Scope | File | Shared |
+|---|---|---|
+| Yours | `~/.aristra/settings.json` | No: yours, for every folder |
+| The project | `<folder>/.aristra/settings.json` | Yes: commit it to share with your team |
+| The project, yours | `<folder>/.aristra/settings.local.json` | No: kept out of git |
+| Managed policy | Set by an administrator; see [Managed policy](/configure/managed-policy) | Enforced on the computer |
+
+Later layers win: yours, then the project's, then the project's local file, then a script run's `--settings`, then the managed policy, which overrides everything. Objects merge key by key; other values (strings, numbers, lists) are replaced whole by a later layer.
+
+Permission rules are the exception: each file's `allow`, `ask` and `deny` lists add up instead of replacing each other, and a deny anywhere wins. See [Permissions](/configure/permissions#rules).
+
+## What a repository can't change
+
+A project's files count only once you [trust the folder](/configure/permissions#trust-a-folder). Until then, only their deny and ask rules are read.
+
+Some keys are read only from your own file, trusted folder or not, so a repository can't change them: `projects`, `mcp`, `review`, `credentials`, `auxiliary` and `model.fallback`. Hooks are read from your file and a trusted project's `settings.json`, never from `settings.local.json`.
+
+## Read and change settings
+
+```sh
+aristra config get                              # every setting in effect here, and where each comes from
+aristra config get permissions --json
+aristra config set permissions.defaultMode auto # in your own file
+aristra config set permissions.allow '["shell(npm test *)"]' --project   # in the project's file
+aristra config edit                             # your file in your editor
+```
+
+In a chat, `/config` shows your settings in effect and the file each comes from. You can also ask Aristra Code to change a setting: the built-in `/update-config` skill does it.
+
+Settings take effect at once: the runtime reads a file again whenever it changes. A section that doesn't fit is ignored with a warning naming it, and the rest still apply. `aristra doctor`, `/config` and `aristra config get` show the warnings.
+
+## Checking a settings file
+
+`aristra doctor`, `/config` and `aristra config get` check your settings files and name any section that doesn't fit. A JSON Schema for editors is planned at `https://aristralabs.com/schemas/aristra-settings.json`; it is not published yet, so a `$schema` line pointing there does not work today.
+
+## Every setting
+
+The [settings reference](/reference/settings) lists every key, its default and what it does.

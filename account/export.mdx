@@ -1,0 +1,39 @@
+---
+title: "Devices, downloads and export"
+description: "See and sign out the computers on your account, download Aristra Desktop and the Aristra CLI, and take a copy of your account's data."
+---
+
+## Devices
+
+**Devices** lists every computer signed in to your account: Aristra Desktop, the Aristra CLI and a cloud computer. Each shows whether it is online and when it was last seen.
+
+**Sign out** removes a computer from your account. Its chats and files stay on it; it has to sign in again to use your account.
+
+## Downloads
+
+**Downloads** has Aristra Desktop for Mac and the command that installs the Aristra CLI:
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+```
+
+Both are free and work with a model of your own. See [Set up Aristra Code](/setup).
+
+## Export
+
+**Import and export** gives you your account's data as one zip file. It needs no plan, so you can always take what you made, also after a plan ends.
+
+| In the file | |
+|---|---|
+| `chats/` | Every chat saved to your account, each as a Markdown file, with a list of them all |
+| `memory/` | What Aristra remembers about you and your work, as a readable file and as data |
+| `files/files.csv` | The list of your files: name, type, size and date, and the chat a file was attached to |
+| `usage.csv` | A year of usage rows |
+| `README.txt` | What is in the file, and what is not |
+
+Kept somewhere else:
+
+- **Your files themselves** download from **Files**.
+- **Craft documents** export from each document's menu, as Markdown, Word or PDF.
+- **Chats on a computer** that you did not share live on that computer, in `~/.aristra`. They never reached your account.
+- **A cloud computer's** chats and memory export from its own page. See [Cloud computer](/surfaces/cloud-computer).

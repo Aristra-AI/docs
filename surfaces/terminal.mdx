@@ -1,0 +1,147 @@
+---
+title: "Terminal"
+description: "Use Aristra Code in your terminal: the screen, keys, approvals, steering a running turn, going back to an earlier message, and the fullscreen renderer."
+---
+
+`aristra` with no subcommand opens Aristra Code in the current folder.
+
+```sh
+aristra                          # a new chat in this folder
+aristra "add a --verbose flag"   # a new chat that starts with this prompt
+aristra -c                       # this folder's newest chat
+aristra -r <id>                  # that chat
+aristra resume                   # pick an earlier chat
+aristra attach <id>              # a chat that may be running elsewhere
+aristra --fullscreen             # draw on the whole screen
+aristra --folder ~/code/api      # work in another folder
+aristra --cloud "plan the launch"   # a chat run by Aristra's cloud agent
+```
+
+Every option is in the [CLI reference](/reference/cli).
+
+## The screen
+
+```text
+gemini-3.8-flash · Aristra balance · ~/code/my-project · Manual                    the header
+
+› Find why the date parser fails on leap years and fix it.                          your message
+● Searched for 1 pattern, read 2 files                                              reads and searches, one line
+● Edit src/date.ts                                                                  an edit, with its diff
+  npm test                                                                          a command, with its output
+The parser treated 1900 as a leap year. ...                                         the reply
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ ›                                                                            │  the composer
+╰──────────────────────────────────────────────────────────────────────────────╯
+ Working · 12s · esc to interrupt                 ████░░░░░░ 41% of the window · 18k tokens
+ Manual · asks before changes the rules do not allow (shift+tab)    gemini-3.8-flash
+```
+
+- **Steps.** Each tool call is one line with what it did. Reads and searches in a row fold into one line. An edit shows its diff, a command the head of its output; **Ctrl+O** opens the newest step's full output.
+- **The task list** appears above the composer when the agent keeps one. **Ctrl+T** hides and shows it.
+- **The status line** says what the agent is doing, what runs in the background (`/tasks` lists it), how many approvals wait in other chats, and how full the model's context is (yellow at 60%, red at 80%). `/usage` shows the tokens used.
+- **The footer** shows the mode, the branch's open pull request (`PR #412`, coloured by its review state), the model and who pays.
+- **Suggestions.** After a few replies, the empty composer may suggest your next message in grey: Tab takes it, Enter sends it, typing ignores it.
+
+## Keys
+
+| Key | Does |
+|---|---|
+| Enter | Send. While a turn runs, add your message to it at its next step |
+| Shift+Enter, Alt+Enter, Ctrl+J | A new line (run `/terminal-setup` if Shift+Enter doesn't work in your terminal) |
+| Esc | Stop the running turn. Twice on an empty composer: go back to an earlier message |
+| Shift+Tab | Cycle the mode: Manual, Accept edits, Plan, Auto |
+| `!` at the start | Shell mode: run a command yourself |
+| `@` | Mention a file or folder; Tab completes |
+| `/` | Commands and your skills |
+| Ctrl+V | Attach the image on the clipboard |
+| Ctrl+O | The newest step's full output |
+| Alt+P | Choose the model |
+| Ctrl+L | Redraw the screen |
+| Ctrl+X then Tab | In fullscreen, move to the pane above the prompt |
+| Ctrl+Up, Ctrl+Down | In fullscreen, move through the diff panel's files |
+| Ctrl+T | Hide or show the task list |
+| Ctrl+B, while a command runs | Send it to the background |
+| Ctrl+R | Search your earlier prompts |
+| Ctrl+G | Edit the draft in your editor |
+| Ctrl+S | Stash the draft; again on an empty composer to bring it back |
+| Up, Down | Earlier prompts, this folder's first |
+| Ctrl+C | Clear the composer; twice on an empty one to leave |
+
+You can rebind keys in `~/.aristra/keybindings.json` (`/keybindings` opens it). See [Terminal setup](/configure/terminal).
+
+## Sending while a turn runs
+
+Aristra Code runs one turn per chat at a time. While one runs:
+
+- **Enter steers.** Your message joins the running turn at its next step. Use it to correct course without stopping.
+- **`/queue <message>` waits** and is sent as a new turn once the running one ends.
+- **Esc stops** the turn. Running commands and hooks are stopped with everything they started, waiting approvals cancelled, and Aristra Code asks what to do instead.
+
+## Approvals
+
+When a step needs your answer, it appears above the composer: what kind of step it is, exactly what it would do (the command, the diff, the address), and the answers.
+
+| Answer | Means |
+|---|---|
+| Yes | Run this step |
+| Yes, and don't ask again for `rule` | Run it, and save the rule to the folder's `.aristra/settings.local.json`. For a command you can edit the rule first |
+| Yes, and switch to accept edits | Run it, and let the rest of the chat edit files without asking |
+| Yes, allow reading from `X/` | Run it, and let the chat read that folder |
+| No | Don't run it and stop the turn. Tab on No adds a note: the model reads it as the reason and carries on |
+
+Press a number or move and press Enter. **Ctrl+E** on a command explains it: what it does, why, and its risk.
+
+**Plan mode's approval** shows the plan and asks whether to go ahead: with Auto mode, approving edits by hand, or "Tell Aristra what to change" to keep planning. **Ctrl+G** opens the plan in your editor.
+
+An approval shows in every surface that is open, and the first answer wins. Unanswered, it is declined after 30 minutes (`approvals.timeoutMinutes`).
+
+## Choosing a model
+
+`/model` lists every model source with who pays for it. A source that is not ready says how to set it up. Choosing a model switches this chat and makes it the default for new chats. `/effort` sets how hard the model thinks. See [Models](/configure/models).
+
+## Resuming
+
+`/resume` (or `aristra resume`) lists chats from every surface: the terminal, Aristra Desktop, scripts and editors. Type to search, Tab switches between this folder and every folder, Right previews, Enter opens. A chat that is still running keeps running when you open it.
+
+## Going back to an earlier message
+
+`/rewind`, or Esc twice on an empty composer, lists your messages with what each turn changed. Choose one, then:
+
+| Choice | Does |
+|---|---|
+| Restore code and conversation | Both of the below |
+| Restore conversation | The message and everything after it leave the chat, and the message comes back into the composer to edit and send again |
+| Restore code | Files the agent changed with its file tools go back to how they were before the message |
+
+Changes made by commands, or by you, are not undone. See [Chats](/guides/chats#checkpoints).
+
+## Running a command yourself
+
+Type `!` at the start of the composer and Enter runs the command in the chat's folder, as you, outside the sandbox. It runs in the sandbox instead when the sandbox is on and a team's [policy](/configure/managed-policy) forbids leaving it. The command and its output show as a step, and the agent reads them with your next message. Esc or Backspace at the start leaves shell mode.
+
+## Attachments
+
+- A long paste is kept whole behind a short placeholder.
+- A file dragged into the terminal is attached rather than typed. Images go to the model when it accepts them.
+- `@path` gives the agent a file with your words; `@app.py#L10-20` gives some of its lines. Credentials files such as `.env` are left out.
+
+## Leaving
+
+`/exit` (or `/quit`), Ctrl+D on an empty composer, or Ctrl+C twice. When work is still running, Aristra Code asks whether to stop it, move it to the background and leave, or stay. Background work keeps running in the runtime, and `aristra resume <id>` brings you back to it.
+
+## Notifications and recaps
+
+When you haven't touched the terminal for a while, Aristra Code notifies you through it when an approval waits or a turn has ended (in iTerm2, kitty, Ghostty and Apple's Terminal). `ARISTRA_NO_NOTIFY=1` turns this off.
+
+When you come back to a chat you stepped away from, a one-line recap waits in it with the goal, the current task and the next step. `/recap` makes one now; `awaySummaryEnabled: false` turns them off.
+
+## Fullscreen
+
+The fullscreen renderer draws on the whole screen, keeping the transcript scrollable above and the composer at the bottom, with mouse selection and a side panel for diffs. Turn it on with `/tui fullscreen` (saved in your settings) or for one launch with `--fullscreen`; `/tui default` goes back.
+
+In fullscreen:
+- PgUp and PgDn scroll half a view; Ctrl+Home and Ctrl+End go to the top and the end. The mouse wheel scrolls.
+- Drag to select; the selection is copied when you let go (`copyOnSelect: false` turns that off). Hold Shift to use the terminal's own selection.
+- **Ctrl+O** opens the transcript screen: every step with its full output, searchable with `/`.
+- **`/diff`** shows the changed files beside the transcript. See [Git and pull requests](/guides/git#diffs).

@@ -1,122 +1,115 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Aristra Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#111111",
+    "light": "#E5E5E5",
+    "dark": "#111111"
+  },
+  "fonts": {
+    "family": "Inter"
+  },
+  "logo": {
+    "light": "/logo/aristra.svg",
+    "dark": "/logo/aristra.svg"
   },
   "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Open Aristra",
+      "href": "https://app.aristralabs.com"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Aristra Code",
+        "icon": "terminal",
         "groups": [
           {
             "group": "Getting started",
+            "pages": ["index", "quickstart", "setup", "how-it-works"]
+          },
+          {
+            "group": "Surfaces",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "surfaces/terminal",
+              "surfaces/desktop",
+              "surfaces/editors",
+              "surfaces/remote-control",
+              "surfaces/cloud-chats",
+              "surfaces/cloud-computer",
+              "surfaces/non-interactive",
+              "surfaces/remote-machines"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Use Aristra Code",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "guides/chats",
+              "guides/memory",
+              "guides/context",
+              "guides/git",
+              "guides/background",
+              "guides/goals",
+              "guides/subagents"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Extend",
+            "pages": ["extend/mcp", "extend/skills", "extend/hooks", "extend/plugins"]
+          },
+          {
+            "group": "Configure",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "configure/settings",
+              "configure/permissions",
+              "configure/sandbox",
+              "configure/models",
+              "configure/terminal",
+              "configure/managed-policy"
             ]
           },
           {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
+            "group": "Help",
+            "pages": ["security", "troubleshooting"]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Account and plans",
+        "icon": "credit-card",
         "groups": [
           {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
+            "group": "Aristra One",
+            "pages": ["account/overview", "account/web", "account/plans", "account/credits", "account/usage", "account/export"]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "icon": "book",
+        "groups": [
           {
-            "group": "Endpoint examples",
+            "group": "Reference",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "reference/cli",
+              "reference/commands",
+              "reference/tools",
+              "reference/settings",
+              "reference/environment",
+              "reference/glossary"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "website": "https://aristralabs.com"
     }
   }
 }
