@@ -15,3 +15,7 @@ mint broken-links   # check internal links
 ```
 
 `AGENTS.md` has the naming and style the pages follow.
+
+## License
+
+The text of these docs is licensed under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0): you may share and adapt it, with credit. See `LICENSE.md`.
