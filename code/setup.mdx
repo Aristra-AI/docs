@@ -9,7 +9,7 @@ description: "Install, update, switch versions and uninstall Aristra Code on mac
 |---|---|
 | macOS | Apple silicon and Intel. The Apple silicon build also installs in a shell running under Rosetta |
 | Linux | x64 and arm64 with glibc. The sandbox, when you turn it on, needs bubblewrap (`bwrap`). Alpine (musl) is not supported yet |
-| Windows | Through WSL2 with a Linux distribution such as Ubuntu, using the Linux build. Sign-in pages open in Windows through `wslview` |
+| Windows | Through WSL2 with a Linux distribution such as Ubuntu, using the Linux build. Sign-in pages open through the program `$BROWSER` names (on WSL, usually `wslview`). Without one, sign in with a code |
 
 Each build carries everything it needs, including its own Node and Python, so nothing else has to be installed first apart from `curl` or `wget`.
 
@@ -24,15 +24,16 @@ curl -fsSL https://aristralabs.com/install.sh | sh -s 1.2.1     # one version
 The script:
 
 1. Picks the build for your machine.
-2. Downloads it and checks its SHA-256 checksum and size against the release's manifest.
+2. Downloads it and checks its SHA-256 checksum against the release's manifest.
 3. Installs it into `~/.local/share/aristra/versions/<version>/` and points `~/.local/bin/aristra` at it.
-4. Adds `~/.local/bin` to your shell profile when it is not on your `PATH` (for fish it prints the `fish_add_path` command to run).
+4. Adds `~/.local/bin` to your shell profile when it is not on your `PATH`, or when another `aristra` comes first (for fish it prints the `fish_add_path` command to run).
 5. Offers to remove an older `aristra` installed with npm or bun that would come first on your `PATH`.
+6. Offers to start `aristra`.
 
 Questions are asked on the terminal, so they work through `curl | sh`. With no terminal, or with `ARISTRA_NON_INTERACTIVE=1`, it asks nothing and takes the safe answer.
 
 <Warning>
-Don't run the installer with `sudo` from your own shell: it would install into root's home folder. In a container or CI running as root, it installs for root as usual.
+The installer refuses to run under `sudo` from your own shell, because it would install into root's home folder. To install for root through sudo on purpose, set `ARISTRA_INSTALL_ALLOW_SUDO=1`. In a container or CI running as root, it installs for root as usual.
 </Warning>
 
 ## Release channels

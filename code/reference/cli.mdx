@@ -3,11 +3,11 @@ title: "CLI reference"
 description: "Every aristra subcommand and flag: the Aristra CLI for chats, scripts, accounts, models, extensions, settings and support."
 ---
 
-The Aristra CLI is the `aristra` command: Aristra Code in your terminal. Every subcommand prints its usage with `--help`. For the commands you type inside a chat, see [Commands](/code/reference/commands).
+The Aristra CLI is the `aristra` command: Aristra Code in your terminal. Every subcommand shows its usage with `--help`; a few show it as a usage error (status 2). For the commands you type inside a chat, see [Commands](/code/reference/commands).
 
 ```text
 aristra [options] [prompt]          Aristra Code in this folder
-aristra run [options] [prompt]      one turn, non-interactive (also: aristra -p, --print)
+aristra run [options] [prompt]      one turn, non-interactive (also: aristra -p or --print, as the first argument)
 aristra <command> ...
 ```
 
@@ -17,12 +17,12 @@ Anything that isn't a subcommand is a prompt: `aristra fix the build` starts a c
 
 | Option | Does |
 |---|---|
-| `--remote <host>` | Run on another machine over SSH, before or after any command. See [Remote machines](/code/remote-machines) |
+| `--remote <host>` | Run on another machine over SSH, before or after the command. See [Remote machines](/code/remote-machines) for the commands that stay on this computer |
 | `-v`, `--version` | Print the version |
 | `-h`, `--help` | List the subcommands |
 | `--help-agent` | List the interactive options |
 
-Subcommands exit `0` on success, `1` on failure (the message on stderr) and `2` for a usage mistake. `aristra run` adds `3` and `130`; see [Non-interactive mode](/code/non-interactive#exit-status).
+Subcommands exit `0` on success, `1` on failure (the message on stderr) and `2` for a usage mistake. `aristra run` adds `3` and `130`; see [Non-interactive mode](/code/non-interactive#exit-status). `aristra serve` exits with the runtime's own status (`3`: a runtime already runs for this home). `aristra` exits `130` when you leave the first-run screens, as with "No, exit".
 
 ## Start a chat
 
@@ -81,7 +81,7 @@ aristra sessions download <id> [<key>]
 
 | Command | Does |
 |---|---|
-| `aristra login [--device-code \| --browser]` | Sign in, in a browser or with a code (a code is the default over SSH or without a browser) |
+| `aristra login [--device-code \| --browser]` | Sign in, in a browser or with a code (a code is the default over SSH or without a browser). While the browser sign-in waits, press c to use a code instead |
 | `aristra logout` | Sign out and remove this computer from your account |
 | `aristra setup-token [--name <name>]` | Print a token for CI that runs models on your Aristra balance for a year. See [In CI](/code/non-interactive#in-ci) |
 | `aristra status [--json]` | Your account, the runtime and the model sources |
@@ -91,7 +91,8 @@ aristra sessions download <id> [<key>]
 | Command | Does |
 |---|---|
 | `aristra models [--source <id>] [--json]` | The models each source offers, with who pays and, for local models, whether they fit |
-| `aristra keys add <provider>` | Add a provider key (asked for hidden, or piped on stdin) |
+| `aristra keys add <provider>` | Add a provider key, or a tool's key: `brave` for web search, `e2b` for the sandbox (asked for hidden, or piped on stdin) |
+| `aristra keys add custom [--url <address>] [--wire chat_completions\|responses\|anthropic] [--name <name>] [--model <id>]... [--no-key]` | A server of your own that speaks an OpenAI or Anthropic API |
 | `aristra keys list` | Which keys are set, never the keys themselves |
 | `aristra keys remove <provider>` | Remove a key |
 
@@ -99,10 +100,10 @@ aristra sessions download <id> [<key>]
 
 | Command | Does |
 |---|---|
-| `aristra mcp add [-s scope] <name> [--env K=V]... [--secret K=V]... [--cwd <folder>] [--writable <folder>]... [--sandbox] -- <command> [args]` | Add an MCP server that runs as a program; `-s` is `local` (default), `project` or `user`. `--secret` keeps the value in your credential store, `--sandbox` runs it in the sandbox with write access only to `--writable` folders |
+| `aristra mcp add [-s scope] <name> [--env K=V]... [--secret K=V]... [--cwd <folder>] [--writable <folder>]... [--sandbox] -- <command> [args]` | Add an MCP server that runs as a program; `-s` is `local` (default), `project` or `user`. `--secret` keeps the value in your credential store, `--sandbox` runs it in the sandbox, with the network, writing only its own folder (`--cwd`, or the project), the `--writable` folders and package launcher caches |
 | `aristra mcp add [-s scope] <name> --url <url> [--header K=V]... [--client-id <id>] [--client-secret <secret>]` | Add an MCP server at an address |
-| `aristra mcp add-json [-s scope] <name> <json>` | Add one from JSON |
-| `aristra mcp add-from-claude-desktop [-s scope] [name]` | Bring Claude Desktop's servers over (macOS) |
+| `aristra mcp add-json [-s scope] <name> <json> [--client-secret <secret>]` | Add one from JSON |
+| `aristra mcp add-from-claude-desktop [-s scope] [name...]` | Bring Claude Desktop's program (stdio) servers over (macOS) |
 | `aristra mcp list [--json]`, `get <name>`, `test <name>`, `remove [-s scope] <name>` | List, inspect, try or remove servers |
 | `aristra mcp reset-project-choices` | Forget your approvals of this project's `.mcp.json` servers |
 | `aristra mcp trust <name>`, `untrust <name>` | Let a server's tools follow the chat's mode, or not |
@@ -124,7 +125,7 @@ See [MCP servers](/code/extend/mcp), [Hooks](/code/extend/hooks) and [Plugins](/
 | `aristra config get [key] [--json]` | Settings in effect, and where each comes from |
 | `aristra config set <key> <value> [--project \| --local]` | Change a setting, in your file or the project's |
 | `aristra config edit [--project \| --local]` | Open a settings file in your editor |
-| `aristra import <claude-code\|codex>` | Bring your instructions, MCP servers, permission rules and skills over from Claude Code or Codex. Shows a preview first; `--yes=<digest>` applies it, `--only <id>` picks items, `--dry-run` shows the result |
+| `aristra import <claude-code\|codex>` | Bring your instructions, MCP servers, permission rules, default mode, hooks, skills, agents and commands over from Claude Code or Codex. Shows a preview first. `--yes=<digest>` applies the checked items (yours, not skills), `--only <id>` picks items, including skills and the folder's own, `--dry-run` shows the result, and `--json` prints it as JSON |
 
 ## Support
 
@@ -140,7 +141,7 @@ See [MCP servers](/code/extend/mcp), [Hooks](/code/extend/hooks) and [Plugins](/
 |---|---|
 | `aristra runtime status [--json]` | Whether the runtime is running, and what it holds. Doesn't start one |
 | `aristra runtime stop [--now]` | Stop it once nothing runs; `--now` stops running turns too |
-| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|hour\|<day> --at <HH:MM>` (or `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | The scheduled tasks saved on this computer. `add` also takes `--name`, `--folder`, `--source`, `--model`, `--mode` and `--skip-missed`. See [Scheduled tasks](/code/guides/background#scheduled-tasks) |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (or `--every hour --at <minute>`, or `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | The scheduled tasks saved on this computer. `add` also takes `--name`, `--folder`, `--source`, `--model`, `--mode` and `--skip-missed`. See [Scheduled tasks](/code/guides/background#scheduled-tasks) |
 | `aristra service install`, `uninstall [--now]`, `status [--json]` | The background service. See [Background work](/code/guides/background#the-background-service) |
 | `aristra serve` | Run the runtime yourself (`--socket` or `--stdio`); surfaces start it for you |
 | `aristra acp` | Serve an editor over the Agent Client Protocol. See [Editors](/code/editors) |
@@ -150,6 +151,6 @@ See [MCP servers](/code/extend/mcp), [Hooks](/code/extend/hooks) and [Plugins](/
 | Command | Does |
 |---|---|
 | `aristra update [--check]` | Update to the newest release on your channel |
-| `aristra install <latest\|stable\|version>` | Switch channel or version |
+| `aristra install [latest\|stable\|<version>]` | Switch channel or version (default `latest`) |
 
 See [Setup](/code/setup).
