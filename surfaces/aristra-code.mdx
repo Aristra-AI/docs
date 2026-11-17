@@ -1,0 +1,29 @@
+---
+title: "Aristra Code"
+description: "Aristra working in folders on your computer: it reads your code, edits files, runs commands and works with git, in your terminal, Aristra Desktop's Code tab and your editor."
+---
+
+Aristra Code is Aristra working in a folder on your computer. Tell it what you want done: it reads the code it needs, makes the changes across files, runs your tests and commands, and asks before it does anything you haven't allowed. It is free with a model of your own, and your chats with it are kept on your computer.
+
+## Where you use it
+
+| | |
+|---|---|
+| [The terminal](/code/terminal) | The `aristra` command: the full app in your terminal, on a Mac or Linux |
+| [Aristra Desktop's Code tab](/code/desktop) | Your folders with their chats, with a terminal, a browser, the changes and the pull request beside the chat |
+| [Your editor](/code/editors) | Zed and other editors that speak the Agent Client Protocol |
+| [Phone and web](/code/remote-control) | With a plan, Remote Control carries on a chat from your phone or the website while the work stays on your computer |
+| [Scripts and CI](/code/non-interactive) | `aristra run` runs one turn with no app, for scripts and CI |
+| [Another machine](/code/remote-machines) | `aristra --remote <host>` works on a machine you reach over SSH |
+
+They all talk to the same agent on your computer, the Aristra Runtime, so a chat started in one shows in the others.
+
+## Get started
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Aristra Desktop includes Aristra Code, so you don't need the CLI beside it. The [Aristra Code quickstart](/code/quickstart) walks through a first real task, and the **Aristra Code** tab of these docs covers everything else: [permissions](/code/configure/permissions), [models](/code/configure/models), [git](/code/guides/git), [MCP servers](/code/extend/mcp), [skills](/code/extend/skills), [hooks](/code/extend/hooks) and the [command reference](/code/reference/commands).

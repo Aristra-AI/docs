@@ -31,13 +31,31 @@
           {
             "group": "Get started",
             "pages": [
+              "index",
+              "quickstart",
+              "how-it-works",
               "glossary"
+            ]
+          },
+          {
+            "group": "Use Aristra",
+            "pages": [
+              "chats",
+              "memory",
+              "projects",
+              "files",
+              "craft",
+              "connectors",
+              "scheduled-tasks"
             ]
           },
           {
             "group": "Surfaces",
             "pages": [
               "surfaces/web",
+              "surfaces/desktop",
+              "surfaces/aristra-code",
+              "surfaces/telegram",
               "surfaces/cloud-computer"
             ]
           }

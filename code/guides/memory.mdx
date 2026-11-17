@@ -1,5 +1,6 @@
 ---
-title: "Memory and instructions"
+title: "Instructions and memory in Aristra Code"
+sidebarTitle: "Instructions and memory"
 description: "Tell Aristra Code how your project works with AGENTS.md and rules, and how it remembers you and your repositories across chats."
 ---
 
@@ -8,15 +9,11 @@ Aristra Code starts each chat knowing four kinds of things:
 | | What it is | Who writes it |
 |---|---|---|
 | **Instruction files** | `AGENTS.md` and rules: how your project is built, tested and reviewed | You (or `/init`) |
-| **Your account's memory** | Who you are and how you like to work, on every device. Every account has it, with or without a [plan](/account/plans) | Aristra Code, from what you tell it |
+| **Your account's memory** | Who you are and how you like to work, on every device. Every account has it. See [Memory](/memory) | Aristra Code, from what you tell it |
 | **Memory in files** | The same, kept in files on a cloud computer set to **Kept on the computer only** | Aristra Code, from what you tell it |
 | **Notes about a repository** | Corrections, ongoing work and where things live, for one repository on this computer | Aristra Code, as it works |
 
 Signed in, memory is kept in your Aristra account, so it follows you to the web, your phone and your other computers. Keeping it, saving to it, importing into it and searching it cost nothing: a chat that uses your memory pays only for its own tokens.
-
-## Your profile
-
-Your name, your occupation and the **About you** note on your account's Profile page start every chat, with or without a plan and whatever the Memory switch says. You typed them, so they are a setting, not something Aristra learned. They are left out of an incognito chat, and a cloud computer that keeps its own memory does not read them.
 
 ## Instruction files
 
@@ -61,24 +58,11 @@ Includes stay inside the chat's folder, except in your own `~/.aristra` files. L
 
 ## Your account's memory
 
-When a chat has memory on, each turn starts with what your Aristra account remembers that is relevant here: who you are, how you like answers, what you know. The same memory reaches your chats on the website, your phone and Aristra Desktop.
-
-Aristra Code remembers, corrects and forgets things with its memory tools, and says so in the chat. You can also just ask: "remember that I prefer pnpm".
+When a chat has memory on, each turn starts with what your Aristra account remembers that is relevant here, and Aristra Code remembers, corrects and forgets things with its memory tools, saying so in the chat. It is the same memory as on the website and your phone; [Memory](/memory) covers how it is saved, learned each night, turned off and edited.
 
 - **One chat:** in the terminal, chats start with memory on unless `memory.enabled` is `false` in your settings. In Aristra Desktop, a chat follows your account's Memory switch as it was when the chat started.
-- **Everywhere:** the Memory switch in your account settings turns memory off on every device. While it is off, nothing is used or saved. Once it is back on, Aristra may learn from chats still in your history; an incognito chat is never learned from.
-- **Incognito chats** never read or save memory.
-
-A memory saved after Aristra Code read outside content, such as a web page, must quote you, so a page can't plant a memory.
-
-### Learning from your past chats
-
-Each night Aristra reads the chats in your account since the night before (on the web, your phone, and chats you shared from your computers) and keeps what will matter later: a fact about you, how you like answers, a decision or a plan with its date. Each memory quotes what you said and names the chat it came from. It also brings older memories up to date when a newer chat changed them, and rewrites the summary of you that starts every chat, with a section on what you have been working on lately.
-
-- It needs both **Memory** and **Search and reference past chats** on, and reads nothing while either is off. Once both are back on, it reads the chats from that time too. Incognito chats, group chats, scheduled tasks' own chats and chats you started with Memory off are never read; to keep a chat out of memory for good, make it incognito or delete it.
-- Review it on your account's Memory page, under **Learned from your chats**: each item links to its chat, and **Forget** removes it. The page opens on the summary, which you can edit.
-- **Import** on the same page brings in what another assistant, such as ChatGPT or Claude, remembers about you: up to 500 memories a day. Imported memories reach the summary the next night.
-- The chats go to Anthropic's batch service to be read. Aristra deletes each night's batch there once its results are saved; Anthropic never keeps one longer than 29 days. It costs you nothing.
+- **Incognito chats** in Aristra Code neither read nor save memory, and leave out your profile.
+- A memory saved after Aristra Code read outside content, such as a web page, must quote you, so a page can't plant a memory.
 
 ## Memory in files
 

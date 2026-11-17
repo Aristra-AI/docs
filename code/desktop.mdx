@@ -1,16 +1,10 @@
 ---
-title: "Aristra Desktop"
+title: "Aristra Desktop's Code tab"
+sidebarTitle: "Aristra Desktop"
 description: "Use Aristra Code in the Code tab of Aristra Desktop for Mac: chats grouped by folder, with a terminal, a browser, the changes and the pull request beside the chat."
 ---
 
-Aristra Desktop is the Aristra app for Mac. Its sidebar has two tabs:
-
-- **Chat**: your Aristra conversations without a folder, with Chats & tasks, Files and Craft. A chat without a folder runs in Aristra Cloud, paid from your [balance](/account/credits): a new account's starter credit, your plan's monthly usage, then top-ups.
-- **Code**: Aristra Code. Your folders with their chats, and everything you use while coding beside the chat.
-
-Switch between them with the switch at the top of the sidebar, or with **⌥⌘←** and **⌥⌘→**. The tab you are not on shows a dot when a chat there waits for you (amber) or is working (green), or when the Code tab has scheduled runs you haven't read (accent color). Opening any chat, from search, a notification or the Dock, moves to its tab.
-
-Aristra Desktop includes Aristra Code, so you don't need to install the Aristra CLI separately. Both use the same runtime and the same `~/.aristra` folder: a chat started in the terminal shows in the Code tab, and the other way round.
+The **Code** tab of [Aristra Desktop](/surfaces/desktop) is Aristra Code on your Mac: your folders with their chats, and everything you use while coding beside the chat. It uses the same runtime and `~/.aristra` folder as the terminal, so a chat started in one shows in the other.
 
 ## Start a chat in the Code tab
 
@@ -64,28 +58,6 @@ Right-click a chat that runs on this Mac and choose **Continue on phone and web*
 
 To start a new chat on this Mac from the web or your phone, turn on **Settings › General › From the web and phone**, then allow the folders a chat may start in. See [Start a chat on your computer](/code/remote-control#start-a-chat-on-your-computer-from-the-web-or-phone).
 
-## Find something you said
-
-Press **⌘K** and type. Under the chats and commands whose names match, **In messages** lists what was said in any chat on this Mac that holds your words. Choose one to open its chat. The search runs on this Mac and covers this Mac's chats. On the website, the Chats page finds cloud chats by their title.
-
-## Files
-
-**Files** in the sidebar lists what your chats on this Mac shared with you, made or changed, and the files you attached, newest first, with the chat each came from. Nothing is copied: a file opens where it is, beside the list, in its app, or in Finder, and **Go to the chat** opens its chat. A file that was moved or deleted shows as gone. Search by name, folder or chat title, or press Return to search inside the files: their words, from an index kept on this Mac (no AI, nothing sent), with the page of a PDF. In the terminal, `/files` lists the same files and `/files find` searches inside them.
-
-Signed in, Files shows the files in your account too, the same ones as **Files** on the website: **All**, **On this Mac** or **In your account**. A file in your account downloads when you open it. Upload with the button or by dropping files on the list, rename, star, and send files to the trash and back. Press Return in the search box to search inside your account's files too, by the words in them and by name. Every account has room for them: 1 GB on a Free account, more with a [plan](/account/plans).
-
-A file on this Mac reaches your account only when you save it: **Save to your account** in its menu, or ask Aristra to save it (`library_save`). The file stays on this Mac, shows once, marked **In your account**, and when it changes it offers **Update in your account**. If its copy was also changed on the web since, Aristra asks whether to replace that copy or keep both. Deleting either one never deletes the other. Without a connection, a save waits and goes when Aristra is reachable. When your account's storage is full, a save is refused and says so.
-
-## Craft
-
-**Craft** in the sidebar holds your docs: write them with Aristra or yourself, with versions, export to Markdown, a web page or PDF, and with a plan, comments and a share link.
-
-Without a plan, a new doc is kept on this Mac, marked **On this Mac**: it opens, edits, keeps its versions and exports with no connection, and Aristra can write in it from a chat on this Mac. A doc made while offline is kept on this Mac too. With a plan, **Move to your account** in a doc's menu (or **Move all** at the top of Craft) puts it in your account with everything written in it, and it opens on the web and your phone. Nothing moves unless you ask. When a plan ends, your account's docs open to read and export, and new docs are kept on this Mac.
-
-## Your plan and account
-
-**Settings › Aristra One**, **Aristra One** in the account menu (your name, bottom left) or in **⌘K** opens your account's pages on app.aristralabs.com in a new tab of your browser: the plans, your balance, spending by day, your devices, the cloud computer and export. **Settings › Billing** shows your plan and balance in dollars in the app; without a running plan, **See plans** opens the plans there too. Payments always happen on Stripe's page in your browser. See [Plans](/account/plans).
-
 ## Scheduled tasks and the Inbox
 
 A scheduled task on this Mac runs a prompt in a folder on a schedule (once, hourly, daily, weekdays or weekly), in a new chat each time or in one chat. It needs no plan; a task on one of Aristra's models is paid from your balance. Make one in the task form, or ask in a chat ("every weekday at 9, check the build") and approve the task Aristra shows you. With a [plan](/account/plans), a task can run in the cloud instead, even when this Mac is off. The **Inbox** in the Code tab lists every run, with unread dots; a run with nothing to report arrives already read. Tasks on this Mac run while Aristra is open, or with the app closed once **Keep Aristra running in the background** is on (Settings › General; the task form offers it once). See [Background work](/code/guides/background#scheduled-tasks).
@@ -94,18 +66,8 @@ A scheduled task on this Mac runs a prompt in a folder on a schedule (once, hour
 
 | Keys | Action |
 |---|---|
-| ⌘N | New chat |
-| ⌥⌘← / ⌥⌘→ | Chat / Code |
-| ⌘K | Search chats, their messages, and commands |
-| ⌘B | Show or hide the sidebar |
 | ⌘J | Terminal |
 | ⌥⌘B | Review |
 | ⇧⌘B | Browser |
-| ⌘, | Settings |
-| ⌥Space | Quick entry, from anywhere (configurable) |
-| ⌘W | Close a chat window |
-| Return (or ⌘Return) | Send, as set in Settings › General |
-| ⇧Return | New line |
-| ↑ | Recall your last prompt, in an empty box |
-| Esc | Stop Aristra while it works |
-| ⌘-click | Open a link the other way |
+
+The rest are on [Aristra Desktop](/surfaces/desktop#keyboard-shortcuts).
