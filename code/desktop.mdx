@@ -5,10 +5,10 @@ description: "Use Aristra Code in the Code tab of Aristra Desktop for Mac: chats
 
 Aristra Desktop is the Aristra app for Mac. Its sidebar has two tabs:
 
-- **Chat**: your Aristra conversations without a folder, with Chats & tasks, Files and Craft. A chat without a folder runs in Aristra Cloud, which comes with a [plan](/account/plans); without one the message box says so.
+- **Chat**: your Aristra conversations without a folder, with Chats & tasks, Files and Craft. A chat without a folder runs in Aristra Cloud, paid from your [balance](/account/credits): a new account's starter credit, your plan's monthly usage, then top-ups.
 - **Code**: Aristra Code. Your folders with their chats, and everything you use while coding beside the chat.
 
-Switch between them with the switch at the top of the sidebar, or with **⌥⌘←** and **⌥⌘→**. The tab you are not on shows a dot when a chat there waits for you (amber) or is working (green). Opening any chat, from search, a notification or the Dock, moves to its tab.
+Switch between them with the switch at the top of the sidebar, or with **⌥⌘←** and **⌥⌘→**. The tab you are not on shows a dot when a chat there waits for you (amber) or is working (green), or when the Code tab has scheduled runs you haven't read (accent color). Opening any chat, from search, a notification or the Dock, moves to its tab.
 
 Aristra Desktop includes Aristra Code, so you don't need to install the Aristra CLI separately. Both use the same runtime and the same `~/.aristra` folder: a chat started in the terminal shows in the Code tab, and the other way round.
 
@@ -21,33 +21,33 @@ Under the message box of a new chat in the Code tab:
 | **Folder** | The folder the chat works in. A new chat starts in the last folder you used. **Add folder…** adds one |
 | **Where it runs** | **On this Mac**: saved only here, with any model you set up. **In the cloud**, paid from your [balance](/account/credits) or a [plan](/account/plans): saved to your Aristra account, on the web and your phone too, while the folder stays on this Mac |
 | **Project** | An Aristra project: its instructions and memory. A project chat runs in the cloud, in the project's main folder when it has one on this Mac |
-| **Permissions** | **Manual** (always ask before making changes), **Accept edits**, **Plan** or **Auto** (Aristra handles permission decisions). You can switch at any point in the chat |
-| **+ menu** | **Work in a new worktree** gives the chat its own git worktree and branch, so the folder stays as it is. Your custom agents appear here as **Run as …** |
+| **Permissions** | For a chat on this Mac: **Manual** (always ask before making changes), **Accept edits**, **Plan** or **Auto** (Aristra handles permission decisions). You can switch at any point in the chat. A chat in the cloud uses Manual or Auto, as on the website |
+| **+ menu** | For a chat on this Mac: **Work in a new worktree** (in a git folder) gives the chat its own worktree and branch, so the folder stays as it is. Your custom agents appear as **Run as …**, and **Share my profile** and **Permissions and tools** are here too |
 
-A new chat also offers starters: **Explain this folder**, **Review changes**, **Build something**.
+Under the box, a new chat shows the folder's branch and how many files changed; its menu opens Review changes or switches the branch. The Code tab's home shows your recent chats, pull requests, this month's work and activity.
 
 ## Beside the chat
 
-The header of a Code chat has the panels you use while coding. One side panel shows at a time.
+The header of a Code chat has the panels you use while coding. One side panel shows at a time, and the terminal opens below the chat. Terminal, Review, Open in and Pull request are for chats on this Mac.
 
 | Panel | Opens with | What it shows |
 |---|---|---|
 | **Terminal** | ⌘J | A real shell in the chat's folder (its worktree's, for a chat in one). Each chat keeps its own shells, in tabs, running while the panel is hidden |
-| **Review** | ⌥⌘B | The folder's changes: uncommitted, the branch against its base, or the last turn's own edits. Each file opens in your editor |
+| **Review** | ⌥⌘B | The folder's changes: uncommitted, all changes against the default branch or another branch, one commit, or the last turn's own edits. Each file opens in your editor at its first change |
 | **Browser** | ⇧⌘B, or a link in a reply | A real browser with tabs. The agent can use it too, with your consent per site |
 | **Files** | The header, or a file card in the chat | The chat's files, with previews of text, PDFs, images and Office files |
 | **Pull request** | The header's **PR #N** | The chat's pull request: status, checks, files, commits and the conversation, with Merge, Approve and re-running checks |
-| **Open in** | The header's editor button | The folder in VS Code, Cursor, Zed, Windsurf, Xcode, Finder or Terminal |
+| **Open in** | The header's editor button | The folder in VS Code, Cursor, Zed, Windsurf or Xcode (those you have installed), Finder, or the chat's Terminal panel |
 
-On a branch without a pull request, the header offers **Create PR**, **Create draft PR** or **Manually create PR**. On your own open pull request, **Auto-fix CI & address comments** wakes the chat when checks fail, conflicts appear or reviewers comment. See [Git and pull requests](/code/guides/git).
+On a branch without a pull request, the header offers **Create PR**, **Create draft PR** or **Manually create PR**. In the Pull request panel, on your own open pull request, the **Auto-fix CI & address comments** switch wakes the chat when checks fail, conflicts appear or reviewers comment. See [Git and pull requests](/code/guides/git).
 
 ## In the chat
 
 - **Steps** fold into a one-line summary that opens to each command, edit and read. Edits show their diffs.
 - **Approvals** appear in the chat with the exact command or diff. An approval can be answered from any surface, and the first answer wins.
-- **While a reply runs**, Enter sends your message into it at its next step, and ⌘Enter queues it for after. Queued messages wait above the box, where you can send one now, reorder or remove them.
-- **The / menu** has Context usage, Compact and Goal, and a new Craft doc beside the chat. (Your skills are in the terminal's `/` menu, and Aristra Code uses them in every surface.) Type `!` to run a command yourself in the chat's folder.
-- **Restore to here** on one of your messages goes back to before it, with its files.
+- **While a reply runs** in a chat on this Mac, Enter sends your message into it at its next step, and ⌘Enter (or the send button) queues it for after. A message with files always waits in the queue. Queued messages wait above the box, where you can send one now, reorder or remove them.
+- **The / menu** has Add files or photos, the + menu's choices, New Craft doc (beside the chat) and Mention a Craft doc, and in a chat on this Mac, Context usage, Compact and Goal. (Your skills are in the terminal's `/` menu, and Aristra Code uses them in every surface.) Type `!` to run a command yourself in the chat's folder.
+- **Restore to here** on one of your messages, in a chat on this Mac, goes back to before it: the code and the conversation, or just one of them.
 - **Background commands** and the chat's agents are listed above the message box while they run, each with its output and a Stop button.
 
 ## Folders
@@ -55,18 +55,18 @@ On a branch without a pull request, the header offers **Create PR**, **Create dr
 Each folder in the sidebar lists its chats, newest first. Its menu has **New chat here**, **Open terminal**, **Review changes**, **Use from other devices** and **Open in Finder**.
 
 - A folder is followed when you rename or move it. If Aristra can't find it, the sidebar says so and offers **Locate folder…**.
-- **Use from other devices** lets the website and your phone read the folder, or read and change it, in chats started with it on this Mac: **Off**, **Read only** or **Read and edit**. Each change asked from another device needs a fresh sign-in check there, or your answer on this Mac. **Activity from other devices…** lists what they did.
+- **Use from other devices** lets the website and your phone read the folder, or read and change it, in chats started with it on this Mac: **Off**, **Read only** or **Read and edit**. Each change asked from another device needs a fresh sign-in check there, or your answer on this Mac. **Activity from other devices…** lists what they did. Read only and Read and edit come with a [plan](/account/plans).
 - Coding chats whose folder is on another Mac are listed under **On other devices**.
 
 ## Continue on your phone and the web
 
-Right-click a chat that runs on this Mac and choose **Continue on phone and web**. The chat is saved to your account, and you can read and send messages from app.aristralabs.com or your phone while the work still runs here. See [Remote Control](/code/remote-control).
+Right-click a chat that runs on this Mac and choose **Continue on phone and web**. The chat is saved to your account, and you can read and send messages from app.aristralabs.com or your phone while the work still runs here. See [Remote Control](/code/remote-control). This and starting chats from the web come with a [plan](/account/plans).
 
 To start a new chat on this Mac from the web or your phone, turn on **Settings › General › From the web and phone**, then allow the folders a chat may start in. See [Start a chat on your computer](/code/remote-control#start-a-chat-on-your-computer-from-the-web-or-phone).
 
 ## Find something you said
 
-Press **⌘K** and type. Under the chats and commands whose names match, **In messages** lists what was said in any chat on this Mac that holds your words. Choose one to open its chat. The search runs on this Mac; chats in the cloud are searched on the website.
+Press **⌘K** and type. Under the chats and commands whose names match, **In messages** lists what was said in any chat on this Mac that holds your words. Choose one to open its chat. The search runs on this Mac and covers this Mac's chats. On the website, the Chats page finds cloud chats by their title.
 
 ## Files
 
@@ -88,7 +88,7 @@ Without a plan, a new doc is kept on this Mac, marked **On this Mac**: it opens,
 
 ## Scheduled tasks and the Inbox
 
-A scheduled task on this Mac runs a prompt in a folder on a schedule (once, hourly, daily, weekdays or weekly), in a new chat each time or in one chat. It is free. Make one in the task form, or ask in a chat ("every weekday at 9, check the build") and approve the task Aristra shows you. With a [plan](/account/plans), a task can run in the cloud instead, even when this Mac is off. The **Inbox** in the Code tab lists every run, with unread dots; a run with nothing to report arrives already read. Tasks on this Mac run while Aristra is open, or with the app closed once **Keep Aristra running in the background** is on (Settings › General; the task form offers it once). See [Background work](/code/guides/background#scheduled-tasks).
+A scheduled task on this Mac runs a prompt in a folder on a schedule (once, hourly, daily, weekdays or weekly), in a new chat each time or in one chat. It needs no plan; a task on one of Aristra's models is paid from your balance. Make one in the task form, or ask in a chat ("every weekday at 9, check the build") and approve the task Aristra shows you. With a [plan](/account/plans), a task can run in the cloud instead, even when this Mac is off. The **Inbox** in the Code tab lists every run, with unread dots; a run with nothing to report arrives already read. Tasks on this Mac run while Aristra is open, or with the app closed once **Keep Aristra running in the background** is on (Settings › General; the task form offers it once). See [Background work](/code/guides/background#scheduled-tasks).
 
 ## Keyboard shortcuts
 
@@ -103,3 +103,9 @@ A scheduled task on this Mac runs a prompt in a folder on a schedule (once, hour
 | ⇧⌘B | Browser |
 | ⌘, | Settings |
 | ⌥Space | Quick entry, from anywhere (configurable) |
+| ⌘W | Close a chat window |
+| Return (or ⌘Return) | Send, as set in Settings › General |
+| ⇧Return | New line |
+| ↑ | Recall your last prompt, in an empty box |
+| Esc | Stop Aristra while it works |
+| ⌘-click | Open a link the other way |
