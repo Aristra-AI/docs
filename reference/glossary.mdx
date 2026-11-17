@@ -1,0 +1,126 @@
+---
+title: "Glossary"
+description: "What the words in these docs mean: Aristra Code, surfaces, chats, the runtime, modes, rules, the sandbox, skills, hooks and more."
+---
+
+## A
+
+**AGENTS.md**. A Markdown file of instructions for coding agents, kept in your repository. Aristra Code reads it at the start of every chat, in layers from your organization's down to the folder you work in. See [Memory and instructions](/guides/memory#instruction-files).
+
+**Approval**. A step Aristra Code asks you about before running it, shown in every open surface. The first answer wins. See [Permissions](/configure/permissions#approvals).
+
+**Aristra CLI**. The `aristra` command: Aristra Code in your terminal. See the [CLI reference](/reference/cli).
+
+**Aristra Code**. Aristra's coding agent, on every surface: the terminal, the Code tab of Aristra Desktop, editors, and your phone and the web through Remote Control.
+
+**Aristra Cloud**. Everything Aristra hosts: Aristra's models, the cloud agent, a cloud computer, account memory (every account's), storage, connectors and scheduled cloud tasks. See [Plans and pricing](/account/plans).
+
+**Aristra Desktop**. The Aristra app for Mac. Its Code tab is Aristra Code. See [Aristra Desktop](/surfaces/desktop).
+
+**Aristra One**. The website, app.aristralabs.com: your account and your chats and projects in a browser or on a phone, paid from your balance, your files, and with a plan Craft. See [Your account and Aristra One](/account/overview).
+
+**Aristra Runtime**. The background process on your computer that runs Aristra Code for every surface: chats, turns, approvals, tools, models and settings. See [How it works](/how-it-works).
+
+**Auto mode**. A [mode](#m) where a reviewer model decides the steps that would otherwise ask you. See [Permissions](/configure/permissions#auto-modes-reviewer).
+
+## B
+
+**Balance**. What pays for Aristra's models, hosted tools and a cloud computer, in US dollars: your plan's monthly usage, then your top-up balance, plus a one-time $1 starter credit. See [Your balance and top-ups](/account/credits).
+
+**Background task**. Work that runs while the chat goes on: a long command, an agent, a workflow. `/tasks` lists them. See [Background work](/guides/background).
+
+## C
+
+**Chat**. One conversation with Aristra Code, with its folder, model, mode and history. Aristra uses "chat" on every surface.
+
+**Checkpoint**. A restore point at each of your messages. `/rewind` goes back to one. See [Chats](/guides/chats#checkpoints).
+
+**Cloud computer**. Your own Linux machine in Aristra Cloud, with a disk that keeps your files and tools. It runs on your balance, with a plan or on top-ups. See [Cloud computer](/surfaces/cloud-computer).
+
+**Cloud chat**. A chat run by Aristra's cloud agent and kept in your account, as opposed to a chat on your computer. See [Cloud chats](/surfaces/cloud-chats).
+
+**Command**. Something you type after `/` in a chat, such as `/model` or `/compact`. See [Commands](/reference/commands). Not to be confused with `aristra` subcommands such as `aristra mcp add`, or with shell commands the agent runs.
+
+**Compaction**. Summarizing the older part of a long chat so it fits the model's context. See [Context](/guides/context).
+
+**Connector**. An app connected to your Aristra account (Gmail, GitHub, Slack and others), usable by cloud chats and by Aristra Code.
+
+**Context**. Everything the model reads on a turn. `/context` shows what fills it.
+
+**Craft**. Documents you write with Aristra on Aristra One, with comments and version history. See [Aristra One on the web and phone](/account/web).
+
+## D
+
+**Device key**. A key that binds this computer's sign-in to it; on a Mac it lives in the Secure Enclave. See [Security](/security#signing-in).
+
+## F
+
+**Files**. The files kept in your account: what you added, what you attached to a chat and what Aristra made. They are on **Files** on Aristra One and in Aristra Desktop, and count against your account's storage. See [Aristra One on the web and phone](/account/web).
+
+**Folder**. Where a chat works: its files are read and changed there, its commands run there.
+
+## H
+
+**Hook**. A command of yours that runs on an event, such as before a tool runs. See [Hooks](/extend/hooks).
+
+## M
+
+**MCP server**. A program or address that gives Aristra Code more tools over the Model Context Protocol. See [MCP servers](/extend/mcp).
+
+**Mode**. How much runs without asking: Manual, Accept edits, Plan, Auto, Don't ask, Bypass permissions, Read only. Shift+Tab switches. See [Permissions](/configure/permissions#modes).
+
+**Managed policy**. Settings an administrator enforces on every computer. See [Managed policy](/configure/managed-policy).
+
+## N
+
+**Non-interactive mode**. Running one turn from a script or CI with `aristra run` or `aristra -p`. See [Non-interactive mode](/surfaces/non-interactive).
+
+## P
+
+**Payer**. Who pays for a model call: your Aristra balance, your ChatGPT plan, your own key, or nobody for a model on your computer. See [Models](/configure/models).
+
+**Plan**. Plus, Pro or Max: a monthly subscription that opens everything Aristra hosts (Craft, connectors, scheduled tasks, channels; memory comes with every account) and includes its price in usage each month. Without one, an account is a Free account. See [Plans and pricing](/account/plans).
+
+**Plan mode**. A mode where Aristra Code explores and writes a plan before changing anything.
+
+**Plugin**. A bundle of skills, agents, hooks and MCP servers you install as one. See [Plugins](/extend/plugins).
+
+**Project**. An Aristra project: instructions and memory shared by its chats, with a main folder per computer.
+
+## R
+
+**Remote Control**. Continuing a chat that runs on your computer from your phone or the web. See [Remote Control](/surfaces/remote-control).
+
+**Rule**. A permission setting that allows, asks about or denies a tool call, such as `shell(npm test:*)`. Deny beats allow.
+
+## S
+
+**Sandbox**. The operating system boundary commands run in once you turn it on (`/sandbox`; off by default): what they can write and which hosts they can reach. See [Sandbox](/configure/sandbox).
+
+**Scheduled task**. A prompt Aristra runs on a schedule, in a new chat each time. On your own computer it is free and runs while Aristra is running there; in Aristra's cloud it comes with a plan and runs with your computer off. See [Background work](/guides/background#scheduled-tasks) and [Aristra One on the web and phone](/account/web#scheduled-tasks).
+
+**Skill**. A `SKILL.md` file of instructions for a kind of task, used by Aristra Code when it fits or run with `/name`. See [Skills](/extend/skills).
+
+**Source**. Where a chat's model comes from: `aristra`, `chatgpt`, a provider key, a local server or a custom endpoint.
+
+**Starter credit**. $1 a new account gets once, for each email address. It pays for Aristra's models and hosted tools, never a cloud computer. See [Your balance and top-ups](/account/credits#the-starter-credit).
+
+**Steering**. Sending a message while a turn runs, so it joins the turn at its next step.
+
+**Subagent**. An agent Aristra Code starts with a task of its own, in its own context, that reports back. See [Subagents and workflows](/guides/subagents).
+
+**Surface**. Any place you use Aristra Code: the terminal, Aristra Desktop, an editor, your phone or the web. All surfaces share one runtime on your computer.
+
+## T
+
+**Tool**. An action Aristra Code can take: read a file, edit, run a command, fetch a page, call an MCP server. See [Tools](/reference/tools).
+
+**Top-up**. Credits you buy, any amount from $10 to $500 at 100 credits a dollar. Used after a plan's credits, and good for 12 months. See [Buy credits](/account/credits).
+
+**Trust**. Your answer that a folder's own settings, skills and hooks may count. Asked before the first chat in a folder.
+
+**Turn**. One message from you and everything Aristra Code does until it replies.
+
+## W
+
+**Worktree**. A separate git checkout of your repository on its own branch, so a chat can work without touching your folder. See [Git and pull requests](/guides/git#worktrees).

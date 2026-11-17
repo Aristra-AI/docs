@@ -1,0 +1,128 @@
+---
+title: "Permissions"
+description: "Control what Aristra Code does on its own and what asks first: modes, rules, trusting a folder, approvals, plan mode and Auto mode's reviewer."
+---
+
+Before every tool call, Aristra Code decides whether it runs, asks you, goes to Auto mode's reviewer, or is refused. One set of rules decides for every surface, so a rule means the same thing in the terminal, Aristra Desktop, scripts and editors.
+
+Approvals are the safety prompt. The [sandbox](/configure/sandbox), off by default, is the security boundary once you turn it on. A command in the sandbox can't write outside the chat's folders and reaches only hosts you allow, so it runs without asking unless a rule says otherwise.
+
+## Modes
+
+| Mode | Runs on its own | Everything else |
+|---|---|---|
+| **Manual** (`default`) | Reads, searches and listings in the chat's folders, commands that only read, and, with the sandbox on, commands in it; what your allow rules cover | Asks |
+| **Accept edits** | Also file edits in the chat's folders, and `mkdir`, `touch`, `rm`, `rmdir`, `mv`, `cp` and `sed` there | Asks |
+| **Plan** | As Manual. Aristra Code explores and writes a plan, changing nothing until you approve it | Asks |
+| **Auto** | As Accept edits | Goes to Auto mode's reviewer instead of asking you |
+| **Don't ask** (`dontAsk`) | As Manual | Refused |
+| **Bypass permissions** | Everything except what a deny or ask rule covers and the safety checks | |
+| **Read only** | Reads, searches and listings | Refused: nothing changes |
+
+**Switch** with Shift+Tab (Manual, Accept edits, Plan, Auto) or `/mode <name>`. A switch applies from the next tool call, and an approval already waiting is checked again: if the new mode allows it, it runs.
+
+**The starting mode** comes from `--permission-mode`, else `permissions.defaultMode` in your settings, else Manual.
+
+**Turning modes off.** `permissions.disableAutoMode: "disable"` turns Auto off. Bypass permissions is available only in a chat started with `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`, shows a warning the first time, is refused to root, and a [managed policy](/configure/managed-policy) can turn it off. Aristra Desktop doesn't offer it.
+
+## Rules
+
+A rule is `tool` or `tool(specifier)`. Claude Code's tool names work too (`Bash(npm test:*)`, `Read`, `Edit`, `WebFetch`).
+
+| Rule | Covers | Specifier |
+|---|---|---|
+| `shell` | Commands | The exact command, `prefix:*` for commands starting with those words (`shell(npm run:*)`), or `*` as a wildcard (`shell(git log *)`) |
+| `read` | Reading, listing and searching files | A path pattern |
+| `edit` | Editing and writing files | A path pattern |
+| `web_fetch` | Fetching a page, and the sandbox's network | `domain:example.com` |
+| `mcp__server` | An MCP server's tools | `mcp__server` for all, `mcp__server__tool` for one |
+| Any other tool name | That tool | None |
+
+```json .aristra/settings.json
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["shell(npm test:*)", "shell(git diff:*)", "edit(/src/**)"],
+    "ask": ["shell(git push:*)"],
+    "deny": ["read(~/.env*)", "web_fetch(domain:pastebin.com)"],
+    "additionalDirectories": ["../shared"]
+  }
+}
+```
+
+- **Path patterns** use gitignore style: `//abs/path` from the root, `~/path` from your home folder, `/path` from the settings file's folder, anything else from the chat's folder. `**` crosses folders, `*` does not.
+- **Compound commands** (`;`, `&&`, `|`, redirections): an allow rule must cover each part; a deny or ask rule matching any part is enough. Wrappers such as `timeout` and `nohup` are looked through.
+- **A deny anywhere beats an allow anywhere.**
+
+`aristra doctor` and `/config` point out rules that can't be read or can never apply.
+
+### Where rules come from
+
+| Source | Where |
+|---|---|
+| Managed policy | Set by an administrator; its deny rules beat everything |
+| You | `~/.aristra/settings.json` |
+| The project, shared | `<folder>/.aristra/settings.json`, committed with the repository |
+| The project, yours | `<folder>/.aristra/settings.local.json`, where "don't ask again" saves |
+| One run | `aristra run --allow` and `--deny` |
+| One chat | "during this session" answers and `/add-dir` |
+
+`/permissions` lists every rule by source, lets you add or remove one, shows the chat's folders, and lists steps Auto's reviewer recently blocked.
+
+## Trust a folder
+
+A repository's settings are written by whoever made it. Before the first chat in a folder, Aristra Code asks whether you trust it. "No, exit" is selected first. Trusting saves it for the repository and its subfolders. Until you trust a folder, only its deny and ask rules count, and its skills and hooks are ignored. `/folder` says whether the current folder is trusted.
+
+## Safety checks
+
+Some changes ask in every mode, Bypass included, and no allow rule or reviewer lets them through:
+
+- Writing into `.git`, `.vscode`, `.idea`, `.claude` and `.aristra` folders, and to `.gitconfig`, `.gitmodules`, shell startup files, `.mcp.json` and `.claude.json`.
+- Risky `rm` and `rmdir` commands: a target that is an empty or unset variable, or comes from a command substitution, the root of a drive or a critical folder, a mounted drive (`/Volumes`, `/mnt`, `/media`), and an `rm` inside an `sh -c` script.
+- Moving the chat into a worktree other than its own.
+- A tool that always needs you, such as leaving plan mode or paying.
+
+## Approvals
+
+When a call asks, every open surface shows it with what it would do and why it asks. The first answer wins.
+
+| Answer | Effect |
+|---|---|
+| **Yes** | This call runs |
+| **Yes, and don't ask again for** `rule` | Saves the rule (editable first, for commands) to the folder's `settings.local.json` |
+| **Yes, and don't ask again for** `X, Y, and Z` **commands in** `folder` | For a command of several parts: saves a rule for each part, every one named in the answer |
+| **Yes, allow reading from** `X/` | Saves a read rule for that folder |
+| **Yes, and don't ask again for** `host` | For a sandboxed command reaching a new host: saves `web_fetch(domain:host)` |
+| **Yes, and switch to accept edits** | Switches the chat to Accept edits |
+| **Yes, allow all edits in** `X/` **during this session** | Adds that folder to the chat |
+| **No** | The call doesn't run and the turn stops. With a note (Tab), the turn goes on with your note as the reason |
+
+Approvals wait 30 minutes (`approvals.timeoutMinutes`), then decline.
+
+## Questions
+
+Aristra Code can ask you multiple-choice questions: one to four at a time, each with options, and you can always answer in your own words or choose **Chat about this** to talk it through first. Questions are asked in every mode. In plan mode, it asks this way before writing the plan.
+
+## Plan mode
+
+Aristra Code enters plan mode itself for a task worth planning, or you choose it. It explores, writes the plan to `~/.aristra/plans/<chat>.md`, and asks to go ahead:
+
+- **Yes, and use auto mode** (or accept edits): leaves plan mode in that mode.
+- **Yes, manually approve edits:** leaves for Manual.
+- **Tell Aristra what to change:** it revises the plan.
+
+Ctrl+G opens the plan in your editor; what you save is the plan you approve.
+
+## Auto mode's reviewer
+
+In Auto mode, what would otherwise ask goes to a reviewer model instead of you. Reads, searches and what Accept edits allows run without it. Deny rules, safety checks and tools that always need you never reach it.
+
+- **What it sees:** your own words, the agent's earlier calls without their results (so a web page can't talk to it), your `AGENTS.md` as data, and the action itself.
+- **When it blocks**, the agent is told why and not to work around it. When it can't decide, the call is refused, never allowed.
+- **After 3 blocks in a row, or 20 in a chat**, it asks you instead.
+- **`/retry`** lets the steps it just blocked run once, as they were.
+- **Who reviews:** on the Aristra plan and the ChatGPT plan, Aristra's reviewer, free. On your own key or a local model, that model, or `review.model`. `review.policy` adds your own words for the reviewer.
+
+## Changing the mode from the web
+
+In a chat shared with [Remote Control](/surfaces/remote-control), the website's mode picker switches the chat's mode on your computer. A mode that lets more run without asking needs a fresh sign-in check first.

@@ -1,0 +1,100 @@
+---
+title: "Cloud chats"
+description: "Chats run by Aristra's cloud agent and kept in your account, started from the terminal or Aristra Desktop, optionally working in a folder on your computer."
+---
+
+A cloud chat lives in your Aristra account and runs on Aristra's servers, the same agent as on the website and your phone. Aristra Code lists, opens, starts and continues cloud chats beside the chats on your computer.
+
+For a machine of your own in the cloud, with a disk that keeps your files and tools between chats, see [Cloud computer](/surfaces/cloud-computer).
+
+Cloud chats are paid from your [balance](/account/credits): your plan's monthly usage, a new account's $1 starter credit, then top-ups. When the balance runs out, a new message says so; chats on your computer keep working with your own model.
+
+Use a cloud chat when you want the conversation in your account (on the web and your phone too), the cloud agent's tools (its browser, its sandbox, your connected accounts, Craft docs), or a chat that keeps going while your computer sleeps. Use a chat on your computer for work in a folder with any model and your computer's sandbox.
+
+| | On your computer | In the cloud |
+|---|---|---|
+| Runs on | The Aristra Runtime here | Aristra's cloud agent |
+| Kept in | `~/.aristra` on this computer | Your Aristra account |
+| Models | Any source you set up | Aristra's models, billed as on the website |
+| Files | The chat's folder, in this computer's sandbox | A folder on this computer when you connect one; otherwise the cloud agent's own sandbox |
+| Modes | Manual, Accept edits, Plan, Auto, Read only | Manual or Auto, as on the website |
+
+## Start one
+
+```sh
+aristra --cloud                                        # a new cloud chat
+aristra --cloud "draft the launch email"               # with a first message
+aristra --cloud --folder ~/code/site "update the docs" # working in a folder on this computer
+aristra --cloud --incognito                            # incognito
+aristra --cloud --project "Q4 launch"                  # in a project
+```
+
+In Aristra Desktop, choose a folder and **In the cloud** under the message box of a new Code chat, or start a chat in the Chat tab.
+
+A cloud chat runs Aristra's models: name one with `-m` (`aristra models --source aristra` lists them). Without `-m` it takes your default model's name, so if your default comes from your own key or a local model, name an Aristra model.
+
+## List, open and continue
+
+```sh
+aristra sessions --cloud                  # your account's chats, newest first
+aristra resume <id>                       # open one
+aristra run -r <id> "next step, please"   # one more turn from a script
+```
+
+Opening a cloud chat reads its transcript from your account, with its steps, files and docs. A run already going on is followed live. Esc cancels the run. `/rename` and `aristra sessions delete <id>` rename and delete it in your account. A chat started or deleted on the website shows up or disappears within two minutes.
+
+## A folder on your computer
+
+A cloud chat can work in a folder on your computer: the cloud agent reads and changes files there, and runs commands, through your computer, and nothing outside that folder.
+
+```sh
+aristra --cloud --folder ~/code/site                        # start one in a folder
+aristra sessions connect-folder <id> --folder ~/code/site   # give an existing cloud chat a folder here
+```
+
+- The folder's calls run under this computer's rules: inside the folder, in the sandbox, with each change approved as it was shown. Approvals show in the terminal, Aristra Desktop and on the website; the first answer wins.
+- Your computer keeps an outbound connection to Aristra for this. Nothing listens on your computer.
+- While your computer sleeps, the chat's folder calls wait or fail, and the cloud agent says so.
+- Each folder also has a level for chats driven from the website or your phone: **Off** (the default), **Read only** or **Read and edit**. Set it from the folder's menu in Aristra Desktop.
+
+## Incognito
+
+`aristra --cloud --incognito` starts a chat your account keeps out of its lists and its memory. Nothing of it is kept on your computer once you leave it. It has no folder and no project, and the account deletes it 30 days after its last activity.
+
+## Projects
+
+`aristra --cloud --project <name>` starts the chat in that project, so it shows under the project on the website, with the project's instructions and memory. With `--folder`, the project remembers the folder; the project's main folder is where its new chats start in Aristra Desktop. Projects are made on the website.
+
+## Modes and questions
+
+A cloud chat is in **Manual** mode (the agent asks before each step your settings don't allow) or **Auto** mode (Aristra's reviewer decides those steps). It uses the mode chosen for it, else your account's default from the website's settings. Shift+Tab or `/mode` switches, and the choice is kept on the chat.
+
+When the cloud agent asks you something mid-run (a step to approve, a question with options, a form), the run pauses and the question arrives as an approval in every surface. A request to an outside site can be allowed for the rest of the chat. Questions with options are easiest to answer in Aristra Desktop or on the website.
+
+## Attachments
+
+A file you attach to a cloud chat is kept with the chat in your account, its text and the file itself, until you delete the chat. An incognito chat keeps none. Aristra reads PDF, Word, Excel, PowerPoint, older Office files, OpenDocument, RTF and EPUB, and reads a PDF's scanned pages with OCR at no charge.
+
+- A PDF of 10 pages or fewer goes to the model whole, so it sees the pages as they look too.
+- Text of 2,000 lines or fewer goes into the message whole. A longer file goes in as its first 2,000 lines, and the agent reads the rest when it needs it.
+- On later turns the agent still has the files attached earlier in the chat: it can read any of them again, or look at a PDF's pages as pictures.
+
+A file attached in a chat on your computer stays on your computer, with the chat (see [Chats](/guides/chats)).
+
+## Files the cloud agent made
+
+```sh
+aristra sessions download <id>          # every file the chat's agent made
+aristra sessions download <id> <key>    # one, by the key its step names
+```
+
+Files are saved under `~/.aristra/attachments/` and their paths printed.
+
+## Copy a cloud chat to your computer
+
+```sh
+aristra sessions import <id>
+aristra sessions import <id> --folder ~/code/site --source anthropic --model claude-sonnet-5-5
+```
+
+This copies a cloud chat into a new chat on your computer, to continue with any model in a folder. The cloud chat stays as it was, and a chat on your computer is never pushed to the cloud.

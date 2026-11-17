@@ -1,0 +1,95 @@
+---
+title: "Setup"
+description: "Install, update, switch versions and uninstall Aristra Code on macOS, Linux and Windows through WSL."
+---
+
+## System requirements
+
+| System | Supported |
+|---|---|
+| macOS | Apple silicon and Intel. The Apple silicon build also installs in a shell running under Rosetta |
+| Linux | x64 and arm64 with glibc. The sandbox, when you turn it on, needs bubblewrap (`bwrap`). Alpine (musl) is not supported yet |
+| Windows | Through WSL2 with a Linux distribution such as Ubuntu, using the Linux build. Sign-in pages open in Windows through `wslview` |
+
+Each build carries everything it needs, including its own Node and Python, so nothing else has to be installed first apart from `curl` or `wget`.
+
+## Install
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh              # the latest release
+curl -fsSL https://aristralabs.com/install.sh | sh -s stable    # the stable channel
+curl -fsSL https://aristralabs.com/install.sh | sh -s 1.2.1     # one version
+```
+
+The script:
+
+1. Picks the build for your machine.
+2. Downloads it and checks its SHA-256 checksum and size against the release's manifest.
+3. Installs it into `~/.local/share/aristra/versions/<version>/` and points `~/.local/bin/aristra` at it.
+4. Adds `~/.local/bin` to your shell profile when it is not on your `PATH` (for fish it prints the `fish_add_path` command to run).
+5. Offers to remove an older `aristra` installed with npm or bun that would come first on your `PATH`.
+
+Questions are asked on the terminal, so they work through `curl | sh`. With no terminal, or with `ARISTRA_NON_INTERACTIVE=1`, it asks nothing and takes the safe answer.
+
+<Warning>
+Don't run the installer with `sudo` from your own shell: it would install into root's home folder. In a container or CI running as root, it installs for root as usual.
+</Warning>
+
+## Release channels
+
+| Channel | What it is |
+|---|---|
+| `latest` | The newest release. The default |
+| `stable` | A release that has been out about a week without problems |
+
+The channel you install from is remembered, and `aristra update` follows it. Releases go out about weekly.
+
+## Update, switch and roll back
+
+```sh
+aristra update            # the newest release on your channel
+aristra update --check    # only say whether there is one
+aristra install latest    # switch to the latest channel
+aristra install stable    # switch to the stable channel
+aristra install 1.2.1     # switch to exactly that version (a rollback when it is older)
+```
+
+The version in use and the two newest stay on disk, so rolling back to one of them downloads nothing. An update never interrupts a running chat: the runtime that is already running stops once it is idle, and the next command starts the new one.
+
+[Aristra Desktop](/surfaces/desktop) carries its own copy of Aristra Code. The terminal and the desktop app always share one runtime, the newest compatible one installed.
+
+## What gets installed
+
+```text
+~/.local/bin/aristra                 a link to the version in use
+~/.local/share/aristra/
+  channel                            latest or stable
+  versions/<version>/                the program, its runtime and their licenses
+```
+
+Your data is not here: chats, settings, logs and secrets live in `~/.aristra`. See [Files and environment variables](/reference/environment).
+
+## Uninstall
+
+There is no uninstall command yet. To remove Aristra Code and everything it keeps:
+
+```sh
+aristra logout                    # sign out and remove this computer from your account
+aristra service uninstall         # if you turned on the background service
+aristra runtime stop --now        # stop the runtime
+rm ~/.local/bin/aristra
+rm -rf ~/.local/share/aristra      # every installed version
+rm -rf ~/.aristra                 # your data: chats, settings, logs, secrets
+```
+
+On a Mac, also remove the key that sealed your secrets from the login keychain:
+
+```sh
+security delete-generic-password -s Aristra-credentials
+```
+
+On Linux with a keyring, run `secret-tool clear service Aristra-credentials`. Then remove the block the installer added to your shell profile, if any.
+
+<Note>
+Aristra Desktop uses the same `~/.aristra` folder. Removing it removes the desktop app's chats on this Mac too.
+</Note>

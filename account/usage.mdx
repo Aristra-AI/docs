@@ -1,0 +1,48 @@
+---
+title: "Usage and prices"
+description: "See where your money went, by model and by tool, what each model and hosted tool costs in dollars, and choose the web search Aristra uses."
+---
+
+**Usage**, at `app.aristralabs.com/account/usage`, shows where your money went. In the Aristra CLI, `/usage` shows your balance and the chat you are in, and Aristra Desktop has **Settings › Usage**.
+
+## What the page shows
+
+| | |
+|---|---|
+| **Spent** | The total for the period (7, 30 or 90 days), and how much came from your monthly usage, your top-up balance and the starter credit |
+| **Spending over time** | A column for each day, split into models, tools and the cloud computer. Point at a day for its figures, or open **Show as a table** |
+| **By model** | Each model: requests, tokens in, tokens read from the cache and written to it, tokens out, and cost |
+| **Tools and cloud** | Each hosted tool and your cloud computer: how much you used, and cost. A free search says Free |
+| **Recent tool calls** | The latest calls, with what each cost |
+| **Download CSV** | Every usage row for the period, with its exact cost in US dollars |
+
+Totals are rounded to the cent. A single charge under a cent shows as `<$0.01` in a total and to four decimals on its own line ($0.0053), so nothing that cost you money reads $0.00.
+
+## Model prices
+
+Every model is charged at its provider's own price: Aristra adds nothing to it. Each model's price for a million tokens in and out is on [Models and prices](https://app.aristralabs.com/models). Input read from the cache costs less. Some models cost more for a very long prompt, for that call only; the page says from how many tokens.
+
+## Tool prices
+
+| Tool | Price |
+|---|---|
+| Web search, fast | Free: 50 searches a day, 200 with a plan |
+| Web search, Brave (also news, image and video search) | $0.0075 a search |
+| Code sandbox and cloud browser | $0.003 a minute |
+| Web page read | $0.01 a page |
+| Image generation | 1.5 times the image model's own price |
+| Transcription | $0.001 a minute of audio |
+| Document page read | $0.006 a page, $0.015 with vision |
+| Cloud computer | $0.0122 to $0.0881 an hour awake, by size |
+| Cloud computer disk | $0.18 a month for each GB, awake or asleep |
+
+The live list is on the Usage page. Tools that run on your own computer (files, the shell, git, your MCP servers) cost nothing, and so does your memory: saving, importing and searching it, and Aristra learning from your chats. A chat that uses memory pays only for its own tokens. A search or page read that fails costs nothing; a sandbox command is charged for the time it ran, even when it fails.
+
+## The search Aristra uses
+
+Aristra searches the web in one of two ways. You choose under **Web search** on the Usage page:
+
+- **Fast search** (the default): free, up to 50 searches in any 24 hours without a plan and 200 with one. Each search counts for 24 hours from when it ran, so searches come back through the day.
+- **Brave**: $0.0075 a search, with no daily limit.
+
+On your own computer you can also set **your own Brave key** (Aristra Desktop: **Settings › Tools**). Your key then always comes first and costs nothing on Aristra. If that key can't be read, Aristra says so: it does not quietly switch to a search paid from your balance. Remove the key in Settings to go back to Aristra's search.
