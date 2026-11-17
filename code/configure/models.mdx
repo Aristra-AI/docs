@@ -1,13 +1,13 @@
 ---
 title: "Models"
-description: "Choose the model Aristra Code runs on and who pays for it: your Aristra plan, your ChatGPT plan, your own provider keys, a model on your computer, or a custom endpoint. Fallbacks and usage."
+description: "Choose the model Aristra Code runs on and who pays for it: Aristra's models from your Aristra balance, your ChatGPT plan, your own provider keys, a model on your computer, or a custom endpoint. Fallbacks and usage."
 ---
 
 Every chat runs on a model from a **source**, and every source has a **payer**. Aristra Code shows who pays in the footer, in `/model`, in `aristra status` and in `aristra models`, before a turn runs.
 
 | Who pays | Shown as | Sources |
 |---|---|---|
-| Your Aristra plan | Your Aristra balance, at each model's provider price | `aristra` |
+| Aristra | Your Aristra balance, at each model's provider price | `aristra` |
 | Your ChatGPT plan | your plan | `chatgpt` |
 | You, with your own key | your key | A provider key you added, a custom endpoint |
 | Nobody | this computer | Ollama, LM Studio, a custom endpoint on your computer or network |
@@ -17,7 +17,7 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
 ## Sources
 
 <AccordionGroup>
-  <Accordion title="Your Aristra plan">
+  <Accordion title="Aristra">
     Aristra's models, paid from your balance: a new account's $1 starter credit first, then a plan's monthly usage, then top-ups. Every model is on every plan, listed with its context window and reasoning levels, and a pricier model uses your balance faster. See [Your balance and top-ups](/account/credits). Each model's price is on [Models and prices](https://app.aristralabs.com/models). Your files and commands stay on your computer; what the model reads goes out in the model call. See [Security](/code/security) for what else leaves.
 
     Each model has its whole window. Some providers charge more for a long prompt, and so does Aristra, for that request alone: Claude Haiku 5.5 over 100K tokens, GPT-5.4 and later (not mini or nano) over 272K, Gemini 3.1 Pro over 200K.
@@ -62,7 +62,7 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
 </AccordionGroup>
 
 <Note>
-Signing in with a Claude subscription isn't offered: use Claude models through your Aristra plan or your own Anthropic key. Google models are used with an API key or through your Aristra plan.
+Signing in with a Claude subscription isn't offered: use Claude models through Aristra or your own Anthropic key. Google models are used with an API key or through your Aristra plan.
 </Note>
 
 ## Choose a model
@@ -111,7 +111,7 @@ The fallback list is `model.fallback` in your own settings:
 Titles, summaries of long chats, and the memory backstop call a model too. They use, in order:
 
 1. Yours, from `auxiliary.title`, `auxiliary.summary` and `auxiliary.memory` in your settings, each `{"source": ..., "model": ...}` from one of your own sources (not `aristra`) (`auxiliary.title: "off"` keeps your first words as the title).
-2. On the Aristra plan, its background model: a cheaper, faster model, for titles and the memory backstop. Summaries use the chat's own model.
+2. On Aristra's models, Aristra's background model: a cheaper, faster model, for titles and the memory backstop. Summaries use the chat's own model.
 3. The chat's own model.
 
 A side model that fails never fails the chat. Auto mode's reviewer has its own model; see [Permissions](/code/configure/permissions#auto-modes-reviewer).
