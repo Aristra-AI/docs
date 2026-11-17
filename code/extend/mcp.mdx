@@ -3,7 +3,7 @@ title: "MCP servers"
 description: "Give Aristra Code more tools with Model Context Protocol servers: add them for you, a project or everyone on a repository, approve a project's, trust, sign in with OAuth, and sandboxing a server."
 ---
 
-[Model Context Protocol](https://modelcontextprotocol.io) servers give Aristra Code more tools: a database, an issue tracker, a design tool, an internal API. Aristra Code runs them for chats on your computer. Cloud chats use the cloud agent's tools and the connectors in your Aristra account.
+[Model Context Protocol](https://modelcontextprotocol.io) servers give Aristra Code more tools: a database, an issue tracker, a design tool, an internal API. Aristra Code runs them for chats on your computer. Cloud chats use the cloud agent's tools, the connectors in your Aristra account, and MCP servers at an address that you add on the website's Connectors page. Servers you add with `aristra mcp` aren't used there.
 
 ## Add a server
 
@@ -89,7 +89,7 @@ A `.mcp.json` is shared with everyone who has the repository, so it holds no sec
 
 ```sh
 aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
-aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop (macOS)
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop whose name is free here (macOS)
 ```
 
 `aristra import claude-code` and `aristra import codex` bring over those tools' servers too, with a preview first.
@@ -116,6 +116,7 @@ A user server lives in your own settings under `mcp.servers`, and a local one un
 
 | Field | For | Meaning |
 |---|---|---|
+| `type` | Both | `stdio` or `http`. SSE and WebSocket servers aren't supported |
 | `command`, `args` | Programs | The program and its arguments |
 | `env` | Programs | Environment variables that are not secret |
 | `cwd` | Programs | The folder it runs in, which it may write |
@@ -128,8 +129,9 @@ A user server lives in your own settings under `mcp.servers`, and a local one un
 | `alwaysLoad` | Both | `true` keeps its tools always in the model's list, never behind tool search |
 | `timeout` | Both | Seconds a call may take |
 | `enabled` | Both | `false` keeps the entry without starting it |
+| `toolCosts`, `spendLimit`, `costUnit` | Both | What its tools cost, a chat's spend limit on it, and the unit (`credits` by default). A costed call's approval shows its cost, and a call past the limit always asks |
 
-`${VAR}` and `${VAR:-default}` in `command`, `args`, `env`, `url` and `headers` are read from your login shell's environment.
+`${VAR}` and `${VAR:-default}` in `command`, `args`, `env`, `url` and `headers` are read from your login shell's environment. For a server at an address, variables that hold well-known credentials (cloud keys, package registry tokens, `ANTHROPIC_API_KEY` and the like) are read as empty, and `ARISTRA_TOKEN` is never filled in.
 
 <Note>
 A repository's `.aristra/settings.json` can't add MCP servers: a repository's servers are its `.mcp.json`, used once you approve them. When the agent changes a `.mcp.json`, it always asks first.
@@ -140,9 +142,10 @@ A repository's `.aristra/settings.json` can't add MCP servers: a repository's se
 An MCP server is code you didn't write, and its tools can do anything:
 
 - **Until you trust a server**, each of its tools asks before it runs, unless a rule allows it (in Auto mode, the reviewer decides).
-- **Once you trust it** (`aristra mcp trust <name>`), its tools follow the chat's mode, and the ones it marks read-only run like reads. A local or project server is trusted for its project only.
+- **Once you trust a server of your own** (user scope) with `aristra mcp trust <name>`, its tools run without asking, as a rule allowing `mcp__<name>` would. A deny or ask rule still wins, and in Read only a tool the server doesn't mark read-only is refused.
+- **Trusting a local or project server** counts for its project only, and makes only its read-only marks count: those tools run like reads, and its other tools still ask.
 
-Rules work too: `mcp(github.*)` or `mcp(github.create_issue)` in `permissions.allow`, `ask` or `deny`. See [Permissions](/code/configure/permissions).
+Rules work too: `mcp__github` for all of a server's tools, or `mcp__github__create_issue` for one, in `permissions.allow`, `ask` or `deny`. See [Permissions](/code/configure/permissions).
 
 ## Sandbox
 
@@ -170,14 +173,14 @@ Tokens go to the credential store and are refreshed before they expire. A server
 
 ## Long calls and many tools
 
-- A call fails when the server sends nothing for 30 minutes (a program) or 5 minutes (an address), unless its `timeout` says otherwise. A call still running after two minutes moves to the background, and its result reaches the chat when it ends.
-- MCP tools stand behind tool search: the model finds the tool it needs instead of receiving hundreds of tool definitions every turn. `mcp.toolSearch: false` sends them all instead, up to 128.
+- A call fails when the server sends nothing for 30 minutes (a program) or 5 minutes (an address), unless its `timeout` says otherwise. In your own chat, a call still running after two minutes moves to the background, and its result reaches the chat when it ends. In a subagent or a run nobody watches, the turn waits for it.
+- MCP tools stand behind tool search: the model finds the tool it needs instead of receiving hundreds of tool definitions every turn. `mcp.toolSearch: false` puts them in the model's tool list instead, cut so the whole list, Aristra Code's own tools included, stays within 128.
 - A chat's servers connect when the chat opens, so they're ready by your first message. When a server's tools change, Aristra Code lists them again, mid-turn if needed.
 - A server that runs as a program is stopped with SIGINT (a server in Docker shuts down on it), then SIGTERM after 100 ms and SIGKILL after 400 more.
 
 ## Servers from plugins
 
-A [plugin](/code/extend/plugins) can bring MCP servers in its `.mcp.json`. They run like your own, named after the plugin.
+A [plugin](/code/extend/plugins) can bring MCP servers in its `.mcp.json` or its manifest's `mcpServers`. They're named `plugin:<plugin>:<server>`, and their tools ask before each call unless a rule allows them (`mcp__plugin_<plugin>_<server>`).
 
 ## For organizations
 
