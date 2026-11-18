@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Aristra Docs",
   "colors": {
-    "primary": "#0D0D0D",
-    "light": "#E6E6E6",
-    "dark": "#0D0D0D"
+    "primary": "#3F5A8A",
+    "light": "#94A6D4",
+    "dark": "#3F5A8A"
   },
   "fonts": {
     "family": "Inter"
