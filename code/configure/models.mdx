@@ -12,7 +12,7 @@ Every chat runs on a model from a **source**, and every source has a **payer**. 
 | You, with your own key | your key | A provider key you added, a custom endpoint |
 | Nobody | this computer (**This Mac** in Aristra Desktop) | Ollama, LM Studio, a custom endpoint on your computer or network |
 
-Every chat needs an Aristra sign-in, whatever its source: your account holds your memory and settings across devices. Step-by-step setup for each source is in the quickstart's [Set up your model](/code/quickstart#set-up-your-model).
+Every chat needs an Aristra sign-in, whatever its source: your account holds your memory and settings across devices. Step-by-step setup for each source is in [Use your own model](/own-models).
 
 ## Sources
 
@@ -23,7 +23,7 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
     Each model has its whole window. Some providers charge more for a long prompt, and so does Aristra, for that request alone: Claude Haiku 5.5 over 100K tokens, GPT-5.4 and later (not mini or nano) over 272K, Gemini 3.1 Pro over 200K.
   </Accordion>
   <Accordion title="Your ChatGPT plan">
-    Your ChatGPT subscription supplies the model; Aristra Code runs the turn with its own tools and approvals. Sign in from `/model`: choose **Sign in with your ChatGPT plan**, open the page it shows and enter the code. `/usage` shows the plan's 5-hour and weekly limits.
+    Your ChatGPT subscription supplies the model; Aristra Code runs the turn with its own tools and approvals. Sign in from `/model`: choose **Sign in with your ChatGPT plan**, open the page it shows and enter the code. `/usage` shows the plan's 5-hour and weekly limits. `aristra logout chatgpt` (or `/logout chatgpt`) signs out of the plan and keeps the Aristra sign-in.
   </Accordion>
   <Accordion title="Your own provider keys">
     ```sh

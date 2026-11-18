@@ -32,6 +32,7 @@
             "pages": [
               "index",
               "quickstart",
+              "own-models",
               "how-it-works",
               "glossary"
             ]
