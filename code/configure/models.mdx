@@ -10,9 +10,9 @@ Every chat runs on a model from a **source**, and every source has a **payer**. 
 | Aristra | Your Aristra balance, at each model's provider price | `aristra` |
 | Your ChatGPT plan | your plan | `chatgpt` |
 | You, with your own key | your key | A provider key you added, a custom endpoint |
-| Nobody | this computer | Ollama, LM Studio, a custom endpoint on your computer or network |
+| Nobody | this computer (**This Mac** in Aristra Desktop) | Ollama, LM Studio, a custom endpoint on your computer or network |
 
-Every chat needs an Aristra sign-in, whatever its source: your account holds your memory and settings across devices.
+Every chat needs an Aristra sign-in, whatever its source: your account holds your memory and settings across devices. Step-by-step setup for each source is in the quickstart's [Set up your model](/code/quickstart#set-up-your-model).
 
 ## Sources
 
@@ -48,16 +48,26 @@ Every chat needs an Aristra sign-in, whatever its source: your account holds you
     Keys go to Aristra's credential store, never to a settings file. A chat picks up a changed key on its next turn.
   </Accordion>
   <Accordion title="Models on your computer">
-    Ollama (where `OLLAMA_HOST` says, else `localhost:11434`) and LM Studio (`localhost:1234`) are found automatically.
+    Ollama and LM Studio are always listed, with no key, and show **Not running** until their server answers.
 
-    - `aristra models` and `/model` say whether each local model **fits** your computer's memory, is **tight**, or is **too big**.
-    - Ollama runs models with a short context by default. Under 16,384 tokens the turn fails and says how to raise it: Context length in the Ollama app, or `OLLAMA_CONTEXT_LENGTH`.
-    - `aristra doctor` checks that the local server answers.
+    - **Ollama** is found where `OLLAMA_HOST` says, read the way Ollama reads it, else at `localhost:11434`. Set `OLLAMA_HOST` before the runtime starts; after changing it, run `aristra runtime stop`.
+    - **LM Studio** is found at `localhost:1234` only.
+    - **Tools**: Aristra Code works through tools, so choose a model that can call them. A model that can't fails with its server's error.
+    - **Context window**: at least 16,384 tokens. Ollama often gives less by default; the turn then stops and says how to raise it (Context length in the Ollama app, or `OLLAMA_CONTEXT_LENGTH=16384`). LM Studio is checked once the model is loaded; load it with 16K or more. Before each turn on Ollama, Aristra waits for the model to load.
+    - **Fit**: `aristra models` and `/model` say whether each model **fits this computer**, is **tight on memory**, or is **too big for this computer** (Aristra Desktop: **Fits**, **Tight fit**, **Too big**). The estimate is the model plus its working memory at a 16K window or more, against your computer's total memory: fits is up to 75%, tight up to 90%. It is advice; any model can still be chosen.
+    - **Where**: local models run in chats on this computer. Cloud chats use Aristra's models. In Aristra Desktop, a Code chat with a folder set to **On this Mac** can use them.
+    - **Limits**: images are left out for a model that doesn't take them, and local models have no reasoning levels, so `/effort` doesn't apply.
+    - `aristra doctor` asks each local server for 5 seconds and lists the ones that answer as ready. It marks `fix` only when your default model's source doesn't answer.
   </Accordion>
   <Accordion title="A custom endpoint">
-    Any server that speaks Chat Completions, Responses or Anthropic's Messages: a company gateway, a proxy, a self-hosted server. Set it up in Aristra Desktop's Settings › Models. Without Aristra Desktop (on Linux, for example), run `aristra keys add custom`: it asks for the address, the API it speaks, its models, a name and a key. Or give them as `--url`, `--wire chat_completions|responses|anthropic`, `--name` and `--model` (repeat it for each model), with `--no-key` for a server that needs none.
+    Any server that speaks Chat Completions, Responses or Anthropic's Messages: vLLM, llama.cpp's server, a company gateway, a proxy. You can set up one at a time.
 
-    It is kept in `~/.aristra/sources.json`, and its key in the credential store. The address must be `https://`, or `http://` for a server on your computer. It pays as "this computer" when its address is on your computer or network, else as "your key".
+    - **Aristra Desktop**: **Settings › Models**, under **On this Mac**, **Custom endpoint › Set up**: a name, the API, the **Base URL**, and the key and model ids if needed.
+    - **Terminal**: `aristra keys add custom` asks for the address, the API it speaks, its models, a name and a key. Or give them as `--url`, `--wire chat_completions|responses|anthropic`, `--name` and `--model` (repeat it for each model), with `--no-key` for a server that needs none. `aristra keys remove custom` removes the endpoint.
+
+    The address includes the API's path, usually `/v1`, for Chat Completions and Responses; for Anthropic Messages, leave `/v1` out. It must be `https://`; `http://` works only for `localhost`, `127.0.0.1` or `::1`. The models come from the server's list; the names you give are used when it has none, and always for Anthropic Messages.
+
+    It is kept in `~/.aristra/sources.json`, and its key in the credential store, tied to the address: a new address needs the key again. It pays as "this computer" when its address is on your computer or network, else as "your key". Aristra assumes a 128K window for it and doesn't check; a server that says the conversation is too long gets a summary and a retry.
   </Accordion>
 </AccordionGroup>
 
@@ -68,8 +78,9 @@ Signing in with a Claude subscription isn't offered: use Claude models through A
 ## Choose a model
 
 - `/model` in a chat lists every source with who pays and its models. Choosing one switches the chat and makes it the default for new chats.
-- `/effort [level|auto]` sets how hard the model thinks: `low`, `medium`, `high`, and on some models `xhigh` or `max`.
-- `aristra -m <model> --source <source>` chooses for one chat.
+- `/effort [level|auto]` sets how hard the model thinks: `low`, `medium`, `high`, and on some models `xhigh` or `max`. Local models and custom endpoints have no levels.
+- `aristra -m <model> --source <source>` chooses for one chat. `--source` alone takes that source's default model.
+- In Aristra Desktop, the model menu under the box chooses for a new chat, and **Settings › Models › Default model** sets the default for new chats there. Aristra Desktop keeps its own default, apart from the terminal's.
 
 The default lives in your settings:
 
@@ -114,7 +125,7 @@ Titles, summaries of long chats, and the memory backstop call a model too. They 
 2. On Aristra's models, Aristra's background model: a cheaper, faster model, for titles and the memory backstop. Summaries use the chat's own model.
 3. The chat's own model.
 
-A side model that fails never fails the chat. Auto mode's reviewer has its own model; see [Permissions](/code/configure/permissions#auto-modes-reviewer).
+On a local model, titles wait until the turn ends. A side model that fails never fails the chat. Auto mode's reviewer has its own model; see [Permissions](/code/configure/permissions#auto-modes-reviewer).
 
 ## Usage
 

@@ -1,17 +1,21 @@
 ---
 title: "Quickstart"
-description: "Make your Aristra account, start your first chat on the web, and get Aristra on your Mac and your phone."
+description: "Make your Aristra account, start your first chat on the web, sign in on your Mac, your terminal, your editor and your phone, and sign out."
 ---
 
 <div className="aristra-band aristra-band-meadow" aria-hidden="true"></div>
 
-This guide takes you from no account to a first chat, then to Aristra on your Mac and your phone. To start with code in a terminal instead, see the [Aristra Code quickstart](/code/quickstart).
+This guide takes you from no account to a first chat, then to Aristra on your Mac and your phone. [Sign in](#sign-in) has the steps for every way in. To start with code in a terminal instead, see the [Aristra Code quickstart](/code/quickstart).
 
 <Steps>
   <Step title="Make your account">
-    Go to [app.aristralabs.com](https://app.aristralabs.com) and choose to sign up. While Aristra opens in batches, the page asks for your email to join the waitlist, and you get an email when your place is ready.
+    Go to [app.aristralabs.com](https://app.aristralabs.com) and choose **Sign up**.
 
-    With an invitation link, or once sign-up is open, enter your name, your email and a password, then the code Aristra sends to your email.
+    - **While Aristra opens in batches**, the page shows **Join the waitlist**. Enter your email and choose **Join waitlist**. Aristra emails you when your place is ready; nothing else is needed until then.
+    - **With an invitation link**, open the link in your invite email. It brings you straight to the form, which takes your email from the invitation.
+    - **Once sign-up is open**, the page shows **Create your account**.
+
+    On **Create your account**, enter your name (optional), your email, a password of at least 8 characters, and the password again. Choose **Create account**. Then enter the code Aristra sends to your email (an invitation link skips this) and choose **Create account** again. **Send a new code** sends another.
 
     A new account is free and starts with a $1 credit for Aristra's models and tools, once for each email address.
   </Step>
@@ -31,7 +35,7 @@ This guide takes you from no account to a first chat, then to Aristra on your Ma
   </Step>
 
   <Step title="Get Aristra on your Mac">
-    Open your account's **Downloads** page and choose **Download for Mac** (Apple silicon and Intel). Open Aristra Desktop and sign in, in your browser or with a code.
+    Open your account's **Downloads** page and choose **Download for Mac** (Apple silicon and Intel). Open Aristra Desktop and choose **Sign in**; the steps are under [Sign in](#sign-in), on the **Aristra Desktop** tab.
 
     The app has two tabs. **Chat** has the same chats as the website. **Code** is Aristra Code, for work in folders on your Mac. See [Aristra Desktop](/surfaces/desktop).
   </Step>
@@ -41,11 +45,158 @@ This guide takes you from no account to a first chat, then to Aristra on your Ma
   </Step>
 </Steps>
 
+## Sign in
+
+Your Aristra account is the same everywhere. The website and your phone sign in with your email. Aristra Desktop, the terminal and editors sign in **a computer**: you start on the computer, then approve it on the website, in your browser or on any phone or computer where you're signed in.
+
+Aristra Desktop, the terminal and your editors on one computer share one sign-in. Sign in once on that computer and all of them are signed in.
+
+<Tabs>
+  <Tab title="Website">
+    **With your password**
+
+    1. Go to [app.aristralabs.com](https://app.aristralabs.com). The page shows **Welcome back**.
+    2. Enter your **Email** and **Password**.
+    3. Choose **Sign in**.
+
+    **With a code sent to your email**
+
+    1. On **Welcome back**, enter your **Email**. Leave the password empty.
+    2. Under **Or continue with**, choose **Email me a sign-in code**.
+    3. On **Check your email**, enter the **Code** from the email and choose **Continue**.
+
+    **If you forgot your password**
+
+    1. On **Welcome back**, choose **Forgot your password?**
+    2. Enter your **Email** and choose **Send reset code**.
+    3. Enter the **Code** from the email and a **New password**, then choose **Reset password**. This also signs you in.
+
+    Signing in on a new browser may ask for a code from your email first, on the same **Check your email** screen.
+  </Tab>
+
+  <Tab title="Aristra Desktop">
+    Aristra Desktop opens on **Sign in to Aristra** until you sign in. With no account yet, **Create an account** opens the sign-up page in your browser.
+
+    **In your browser**
+
+    1. Choose **Sign in**. Your browser opens Aristra's **Authorize Aristra Desktop** page. If you aren't signed in to the website in that browser, sign in first; the page comes back.
+    2. Check the **Computer** and **Account** rows: they name this Mac and the account it will join.
+    3. Choose **Approve**. The page says **Computer connected**, and the app moves on by itself. You can close the tab.
+
+    If the page didn't open, choose **Open the page again** in the app.
+
+    **With a code, on another device**
+
+    Use this when this Mac's browser can't finish the sign-in, or you'd rather approve on your phone.
+
+    1. Choose **Sign in**, then **Use a code instead**. The app shows an eight-letter code, such as `BCDF-GHJK`, with **Copy**.
+    2. On any phone or computer, go to **app.aristralabs.com/desktop/device** and sign in if asked. **Open the page** in the app opens it on this Mac with the code filled in.
+    3. Enter the code and choose **Continue**.
+    4. Check that the code and the **Computer** match this Mac, then choose **Approve**. The app moves on by itself.
+
+    The code works for 10 minutes. After that, choose **Sign in** again for a new one.
+  </Tab>
+
+  <Tab title="Terminal">
+    Install Aristra Code first: see the [Aristra Code quickstart](/code/quickstart). The first time you run `aristra` while signed out, it asks you to sign in. You can also sign in at any time:
+
+    ```sh
+    aristra login
+    ```
+
+    **In your browser**
+
+    1. Choose **In your browser** (the first choice on a computer with a browser), or run `aristra login`.
+    2. Your browser opens Aristra's **Authorize Aristra Code** page. If it doesn't, open the link the terminal prints.
+    3. Check the **Computer** and **Account** rows, then choose **Approve**.
+    4. The terminal says **Signed in as** your email.
+
+    **With a code, on another device**
+
+    1. Choose **With a code, on another device**, or run `aristra login --device-code`. While a browser sign-in waits, you can also press **c** to switch to a code.
+    2. The terminal says: Go to https://app.aristralabs.com/desktop/device and enter the code `BCDF-GHJK` (your code differs).
+    3. On any phone or computer, open that page, sign in if asked, enter the code and choose **Continue**.
+    4. Check that the code and the **Computer** match, then choose **Approve**.
+
+    **Over SSH, or on another machine**
+
+    Over SSH, or on Linux without a display, the code comes first, since there is no browser on that computer. With `aristra --remote <host>`, the other machine signs in as its own computer: sign in there with a code (`aristra --remote <host> login` always uses one).
+
+    **Inside a chat**
+
+    `/login` signs in, `/login code` signs in with a code, and `/logout` signs out. `aristra status` shows which account this computer is signed in to.
+
+    **Scripts and CI**
+
+    `aristra setup-token` prints a token valid for one year. Set it as `ARISTRA_TOKEN` where the script runs. It shows in your devices as its own entry, and you revoke it there.
+  </Tab>
+
+  <Tab title="Editors">
+    Zed and other editors that speak the Agent Client Protocol run Aristra Code with `aristra acp`. Add it to your editor first: see [Editors](/code/editors).
+
+    1. Start an Aristra thread in the editor's agent panel. If this computer isn't signed in yet, the editor asks you to sign in.
+    2. Choose **Sign in to Aristra**. Your browser opens the **Authorize Aristra** page.
+    3. Check the **Computer** and **Account** rows, then choose **Approve**. The editor continues.
+
+    The sign-in waits 5 minutes. If Aristra Desktop or the terminal on this computer is already signed in, the editor is too, and there is nothing to do.
+  </Tab>
+
+  <Tab title="Phone">
+    1. Open [app.aristralabs.com](https://app.aristralabs.com) in your phone's browser.
+    2. Sign in as on the website, with your password or a code sent to your email.
+    3. Optional: add the page to your home screen to open Aristra like an app.
+
+    Your phone is also a good place to approve a computer: open **app.aristralabs.com/desktop/device** and enter the code the computer shows.
+  </Tab>
+</Tabs>
+
+### Approving a computer
+
+The approval page names the **Application** (Aristra Desktop, Aristra Code in a terminal, or Aristra for an editor), the **Computer**, and the **Account** it joins. The computer joins whichever account the website is signed in to, so check the **Account** row before you choose **Approve**.
+
+Only approve a sign-in you started yourself, just now. Aristra will never ask you to approve a code. **Deny** connects nothing, and the sign-in on that computer expires by itself.
+
+A signed-in computer stays signed in while you use it. One that isn't used for 30 days asks you to sign in again. An account can have 20 computers (and script tokens) signed in at once.
+
+### Sign out
+
+| To sign out of | Do this |
+|---|---|
+| The website, in this browser | Choose your name at the bottom of the sidebar, then **Log out**. Your computers stay signed in |
+| This Mac | In Aristra Desktop, open the account menu (your name, bottom left) and choose **Sign out**. Running chats stop, here and in the terminal |
+| This computer, in a terminal | `aristra logout`, or `/logout` in a chat. Aristra Desktop on this computer signs out too |
+| Another computer | On the website, open **Settings › Devices** and choose **Sign out** next to it. Its chats and files stay on it |
+
+Signing out of Aristra keeps your ChatGPT sign-in and API keys on that computer. Chats on a computer show again when the same account signs back in.
+
+### If signing in doesn't work
+
+<AccordionGroup>
+  <Accordion title="The sign-in expired">
+    A browser sign-in lasts 5 minutes and a code 10 minutes. Start the sign-in again on the computer (**Sign in** in Aristra Desktop, `aristra login` in a terminal) for a new page or code.
+  </Accordion>
+  <Accordion title="The code isn't accepted">
+    Check each letter. Codes use consonants only, so there is no O or I to confuse with 0 or 1, and you can type the code with or without the dash. After 10 tries in 10 minutes, wait a few minutes and start the sign-in again.
+  </Accordion>
+  <Accordion title="The browser page never reaches the computer">
+    The browser may be on another device, or unable to reach this computer. Switch to a code: **Use a code instead** in Aristra Desktop, **c** while the terminal waits, or `/login code` in a chat.
+  </Accordion>
+  <Accordion title="Revoke an existing device before connecting another">
+    Your account has 20 computers signed in. Sign one out in **Settings › Devices** on the website, then sign in again.
+  </Accordion>
+  <Accordion title="Your account is on the waitlist">
+    Aristra lets people in gradually. Your computer connects once your place is ready; Aristra emails you.
+  </Accordion>
+  <Accordion title="Sign out of the current Aristra account before signing in to another">
+    A computer is signed in to one Aristra account at a time. Sign out on it first, then sign in with the other account. To approve with a different account, sign out of the website in that browser first.
+  </Accordion>
+</AccordionGroup>
+
 ## Next
 
 <CardGroup cols={2}>
   <Card title="Memory" icon="brain" href="/memory">What Aristra remembers, and how to change it.</Card>
   <Card title="Projects" icon="folder" href="/projects">Keep a piece of work's chats, files and instructions together.</Card>
   <Card title="Plans and pricing" icon="credit-card" href="/account/plans">What a plan adds.</Card>
-  <Card title="Aristra Code" icon="terminal" href="/surfaces/aristra-code">Aristra in your terminal, your Mac's folders and your editor.</Card>
+  <Card title="Aristra Code" icon="terminal" href="/surfaces/aristra-code">Aristra in your terminal, your Mac's folders and your editor, on Aristra's models, your own keys or a model on your computer.</Card>
 </CardGroup>
