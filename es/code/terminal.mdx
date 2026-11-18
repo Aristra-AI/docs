@@ -1,0 +1,147 @@
+---
+title: "Terminal"
+description: "Usa Aristra Code en tu terminal: la pantalla, las teclas, las aprobaciones, cómo redirigir un turno en curso, cómo volver a un mensaje anterior y el renderizador a pantalla completa."
+---
+
+`aristra` sin subcomando abre Aristra Code en la carpeta actual.
+
+```sh
+aristra                          # a new chat in this folder
+aristra "add a --verbose flag"   # a new chat that starts with this prompt
+aristra -c                       # this folder's newest chat
+aristra -r <id>                  # that chat
+aristra resume                   # pick an earlier chat
+aristra attach <id>              # a chat that may be running elsewhere
+aristra --fullscreen             # draw on the whole screen
+aristra --folder ~/code/api      # work in another folder
+aristra --cloud "plan the launch"   # a chat run by Aristra's cloud agent
+```
+
+Todas las opciones están en la [referencia de la CLI](/es/code/reference/cli).
+
+## La pantalla
+
+```text
+aristra · gemini-3.8-flash · Aristra balance · /Users/you/code/my-project · Manual  the header
+
+› Find why the date parser fails on leap years and fix it.                          your message
+● Searched for 1 pattern, read 2 files                                              reads and searches, one line
+● Edit src/date.ts                                                                  an edit, with its diff
+  npm test                                                                          a command, with its output
+The parser treated 1900 as a leap year. ...                                         the reply
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ ›                                                                            │  the composer
+╰──────────────────────────────────────────────────────────────────────────────╯
+ ⠋ Working 12 s · esc to interrupt                              ████░░░░░░ 41% of the window
+ Manual · asks before changes the rules do not allow (shift+tab)    gemini-3.8-flash · Aristra balance
+```
+
+- **Pasos.** Cada llamada a una herramienta es una línea con lo que hizo. Las lecturas y búsquedas seguidas se agrupan en una sola línea. Una edición muestra su diff, y un comando, el principio de su salida; **Ctrl+O** abre la salida completa del paso más reciente.
+- **La lista de tareas** aparece encima del compositor cuando el agente lleva una. **Ctrl+T** la oculta y la muestra.
+- **La línea de estado** indica lo que está haciendo el agente, lo que se ejecuta en segundo plano (`/tasks` lo muestra), cuántas aprobaciones esperan en otros chats y cuánto se ha llenado el contexto del modelo (amarillo al 60%, rojo al 80%; cerca del límite indica cuánto queda hasta la compactación automática). `/usage` muestra los tokens usados.
+- **El pie** muestra el modo, el pull request abierto de la rama (`PR #412`, coloreado según el estado de su revisión), el modelo y quién paga.
+- **Sugerencias.** Tras unas cuantas respuestas, el compositor vacío puede sugerir tu siguiente mensaje en gris: Tab lo acepta, Enter lo envía y, si escribes, se ignora.
+
+## Teclas
+
+| Tecla | Hace |
+|---|---|
+| Enter | Enviar. Mientras se ejecuta un turno, añadir tu mensaje a él en su siguiente paso |
+| Shift+Enter, Alt+Enter, Ctrl+J, o `\` y luego Enter | Una línea nueva (ejecuta `/terminal-setup` si Shift+Enter no funciona en tu terminal) |
+| Esc | Detener el turno en curso. Dos veces con el compositor vacío: volver a un mensaje anterior |
+| Shift+Tab | Cambiar de modo: Manual, Accept edits, Plan, Auto (Bypass Permissions después de Plan si empezaste con un flag de omisión; en un chat en la nube, Manual y Auto) |
+| `!` al principio | Modo shell: ejecutar un comando tú mismo |
+| `@` | Mencionar un archivo o una carpeta; Tab completa |
+| `/` | Los comandos y tus skills |
+| Ctrl+V | Adjuntar la imagen del portapapeles |
+| Ctrl+O | La salida completa del paso más reciente |
+| Alt+P | Elegir el modelo |
+| Ctrl+L | Limpiar la pantalla |
+| Ctrl+X y luego Tab | A pantalla completa con el panel de diff abierto, darle las teclas (Esc las devuelve) |
+| Ctrl+Up, Ctrl+Down (o Alt+Up, Alt+Down) | A pantalla completa, moverse por los archivos del panel de diff |
+| Ctrl+T | Ocultar o mostrar la lista de tareas |
+| Ctrl+B, mientras se ejecuta un comando | Enviarlo a segundo plano (Ctrl+B dos veces en tmux) |
+| Ctrl+R | Buscar en tus prompts anteriores |
+| Ctrl+G | Editar el borrador en tu editor |
+| Ctrl+S | Guardar aparte el borrador; otra vez con el compositor vacío para recuperarlo |
+| Up, Down | Prompts anteriores, primero los de esta carpeta |
+| Ctrl+C | Vaciar el compositor; dos veces con el compositor vacío para salir |
+
+Puedes reasignar las teclas en `~/.aristra/keybindings.json` (`/keybindings` lo abre). Consulta [Configuración de la terminal](/es/code/configure/terminal).
+
+## Enviar mientras se ejecuta un turno
+
+Aristra Code ejecuta un turno por chat a la vez. Mientras se ejecuta uno:
+
+- **Enter redirige.** Tu mensaje se une al turno en curso en su siguiente paso. Úsalo para corregir el rumbo sin detenerlo.
+- **`/queue <message>` espera** y se envía como un turno nuevo cuando termina el que está en curso.
+- **Esc detiene** el turno. Los comandos y hooks en ejecución se detienen junto con todo lo que iniciaron, las aprobaciones pendientes se cancelan y Aristra Code te pregunta qué hacer en su lugar.
+
+## Aprobaciones
+
+Cuando un paso necesita tu respuesta, aparece encima del compositor: qué tipo de paso es, qué haría exactamente (el comando, el diff, la dirección) y las respuestas.
+
+| Respuesta | Significa |
+|---|---|
+| Yes | Ejecutar este paso |
+| Yes, and don't ask again for `rule` | Ejecutarlo y guardar la regla en el `.aristra/settings.local.json` de la carpeta. Con un comando, puedes editar la regla antes |
+| Yes, and switch to accept edits | Ejecutarlo y dejar que el resto del chat edite archivos sin preguntar |
+| Yes, allow reading from `X/` | Ejecutarlo y dejar que el chat lea esa carpeta |
+| No | No ejecutarlo y detener el turno. Tab sobre Yes o No añade una nota; con No, el modelo la lee como el motivo y continúa |
+
+Pulsa un número, o desplázate y pulsa Enter. **Ctrl+E** sobre un comando lo explica: qué hace, por qué y su riesgo.
+
+**La aprobación del modo Plan** muestra el plan y pregunta si continuar: con el modo Auto (o, donde Auto está desactivado, aceptando las ediciones automáticamente), aprobando las ediciones a mano, o "Tell Aristra what to change" para seguir planificando. Shift+Tab aprueba con lo que hayas escrito. **Ctrl+G** abre el plan en tu editor.
+
+Una aprobación aparece en todas las superficies abiertas, y gana la primera respuesta. Si nadie responde, se rechaza a los 30 minutos (`approvals.timeoutMinutes`).
+
+## Elegir un modelo
+
+`/model` muestra todos los orígenes de modelos con quién paga cada uno. Un origen que no está listo indica cómo configurarlo. Elegir un modelo cambia este chat y lo convierte en el predeterminado para los chats nuevos. `/effort` fija cuánto razona el modelo. Consulta [Modelos](/es/code/configure/models).
+
+## Reanudar
+
+`/resume` (o `aristra resume`) muestra los chats de todas las superficies: la terminal, Aristra Desktop, los scripts y los editores. Escribe para buscar; Tab cambia entre esta carpeta y todas las carpetas, Right muestra una vista previa y Enter abre. Un chat que todavía se está ejecutando sigue ejecutándose cuando lo abres.
+
+## Volver a un mensaje anterior
+
+`/rewind`, o Esc dos veces con el compositor vacío, muestra tus mensajes con lo que cambió cada turno. Elige uno y luego:
+
+| Opción | Hace |
+|---|---|
+| Restore code and conversation | Las dos cosas siguientes |
+| Restore conversation | El mensaje y todo lo que va después salen del chat, y el mensaje vuelve al compositor para editarlo y enviarlo de nuevo |
+| Restore code | Los archivos que el agente cambió con sus herramientas de archivos vuelven a como estaban antes del mensaje |
+
+Los cambios hechos por comandos, o por ti, no se deshacen. Consulta [Chats](/es/code/guides/chats).
+
+## Ejecutar un comando tú mismo
+
+Escribe `!` al principio del compositor y Enter ejecuta el comando en la carpeta del chat, como tú, fuera del sandbox. Se ejecuta dentro del sandbox, en cambio, cuando el sandbox está activado y los comandos no pueden salir de él (`sandbox.allowUnsandboxedCommands: false`, en tu configuración o en la [política](/es/code/configure/managed-policy) de un equipo), salvo que sea un comando excluido. Mientras se ejecuta un turno, espera a que termine. El comando y su salida aparecen como un paso, y el agente los lee con tu siguiente mensaje. Esc o Backspace al principio sale del modo shell.
+
+## Adjuntos
+
+- Un pegado largo se conserva entero tras un marcador corto.
+- Un archivo arrastrado a la terminal se adjunta en lugar de escribirse. Las imágenes van al modelo si las acepta.
+- `@path` le da al agente un archivo junto con tus palabras; `@app.py#L10-20` le da algunas de sus líneas. Los archivos de credenciales, como `.env`, se excluyen.
+
+## Salir
+
+`/exit` (o `/quit`), Ctrl+D con el compositor vacío o Ctrl+C dos veces. Si todavía hay trabajo en curso, Aristra Code pregunta si detenerlo, pasarlo a segundo plano y salir, o quedarte. El trabajo en segundo plano sigue ejecutándose en el runtime, y `aristra resume <id>` te devuelve a él.
+
+## Notificaciones y resúmenes
+
+Cuando llevas un rato sin tocar la terminal, Aristra Code te avisa a través de ella cuando una aprobación está esperando o un turno ha terminado (en iTerm2, kitty, Ghostty y Terminal de Apple). `ARISTRA_NO_NOTIFY=1` lo desactiva.
+
+Cuando vuelves a un chat que habías dejado, te espera en él un resumen de una línea con el objetivo, la tarea actual y el siguiente paso. `/recap` crea uno en ese momento; `awaySummaryEnabled: false` los desactiva.
+
+## Pantalla completa
+
+El renderizador a pantalla completa dibuja en toda la pantalla: la transcripción se desplaza arriba y el compositor queda abajo, con selección con el mouse y un panel lateral para los diffs. Actívalo con `/tui fullscreen` (se guarda en tu configuración) o para un solo inicio con `--fullscreen`; `/tui default` vuelve al modo anterior.
+
+A pantalla completa:
+- PgUp y PgDn desplazan media vista; Ctrl+Home y Ctrl+End van al principio y al final. La rueda del mouse desplaza.
+- Arrastra para seleccionar; la selección se copia al soltar (`copyOnSelect: false` lo desactiva). Mantén pulsada la tecla Shift (Option en iTerm2 y en VS Code en un Mac, Fn en Terminal de Apple) para usar la selección propia de la terminal.
+- **Ctrl+O** abre la pantalla de la transcripción: cada paso con su salida completa, en la que puedes buscar con `/`.
+- **`/diff`** muestra los archivos cambiados junto a la transcripción. Consulta [Git y pull requests](/es/code/guides/git).

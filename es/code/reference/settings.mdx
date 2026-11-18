@@ -1,0 +1,134 @@
+---
+title: "Referencia de configuración"
+description: "Todas las claves de los archivos de configuración de Aristra Code, con su valor predeterminado y lo que hacen."
+---
+
+La configuración vive en `~/.aristra/settings.json` (la tuya), `<folder>/.aristra/settings.json` (la del proyecto) y `<folder>/.aristra/settings.local.json` (la tuya, para el proyecto). Cómo se combinan las capas, y qué claves no puede fijar un repositorio, está en [Configuración](/es/code/configure/settings). Las claves marcadas como *solo tu archivo* solo se leen de tu propio archivo.
+
+## Modelo
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `model.source` | `aristra` | De dónde viene el modelo de los chats nuevos: `aristra`, `chatgpt`, un proveedor, `ollama`, `lmstudio`, `custom` |
+| `model.model` | El predeterminado del plan | El id del modelo |
+| `model.effort` | El del propio modelo | El nivel de razonamiento, en los modelos que lo admiten |
+| `model.fallback` | `[]` | Hasta 10 `{source, model, effort}` que se prueban por orden cuando falla una llamada. *Solo tu archivo* |
+| `autoCompactWindow` | La ventana del modelo | Cuánto se llena el contexto antes de resumirlo: `"auto"` o de 100,000 a 1,000,000 tokens |
+| `modelSettings.<model>.autoCompactWindow` | ninguno | Lo mismo, para un modelo. `/autocompact` lo escribe |
+| `auxiliary.title`, `auxiliary.summary`, `auxiliary.memory` | El modelo de segundo plano del plan o, si no, el del chat | `{source, model}` de uno de tus propios orígenes (no `aristra`) para los títulos, los resúmenes y el respaldo de la memoria. `auxiliary.title: "off"` conserva tus primeras palabras. *Solo tu archivo* |
+
+## Permisos
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `permissions.defaultMode` | `default` | El modo en el que empiezan los chats nuevos: `default` (Manual), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`, `read_only` |
+| `permissions.allow`, `ask`, `deny` | `[]` | [Reglas de permisos](/es/code/configure/permissions) |
+| `permissions.additionalDirectories` | `[]` | Más carpetas en las que puede trabajar el chat |
+| `permissions.trustedMcpServers` | `[]` | Servidores MCP cuyas herramientas se ejecutan sin preguntar. *Solo tu archivo* |
+| `permissions.disableAutoMode` | ninguno | `"disable"` desactiva el modo Auto |
+| `skipDangerousModePermissionPrompt` | `false` | Se fija cuando aceptas la advertencia de Bypass permissions. No se lee del `settings.json` de un proyecto |
+| `skipAutoPermissionPrompt` | `false` | Aceptaste el modo Auto; el modo Plan conserva entonces su revisor. No se lee del `settings.json` de un proyecto |
+| `useAutoModeDuringPlan` | `true` | `false`: el modo Plan te pregunta incluso cuando aceptaste Auto. No se lee del `settings.json` de un proyecto |
+| `approvals.timeoutMinutes` | `30` | Cuánto espera una aprobación antes de rechazarse (de 1 a 1440) |
+| `projects["<folder>"].trusted` | ninguno | Si una carpeta (y sus subcarpetas) es de confianza. Lo fija la pregunta de confianza. *Solo tu archivo* |
+| `projects["<folder>"].permissions` | ninguno | Reglas para una carpeta. *Solo tu archivo* |
+| `projects["<folder>"].mcpServers`, `.disabledMcpServers`, `.trustedMcpServers` | ninguno | Servidores MCP solo para esa carpeta, desactivados allí o de confianza allí. *Solo tu archivo* |
+
+## El revisor del modo Auto
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `review.enabled` | `true` | `false`: en el modo Auto, lo que decidiría el revisor te lo pregunta a ti. *Solo tu archivo* |
+| `review.policy` | `""` | Tus propias indicaciones para el revisor, de hasta 8,000 caracteres. *Solo tu archivo* |
+| `review.model` | ninguno | El modelo revisor para los chats con tu propia clave o con un modelo local. *Solo tu archivo* |
+| `autoMode` | ninguno | Listas `allow`, `soft_deny` y `environment` para el revisor, como en Claude Code. No se lee del `settings.json` de un proyecto |
+
+## Sandbox
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `sandbox.enabled` | `false` | Los comandos se ejecutan en el [sandbox](/es/code/configure/sandbox) (`/sandbox`) |
+| `sandbox.failIfUnavailable` | `false` | Con `enabled`: un turno no empieza cuando el sandbox no puede iniciarse, en lugar de ejecutar los comandos fuera de él |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | Un comando dentro del sandbox se ejecuta sin preguntar, salvo que lo cubra una regla |
+| `sandbox.allowUnsandboxedCommands` | `true` | Si Aristra Code puede pedir ejecutar un comando fuera del sandbox |
+| `sandbox.excludedCommands` | `[]` | Comandos que siempre se ejecutan fuera del sandbox, pasando por las comprobaciones |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | Más rutas que abrir o cerrar |
+| `sandbox.filesystem.allowGitConfig` | `false` | Permitir que los comandos escriban en `.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | Hosts a los que llegan los comandos sin preguntar |
+| `sandbox.network.allowLocalBinding` | `false` | Permitir que los comandos escuchen en `localhost` y lleguen a él |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | ninguno | Tu propio proxy en `localhost`, en lugar del del sandbox |
+| `sandbox.network.allowUnixSockets`, `allowAllUnixSockets` | `[]`, `false` | `allowUnixSockets`: rutas de sockets a las que se pueden conectar los comandos (macOS). `allowAllUnixSockets`: todos los sockets Unix (macOS y Linux) |
+| `sandbox.ignoreViolations` | `{}` | Rechazos que no se comunican, por comando |
+| `sandbox.enableWeakerNestedSandbox` | `false` | En un contenedor que no puede montar `/proc` (Linux) |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Abrir el servicio de certificados de macOS para herramientas de Go como `gh` detrás de un proxy con su propia autoridad de certificación |
+
+## Extensiones
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `mcp.servers` | `{}` | Tus [servidores MCP](/es/code/extend/mcp). *Solo tu archivo* |
+| `mcp.toolSearch` | `true` | `false` envía las herramientas MCP en cada solicitud en lugar de detrás de la búsqueda de herramientas. *Solo tu archivo* |
+| `enabledMcpjsonServers`, `disabledMcpjsonServers` | `[]` | [Servidores del `.mcp.json`](/es/code/extend/mcp) de un proyecto aprobados o rechazados. Las aprobaciones propias de una carpeta cuentan una vez que es de confianza |
+| `enableAllProjectMcpServers` | `false` | Aprobar todos los servidores del `.mcp.json` de un proyecto |
+| `hooks` | `{}` | Tus [hooks](/es/code/extend/hooks), por evento |
+| `disableAllHooks` | `false` | Desactivar todos los hooks salvo los de una política gestionada |
+| `allowedHttpHookUrls` | cualquiera | Adónde pueden enviar los hooks HTTP (`*` es un comodín; `[]` no permite ninguno). Las listas de todos los archivos de configuración cuentan juntas |
+| `httpHookAllowedEnvVars` | ninguno | Las variables que pueden usar los encabezados de un hook HTTP, además de las `allowedEnvVars` del propio hook |
+| `enabledPlugins` | `{}` | Plugins activados o desactivados, por `plugin@marketplace` |
+| `pluginConfigs` | `{}` | Las opciones de cada plugin. Solo en tu propio archivo y en una política gestionada |
+| `extraKnownMarketplaces` | `{}` | Marketplaces que añadir, por nombre, con su `source` |
+| `agent` | ninguno | El [agente personalizado](/es/code/guides/subagents) con el que se ejecutan los chats nuevos |
+| `enableWorkflows` | `true` | `false` desactiva los [flujos de trabajo](/es/code/guides/subagents) |
+| `disableWorkflows` | ninguno | `true` desactiva los flujos de trabajo |
+| `workflowSizeGuideline` | `"medium"` | A cuántos agentes apuntan los flujos de trabajo: `"small"`, `"medium"`, `"large"`, `"unrestricted"` |
+
+## Git
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `worktree.baseRef` | `"fresh"` | Desde dónde empieza un worktree nuevo: `fresh` (la rama predeterminada del origin) o `head` (el commit actual) |
+| `worktree.symlinkDirectories` | ninguno | Carpetas enlazadas en un worktree nuevo en lugar de copiadas, como `["node_modules"]` |
+| `worktree.sparsePaths` | ninguno | Rutas que un worktree nuevo hace checkout por separado |
+| `includeGitInstructions` | `true` | `false` deja fuera las indicaciones de git de las instrucciones de la herramienta shell |
+| `prStatusFooterEnabled` | `true` | Mostrar el pull request de la rama en el pie |
+| `prUrlTemplate` | ninguno | Enviar a otro sitio el enlace al pull request del pie, con `{host}`, `{owner}`, `{repo}`, `{number}` y `{url}` |
+
+## Terminal
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` para el renderizador a pantalla completa |
+| `statusLine` | ninguno | `{"type": "command", "command": "...", "padding": 1, "refreshInterval": 10}`: [tu propia línea de estado](/es/code/configure/terminal) |
+| `subagentStatusLine` | ninguno | `{"type": "command", "command": "..."}`: una línea para cada agente en ejecución en `/tasks` |
+| `copyOnSelect` | `true` | A pantalla completa, copiar una selección al soltar |
+| `copyFullResponse` | `false` | `/copy` toma la respuesta completa |
+| `promptSuggestionEnabled` | `true` | Sugerir tu siguiente mensaje después de una respuesta |
+| `awaySummaryEnabled` | `true` | Dejar un resumen en un chat al que vuelves |
+| `spinnerTipsEnabled` | `true` | Mostrar consejos mientras trabaja Aristra Code |
+| `terminalProgressBarEnabled` | `true` | Una barra de progreso en la pestaña de la terminal mientras se ejecuta un paso |
+| `permissionExplainerEnabled` | `true` | Ctrl+E explica un comando en su aprobación |
+| `disableDeepLinkRegistration` | ninguno | `"disable"`: no registrar el manejador de enlaces `aristra-cli://` |
+
+## Runtime y privacidad
+
+`runtime`, `approvals`, `telemetry` y `web` solo se leen de tu propio archivo y de una política gestionada; el archivo de un proyecto no puede cambiarlos. `runtime.maxRunningTurns` y `runtime.notifications` solo salen de tu propio archivo.
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `runtime.idleExitMinutes` | `10` | Minutos de inactividad antes de que se detenga el runtime (de 1 a 1440) |
+| `runtime.keepRunningAfterClientsLeave` | `true` | Un turno sigue ejecutándose después de que se hayan cerrado todas las superficies |
+| `runtime.maxRunningTurns` | sin límite | Cuántos turnos pueden ejecutarse a la vez; el resto espera |
+| `runtime.notifications` | `true` | Mostrar una notificación cuando no hay nadie conectado que pueda mostrarla |
+| `memory.enabled` | `true` | Los chats nuevos empiezan con la memoria activada |
+| `web.keylessFallback` | `true` | Cuando la búsqueda de Aristra no puede responder (saldo agotado o servicio caído), las búsquedas pasan a la búsqueda pública gratuita de Exa, Parallel, Firecrawl o Keenable, enviando solo las palabras de búsqueda (esos servicios pueden conservarlas). `false` las mantiene en tu clave o en Aristra |
+| `remoteControl.allowStart` | `false` | Permitir que la web y el teléfono inicien chats en esta computadora (necesita un plan de Aristra). *Solo tu archivo* |
+| `remoteControl.startFolders` | `[]` | Las carpetas de confianza en las que pueden iniciar chats; nunca la carpeta personal, una carpeta oculta dentro de ella ni la raíz. *Solo tu archivo* |
+| `telemetry.usage` | `true` | Eventos de uso sin contenido |
+| `telemetry.errors` | `true` | Informes de errores |
+| `credentials.store` | `auto` | Dónde se guardan los secretos: `auto`, `keychain`, `file`. *Solo tu archivo* |
+| `ui.theme` | `system` | La apariencia de Aristra Desktop: `system`, `light`, `dark` |
+| `ui.notifications` | `true` | Las notificaciones de Aristra Desktop |
+
+## Solo en la política gestionada
+
+Estas claves solo cuentan en una [política gestionada](/es/code/configure/managed-policy): `permissions.allowManagedPermissionRulesOnly`, `permissions.disableBypassPermissionsMode`, `sandbox.network.allowManagedDomainsOnly`, `sandbox.filesystem.allowManagedReadPathsOnly`, `allowedMcpServers`, `deniedMcpServers`, `allowManagedHooksOnly`, `strictKnownMarketplaces` (o `allowedMarketplaces`), `blockedMarketplaces`, `pluginTrustMessage` y `disableSideloadFlags`.

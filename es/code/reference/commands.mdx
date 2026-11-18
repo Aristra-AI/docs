@@ -1,0 +1,110 @@
+---
+title: "Comandos"
+description: "Todos los comandos que puedes escribir en Aristra Code en la terminal, de /help a /remote-control."
+---
+
+En la terminal, escribe `/` al principio del compositor para abrir el menú de comandos: los comandos y tus [skills](/es/code/extend/skills), filtrados a medida que escribes. Up y Down eligen, Tab completa, Enter lo ejecuta (un comando que necesita un argumento espera a que lo escribas) y Esc cierra el menú y vacía el compositor. Un comando desconocido no se envía. Para enviar un mensaje que empieza por `/`, empiézalo con un espacio.
+
+El menú `/` de Aristra Desktop tiene su propia lista breve; consulta [La pestaña Code de Desktop](/es/code/desktop). Para los subcomandos y flags de `aristra`, consulta la [referencia de la CLI](/es/code/reference/cli).
+
+## El chat
+
+| Comando | Hace |
+|---|---|
+| `/new` (o `/clear`, `/reset`) | Iniciar un chat nuevo en esta carpeta |
+| `/resume` | Volver a un chat anterior |
+| `/search <words>` | Buscar palabras en los mensajes de todos los chats de esta computadora. `/search #2` abre el chat del segundo resultado |
+| `/rename <title>` | Cambiar el nombre de este chat |
+| `/branch [name]` | Copiar este chat tal como está en un chat nuevo y seguir en la copia |
+| `/fork <directive>` | Iniciar un agente en segundo plano con todo el contexto de este chat para que cumpla la instrucción e informe |
+| `/btw <question>` | Hacer una pregunta al margen sin interrumpir el turno en curso; la respuesta no se añade al chat |
+| `/queue <message>` | Enviar esto cuando termine el turno en curso |
+| `/rewind` (o `/checkpoint`) | Restaurar el código, la conversación o ambos a antes de uno de tus mensajes |
+| `/export [md\|json]` | Guardar este chat en un archivo en `~/.aristra/exports/` |
+| `/copy [N]` | Copiar al portapapeles la respuesta más reciente (o la N-ésima más reciente) |
+| `/files [words \| find WORDS \| open N \| save PATH \| update N]` | Los archivos que tus chats compartieron, crearon o cambiaron, los archivos que adjuntaste y, con la sesión iniciada, los archivos de tu cuenta, del más reciente al más antiguo; las palabras buscan en los nombres, las carpetas y los títulos de los chats, `find WORDS` busca dentro de los archivos (con la página de un PDF), `open N` abre uno en su app (un archivo de tu cuenta se descarga primero), `save PATH` guarda en tu cuenta una copia de un archivo de aquí, y `update N [replace\|keep-both]` sustituye la copia de un archivo guardado después de que cambiara |
+| `/recap` | Un resumen de una línea del chat en ese momento |
+| `/exit` (`/quit`) | Salir; un turno en curso puede seguir adelante |
+
+## Contexto y memoria
+
+| Comando | Hace |
+|---|---|
+| `/context [all]` | Lo que ocupa el contexto del modelo, como una cuadrícula, con sugerencias |
+| `/compact [instructions]` | Resumir la conversación hasta ahora, conservando lo que digan las instrucciones |
+| `/autocompact [auto\|<tokens>]` | Fijar cuánto se llena el contexto antes de resumirlo, para este modelo |
+| `/memory` | Editar tus archivos de instrucciones (`AGENTS.md`) o abrir las notas del repositorio |
+| `/init` | Escribir el `AGENTS.md` de esta carpeta a partir del código |
+| `/goal [<condition> \| clear]` | Fijar una condición que Aristra Code comprueba antes de detenerse. Consulta [Objetivos](/es/code/guides/goals) |
+
+## Modelo y permisos
+
+| Comando | Hace |
+|---|---|
+| `/model` | Elegir el modelo, con quién lo paga |
+| `/effort [level\|auto]` | Cuánto razona el modelo: `low`, `medium`, `high` y, en algunos modelos, `xhigh` o `max` |
+| `/mode [mode]` | Fijar el modo de permisos: `manual` (o `default`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` (si iniciaste `aristra` con `--dangerously-skip-permissions` o `--allow-dangerously-skip-permissions`), `read_only`. Sin modo, el siguiente. Un chat en la nube tiene `manual` y `auto` |
+| `/permissions` | Las reglas por origen, las carpetas del chat y los pasos que el modo Auto bloqueó recientemente |
+| `/sandbox [exclude <pattern>]` | Ejecutar los comandos en el [sandbox](/es/code/configure/sandbox) (desactivado de forma predeterminada): con permiso automático, con los permisos normales o sin sandbox. `exclude` añade un comando que siempre se ejecuta fuera de él |
+| `/add-dir <path>` | Permitir que este chat trabaje en otra carpeta |
+| `/retry` | Dejar que los pasos que acaba de bloquear el revisor del modo Auto se ejecuten una vez, tal como estaban |
+| `/folder` | La carpeta de este chat y si es de confianza |
+
+## Git y pull requests
+
+| Comando | Hace |
+|---|---|
+| `/diff` | Los cambios sin commit y los cambios de cada turno. A pantalla completa, un panel de diff junto al chat |
+| `/pr [number]` | El pull request de la rama: estado, checks, archivos, revisión y merge |
+| `/create-pr [--draft]` | Hacer commit, hacer push y abrir un pull request |
+| `/commit [guidance]` | Hacer commit de los cambios con un mensaje con el estilo del repositorio |
+| `/autofix-pr [number\|stop]` | Vigilar el pull request y corregir los checks fallidos, los conflictos y los comentarios de revisión |
+
+Consulta [Git y pull requests](/es/code/guides/git).
+
+## Trabajo en segundo plano
+
+| Comando | Hace |
+|---|---|
+| `/tasks` (o `/bashes`) | Todo lo que se ejecuta en segundo plano: agentes, flujos de trabajo, comandos. Detén uno con x |
+| `/schedule [pause\|resume\|run\|remove N]` (o `/scheduled`) | Las [tareas programadas](/es/code/guides/background) guardadas en esta computadora, numeradas; cambia una por su número. Para crear una, pídela con palabras normales |
+| `/workflows` | Los flujos de trabajo en ejecución y terminados: sus fases y sus agentes |
+
+Consulta [Trabajo en segundo plano](/es/code/guides/background).
+
+## Extensiones
+
+| Comando | Hace |
+|---|---|
+| `/mcp [reconnect\|enable\|disable [<server>\|all]]` | Gestionar los servidores MCP: aprobar los de un proyecto, iniciar sesión, volver a conectar, desactivar uno para este proyecto, ver las herramientas |
+| `/hooks` | Tus hooks por evento, y cuáles necesitan todavía aprobación |
+| `/plugin [subcommand]` (o `/plugins`, `/marketplace`) | Gestionar plugins y marketplaces |
+| `/reload-plugins` | Volver a leer tus plugins y activar los cambios en este chat |
+| `/<skill> [args]` | Ejecutar una de tus skills o de tus flujos de trabajo guardados (la de un plugin como `/<plugin>:<name>`) |
+| `/mcp__<server>__<prompt> [args]` | Ejecutar el prompt de un servidor MCP |
+
+## Tu cuenta y tu configuración
+
+| Comando | Hace |
+|---|---|
+| `/help` | Todos los comandos, tus skills y las teclas |
+| `/status` | Tu cuenta y su plan, el runtime y los orígenes de modelos |
+| `/usage` | Los tokens que usó este chat y quién pagó, tu saldo de Aristra en dólares y los límites de tus planes, y qué contribuye a tu uso. Sin un plan de Aristra, qué paga cada cosa |
+| `/config` | Tu configuración en vigor y de qué archivo sale cada ajuste |
+| `/login [code]`, `/logout` | Iniciar sesión en Aristra (`code`: con un código, en otro dispositivo) o cerrarla en esta computadora |
+| `/remote-control [off]` (o `/rc`) | Continuar este chat en tu teléfono y en la web. Viene con un plan. Consulta [Remote Control](/es/code/remote-control) |
+| `/remote-control computer [on\|off]` | Permitir que la web y tu teléfono inicien chats en esta computadora. Desactivado de forma predeterminada |
+| `/remote-control folder [on\|off]` | Permitir que los chats desde la web y tu teléfono empiecen en la carpeta en la que estás |
+| `/release-notes` | Lo que cambió en cada versión |
+
+## La terminal
+
+| Comando | Hace |
+|---|---|
+| `/tui [default\|fullscreen]` | Elegir el renderizador: el clásico o el de pantalla completa |
+| `/keybindings` | Abrir tu archivo de atajos de teclado |
+| `/terminal-setup` | Configurar una tecla para las líneas nuevas en tu terminal (Shift+Enter u Option+Enter) |
+
+## Skills integradas
+
+Estas se ejecutan como [skills](/es/code/extend/skills): `/init`, `/code-review` (o `/review`), `/simplify`, `/security-review`, `/update-config`, `/fewer-permission-prompts`, `/debug`, `/verify`, `/commit`, `/create-pr` y `/loop` (o `/proactive`), además de `workflow-authoring`, la referencia que lee Aristra Code cuando escribe un flujo de trabajo. `/deep-research <question>` ejecuta el [flujo de trabajo](/es/code/guides/subagents) integrado de Aristra Code.

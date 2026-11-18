@@ -1,0 +1,75 @@
+---
+title: "Skills"
+description: "Empaqueta el trabajo que repites como archivos SKILL.md que Aristra Code usa cuando una tarea encaja, o que ejecutas con /name. Incluye las skills integradas."
+---
+
+Una skill es un conjunto de instrucciones para un tipo de tarea: cómo escribe tu equipo las notas de la versión, cómo sacar un hotfix, una lista de comprobación para revisar una migración. Es un archivo `SKILL.md` con el mismo formato que los de Claude Code, así que una skill pasa de uno a otro. Los demás campos de Claude Code (`allowed-tools`, `model`, `context`, `agent`, `hooks`, `paths`, `shell`) se ignoran: una skill que los usa se carga igualmente, sin ellos.
+
+## Dónde viven las skills
+
+| Dónde | Se usa en |
+|---|---|
+| `~/.aristra/skills/<name>/SKILL.md` | Todos los chats |
+| `<folder>/.aristra/skills/<name>/SKILL.md` | Los chats de esa carpeta, una vez que confías en ella |
+| Un [plugin](/es/code/extend/plugins) | Todos los chats, como `plugin-name:skill-name` |
+
+La carpeta de una skill puede contener otros archivos junto a `SKILL.md` (plantillas, scripts, ejemplos) a los que la skill remite a Aristra Code. Para usar tus skills de Claude Code, copia sus carpetas de `~/.claude/skills/` a `~/.aristra/skills/` (una carpeta enlazada se omite), o ejecuta `aristra import claude-code` e indica las skills que quieres con `--only`, ya que no están en su selección predeterminada.
+
+## Escribir una skill
+
+```markdown ~/.aristra/skills/release-notes/SKILL.md
+---
+name: release-notes
+description: Write release notes from the merged pull requests since the last tag
+when_to_use: When the user asks for release notes or a changelog entry
+argument-hint: "[version]"
+---
+
+1. Find the last tag with `git describe --tags --abbrev=0`.
+2. List the merged pull requests since then with `git log <tag>..HEAD --merges --oneline`.
+3. Group them under Added, Changed and Fixed, one line each, in the past tense.
+4. Title the notes "Release $ARGUMENTS". Use the template in ${ARISTRA_SKILL_DIR}/template.md.
+```
+
+| Campo | Significado |
+|---|---|
+| `name` | Un nombre para mostrar. Escribes el nombre de la carpeta: `/release-notes` para `skills/release-notes/` |
+| `description` | Lo que hace, que se muestra al modelo |
+| `when_to_use` | Cuándo usarla, que se añade a lo que ve el modelo |
+| `argument-hint` | Qué escribir después de `/name`, que se muestra en el menú de comandos |
+| `user-invocable` | `false` la deja fuera del menú `/` (el modelo puede seguir usándola) |
+| `disable-model-invocation` | `true` la oculta al modelo (tú puedes seguir escribiendo `/name`) |
+
+En el cuerpo, `$ARGUMENTS` es todo lo que se escribe después de `/name`, `$1` a `$9` son sus palabras y `${ARISTRA_SKILL_DIR}` es la carpeta de la skill.
+
+## Cómo se usan las skills
+
+- **Por Aristra Code.** En cada turno, el modelo ve los nombres y las descripciones de tus skills. Cuando una encaja con la tarea, carga las instrucciones completas de la skill.
+- **Por ti.** Escribe `/` y elige una skill, o escribe `/release-notes 2.4.0`. Las instrucciones de la skill se envían con `2.4.0` como argumentos.
+
+`/help` muestra tus skills debajo de los comandos. Los [flujos de trabajo](/es/code/guides/subagents) guardados y los prompts de los servidores MCP aparecen en el mismo menú.
+
+## Skills integradas
+
+| Skill | Hace | Aristra Code puede usarla por su cuenta |
+|---|---|---|
+| `/init` | Escribe el `AGENTS.md` de la carpeta a partir del código | No |
+| `/code-review [level] [target]` (o `/review`) | Revisa el diff actual, un pull request, una rama o una ruta en busca de errores y limpiezas, de más a menos grave | Sí |
+| `/simplify [target]` | Limpia el código cambiado sin cambiar lo que hace | Sí |
+| `/security-review` | Una revisión de seguridad de los cambios de la rama: solo vulnerabilidades probables y explotables | Sí |
+| `/update-config [request]` | Cambia tu configuración: reglas de permisos, hooks, el sandbox, servidores MCP | Sí |
+| `/fewer-permission-prompts` | Añade a la lista de permitidos de la carpeta los comandos de solo lectura y las herramientas MCP que más apruebas | Sí |
+| `/debug [issue]` | Lee el registro de Aristra para averiguar qué salió mal | No |
+| `/verify [what to check]` | Ejecuta la app cambiada, comprueba que el cambio funciona e informa PASS, FAIL, BLOCKED o SKIP | No |
+| `/commit [guidance]` | Hace commit de los cambios con un mensaje con el estilo del repositorio, sin omitir hooks, sin hacer amend y sin incluir secretos | No |
+| `/create-pr [--draft]` | Hace commit, hace push y abre un pull request | No |
+| `/loop [interval] [prompt]` (o `/proactive`) | Ejecuta un prompt o un comando cada cierto intervalo, o a su propio ritmo. Consulta [Trabajo en segundo plano](/es/code/guides/background) | Sí |
+| `/workflow-authoring` | La referencia completa para escribir scripts de [flujos de trabajo](/es/code/guides/subagents) | Sí |
+
+`/code-review` acepta un nivel: `low` (una pasada rápida), `medium` (el predeterminado inicial), `high`, `xhigh` y `max` (el más exhaustivo). Sin nivel, usa el último que indicaste en este chat. `--fix` aplica los hallazgos, `--comment` los publica en el pull request y `--max-findings <n>` (o `all`) fija cuántos informa.
+
+Una skill tuya llamada `init` o `security-review` sustituye a la integrada.
+
+## Confianza
+
+Las skills de una carpeta solo cuentan después de que confíes en la carpeta, así que un repositorio que acabas de clonar no puede poner instrucciones delante de Aristra Code.

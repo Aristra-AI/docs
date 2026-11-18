@@ -1,0 +1,83 @@
+---
+title: "Remote Control"
+description: "Continúa un chat de tu computadora desde tu teléfono o app.aristralabs.com, o inicia uno desde allí. El trabajo se ejecuta en tu computadora."
+---
+
+Remote Control comparte con tu cuenta de Aristra un chat que se ejecuta en tu computadora, para que puedas leerlo, enviar mensajes y responder aprobaciones desde tu teléfono o app.aristralabs.com. El código y los comandos se quedan en tu computadora; solo viaja la conversación.
+
+<Note>
+Remote Control es distinto de un [chat en la nube](/es/code/cloud-chats), que se ejecuta en los servidores de Aristra. Con Remote Control, el trabajo lo hace tu computadora.
+</Note>
+
+Remote Control viene con un [plan](/es/account/plans), porque el chat compartido se guarda en tu cuenta. Sin plan, la terminal y Aristra Desktop lo indican cuando lo activas.
+
+## Activarlo
+
+<Tabs>
+  <Tab title="Terminal">
+    En un chat, ejecuta:
+
+    ```text
+    /remote-control
+    ```
+
+    Ejecútalo en un chat de esta computadora después de tu primer mensaje; un chat en la nube ya está en la web. Aristra Code muestra el enlace del chat. `/rc` es la forma corta, y `/remote-control off` deja de compartir.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Haz clic derecho en un chat que se ejecuta en este Mac y elige **Continue on phone and web**. Un icono de teléfono marca los chats compartidos en la barra lateral. Elige **Stop sharing to phone and web** para dejar de compartir.
+  </Tab>
+</Tabs>
+
+Remote Control necesita que esta computadora tenga la sesión iniciada con una clave del dispositivo. Si no la tiene, el menú lo indica: vuelve a iniciar sesión en esta computadora.
+
+## Qué puedes hacer desde tu teléfono y la web
+
+- Leer el chat mientras se ejecuta, pasos incluidos.
+- Enviar mensajes. Un mensaje enviado mientras se ejecuta una respuesta espera y se ejecuta después, como uno puesto en cola con ⌘Enter en Aristra Desktop.
+- Detener una respuesta en curso.
+- Aprobar o rechazar pasos. Permitir uno desde otro dispositivo necesita allí una nueva verificación del inicio de sesión; no se ofrecen las respuestas "don't ask again"; una pregunta que pide un secreto, como una clave, solo se responde en tu computadora; y una respuesta dada en tu computadora gana.
+- Cambiar el modo y el modelo del chat, entre los que ofrece tu computadora. Un modo menos estricto pide antes una nueva verificación del inicio de sesión.
+- Adjuntar archivos a un mensaje.
+
+## Cuando tu computadora no está disponible
+
+Un chat compartido sigue compartido cuando se cierra la terminal o se detiene el runtime. Lo que envías desde tu teléfono o la web mientras tanto espera, marcado como pendiente, y se ejecuta cuando tu computadora vuelve. La transcripción del chat se queda en tu cuenta hasta que la eliminas, incluso después de dejar de compartir.
+
+## Iniciar un chat en tu computadora desde la web o el teléfono
+
+También puedes iniciar un chat nuevo en una de tus computadoras sin estar delante de ella. En app.aristralabs.com, elige **Runs on Aristra Cloud** encima de un chat nuevo y elige la computadora. En su página, elige una carpeta y escribe tu mensaje. El chat se ejecuta en esa computadora, con sus archivos, su shell y sus herramientas, con los modelos de Aristra pagados con tu saldo, y se guarda en tu cuenta como cualquier chat compartido. Necesita un plan, y que la computadora tenga la sesión iniciada con una clave del dispositivo.
+
+No puede empezar nada hasta que lo permitas **en la propia computadora**. Está desactivado de forma predeterminada, y el sitio web nunca puede activarlo.
+
+<Tabs>
+  <Tab title="Aristra Desktop">
+    Abre **Settings › General › From the web and phone** y activa **Start chats on this Mac from the web and phone**. Después activa cada carpeta en la que puede empezar un chat.
+  </Tab>
+  <Tab title="Terminal">
+    ```text
+    /remote-control computer on
+    /remote-control folder on
+    ```
+
+    El primero lo activa para esta computadora. El segundo permite la carpeta en la que estás. `/remote-control computer` muestra lo que está permitido, y `off` en lugar de `on` deshace cualquiera de los dos.
+  </Tab>
+</Tabs>
+
+| Regla | Qué significa |
+|---|---|
+| **Primero hay que confiar en la carpeta** | Abre un chat en la carpeta en la computadora y confía en ella. Una carpeta que no es de confianza no se puede permitir |
+| **Algunas carpetas nunca se permiten** | Tu carpeta personal en sí, una carpeta oculta dentro de ella y la raíz del disco |
+| **El sitio web nombra una carpeta, nunca una ruta** | Ve el nombre de la carpeta. La ruta se queda en tu computadora |
+| **La computadora comprueba cada inicio** | El interruptor, la carpeta, la confianza y el modo se vuelven a comprobar en la computadora cada vez |
+| **Sin omisión de permisos desde otro dispositivo** | Eliges Manual, Accept edits, Plan o Auto, o dejas el predeterminado de la propia computadora |
+| **La computadora debe estar en línea** | Un inicio necesita la computadora encendida y conectada. Los mensajes que envíes después la esperan, como en cualquier chat compartido |
+
+Las aprobaciones esperan en el chat, en la web y en la computadora; gana la primera respuesta. La computadora muestra una notificación cuando un chat empieza desde otro dispositivo.
+
+## Una computadora siempre accesible
+
+Una [computadora en la nube](/es/surfaces/cloud-computer) es una computadora propia en la nube de Aristra. Inicias chats en ella desde la web y tu teléfono, y despierta con tus mensajes, así que nunca está ausente.
+
+## Cómo se conecta
+
+Tu computadora mantiene una conexión HTTPS saliente con Aristra, autenticada con su token del dispositivo y su clave del dispositivo. Nada escucha en tu computadora, y cada solicitud desde tu teléfono o la web se ejecuta como máximo una vez.

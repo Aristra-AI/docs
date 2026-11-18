@@ -1,0 +1,187 @@
+---
+title: "Servidores MCP"
+description: "Dale a Aristra Code más herramientas con servidores del Model Context Protocol: añádelos para ti, para un proyecto o para todos en un repositorio, aprueba los de un proyecto, confía en ellos, inicia sesión con OAuth y ejecuta un servidor en el sandbox."
+---
+
+Los servidores del [Model Context Protocol](https://modelcontextprotocol.io) le dan a Aristra Code más herramientas: una base de datos, un gestor de incidencias, una herramienta de diseño, una API interna. Aristra Code los ejecuta para los chats de tu computadora. Los chats en la nube usan las herramientas del agente en la nube, los conectores de tu cuenta de Aristra y los servidores MCP en una dirección que añades en la página Connectors del sitio web. Los servidores que añades con `aristra mcp` no se usan allí.
+
+## Añadir un servidor
+
+Un servidor que se ejecuta como programa en tu computadora:
+
+```sh
+aristra mcp add fs --cwd ~/notes -- npx -y @modelcontextprotocol/server-filesystem ~/notes
+aristra mcp add db --secret DATABASE_URL=postgres://... -- uvx mcp-server-postgres
+```
+
+Un servidor en una dirección:
+
+```sh
+aristra mcp add sentry --url https://mcp.sentry.dev/mcp
+aristra mcp add internal --url https://tools.example.com/mcp --header Authorization="Bearer ..."
+```
+
+El programa y sus argumentos van después de `--`. Después:
+
+```sh
+aristra mcp test fs        # start it and list its tools
+aristra mcp list           # every server here, its scope and its state
+aristra mcp get fs         # one server's details
+aristra mcp trust fs       # let its tools run without asking, in this project
+```
+
+## Ámbitos
+
+Un servidor se guarda en uno de tres ámbitos. `-s` (`--scope`) lo elige cuando añades o eliminas uno.
+
+| Ámbito | Se usa en | Compartido | Se guarda en |
+|---|---|---|---|
+| `local` (el predeterminado) | Solo este proyecto | No | Tu configuración, bajo el proyecto |
+| `project` | Este proyecto | Sí, a través del repositorio | `.mcp.json` en la carpeta |
+| `user` | Todos tus proyectos | No | Tu configuración, en `mcp.servers` |
+
+```sh
+aristra mcp add -s user github -- npx -y @modelcontextprotocol/server-github
+aristra mcp add -s project docs --url https://docs.example.com/mcp
+aristra mcp remove -s local fs
+```
+
+El proyecto es la raíz del repositorio, así que un servidor local añadido en una subcarpeta o en un worktree está disponible en todo él. Cuando un nombre está en varios ámbitos, se usa el local antes que el del proyecto, el del proyecto antes que el tuyo y el tuyo antes que el de un plugin. Un servidor local o de proyecto que se ejecuta como programa se ejecuta en el proyecto.
+
+## El .mcp.json de un proyecto
+
+Un repositorio puede traer sus propios servidores en un `.mcp.json`, el mismo archivo que lee Claude Code:
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"] },
+    "docs": { "type": "http", "url": "https://docs.example.com/mcp", "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" } }
+  }
+}
+```
+
+Se lee desde la carpeta del chat y desde cada carpeta superior; gana el archivo más cercano.
+
+**Un servidor de proyecto solo se ejecuta cuando lo apruebas.** Cuando inicias `aristra` en la carpeta, te pregunta por cada uno nuevo: usarlo, usarlo junto con todos los futuros de este proyecto o continuar sin él. Si hay varios, aparecen en una lista para marcar. Un chat en una carpeta en Aristra Desktop pregunta lo mismo encima de su compositor, y `/mcp` aprueba o rechaza uno más tarde.
+
+Tus respuestas se guardan en tu propia configuración, nunca en el repositorio. `aristra mcp reset-project-choices` las olvida, así que se te vuelve a preguntar.
+
+<Note>
+Un repositorio no puede aprobar sus propios servidores. Las aprobaciones en la configuración `.aristra` de la carpeta solo cuentan una vez que confías en la carpeta, y un rechazo cuenta venga de donde venga. Una ejecución que nadie supervisa (`aristra run`, una tarea programada) no puede preguntar, así que usa un servidor que siga pendiente de aprobación, pero nunca uno rechazado.
+</Note>
+
+Un `.mcp.json` se comparte con todos los que tienen el repositorio, así que no contiene secretos: escribe `${VAR}` y define la variable en tu entorno. Confiar en un servidor de proyecto se aplica solo a este proyecto.
+
+## La pantalla /mcp
+
+`/mcp` en un chat muestra los servidores que ve, agrupados por ámbito, cada uno con su estado. Elige uno para ver sus detalles y:
+
+- aprobarlo o rechazarlo, si es un servidor de proyecto todavía sin aprobar;
+- autenticarte, volver a autenticarte o borrar su inicio de sesión, si es un servidor en una dirección;
+- volver a conectarlo;
+- desactivarlo o activarlo solo para este proyecto;
+- ver sus herramientas.
+
+`/mcp reconnect`, `/mcp enable` y `/mcp disable` hacen lo mismo con el servidor que indiques, o con todos.
+
+### Desde JSON o Claude Desktop
+
+```sh
+aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop whose name is free here (macOS)
+```
+
+`aristra import claude-code` y `aristra import codex` también traen los servidores de esas herramientas, con una vista previa primero.
+
+## Dónde se guardan los servidores
+
+Un servidor de usuario vive en tu propia configuración, en `mcp.servers`, y uno local, bajo el proyecto en el mismo archivo, nunca con un secreto: los valores indicados con `--secret`, `--header` y `--client-secret` van al almacén de credenciales de Aristra. Un servidor de proyecto vive en el `.mcp.json` de la carpeta.
+
+```json ~/.aristra/settings.json
+{
+  "mcp": {
+    "servers": {
+      "fs": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/notes"],
+        "cwd": "/Users/me/notes"
+      },
+      "sentry": { "url": "https://mcp.sentry.dev/mcp" }
+    }
+  },
+  "permissions": { "trustedMcpServers": ["fs"] }
+}
+```
+
+| Campo | Para | Significado |
+|---|---|---|
+| `type` | Ambos | `stdio` o `http`. Los servidores SSE y WebSocket no son compatibles |
+| `command`, `args` | Programas | El programa y sus argumentos |
+| `env` | Programas | Variables de entorno que no son secretas |
+| `cwd` | Programas | La carpeta en la que se ejecuta, en la que puede escribir |
+| `writable` | Programas | Otras carpetas en las que puede escribir |
+| `sandbox` | Programas | `true` lo ejecuta en el sandbox (predeterminado: `false`) |
+| `url` | Direcciones | La dirección del servidor |
+| `headers` | Direcciones | Encabezados que no son secretos |
+| `headersHelper` | Direcciones | Un comando cuya salida JSON añade encabezados en cada conexión |
+| `oauth` | Direcciones | `clientId`, `scopes`, `callbackPort`, `authServerMetadataUrl`, para un servidor que los necesite |
+| `alwaysLoad` | Ambos | `true` mantiene sus herramientas siempre en la lista del modelo, nunca detrás de la búsqueda de herramientas |
+| `timeout` | Ambos | Segundos que puede tardar una llamada |
+| `enabled` | Ambos | `false` conserva la entrada sin iniciarla |
+| `toolCosts`, `spendLimit`, `costUnit` | Ambos | Lo que cuestan sus herramientas, el límite de gasto de un chat en él y la unidad (`credits` de forma predeterminada). La aprobación de una llamada con costo muestra su costo, y una llamada que supera el límite siempre pregunta |
+
+`${VAR}` y `${VAR:-default}` en `command`, `args`, `env`, `url` y `headers` se leen del entorno de tu shell de inicio de sesión. En un servidor en una dirección, las variables que contienen credenciales conocidas (claves de la nube, tokens de registros de paquetes, `ANTHROPIC_API_KEY` y similares) se leen vacías, y `ARISTRA_TOKEN` nunca se rellena.
+
+<Note>
+El `.aristra/settings.json` de un repositorio no puede añadir servidores MCP: los servidores de un repositorio son los de su `.mcp.json`, que se usan una vez que los apruebas. Cuando el agente cambia un `.mcp.json`, siempre pregunta antes.
+</Note>
+
+## Confianza
+
+Un servidor MCP es código que no escribiste, y sus herramientas pueden hacer cualquier cosa:
+
+- **Hasta que confíes en un servidor**, cada una de sus herramientas pregunta antes de ejecutarse, salvo que una regla la permita (en modo Auto, decide el revisor).
+- **Una vez que confías en un servidor** con `aristra mcp trust <name>`, sus herramientas se ejecutan sin preguntar, como lo haría con una regla que permite `mcp__<name>`. Una regla de denegación o de pregunta sigue ganando, y en Read only se rechaza una herramienta que el servidor no marca como de solo lectura.
+- **La confianza pertenece al servidor en el que confiaste, en su ámbito.** Un servidor tuyo o de un plugin es de confianza en todas partes; uno local o de proyecto, solo en su proyecto. Un servidor con el mismo nombre de otro ámbito, como el `.mcp.json` de un repositorio o el `--mcp-config` de una ejecución, nunca recibe esa confianza.
+
+Las reglas también funcionan: `mcp__github` para todas las herramientas de un servidor, o `mcp__github__create_issue` para una, en `permissions.allow`, `ask` o `deny`. Consulta [Permisos](/es/code/configure/permissions).
+
+## Sandbox
+
+Un servidor que se ejecuta como programa empieza con tu acceso. Con `"sandbox": true` (`aristra mcp add --sandbox`), se ejecuta en el sandbox, con la red permitida: puede leerlo todo salvo tus carpetas privadas (`~/.ssh`, `~/.aws` y otras credenciales) y los datos de Aristra, y solo puede escribir en su propia carpeta (`cwd`), las carpetas de `writable`, las cachés de paquetes y su propia carpeta temporal.
+
+Antes de que un servidor se inicie mediante `npx`, `bunx`, `uvx` o `pipx`, su paquete se comprueba en la base de datos OSV de malware conocido, y un paquete que se sabe malicioso se rechaza.
+
+## Iniciar sesión con OAuth
+
+Un servidor que necesita iniciar sesión muestra "sign-in needed" en `aristra mcp list`:
+
+```sh
+aristra mcp login sentry                 # in a browser on this computer
+aristra mcp login sentry --device-code   # with a code, when the server offers it
+aristra mcp logout sentry
+```
+
+Los tokens van al almacén de credenciales y se renuevan antes de que caduquen. Un servidor que necesita un ámbito de OAuth concreto lo obtiene de `aristra mcp add-json`, en `oauth.scopes`.
+
+## Recursos, prompts y preguntas
+
+- **Recursos.** Cuando un servidor ofrece recursos, Aristra Code puede listarlos y leerlos.
+- **Los prompts** se convierten en comandos: `/mcp__<server>__<prompt> <arguments>`.
+- **Preguntas.** Un servidor puede preguntarte algo mientras se ejecuta su herramienta, como un formulario o un enlace que abrir. Se pregunta como cualquier aprobación.
+
+## Llamadas largas y muchas herramientas
+
+- Una llamada falla cuando el servidor no envía nada durante 30 minutos (un programa) o 5 minutos (una dirección), salvo que su `timeout` diga otra cosa. En tu propio chat, una llamada que sigue ejecutándose después de dos minutos pasa a segundo plano, y su resultado llega al chat cuando termina. En un subagente o en una ejecución que nadie supervisa, el turno la espera.
+- Las herramientas MCP están detrás de la búsqueda de herramientas: el modelo encuentra la herramienta que necesita en lugar de recibir cientos de definiciones de herramientas en cada turno. `mcp.toolSearch: false` las pone en la lista de herramientas del modelo, recortada para que la lista completa, incluidas las herramientas propias de Aristra Code, no pase de 128.
+- Los servidores de un chat se conectan al abrirse el chat, así que están listos para tu primer mensaje. Cuando cambian las herramientas de un servidor, Aristra Code vuelve a listarlas, a mitad de un turno si hace falta.
+- Un servidor que se ejecuta como programa se detiene con SIGINT (un servidor en Docker se apaga con él), luego con SIGTERM a los 100 ms y con SIGKILL 400 ms después.
+
+## Servidores de plugins
+
+Un [plugin](/es/code/extend/plugins) puede traer servidores MCP en su `.mcp.json` o en el `mcpServers` de su manifiesto. Se llaman `plugin:<plugin>:<server>`, y sus herramientas preguntan antes de cada llamada salvo que una regla las permita (`mcp__plugin_<plugin>_<server>`).
+
+## Para organizaciones
+
+Una política gestionada puede permitir o denegar servidores por nombre, comando o dirección. Consulta [Política gestionada](/es/code/configure/managed-policy).

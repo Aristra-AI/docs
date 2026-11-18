@@ -1,0 +1,42 @@
+---
+title: "Contexto"
+description: "Qué ve el modelo en cada turno, cómo se resumen los chats largos y cómo ver y gestionar lo que ocupa el contexto del modelo con /context, /compact y /autocompact."
+---
+
+El contexto del modelo es todo lo que lee en un turno: las instrucciones de Aristra Code, tus archivos de instrucciones, las herramientas que puede usar, la conversación hasta ese momento y tu mensaje. Tiene un límite de tamaño, así que los chats largos se resumen a medida que crecen.
+
+## Qué ve el modelo
+
+En cada turno, el modelo recibe:
+
+1. **El prompt del sistema**, que se construye una vez por chat y se conserva, para que la caché de prompts del proveedor siga caliente de un turno a otro. Su parte fija va primero y es la misma en todos los chats con el mismo modelo, así que un chat nuevo con ese modelo, o un cambio de modo, también lee esa parte de la caché. Contiene cómo funciona Aristra Code, tu computadora y tu carpeta, lo que permite el modo, tus [archivos de instrucciones](/es/code/guides/memory) y, en un repositorio git, una instantánea de este: la rama, la rama principal, `git status` y los cinco últimos commits.
+2. **La conversación**, con las partes más antiguas resumidas cuando el chat es largo.
+3. **El contexto de este turno**, solo cuando cambió desde el turno anterior: tu perfil, la memoria de tu cuenta para esta carpeta, los agentes que puede iniciar, notas sobre el repositorio, tus skills, las instrucciones de tus servidores MCP y los resultados de los comandos en segundo plano que terminaron.
+4. **Tu mensaje** y los archivos que adjuntaste.
+
+## Ver qué lo ocupa
+
+```text
+/context
+```
+
+muestra una cuadrícula de lo que ocupa el contexto del modelo: el prompt del sistema, las herramientas (aparte, las herramientas MCP), las instrucciones de tus servidores MCP, tus archivos de instrucciones, tus skills, los mensajes, el espacio reservado para resumir y lo que queda libre. Debajo, cada herramienta MCP y cada archivo de instrucciones con su tamaño, y sugerencias como salidas largas de comandos o una ventana casi llena. En el renderizador a pantalla completa, las listas se acortan; `/context all` las muestra completas. En Aristra Desktop, elige **Context usage** en el menú `/` de un chat.
+
+La línea de estado muestra cuánto se ha llenado el contexto: amarillo al 60%, rojo al 80%.
+
+## Resumir (compactación)
+
+Cuando un chat se acerca al límite del modelo, primero las salidas antiguas de comandos y herramientas se guardan en un archivo y se quitan del contexto. Si eso no basta, Aristra Code resume los mensajes más antiguos y el modelo continúa a partir del resumen. El último intercambio se queda palabra por palabra (`/compact` lo resume todo), y se vuelven a leer hasta cinco de los archivos con los que trabajó más recientemente. La línea de estado hace una cuenta atrás a medida que se acerca ese momento.
+
+- `/compact` resume ahora. Añade instrucciones para decir qué debe conservar el resumen: `/compact keep the API decisions`.
+- `/autocompact <tokens>` fija cuánto se llena el contexto antes de resumir, para el modelo del chat: de 100k a 1M (`500k`, `200000`), o `auto` para la propia ventana del modelo. `/autocompact` solo muestra el ajuste actual. Se guarda por modelo en tu configuración (`modelSettings.<model>.autoCompactWindow`); `ARISTRA_AUTO_COMPACT_WINDOW` tiene prioridad sobre él.
+
+Todas las superficies siguen mostrando la conversación completa; solo el modelo trabaja a partir del resumen. Tus archivos de instrucciones se vuelven a leer después de un resumen.
+
+<Tip>
+Iniciar un chat nuevo para una tarea nueva es la forma más barata de mantener el contexto pequeño. Cuando un chat grande lleva más de una hora inactivo, la línea de estado lo sugiere.
+</Tip>
+
+## Quién escribe el resumen
+
+Tu modelo de resúmenes, si configuraste uno (`auxiliary.summary`) o, si no, el propio modelo del chat, que escribe el resumen dentro del chat para reutilizar la caché de prompts del chat. Consulta [Modelos](/es/code/configure/models).

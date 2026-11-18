@@ -1,0 +1,117 @@
+---
+title: "Política gestionada"
+description: "Para administradores: impón reglas, desactiva modos, permite o bloquea servidores MCP y fija cualquier ajuste en todas las computadoras, mediante un perfil de configuración o archivos de configuración gestionada."
+---
+
+Un administrador puede definir una política que siguen todos los chats de una computadora, en la terminal, en Aristra Desktop y en todas las demás superficies: reglas que nadie puede anular, el modo Auto desactivado, servidores MCP permitidos o bloqueados, la telemetría desactivada. Usa las mismas claves que la configuración gestionada de Claude Code.
+
+## De dónde viene la política
+
+Aristra Code lee el primer origen que tenga una política:
+
+| Orden | Origen | Dónde |
+|---|---|---|
+| 1 | Un perfil de configuración de macOS (MDM) para el usuario, dominio `com.aristralabs.aristra` | `/Library/Managed Preferences/<user>/com.aristralabs.aristra.plist` |
+| 2 | El mismo perfil para la computadora | `/Library/Managed Preferences/com.aristralabs.aristra.plist` |
+| 3 | Archivos de configuración gestionada: `managed-settings.json` y, después, cada `managed-settings.d/*.json` combinado encima por orden de nombre | macOS: `/Library/Application Support/Aristra/`. Linux: `/etc/aristra/` |
+
+Las preferencias propias de un usuario nunca se leen como política, y ninguna superficie puede escribir la política. Los archivos se vuelven a leer cuando cambian. Los archivos de instrucciones (`AGENTS.md`, `rules/*.md`) colocados junto a la configuración gestionada también se aplican a todos los chats.
+
+## Un ejemplo
+
+```json /Library/Application Support/Aristra/managed-settings.json
+{
+  "permissions": {
+    "deny": ["shell(git push:*)", "read(~/.aws/**)", "web_fetch(domain:pastebin.com)"],
+    "ask": ["shell(npm publish:*)"],
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
+  "telemetry": { "usage": false, "errors": false },
+  "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
+  "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
+}
+```
+
+Los valores de la política ganan a la configuración de cualquier usuario y de cualquier carpeta.
+
+## Reglas
+
+- **Las reglas de denegación** rechazan una llamada antes que nada: ninguna regla de permitir, respuesta de sesión, modo (Bypass incluido) ni revisor puede anularlas. Sus rutas también cierran el sandbox a los comandos.
+- **Las reglas de pregunta** preguntan, incluso en Bypass (en modo Auto, decide el revisor).
+- **Las reglas de permitir** cuentan como las del usuario, en todas las carpetas.
+- **`permissions.allowManagedPermissionRulesOnly: true`** hace que solo cuenten las reglas de la política. Las aprobaciones ofrecen entonces solo Yes y No.
+
+## Modos
+
+- **`permissions.disableAutoMode: "disable"`** desactiva el modo Auto en todas partes. Un chat que ya está en Auto pregunta a partir de su siguiente turno, con un aviso.
+- **`permissions.disableBypassPermissionsMode: "disable"`** desactiva el modo Bypass permissions y prohíbe `aristra run --dangerously-skip-sandbox`.
+
+## Sandbox
+
+Se puede fijar cualquier ajuste del sandbox, por ejemplo `sandbox.allowUnsandboxedCommands: false` para que los comandos se ejecuten siempre en el sandbox. Con el sandbox activado, un repositorio ya no puede desactivarlo, solo tu propia configuración, `--settings` y la política pueden excluir comandos de él, y los comandos que ejecutas con `!` también se ejecutan dentro. Dos claves solo existen en una política:
+
+| Clave | Hace |
+|---|---|
+| `sandbox.network.allowManagedDomainsOnly` | Solo cuentan los hosts de la política, y no se pregunta nada |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | Solo cuentan las rutas `allowRead` de la política |
+
+## Servidores MCP
+
+| Clave | Significado |
+|---|---|
+| `deniedMcpServers` | Servidores que nunca pueden ejecutarse. Siempre gana |
+| `allowedMcpServers` | Si existe, solo pueden ejecutarse los servidores que coincidan. Una lista vacía no permite ninguno |
+
+| Entrada | Coincide con |
+|---|---|
+| `{"serverName": "github"}` | Un servidor por su nombre, de cualquier origen (configuración, `.mcp.json`, plugins) |
+| `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | Un servidor de programa por su comando y sus argumentos exactos |
+| `{"serverUrl": "https://mcp.company.example/*"}` | Un servidor por su dirección, donde `*` coincide con cualquier cosa |
+
+Cuando la lista de permitidos tiene entradas de comando (o de dirección), un servidor de programa (o de dirección) debe coincidir con una de ellas; su nombre por sí solo no basta.
+
+Un servidor que la política excluye queda desactivado, y `aristra mcp list` indica "Your organization's policy does not allow this MCP server."
+
+## Hooks, plugins y flujos de trabajo
+
+| Clave | Hace |
+|---|---|
+| `hooks` | Hooks que se ejecutan para todos, sin que cada usuario tenga que aprobarlos |
+| `allowManagedHooksOnly` | Solo se ejecutan los hooks de la política y los de los plugins que activa |
+| `disableAllHooks` | No se ejecuta ningún hook |
+| `enabledPlugins` | Plugins activados o desactivados para todos; gana un valor gestionado |
+| `strictKnownMarketplaces` (o `allowedMarketplaces`) | Solo se pueden añadir estos marketplaces de plugins |
+| `blockedMarketplaces` | Marketplaces que nunca se pueden añadir |
+| `pluginTrustMessage` | Tu texto, que se muestra cuando alguien instala un plugin |
+| `disableSideloadFlags` | Rechazar `--plugin-dir` |
+| `disableWorkflows` | Desactivar los flujos de trabajo |
+
+Una carpeta `agents/` junto a la configuración gestionada añade agentes personalizados para todos, con prioridad sobre los agentes de los usuarios con el mismo nombre.
+
+## Cualquier otro ajuste
+
+La mayoría de los ajustes se pueden fijar de la misma forma: `telemetry.usage`, `telemetry.errors`, `approvals.timeoutMinutes`, `memory.enabled`, etc. Los ajustes que solo se leen del archivo propio de cada usuario (`review`, `credentials`, `auxiliary`, `mcp`, `model.fallback`, `runtime.notifications`, `runtime.maxRunningTurns`) no se pueden fijar con una política. Aristra Desktop muestra la telemetría, los flujos de trabajo, el interruptor del sandbox y la búsqueda gratuita de respaldo como definidos por tu organización cuando la política los fija.
+
+## Comprobarla
+
+```sh
+aristra doctor        # says where the policy comes from
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
+```
+
+## Probar una política
+
+En una computadora sin política, haz que Aristra Code apunte a una carpeta de política propia (detén antes el runtime, ya que lee la variable al iniciarse):
+
+```sh
+mkdir -p ~/aristra-policy
+cat > ~/aristra-policy/managed-settings.json <<'EOF'
+{ "permissions": { "deny": ["shell(git push *)"], "disableAutoMode": "disable" } }
+EOF
+aristra runtime stop
+ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
+```
+
+Para la configuración y las instrucciones, `ARISTRA_MANAGED_SETTINGS_DIR` solo se lee cuando no existe ninguna política de un administrador, así que nunca puede sustituirla.

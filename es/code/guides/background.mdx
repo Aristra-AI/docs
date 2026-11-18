@@ -1,0 +1,95 @@
+---
+title: "Trabajo en segundo plano"
+description: "Mantén el trabajo en marcha mientras haces otra cosa: comandos en segundo plano, monitores, /loop y prompts programados, tareas programadas, el servicio en segundo plano y las notificaciones."
+---
+
+## Comandos en segundo plano
+
+Un comando largo no bloquea el chat:
+
+- **Al llegar a su tiempo límite** (2 minutos de forma predeterminada, hasta 10 si el modelo lo pide), un comando que sigue ejecutándose pasa a segundo plano en lugar de detenerse, y Aristra Code recibe la salida que lleve hasta ese momento.
+- **Ctrl+B** (dos veces dentro de tmux) mientras se ejecuta un comando lo envía tú mismo a segundo plano.
+- **Los servidores de desarrollo y los watchers** se inician en segundo plano cuando Aristra Code lo pide.
+
+Los comandos en segundo plano siguen ejecutándose entre turnos. Cuando uno termina, se avisa al chat, y Aristra Code lee su salida. Se detienen con su chat y con el runtime, y detener uno termina todo lo que inició.
+
+Aristra Code ejecuta un servidor como un comando en segundo plano propio. Un comando que termina en `&` se convierte en uno. Un comando que pasa parte de sí mismo a segundo plano con `&`, `nohup`, `disown` o `setsid` se devuelve para dividirlo, ya que lo que deja en ejecución terminaría con él.
+
+```text
+/tasks
+```
+
+muestra todo lo que se ejecuta en segundo plano: comandos, monitores, [agentes](/es/code/guides/subagents) y flujos de trabajo. Enter abre un agente (lo que escribas ahí va a él) o un flujo de trabajo, y x detiene cualquiera de ellos. La línea de estado los cuenta ("1 shell", "2 local agents"). En Aristra Desktop aparecen encima del cuadro de mensaje, cada uno con su salida y un botón Stop.
+
+## Monitores
+
+Un monitor es un comando en segundo plano cuyas líneas de salida llegan al chat como eventos: una línea de registro que coincide con un error, un despliegue que cambia de estado, una ejecución de pruebas que termina. Aristra Code inicia uno cuando le pides que vigile algo ("avísame si falla la compilación"). Cada monitor se ejecuta durante 5 minutos de forma predeterminada y como máximo 30, y luego se detiene con un aviso; Aristra Code puede volver a iniciarlo para vigilar más tiempo. Los monitores aparecen en `/tasks`.
+
+## Repetir un prompt: /loop
+
+```text
+/loop 5m check the deploy and tell me when it's done
+/loop 30m /code-review
+/loop check CI until it passes        # no interval: Aristra Code picks when to look again
+```
+
+`/loop` ejecuta un prompt o un comando cada cierto intervalo. Sin intervalo, Aristra Code marca su propio ritmo y se despierta cuando hay algo que comprobar.
+
+También puedes pedir un calendario con palabras normales ("cada 10 minutos, revisa el despliegue", "recuérdame a las 2:30 que revise el despliegue"). Aristra Code programa el prompt en este chat:
+
+- Un prompt programado solo se ejecuta mientras el chat está inactivo, nunca a mitad de una respuesta.
+- Cada chat puede tener hasta 50. Uno recurrente se detiene a los 7 días.
+- Viven en el Aristra Code que se está ejecutando: se detienen cuando se detiene el runtime. Para un trabajo que debe seguir después del chat, Aristra Code guarda en su lugar una tarea programada, y antes te pregunta.
+
+## Tareas programadas
+
+Una tarea programada ejecuta un prompt en una carpeta a horas fijas (una vez, cada hora, a diario, los días laborables o cada semana, según la hora de tu computadora): un resumen matutino de los pull requests abiertos, una revisión semanal de las dependencias. Las tareas se guardan en tu computadora, se ejecutan allí y son gratis. Cada ejecución es un chat propio (o un mensaje nuevo en el chat del que salió la tarea, si lo pediste así), aparece en la **Inbox** de la pestaña Code con puntos de no leído, y sus aprobaciones esperan 2 horas.
+
+Hay tres formas de crear una:
+
+- **Pídela en un chat**: "todos los días laborables a las 9, revisa la compilación y dime qué falla". Aristra Code muestra la tarea antes de guardarla: su calendario, su prompt, la carpeta, el modelo y el modo de permisos. Pregunta en todos los modos de permisos, porque una tarea sigue ejecutándose después del chat. La tarea toma la carpeta, el modelo y el modo del chat; Aristra Code no puede elegir otros.
+- **En Aristra Desktop**: Chats & tasks, **New** › **Scheduled task**, o ⌘K › **New scheduled task**.
+- **En una terminal**:
+
+```sh
+aristra tasks add "Check the build and report what fails" --every weekday --at 09:00
+aristra tasks add "Summarize last week's commits" --every monday --at 08:30 --name "Weekly notes"
+aristra tasks add "Remind me to send the report" --once "2026-03-01 08:00"
+aristra tasks                      # list them, with each one's next run and last run
+aristra tasks pause <id>           # also: resume, run (once, now), remove
+```
+
+En la app de terminal, `/schedule` las muestra y `/schedule pause|resume|run|remove <number>` cambia una.
+
+Lo que una ejecución puede y no puede hacer:
+
+- Cada ejecución es un chat nuevo que no ha visto el chat en el que se creó la tarea, así que el prompt tiene que valerse por sí mismo, salvo que pidieras que las ejecuciones vuelvan a ese chat (o eligieras un chat en **Each run** en Aristra Desktop). Entonces cada ejecución es un mensaje nuevo allí.
+- Una ejecución no puede hacerte preguntas ni programar tareas.
+- Una ejecución sin nada nuevo que contar lo indica en silencio: se guarda en la lista de la tarea, ya leída, y no recibes ninguna notificación. Una ejecución que falló siempre te avisa, con el motivo (por ejemplo, que no queda saldo). Después de tres ejecuciones fallidas seguidas, la tarea se pausa; reanúdala cuando se haya resuelto la causa.
+- Las ejecuciones perdidas mientras la computadora estaba dormida o apagada se recuperan con una ejecución cuando vuelve, o se omiten si elegiste eso para la tarea.
+
+Las tareas programadas se ejecutan a su hora con todas las ventanas cerradas cuando el servicio en segundo plano está activado. Sin él, una tarea se ejecuta la próxima vez que Aristra Code esté en ejecución. Una ejecución que llega más de dos minutos tarde cuenta como perdida: una ejecución la recupera, o se omite si elegiste eso. Las tareas se ejecutan mientras esta computadora tiene la sesión iniciada en Aristra. Aristra lo avisa una vez, la primera vez que tienes una tarea y el servicio está desactivado.
+
+Con un [plan](/es/account/plans), una tarea puede ejecutarse en la nube de Aristra, con tu computadora apagada. Consulta [Tareas programadas](/es/scheduled-tasks).
+
+## El servicio en segundo plano
+
+```sh
+aristra service install     # keep Aristra Code running, now and at every login
+aristra service status
+aristra service uninstall
+```
+
+En macOS es un agente de launchd, y en Linux, una unidad de usuario de systemd. Sigue las actualizaciones. En Aristra Desktop, Settings › General › **Keep Aristra running in the background** instala el mismo servicio. En un servidor Linux sin nadie con la sesión iniciada, ejecuta `loginctl enable-linger $USER`.
+
+Sin el servicio, el runtime se inicia cuando una superficie lo necesita y se detiene tras 10 minutos sin nada conectado ni nada en ejecución (`runtime.idleExitMinutes`). Un turno, un comando en segundo plano o una aprobación pendiente lo mantienen activo.
+
+## Notificaciones
+
+| Superficie conectada | Quién avisa |
+|---|---|
+| La terminal | La terminal, en iTerm2, kitty y Ghostty, y con la campana en Terminal de Apple. `ARISTRA_NO_NOTIFY=1` lo desactiva |
+| Aristra Desktop | La app |
+| Ninguna | Aristra Code, con una notificación del sistema. `runtime.notifications: false` lo desactiva |
+
+Recibes un aviso cuando una aprobación está esperando, cuando termina una ejecución programada y cuando llega un cambio desde tu teléfono o la web. Aristra Code también puede enviarte una notificación por sí mismo, por ejemplo cuando una tarea larga termina mientras no estás. No envía ninguna mientras estás en tu computadora usando Aristra.

@@ -1,0 +1,96 @@
+---
+title: "Computadora en la nube"
+description: "Tu propia computadora en Aristra Cloud, con un plan o con recargas: un shell real, archivos que se conservan y las herramientas que instales. Se duerme cuando está inactiva y despierta con tu mensaje. El tiempo de ejecución y su disco se pagan con tu saldo."
+---
+
+Una computadora en la nube es tu propia máquina Linux en la nube de Aristra, con el mismo agente de Aristra Code que tu terminal y Aristra Desktop. Los chats en ella funcionan como los chats en tu Mac: un shell real, archivos que se conservan, las herramientas que instales y trabajos largos que se quedan en ejecución. Siempre está accesible desde la web y tu teléfono, y desde Telegram con un plan, porque despierta cuando le envías algo.
+
+<Note>
+Una computadora en la nube es distinta de un [chat en la nube](/es/code/cloud-chats). Un chat en la nube se ejecuta en el agente en la nube compartido de Aristra y no conserva nada entre chats salvo tu cuenta. Una computadora en la nube es una máquina propia, con un disco que conserva tus archivos y las herramientas instaladas.
+</Note>
+
+## Crear una
+
+Una computadora en la nube funciona con tu saldo: con un [plan](/es/account/plans), o con [recargas](/es/account/credits) si no tienes plan. Con un plan, basta con cualquier saldo mayor que cero para crear una. Sin plan, necesitas al menos $2 de recargas; el crédito inicial no cuenta. Tu plan fija el tamaño y el disco máximos que puedes tener; sin plan, hasta Large con un disco de 100 GB.
+
+1. Abre **Cloud computer** en tu cuenta, en `app.aristralabs.com/account/computer`. Es el único lugar para crearla, usarla y gestionarla.
+2. Elige un tamaño, un disco y dónde guarda sus datos (más abajo), y luego elige **Create cloud computer**.
+3. Está lista en un minuto aproximadamente, y la página muestra cada paso. Inicia un chat en ella desde su página, o desde **Where it runs** en un chat nuevo.
+
+| Tamaño | Máquina | Mientras está despierta | Disponible |
+|---|---|---|---|
+| Small | 2 CPU compartidas, 1 GB de memoria | $0.0122 por hora | Todos los planes, y con recargas |
+| Medium (el predeterminado) | 4 CPU compartidas, 2 GB de memoria | $0.0243 por hora | Todos los planes, y con recargas |
+| Large | 8 CPU compartidas, 4 GB de memoria | $0.0487 por hora | Todos los planes, y con recargas |
+| Extra large | 8 CPU compartidas, 8 GB de memoria | $0.0881 por hora | Max |
+
+Medium basta para la mayoría del trabajo del agente. Small sirve para mensajes, scripts y tareas programadas; las compilaciones y un navegador piden Large. Un tamaño nuevo se aplica de inmediato si está despierta: la computadora se reinicia en unos segundos con todo lo que hay en su disco. Si está dormida, despierta con el tamaño nuevo.
+
+**El disco** se elige al crearla, desde 5 GB (10 GB si no lo cambias), en pasos de 5 GB, y puede crecer hasta el límite de tu plan: 25 GB en Plus, 100 GB en Pro y Max, y 100 GB con recargas. Nunca se reduce. Cuesta $0.18 al mes por cada GB, esté la computadora despierta o dormida, porque guarda tus datos.
+
+Las llamadas a modelos y las herramientas se cobran igual que en cualquier otro lugar de Aristra.
+
+## Dónde guarda sus datos
+
+Lo eliges al crearla, y puedes cambiarlo en su página. Un cambio se aplica a los mensajes nuevos.
+
+| | Saved to your account (predeterminado) | Kept on the computer only |
+|---|---|---|
+| Chats | En la computadora, y cada turno también se guarda en tu cuenta | Solo en la computadora |
+| Memoria | La memoria de tu cuenta, compartida con tu Mac y el sitio web | Su propia memoria, en archivos de su disco |
+| Los archivos de tu cuenta, Craft, conectores | Tus archivos; Craft y conectores con un plan | No se usan; las herramientas que instales en ella funcionan |
+| En la web y el teléfono | Tu lista de chats los muestra, incluso mientras está dormida | Se leen de la computadora cuando los abres, lo que la despierta |
+| Prompts que programa ella misma | Se guardan en la computadora; las respuestas se guardan en tu cuenta | Se guardan en la computadora; las respuestas se quedan en ella |
+| Tareas programadas desde el sitio web | La tarea está en tu cuenta; el chat que inicia cada ejecución también se guarda allí | La tarea está en tu cuenta; el chat que inicia cada ejecución se queda en la computadora |
+| Sus propias tareas programadas, en su página | Se guardan en la computadora; el chat que inicia cada ejecución se guarda en tu cuenta | Se guardan en la computadora; el chat que inicia cada ejecución se queda en ella |
+| Telegram | Cada chat de Telegram tiene un chat en la computadora, guardado en tu cuenta | Cada chat de Telegram tiene un chat en la computadora, guardado solo allí |
+| Si la eliminas | Los chats y la memoria se quedan en tu cuenta | Todo lo que hay en ella desaparece |
+
+Con **Kept on the computer only**, Aristra deja pasar tus mensajes y sus respuestas, pero no conserva nada de ellos: ni mensajes guardados, ni títulos, ni entradas de búsqueda. Un mensaje espera en los servidores de Aristra solo hasta que la computadora lo recoge, y una respuesta, como máximo una hora después de terminar, para que una página abierta pueda ponerse al día. Su disco es la única copia, así que usa **Export chats and memory** en su página antes de eliminarla.
+
+En ambos modos, los servidores de Aristra se encargan de tu inicio de sesión, tu saldo, las llamadas a los modelos de Aristra (contadas para la facturación, sin conservar su contenido), la búsqueda web y otras herramientas integradas, Telegram, y de iniciar y detener la computadora. Una tarea programada que creas en el sitio web vive en tu cuenta, porque el sitio web la ejecuta.
+
+Cuando cambias a **Kept on the computer only**, la página ofrece eliminar las copias de sus chats que ya están en tu cuenta. Cuando vuelves a cambiar, ofrece subir los chats que hay en la computadora.
+
+## Dormir y despertar
+
+- **Se duerme tras dos minutos de inactividad**: ninguna respuesta en curso, ninguna aprobación pendiente, ningún comando en segundo plano, nada de tu parte. Todo lo que no puede comprobar cuenta como ocupado, así que nunca se duerme a mitad de un trabajo.
+- **Despierta cuando le envías algo**: un mensaje desde la web, tu teléfono o Telegram, o una aprobación. Un mensaje enviado mientras duerme espera y se responde cuando está lista, normalmente en segundos. Small, Medium y Large conservan en memoria lo que se estaba ejecutando mientras duermen; Extra large, en cambio, se apaga y arranca de cero, así que tarda un poco más en despertar. Tus archivos y chats están en su disco en cualquier caso.
+- **Los prompts programados se siguen ejecutando a su hora.** La computadora los guarda en su disco y solo le indica a Aristra cuándo toca el siguiente, para que Aristra pueda arrancarla justo antes. Aristra nunca sabe qué dicen los prompts.
+- Mientras duerme, solo pagas su disco.
+- Si se detiene por otro motivo (un fallo, mantenimiento en su host), se reinicia sola, o la arranca su siguiente prompt programado o tu siguiente mensaje.
+
+## Úsala desde cualquier lugar
+
+- **La web y tu teléfono:** en un chat nuevo, **Where it runs** muestra Aristra Cloud, tu computadora en la nube y tus otras computadoras; elige la computadora en la nube para abrir su página en tu cuenta y envía un mensaje allí. Con **Saved to your account**, el chat se abre en la página de chat habitual; si no, en la página propia de la computadora en la nube.
+- **Telegram** (con un plan): activa **Telegram messages go to this computer** en su página. Tu chat privado con Aristra pasa entonces a ejecutarse en ella. Envía `/new` para empezar un chat nuevo allí.
+- **Tareas programadas** (con un plan): una tarea configurada para ejecutarse en tu computadora en la nube inicia allí un chat con su prompt cada vez que se ejecuta, y la despierta si está dormida. El historial de la propia tarea muestra que cada ejecución empezó; la respuesta está en el chat.
+- **Sus propias tareas programadas:** en **Scheduled tasks**, en su página, dale un prompt para ejecutar todos los días, los días laborables, un día a la semana, cada hora o una sola vez, a horas de tu propia zona horaria. La computadora las guarda, despierta para cada una y la ejecuta en un chat nuevo, que **Read it** abre. No necesitan plan: cada ejecución se paga con tu saldo, igual que sus chats. Leer la lista mientras duerme la despierta un momento.
+- **Aristra Desktop:** los chats de una computadora en la nube que guarda en tu cuenta aparecen en la pestaña Code en **On other devices**. Para iniciar un chat en ella, usa su página en la web.
+
+## Su propio modelo
+
+De forma predeterminada, una computadora en la nube usa los modelos de Aristra, pagados con tu saldo. También puede funcionar con **tu plan de ChatGPT**:
+
+1. En la página de la computadora en la nube, en **Your own model**, elige **Set up…**.
+2. La computadora inicia su propio inicio de sesión y la página muestra un código. Abre la página de OpenAI y escribe el código.
+3. La computadora termina el inicio de sesión por sí misma y lo guarda en su propio disco.
+
+Los servidores de Aristra transmiten el código y nunca ven el inicio de sesión. Los modelos de Aristra siguen disponibles con tu saldo.
+
+## Cómo se paga
+
+- **Mientras está despierta**, el tiempo de ejecución se cobra por segundos del uso mensual de tu plan, si tienes uno, y después de tu saldo de recargas.
+- **El disco** se cobra tanto si la computadora está despierta como dormida.
+- Cuando tu saldo es bajo, recibes un correo (como máximo uno al día).
+- **Con un plan, si el saldo llega a cero, se duerme.** No se elimina nada de ella mientras tengas un plan. Despierta sola con tu siguiente mensaje cuando vuelvas a tener saldo, por una [recarga](/es/account/credits) o por el reinicio mensual de tu plan. El cargo del disco por ese tiempo se descuenta del siguiente dinero que llegue.
+- **Sin plan, cuando se acaba tu saldo de recargas**, se detiene y su disco se conserva durante 30 días. Recibes un correo una semana antes de que se elimine el disco. Recarga dentro de ese plazo para recuperarla con todo lo que tenía, o exporta antes sus datos.
+- **Cuando termina tu plan**, sigue funcionando con tu saldo de recargas, y una Extra large baja a Large. Si no queda saldo, se detiene y su disco se conserva durante 30 días de la misma forma; renueva o recarga dentro de ese plazo para recuperarla.
+- **Si cambias a un plan con un límite menor**, su tamaño baja al máximo de ese plan en tu renovación. Su disco se queda como está y ya no puede crecer.
+
+## Seguridad
+
+- Cada computadora en la nube es su propia máquina en su propia red privada: no puede llegar a las máquinas de otros usuarios ni a los servidores de Aristra, salvo mediante la API pública, igual que tu Mac.
+- Aristra Code se ejecuta en ella como un usuario sin privilegios y sin `sudo`. Instala las herramientas en tu carpeta personal (`pip install --user`, `npm install -g` o `~/bin`).
+- Nada escucha en ella: se conecta hacia fuera con tu cuenta por HTTPS, autenticada con su propia clave del dispositivo, igual que tu Mac.
+- No guarda ninguna credencial de Aristra. Inicia sesión con un token de un solo uso cuando se crea, y con uno nuevo si ha estado dormida durante semanas o pasa a otro host.

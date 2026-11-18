@@ -1,0 +1,101 @@
+---
+title: "Instrucciones y memoria en Aristra Code"
+sidebarTitle: "Instrucciones y memoria"
+description: "Explica a Aristra Code cómo funciona tu proyecto con AGENTS.md y reglas, y cómo te recuerda a ti y a tus repositorios de un chat a otro."
+---
+
+Aristra Code empieza cada chat sabiendo cuatro tipos de cosas:
+
+| | Qué es | Quién lo escribe |
+|---|---|---|
+| **Archivos de instrucciones** | `AGENTS.md` y las reglas: cómo se compila, se prueba y se revisa tu proyecto | Tú (o `/init`) |
+| **La memoria de tu cuenta** | Quién eres y cómo te gusta trabajar, en todos los dispositivos. Todas las cuentas la tienen. Consulta [Memoria](/es/memory) | Aristra Code, a partir de lo que le cuentas |
+| **Memoria en archivos** | Lo mismo, guardado en archivos en una computadora en la nube configurada como **Kept on the computer only** | Aristra Code, a partir de lo que le cuentas |
+| **Notas sobre un repositorio** | Correcciones, trabajo en curso y dónde está cada cosa, para un repositorio de esta computadora | Aristra Code, mientras trabaja |
+
+Con la sesión iniciada, la memoria se guarda en tu cuenta de Aristra, así que te acompaña a la web, a tu teléfono y a tus otras computadoras. Conservarla, guardar en ella, importar en ella y buscar en ella no cuesta nada: un chat que usa tu memoria solo paga sus propios tokens.
+
+## Archivos de instrucciones
+
+Un archivo `AGENTS.md` le dice a Aristra Code cómo funciona tu proyecto: cómo compilarlo y probarlo, sus convenciones, qué evitar. Es el mismo archivo que leen otros agentes de programación. Los archivos se leen por capas, y los posteriores pesan más:
+
+| Capa | Archivos |
+|---|---|
+| La de tu organización | `AGENTS.md` y `rules/*.md` junto a la [política gestionada](/es/code/configure/managed-policy) |
+| La tuya, para todos los proyectos | `~/.aristra/AGENTS.md` y `~/.aristra/rules/*.md` |
+| Cada carpeta desde la raíz del disco hasta la del chat | `AGENTS.md`, `.aristra/AGENTS.md` y `.aristra/rules/*.md` (incluidos en el repositorio) y `AGENTS.local.md` (tuyo, no incluido en el repositorio) |
+
+Un repositorio preparado para Claude Code funciona tal cual: donde falte uno de los nombres de Aristra, se lee su equivalente de Claude Code (`CLAUDE.md` en lugar de `AGENTS.md`, `.claude/CLAUDE.md`, `.claude/rules/`, `CLAUDE.local.md`). Una carpeta de reglas se lee con sus subcarpetas.
+
+```text
+/init       write this folder's AGENTS.md from the code
+/memory     open an instruction file (or the repository's notes) in your editor
+```
+
+### Reglas para algunos archivos
+
+Un archivo de reglas puede aplicarse solo a algunas rutas, con `paths` en su front matter:
+
+```markdown .aristra/rules/api.md
+---
+paths: src/api/**/*.ts
+---
+
+Every handler validates its input with the schemas in src/api/schemas.ts.
+```
+
+Llega al modelo la primera vez que Aristra Code lee un archivo que coincide. El `AGENTS.md` propio de una subcarpeta funciona igual: se lee cuando Aristra Code lee por primera vez un archivo de esa subcarpeta.
+
+### Inclusiones
+
+`@path` en un archivo de instrucciones incluye otro archivo (relativo a él, desde `~/` o absoluto), hasta cinco niveles de profundidad:
+
+```markdown AGENTS.md
+See @docs/testing.md for how to run the test suites.
+```
+
+Las inclusiones se quedan dentro de la carpeta del chat, salvo en tus propios archivos de `~/.aristra`. Las líneas que son comentarios HTML se omiten, así que puedes dejar notas para las personas que editan el archivo.
+
+## La memoria de tu cuenta
+
+Cuando un chat tiene la memoria activada, cada turno empieza con lo que tu cuenta de Aristra recuerda que es relevante aquí, y Aristra Code recuerda, corrige y olvida cosas con sus herramientas de memoria, indicándolo en el chat. Es la misma memoria que en el sitio web y en tu teléfono; [Memoria](/es/memory) explica cómo se guarda, cómo se aprende cada noche, cómo se desactiva y cómo se edita.
+
+- **Un chat:** un chat lee y guarda memoria solo mientras el interruptor Memory de tu cuenta está activado; desactivarlo detiene todos los chats, en Aristra Desktop y en la terminal, en aproximadamente un minuto. En Aristra Desktop, un chat que empezó con el interruptor desactivado nunca usa la memoria, aunque vuelvas a activarlo. En la terminal, `memory.enabled: false` en tu configuración inicia los chats con la memoria desactivada.
+- **Incógnito:** un chat que Aristra Code ejecuta en tu computadora no tiene modo incógnito. `aristra --cloud --incognito` inicia un chat de incógnito en Aristra Cloud; consulta [Memoria](/es/memory).
+- Un recuerdo guardado después de que Aristra Code leyera contenido externo, como una página web, debe citarte, para que una página no pueda colar un recuerdo.
+
+## Memoria en archivos
+
+La memoria de tu cuenta necesita que tengas la sesión iniciada: sin sesión, Aristra Code no guarda ningún recuerdo de ti. Una [computadora en la nube](/es/surfaces/cloud-computer) configurada como **Kept on the computer only** recuerda, en cambio, en archivos de su propio disco:
+
+```text
+~/.aristra/memory/
+  MEMORY.md            the index, one line per note
+  user_role.md         a note
+  feedback_style.md
+```
+
+Cada chat lee el índice y las notas que ayudan, y Aristra Code las escribe y las corrige como cualquier archivo. Puedes leerlas y editarlas tú mismo. Se quedan en esa computadora: no se envía nada a tu cuenta.
+
+Una computadora que guardaba la memoria en archivos antes de que la memoria viniera con todas las cuentas lleva esas notas a la memoria de tu cuenta la primera vez que inicia un chat con la sesión iniciada (hasta 500 el primer día).
+
+## Notas sobre un repositorio
+
+Mientras la memoria está activada, Aristra Code toma notas sobre el repositorio mientras trabaja: tus correcciones ("ejecuta siempre el linter primero"), el trabajo en curso y su porqué, y dónde está cada cosa fuera del código. Son archivos Markdown fuera del repositorio, así que no aparece nada en `git status`:
+
+```text
+~/.aristra/projects/<repository path, with dashes>/memory/   (for example -Users-you-code-app)
+  MEMORY.md            the index, one line per note
+  feedback_tests.md    a note
+  project_launch.md
+```
+
+Cada turno ve el índice y hasta cinco notas que claramente ayudan, cada una una vez por chat, con su antigüedad y un recordatorio de comprobar el código antes de fiarse de ellas. Las notas también se copian a tu cuenta, así que tus otras computadoras y tus chats web en ese repositorio las ven.
+
+Las notas nunca repiten lo que ya dicen el código, git o tu `AGENTS.md`. Cuando corriges a Aristra Code y no guarda nada, guarda la lección después del turno, citándote, y lo indica.
+
+## Chats anteriores en esta computadora
+
+Pregunta por trabajo anterior ("¿qué decidimos sobre la caché?", "el script que escribiste la semana pasada") y Aristra Code puede buscar, leer y listar tus chats anteriores en esta computadora, citando lo que se dijo. Solo busca en lo que ya está aquí, así que funciona con o sin plan, y no se envía nada a ningún sitio.
+
+No se ofrece en un chat de incógnito, en un chat con la memoria desactivada ni mientras **Memory** o **Search and reference past chats** de tu cuenta estén desactivados, y nunca muestra un chat de incógnito ni el chat en el que estás. Los chats de la web se buscan allí, con **Search and reference past chats** en la configuración de tu cuenta.

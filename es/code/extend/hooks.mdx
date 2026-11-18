@@ -1,0 +1,101 @@
+---
+title: "Hooks"
+description: "Ejecuta tus propios comandos ante los eventos de Aristra Code: antes y después de las herramientas, cuando envías un mensaje, cuando termina un turno. Configuración, eventos, datos de entrada, respuestas y aprobación."
+---
+
+Un hook es un comando tuyo que Aristra Code ejecuta ante un evento: antes de que se ejecute una herramienta, después de que se ejecutara, cuando envías un mensaje, cuando termina un turno. Úsalo para comprobar los comandos según las reglas de tu equipo, formatear un archivo después de una edición, registrar lo que hizo el agente o añadir contexto a un prompt. Los hooks usan el formato de Claude Code: los mismos eventos, el mismo stdin y las mismas respuestas. Los nombres de las herramientas son los de Aristra Code, así que un matcher que nombra herramientas de Claude Code (`Bash`, `Edit`, `Write`) necesita los nombres de Aristra Code (`shell`, `edit_file`, `write_file`). `aristra import claude-code` los cambia por ti, y una regla `if` puede usar cualquiera de los dos.
+
+## Declarar un hook
+
+Los hooks vienen de tu propia configuración (`~/.aristra/settings.json`), del `.aristra/settings.json` de una carpeta de confianza, del `hooks/hooks.json` de un [plugin](/es/code/extend/plugins), de los `hooks` de un [agente personalizado](/es/code/guides/subagents) (activos mientras se ejecuta ese agente) y de una [política gestionada](/es/code/configure/managed-policy). Los hooks de `.aristra/settings.local.json` no se ejecutan. En la configuración:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell|write_file",
+        "hooks": [
+          { "type": "command", "command": "~/.aristra/hooks/check.sh", "timeout": 10, "onFailure": "block" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      { "matcher": "edit_file|write_file", "hooks": [{ "type": "command", "command": "npx prettier --write \"$ARISTRA_PROJECT_DIR\"" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "~/.aristra/hooks/add-ticket-context.sh" }] }
+    ]
+  }
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `matcher` | A qué se aplican los hooks: el nombre de la herramienta en los eventos de herramientas y en `PermissionDenied`, el tipo de agente, el tipo de notificación, lo que desencadena la compactación, el nombre del comando (`UserPromptExpansion`), el origen del inicio (`SessionStart`) o el error (`StopFailure`). Los demás eventos lo ignoran. Un nombre, varios nombres unidos con `\|` o una expresión regular. Omítelo para que coincida con todo |
+| `type` | `command`, o `http`: el evento se envía con POST como JSON a `url`, y un cuerpo 2xx se lee como la respuesta del hook (`allowedHttpHookUrls` limita adónde; `headers` toma `$VAR` solo de `allowedEnvVars`). No se ejecuta en `SessionStart`, y no se envía a una dirección de red privada que no sea la de esta computadora |
+| `if` | Una regla de permisos que la llamada debe cumplir, como `Bash(git *)` |
+| `once` | Ejecutarse una sola vez en el chat |
+| `async` | Ejecutarse en segundo plano, sin bloquear nunca (`asyncRewake`: su salida 2 se indica en el chat) |
+| `command` | Se ejecuta a través del shell |
+| `args` | Ejecutar `command` como programa con estos argumentos, sin shell |
+| `timeout` | Segundos, 60 de forma predeterminada, como máximo 300 (`SessionEnd`: 10). Al llegar a su tiempo límite, y cuando detienes el turno, se detienen el hook y todo lo que inició |
+| `onFailure` | `"block"`: un hook que falla, supera su tiempo límite o imprime JSON ilegible bloquea donde su evento lo permite, en lugar de omitirse |
+
+## Aprobar un hook
+
+Un hook ejecuta tu código con todo tu acceso, fuera del sandbox. Por eso solo se ejecuta después de que apruebes su evento y su comando exacto, una vez. Hasta entonces se omite, y el chat lo indica.
+
+```sh
+aristra hooks list                                     # every hook, approved or not
+aristra hooks approve PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks revoke PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks test PreToolUse --tool shell --input '{"command": "git push --force"}'
+aristra hooks test UserPromptSubmit --prompt "deploy to production"
+```
+
+Cambiar el comando de un hook lo convierte en un hook nuevo que hay que aprobar. `/hooks` en un chat muestra tus hooks y cuáles necesitan todavía aprobación. Settings de Aristra Desktop los muestra con Approve y Revoke.
+
+Los hooks de un plugin y los de una política gestionada no preguntan uno por uno: instalar el plugin, o la política de tu organización, es el consentimiento. `disableAllHooks: true` desactiva todos los hooks salvo los de tu organización (definido en la política, también desactiva esos). `allowManagedHooksOnly: true` en una política ejecuta solo los hooks de la política y los de los plugins que la política activa.
+
+## Eventos
+
+| Evento | Cuándo | Lo que añaden los datos de entrada |
+|---|---|---|
+| `SessionStart` | El primer turno de un chat desde que se inició Aristra: `source` es `startup` para un chat nuevo y `resume` para uno anterior. No en el chat de un subagente | `source` |
+| `UserPromptSubmit` | Enviaste un mensaje, antes de que lo vea el modelo | `prompt` |
+| `UserPromptExpansion` | Escribiste un comando de skill o de prompt, antes de que se use | `expansion_type`, `command_name`, `command_args`, `command_source`, `prompt` |
+| `PreToolUse` | Antes de una llamada a una herramienta, antes de la comprobación de permisos | `tool_name`, `tool_input`, `tool_use_id` |
+| `PermissionRequest` | Una llamada a una herramienta está a punto de preguntarte (o, si no hay nadie a quien preguntar, de rechazarse) | `tool_name`, `tool_input`, `tool_use_id`, `permission_suggestions` |
+| `PostToolUse` | Después de que se ejecutara una llamada a una herramienta | `tool_name`, `tool_input`, `tool_use_id`, `tool_response`, `duration_ms`, `mcp_server` |
+| `PostToolUseFailure` | Una llamada a una herramienta falló mientras se ejecutaba | `tool_name`, `tool_input`, `tool_use_id`, `error`, `is_interrupt`, `duration_ms` |
+| `PostToolBatch` | Todas las llamadas de una respuesta han terminado | `tool_calls` |
+| `Notification` | Una aprobación lleva 6 segundos esperando, o una respuesta lleva un minuto esperándote | `message`, `notification_type` |
+| `PermissionDenied` | El revisor del modo Auto denegó una llamada a una herramienta; un hook que devuelve `hookSpecificOutput.retry: true` permite que el modelo lo vuelva a intentar | `tool_name`, `tool_input`, `tool_use_id`, `reason` |
+| `Stop` | El turno está a punto de terminar | `stop_hook_active`, `last_assistant_message`, `background_tasks`, `session_crons` |
+| `SubagentStart` | Un agente está a punto de iniciarse | `agent_id`, `agent_type` |
+| `SubagentStop` | El turno de un agente está a punto de terminar | como `Stop`, con `agent_id`, `agent_type` y `agent_transcript_path` (siempre vacío) |
+| `StopFailure` | Un turno terminó por un error del modelo | `error`, `error_details`, `last_assistant_message` |
+| `PreCompact` | Antes de que se resuman los mensajes antiguos | `trigger` (`auto` o `manual`), `custom_instructions` |
+| `PostCompact` | Después de que se resumieran | `trigger`, `compact_summary` |
+| `SessionEnd` | El chat se eliminó, o Aristra se está deteniendo | `reason` |
+
+Todos los datos de entrada incluyen además `hook_event_name`, `session_id`, `transcript_path` (siempre vacío), `cwd`, `permission_mode` y, durante un turno, `prompt_id` y `turn_id`; en el chat de un subagente, `agent_id` y `agent_type`; y `effort` cuando el chat fija uno. Llegan como JSON por el stdin del hook. El hook se ejecuta con tu entorno más `ARISTRA_PROJECT_DIR` (y `CLAUDE_PROJECT_DIR`), la carpeta del chat.
+
+## Respuestas
+
+| El hook | Significa |
+|---|---|
+| Sale con 0 y no imprime nada | Continuar |
+| Sale con 2 | Bloquear la llamada a la herramienta, el prompt o aquello de lo que trate el evento, con stderr como motivo. Desde `PostToolUse`: stderr va al modelo con el resultado. Desde `Stop`: mantener el turno en marcha, con stderr para el modelo |
+| Imprime `{"decision": "block", "reason": "..."}` | Bloquear, con ese motivo |
+| Imprime `hookSpecificOutput.permissionDecision`: `"deny"`, `"ask"` o `"allow"` | Rechazar la llamada, hacer que pregunte u omitir la pregunta (las reglas de denegación, las reglas de pregunta y las comprobaciones de seguridad siguen aplicándose, y un paso que siempre te necesita sigue preguntando) |
+| Desde `PermissionRequest`, imprime `hookSpecificOutput.decision: {"behavior": "allow" \| "deny", ...}` | Responder la aprobación por ti |
+| Desde `PreToolUse`, imprime `hookSpecificOutput.updatedInput` | Ejecutar la herramienta con estos argumentos en su lugar |
+| Imprime `additionalContext` (o texto sin formato desde `UserPromptSubmit`, `UserPromptExpansion` y `SessionStart`) | Se añade para el modelo |
+| Imprime `systemMessage` | Se muestra en el chat |
+| Imprime `continue: false` con `stopReason` | Detener: la llamada o el prompt se rechazan, o el turno termina |
+| Desde `PostToolUse`, imprime `hookSpecificOutput.updatedToolOutput` (`updatedMCPToolOutput` para una herramienta MCP) | El modelo lee esto en lugar de la salida de la herramienta |
+| Desde `PreCompact`, imprime texto | Se añade a las instrucciones del resumen |
+
+Los hooks de un evento se ejecutan en paralelo. Cualquier bloqueo gana (deny sobre ask, y ask sobre allow), todo el contexto cuenta y se usa la última entrada cambiada. Los hooks de Stop y una comprobación de `/goal` pueden, entre todos, mantener un turno en marcha hasta 8 veces seguidas sin que el modelo llame a una herramienta (`ARISTRA_STOP_HOOK_BLOCK_CAP` lo cambia); un hook debería devolver éxito cuando `stop_hook_active` es true.

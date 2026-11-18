@@ -1,0 +1,43 @@
+---
+title: "Tareas programadas"
+description: "Trabajo que Aristra hace por ti en la nube, según un calendario o cuando ocurre algo en tus apps, con tu computadora apagada: cómo crear una tarea, adónde van los resultados, las aprobaciones, las ejecuciones silenciosas y los fallos. Con un plan."
+---
+
+Una tarea programada es trabajo que Aristra hace por ti en la nube, a horas fijas o cuando ocurre algo, mientras tu computadora está apagada: un resumen matutino de tu bandeja de entrada, un informe semanal, una respuesta redactada cuando llega un correo. Las tareas programadas en la nube vienen con un [plan](/es/account/plans), y cada ejecución se paga con tu saldo como un chat.
+
+Las tareas también pueden ejecutarse en tu propia computadora, en una carpeta, sin plan (una tarea con uno de los modelos de Aristra se paga con tu saldo): consulta [Trabajo en segundo plano](/es/code/guides/background). Y una [computadora en la nube](/es/surfaces/cloud-computer) puede tener sus propias tareas.
+
+## Crear una tarea
+
+- **En el sitio web:** **Scheduled tasks** en la barra lateral y luego **New task**: **On a schedule** o **When something happens**.
+- **En un chat:** pídelo con palabras normales ("todos los días laborables a las 8, resume mi correo sin leer"). Aristra crea la tarea y la muestra en el chat, donde puedes editarla o cancelarla.
+- **En Aristra Desktop:** el formulario de tareas, con **In the cloud** elegido.
+
+Una tarea programada tiene un título, un calendario (una vez, cada hora, a diario, los días laborables o cada semana, en tu zona horaria) y un prompt. En **Advanced settings**:
+
+| Opción | Qué hace |
+|---|---|
+| **Project context** | El proyecto cuyos archivos, instrucciones y memoria usa la tarea. Sin proyecto, solo conoce tu perfil |
+| **Connectors** | Las apps conectadas que puede usar |
+| **Updates** | Adónde van los resultados: **Dashboard** (las notificaciones del sitio web), **Email** o **Telegram** |
+| **Run limit** | Ejecutarse hasta que la detengas, o un número de veces |
+| **Runs on** | Con una computadora en la nube: el agente en la nube de Aristra o tu computadora en la nube |
+| **Auto-retry on failure** | Cuántas veces se vuelve a intentar una ejecución fallida |
+| **Validation criteria** | Aparece cuando Auto-retry está activado: lo que debe cumplir cada intento |
+
+## Cuando ocurre algo
+
+Una tarea puede empezar cuando ocurre algo en una app conectada (un correo nuevo en Gmail, un mensaje en Slack, un pago en Stripe, una issue nueva en GitHub y más) o cuando termina otra tarea. Entonces ejecuta Aristra con tu prompt, o una lista fija de acciones de apps sin IA. Conecta primero la app; consulta [Conectores](/es/connectors).
+
+## Ejecuciones
+
+- Cada tarea tiene un chat, y cada ejecución se añade a él. **Open in chat**, en una ejecución de la pestaña **History**, lo abre.
+- Una ejecución trabaja sola, en modo Auto. Un paso que necesita tu aprobación espera en su tarjeta en el chat de la tarea, y se te avisa.
+- Una ejecución sin nada nuevo que contar lo indica en silencio: se guarda, y no se te envía nada.
+- Una ejecución puede empezar hasta unos dos minutos después de su hora.
+
+## Cuando una ejecución falla
+
+Antes de cada ejecución, Aristra comprueba tu plan y luego tu saldo. Una ejecución que no pudo empezar o que falló te avisa, allí adonde van las actualizaciones de la tarea, con el motivo.
+
+Después de tres fallos seguidos, la tarea se detiene, y el tercer aviso lo indica. Cuando la causa fue tu plan o tu saldo, la tarea queda en pausa y vuelve a empezar sola: cuando renuevas o cuando se añade dinero (una recarga o el mes siguiente de tu plan). Cualquier otro fallo la desactiva; vuelve a activarla en **Scheduled tasks** cuando se haya resuelto la causa.

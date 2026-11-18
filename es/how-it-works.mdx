@@ -1,0 +1,41 @@
+---
+title: "Cómo funciona Aristra"
+sidebarTitle: "Cómo funciona"
+description: "Tu cuenta, Aristra Cloud y tu propia computadora: dónde se ejecuta cada chat, dónde se guarda, qué modelos usa y quién paga."
+---
+
+## Tu cuenta
+
+Tu cuenta de Aristra guarda lo que te acompaña a todas partes: tus chats en la nube, tu [memoria](/es/memory), tus [archivos](/es/files), tus [proyectos](/es/projects), tus documentos de [Craft](/es/craft), tus [apps conectadas](/es/connectors), y tu saldo y tu plan. Todas las superficies en las que inicias sesión llegan a la misma cuenta.
+
+## Dónde se ejecuta un chat
+
+Un chat se ejecuta en uno de estos tres lugares:
+
+| | Aristra Cloud | Tu computadora | Tu computadora en la nube |
+|---|---|---|---|
+| Qué lo ejecuta | El agente en la nube de Aristra | El Aristra Runtime, en tu Mac o tu máquina Linux | El Aristra Runtime, en tu propia computadora en la nube de Aristra |
+| Desde dónde se inicia | El sitio web, tu teléfono, Aristra Desktop (la pestaña Chat, y los chats de la pestaña Code configurados para ejecutarse en la nube), la terminal con `aristra --cloud` y, con un plan, Telegram y las tareas programadas | La terminal, la pestaña Code de Aristra Desktop (On this Mac), tu editor | Su página en el sitio web, Telegram, sus propias tareas programadas |
+| Con qué trabaja | Su propio sandbox, la web, tus archivos y tus apps conectadas | Tus carpetas, tu shell y tus herramientas | Su propio disco, su shell y sus herramientas |
+| Modelos | Los modelos de Aristra | Cualquiera: los de Aristra, tus propias claves, tu plan de ChatGPT, un modelo en tu computadora | Los modelos de Aristra o tu plan de ChatGPT |
+| Quién paga | Tu saldo | Tu saldo para los modelos de Aristra; nada con tu propio modelo | El uso mensual de un plan o tus recargas (nunca el crédito inicial): sus modelos, su tiempo despierta y su disco, despierta o dormida |
+| Dónde se guarda | En tu cuenta | En tu computadora (`~/.aristra`) | En tu cuenta, o en su propio disco si así lo eliges |
+
+Los chats en Aristra Cloud son los mismos chats en todas las superficies: uno iniciado en la web aparece en la pestaña Chat de Aristra Desktop y en los [chats en la nube](/es/code/cloud-chats) de la terminal.
+
+Un chat en tu computadora se queda allí. Con un plan, [Remote Control](/es/code/remote-control) lo comparte con la web y tu teléfono mientras el trabajo sigue ejecutándose en tu computadora.
+
+## Aristra Code
+
+[Aristra Code](/es/surfaces/aristra-code) es Aristra trabajando en una carpeta de tu computadora: lee y edita archivos, ejecuta comandos y trabaja con git, y pregunta antes de hacer cualquier cosa que no hayas permitido. La terminal, la pestaña Code de Aristra Desktop y tu editor hablan con el mismo runtime de tu computadora, así que un chat iniciado en uno aparece en los demás. [Cómo funciona Aristra Code](/es/code/how-it-works) tiene los detalles.
+
+## Qué te acompaña y qué se queda
+
+- **La memoria** se guarda en tu cuenta y llega a todos los chats que inicias con la sesión iniciada, en todas las superficies, salvo que la desactives. Consulta [Memoria](/es/memory).
+- **Tu perfil** (tu nombre, tu ocupación y **About you**) abre todos los chats que inicias con la sesión iniciada, diga lo que diga el interruptor Memory. Las excepciones son un chat de incógnito mientras Memory está desactivado y una computadora en la nube que guarda su memoria en su propio disco. En un chat con otras personas, solo se usan tu nombre y tu ocupación.
+- **Los archivos** de tu cuenta aparecen en el sitio web, en Aristra Desktop y con `/files` en la terminal. Un archivo de tu Mac llega a tu cuenta solo cuando lo guardas allí. Consulta [Archivos](/es/files).
+- **Los chats en tu computadora** no están en tu cuenta salvo que los compartas con Remote Control, así que el aprendizaje nocturno de Aristra a partir de tus chats no los lee.
+
+## Quién paga
+
+Los modelos de Aristra y las herramientas alojadas se pagan con tu saldo: primero el crédito inicial de $1 de una cuenta nueva, después el uso mensual de tu plan y luego las recargas. Un modelo propio ([Usar tu propio modelo](/es/own-models)) no cuesta nada en Aristra. Consulta [Tu saldo y las recargas](/es/account/credits).

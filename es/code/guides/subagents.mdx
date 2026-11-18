@@ -1,0 +1,80 @@
+---
+title: "Subagentes y flujos de trabajo"
+description: "Delega trabajo en subagentes que se ejecutan en su propio contexto, escribe agentes personalizados, bifurca un chat, envía mensajes a otros chats y ejecuta muchos agentes con flujos de trabajo."
+---
+
+## Subagentes
+
+Aristra Code puede delegar parte de una tarea en un subagente: un agente con su propio contexto que trabaja en segundo plano e informa al terminar. Úsalo para mantener una búsqueda grande fuera del chat principal o para hacer varias investigaciones a la vez. Pídelo ("investiga estos tres módulos en paralelo") o deja que Aristra Code decida.
+
+| Tipo integrado | Para |
+|---|---|
+| `general-purpose` | Cualquier tarea, con todas las herramientas que puede usar un agente en segundo plano |
+| `Explore` | Búsquedas de solo lectura en una base de código |
+| `Plan` | Planificación de solo lectura: diseña un enfoque y los archivos implicados |
+
+Cada subagente trabaja en la carpeta del chat, con su modo y su modelo (salvo que la llamada indique otro), y puede iniciar sus propios subagentes hasta tres niveles de profundidad. Pueden ejecutarse hasta 20 a la vez en un chat, contando los agentes de sus agentes. Sus aprobaciones se preguntan en tu chat, el que está en lo alto de la cadena, indicando el nombre del agente.
+
+**Qué ves.** La línea de estado cuenta los agentes en ejecución ("2 local agents"), y `/tasks` los muestra con unas pocas palabras sobre lo que hace cada uno. Enter abre uno, y lo que escribas ahí va a ese agente. Cuando uno termina, el chat recibe una línea con su resumen, y Aristra Code lee el resultado y continúa.
+
+## Bifurcar un chat
+
+```text
+/fork write the migration for the new schema
+```
+
+Una bifurcación es un subagente que empieza con todo el contexto de este chat, así que no necesita explicaciones previas. Hace lo único que le pides e informa al terminar, mientras sigues trabajando aquí. Para seguir tú mismo en una copia del chat, usa `/branch`.
+
+## Agentes personalizados
+
+Un archivo Markdown en `~/.aristra/agents/` (para todas las carpetas) o en `.aristra/agents/` de un proyecto (una vez que confías en él) añade un tipo de agente, con el mismo formato que los de Claude Code:
+
+```markdown .aristra/agents/migration-reviewer.md
+---
+name: migration-reviewer
+description: Reviews database migrations for locking, data loss and rollback safety
+tools: read_file, grep, glob, shell
+model: sonnet
+---
+
+You review database migrations. For each migration, check ...
+```
+
+| Campo | Significado |
+|---|---|
+| `name`, `description` | El nombre del agente y para qué sirve (se muestra al modelo). Un archivo sin alguno de los dos se omite |
+| `tools`, `disallowedTools` | Qué herramientas puede usar. `mcp__server` indica las herramientas de un servidor |
+| `model` | `inherit`, `sonnet`, `opus`, `haiku`, `fable` (estos cuatro solo cuando el chat usa un modelo de Claude) o un id de modelo |
+| `effort` | Su esfuerzo de razonamiento |
+| `permissionMode` | El modo en el que se ejecuta, salvo que tu chat esté en `acceptEdits`, `auto`, `bypassPermissions` o `plan`, que conserva |
+| `maxTurns` | Un límite de rondas del modelo |
+| `isolation` | `worktree` para darle su propio worktree de git |
+| `skills`, `hooks`, `mcpServers`, `memory` | Las skills que carga, los hooks activos mientras se ejecuta, sus propios servidores MCP y una carpeta de memoria propia |
+| `initialPrompt` | Se coloca antes de tu primer mensaje cuando todo un chat se ejecuta como este agente |
+| `color` | Su color en las listas: red, blue, green, yellow, purple, orange, pink o cyan |
+| `omitClaudeMd` | `true` deja fuera los archivos de instrucciones de la carpeta |
+
+El cuerpo es su prompt del sistema. El agente de un proyecto tiene prioridad sobre uno tuyo con el mismo nombre, y el de tu organización, sobre ambos.
+
+### Ejecutar todo un chat como un agente
+
+`aristra --agent migration-reviewer` inicia un chat que funciona con el prompt, las herramientas y el modelo del agente. En Aristra Desktop, el menú **+** de un chat nuevo de Code muestra tus agentes como **Run as …**. El ajuste `agent` convierte uno en el predeterminado para los chats nuevos.
+
+## Worktrees
+
+Un subagente con `isolation: worktree` recibe su propio worktree de git en `.aristra/worktrees/agent-<id>`, así que los agentes en paralelo nunca editan los mismos archivos. Cuando termina, un worktree que no cambió se elimina; uno que cambió se conserva, y su ruta y su rama acompañan a su informe.
+
+## Mensajes entre chats
+
+Aristra Code puede enviar un mensaje a un subagente, y a tus otros chats de Aristra en esta computadora que estén abiertos o trabajando en ese momento, por su nombre. Pide "dile al chat que trabaja en la API que el esquema cambió". El mensaje llega a ese chat marcado como procedente de otro chat. Un chat en un modo de permisos distinto del de quien lo envía no acepta el mensaje, y se avisa a quien lo envió.
+
+## Flujos de trabajo
+
+Para repartos grandes ("revisa todos los paquetes", "investiga esto desde varios ángulos"), pide un flujo de trabajo. Aristra Code escribe un script corto que ejecuta muchos agentes en un orden fijo: en paralelo, por fases o como una canalización. Una ejecución pregunta primero, mostrando su descripción y sus fases (Ctrl+E muestra el script), salvo que una regla la permita (`workflow(<name>)` para uno guardado) o que tu modo no pregunte. En modo Auto, decide el revisor.
+
+- Una ejecución se hace en segundo plano, con hasta 16 agentes a la vez, o dos menos que los núcleos de CPU de tu computadora si eso es menos.
+- `/workflows` muestra las fases y los agentes de cada ejecución a medida que avanzan, con teclas para detener, pausar, reintentar u omitir un agente, y **s** para guardar el script como un flujo de trabajo con nombre.
+- Los flujos de trabajo guardados viven en `~/.aristra/workflows/` o en `.aristra/workflows/` de un proyecto, y se ejecutan como `/<name> args`.
+- Aristra Code incluye `/deep-research <question>`: busca en la web desde varios ángulos, hace que unos escépticos comprueben cada afirmación y escribe un informe con citas.
+
+`disableWorkflows: true` (o `enableWorkflows: false`) en tu configuración, o `ARISTRA_DISABLE_WORKFLOWS=1`, desactiva los flujos de trabajo.

@@ -1,0 +1,67 @@
+---
+title: "Cómo funciona Aristra Code"
+sidebarTitle: "Cómo funciona"
+description: "El Aristra Runtime detrás de cada superficie, lo que hace un turno y dónde viven tus chats, tu configuración y tus secretos."
+---
+
+## Un agente, muchas superficies
+
+El programa que escribes, `aristra`, es un cliente. El agente en sí es el **Aristra Runtime**, un proceso en segundo plano de tu computadora que comparten todas tus superficies: la terminal, [Aristra Desktop](/es/code/desktop), los [editores](/es/code/editors) y una [máquina remota](/es/code/remote-machines) a la que llegas por SSH.
+
+```text
+ aristra (terminal)    Aristra Desktop    an editor (aristra acp)    aristra --remote <host>
+          \                  |                    |                         |
+           '------------ the runtime protocol on a private socket ---------'
+                                       |
+                            Aristra Runtime (one per user)
+          chats, turns, approvals, permissions, sandbox, tools, models,
+          sign-in and secrets, settings, memory, MCP servers, scheduled tasks
+                                       |
+   Out only: api.aristralabs.com, the model providers you use, model servers on
+   this computer, and the pages, MCP servers and services your chats use
+```
+
+Como comparten un solo runtime:
+
+- Un chat iniciado en la terminal aparece en la pestaña Code de Aristra Desktop, y al revés.
+- Una aprobación se puede responder desde cualquier superficie abierta. Gana la primera respuesta, y las demás ven quién respondió.
+- Un turno en curso no depende de la ventana ni de la terminal que lo inició. Si cierras la terminal mientras se ejecuta un turno, te pregunta si quieres que siga ejecutándose.
+
+El runtime se inicia cuando una superficie lo necesita y se detiene solo tras diez minutos de inactividad. Nunca escucha en la red: las superficies llegan a él a través de un socket que solo tu cuenta de usuario puede abrir.
+
+## Qué hace un turno
+
+Cuando envías un mensaje, Aristra Code ejecuta un bucle hasta que termina el trabajo:
+
+1. **Reunir el contexto.** Tu mensaje, el chat hasta ese momento, tus archivos de instrucciones (`AGENTS.md` y las reglas), la memoria y las herramientas que puede usar van al modelo.
+2. **Actuar.** El modelo pide herramientas: leer un archivo, buscar, editar, ejecutar un comando, obtener una página, llamar a un servidor MCP. Cada petición pasa por tus [permisos](/es/code/configure/permissions): se ejecuta, te pregunta o se rechaza.
+3. **Comprobar.** El resultado de cada herramienta vuelve al modelo, que decide el siguiente paso: otra herramienta o una respuesta.
+
+Puedes intervenir en cualquier momento: envía un mensaje para redirigir el turno en su siguiente paso, pon uno en cola para después o pulsa Esc para detenerlo. Las conversaciones largas se resumen cuando se llena el contexto del modelo; consulta [Contexto](/es/code/guides/context).
+
+## Chats en tu computadora y en la nube
+
+La mayoría de los chats se ejecutan en tu computadora, en una carpeta que eliges, y se guardan en `~/.aristra` en esta computadora. Algunos se ejecutan en la nube:
+
+| | En tu computadora | En la nube |
+|---|---|---|
+| Se inicia con | `aristra`, la pestaña Code de Aristra Desktop | `aristra --cloud`, el sitio web, tu teléfono |
+| Dónde se guarda | En `~/.aristra` en esta computadora | En tu cuenta de Aristra |
+| Modelos | Cualquier origen que configures | Los modelos de Aristra, con tu saldo |
+| Necesita un plan | No: gratis con un modelo propio | No: se paga con tu saldo; un plan añade uso mensual. Consulta [Planes y precios](/es/account/plans) |
+| Una carpeta | Su carpeta de trabajo | Opcional: una carpeta de esta computadora que lee y cambia a través del runtime |
+
+Un chat en tu computadora también se puede continuar desde tu teléfono y la web con [Remote Control](/es/code/remote-control); el trabajo sigue ejecutándose aquí. Consulta [Chats en la nube](/es/code/cloud-chats) para los chats que ejecuta el agente en la nube de Aristra.
+
+## Dónde vive cada cosa
+
+| Qué | Dónde |
+|---|---|
+| El programa | `~/.local/bin/aristra`, un enlace a `~/.local/share/aristra/versions/<version>/` |
+| Tus datos: chats, configuración, registros, secretos | `~/.aristra/` (o `ARISTRA_HOME`) |
+| Tu configuración | `~/.aristra/settings.json` |
+| La configuración de un proyecto | `<folder>/.aristra/settings.json` y `settings.local.json` |
+| Las instrucciones de un proyecto | `AGENTS.md` (o `.aristra/AGENTS.md`) en cada carpeta desde el repositorio hacia abajo, `.aristra/rules/*.md` y tu `AGENTS.local.md` privado; los archivos `CLAUDE.md` de Claude Code donde no hay `AGENTS.md` |
+| El registro del runtime | `~/.aristra/logs/runtime.log` (`aristra logs`) |
+
+Los secretos, como los tokens de inicio de sesión y las claves de proveedores, se sellan con una clave guardada en tu llavero de inicio de sesión (o en tu llavero de Linux; si ninguno responde, en un archivo que solo tú puedes leer). El inicio de sesión de tu computadora está vinculado a una clave del dispositivo, que en un Mac con Secure Enclave vive allí. Consulta [Seguridad y privacidad](/es/code/security).

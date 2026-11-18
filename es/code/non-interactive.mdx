@@ -1,0 +1,155 @@
+---
+title: "Modo no interactivo"
+description: "Ejecuta Aristra Code desde scripts y CI con aristra run o aristra -p: un turno, salida de texto o JSON y códigos de salida con los que puedes actuar."
+---
+
+`aristra run` (o `aristra -p`) ejecuta un turno y termina. Nunca se queda esperando una respuesta: un paso que pediría aprobación se rechaza, se le explica el motivo al modelo y la ejecución termina con el código 3.
+
+```sh
+aristra run "fix the failing test"
+git diff | aristra run "write a commit message for this" -o json
+aristra run -o stream-json --partial --permission-mode auto --allow "shell(npm test:*)" "make the tests pass"
+```
+
+El texto que llega por stdin se añade después del prompt, separado por una línea en blanco. Si se da un prompt, un stdin que no envía nada durante 3 segundos se omite (stderr lo indica); `< /dev/null` evita la espera.
+
+Un chat nuevo de `aristra run` confía en su carpeta, así que se aplica la configuración `.aristra` de la carpeta, igual que hace `-p` en Claude Code.
+
+## Opciones
+
+| Opción | Significado |
+|---|---|
+| `-o, --output text\|json\|stream-json` | `text` muestra la respuesta final. `json` muestra un objeto `result`. `stream-json` muestra los eventos a medida que ocurren, un objeto JSON por línea (también `--output-format`) |
+| `--partial` | Con `stream-json`, también los eventos `delta` a medida que se escribe el texto |
+| `-m, --model <id>`, `--source <id>` | El modelo y de dónde viene. Sin ellas, el predeterminado |
+| `--permission-mode <mode>` | `manual` (o `default`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` o `read_only` |
+| `--permission-prompts host\|none` | Adónde va un paso que preguntaría: ambos lo rechazan, ya que no hay nadie para responder |
+| `--allow-dangerously-skip-permissions` | Permitir que el chat cambie a `bypassPermissions` más adelante |
+| `--allow <rule>`, `--deny <rule>` | Reglas de permisos solo para esta ejecución, como `shell(npm test *)`. Se puede repetir. Una denegación en cualquier lugar sigue ganando |
+| `--add-dir <path>` | Otra carpeta en la que puede trabajar el chat. Se puede repetir |
+| `--folder <path>` | La carpeta en la que trabajar; de forma predeterminada, la actual |
+| `--plugin-dir <path>` | Cargar un plugin desde una carpeta o un `.zip` solo para esta ejecución; una carpeta de plugins carga cada uno. Se puede repetir |
+| `-c, --continue`, `-r, --resume <id>` | Continuar en el chat más reciente de esta carpeta, o en ese chat |
+| `--fork-session` | Con `--continue` o `--resume`: continuar en una copia, dejando el chat como estaba |
+| `--no-session-persistence` | No guardar nada: el chat de la ejecución se elimina al terminar |
+| `-w, --worktree [name]` | Trabajar en un worktree de git del repositorio, creado o reutilizado, que se conserva después |
+| `--max-turns <n>` | Terminar después de `n` rondas del modelo (también `ARISTRA_MAX_TURNS`) |
+| `--run-budget <seconds>` | Al 80% de este tiempo, decirle al agente que deje de explorar y entregue lo que tenga |
+| `--json-schema <schema>` | La respuesta debe ser un valor que cumpla este JSON Schema; se devuelve como `structuredOutput` |
+| `--system-prompt <text>`, `--system-prompt-file <path>` | Sustituir el prompt del sistema de Aristra en un chat nuevo. Tu `AGENTS.md` sigue aplicándose |
+| `--append-system-prompt <text>`, `--append-system-prompt-file <path>` | Añadir al final del prompt del sistema de un chat nuevo |
+| `--agent <agent>` | Ejecutar un chat nuevo como uno de tus [agentes personalizados](/es/code/guides/subagents) |
+| `--settings <file-or-json>` | Configuración adicional solo para esta ejecución, por encima de la tuya y la del proyecto |
+| `--setting-sources <list>` | Qué archivos de configuración leer: `user`, `project`, `local`, separados por comas; `""` para ninguno |
+| `--mcp-config <config>` | Servidores MCP para esta ejecución, como JSON o como archivo: `{"mcpServers": {...}}`. Se puede repetir |
+| `--strict-mcp-config` | Solo los servidores de `--mcp-config` |
+| `--input-format stream-json` | Leer los mensajes del usuario desde stdin, un objeto JSON por línea; cada uno inicia un turno |
+| `--usage-file <path>` | Escribir allí el uso de tokens de la ejecución como JSON |
+| `--no-daemon` | Usar un runtime propio que termina con la ejecución |
+| `--dangerously-skip-sandbox` | Ejecutar los comandos fuera del sandbox. Solo donde la propia máquina es el límite: un runner de CI, un contenedor, una VM |
+| `--dangerously-skip-permissions` | Empezar en `bypassPermissions`. Se rechaza para root salvo con `IS_SANDBOX=1` |
+| `--verbose` | Con `--output json`, todos los eventos en un único array JSON |
+
+`--remote <host>` antes de `run` la ejecuta en otra máquina por SSH; consulta [Máquinas remotas](/es/code/remote-machines).
+
+## En CI
+
+En una computadora con la sesión iniciada en Aristra, `aristra setup-token` muestra un token que ejecuta modelos con el saldo de Aristra de tu cuenta durante un año, y nada más. Guárdalo como un secreto de CI llamado `ARISTRA_TOKEN`:
+
+```sh
+export ARISTRA_TOKEN=...   # from aristra setup-token
+aristra run --source aristra "summarize the failing tests" < test-output.txt
+```
+
+Revócalo cerrando la sesión de su dispositivo en el sitio web de Aristra.
+
+<Warning>
+En CI no hay nadie para aprobar pasos. Permite exactamente lo que necesita el trabajo con `--allow`, o usa `--permission-mode auto` para que decida el revisor de Aristra, y comprueba el código de salida.
+</Warning>
+
+## Código de salida
+
+| Código | Cuándo |
+|---|---|
+| 0 | El turno se completó |
+| 1 | Falló: un error, el runtime inaccesible, se alcanzó `--max-turns` o no hay un valor que cumpla `--json-schema` |
+| 2 | Un error de uso: una opción desconocida, falta el prompt |
+| 3 | Se completó, pero al menos un paso se rechazó porque nadie podía aprobarlo |
+| 130 | Lo detuvo Ctrl+C |
+
+Con `--permission-mode dontAsk`, lo que preguntaría se rechaza y no cuenta, así que el código sigue siendo 0.
+
+Un paso rechazado por una regla de denegación no hace que el código sea 3: la regla hizo lo que dice. Ambos tipos aparecen en `result.permissionDenials`. Con `--permission-mode auto`, el revisor decide lo que preguntaría; si bloquea 3 pasos seguidos, o 20 en un chat, la ejecución se detiene con el código 1.
+
+## Mensajes por stdin
+
+Con `--output stream-json --input-format stream-json`, cada línea de stdin es un mensaje, y los turnos se ejecutan uno tras otro en el mismo chat:
+
+```json
+{"type":"user","message":{"role":"user","content":"Fix the failing test"}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Now run the linter"}]}}
+{"type":"control_request","request_id":"r1","request":{"subtype":"interrupt"}}
+```
+
+`interrupt` detiene el turno en curso, y `end_session` termina la ejecución cuando terminan sus turnos. La ejecución termina cuando termina stdin.
+
+## Eventos de salida
+
+Cada evento de `stream-json` tiene `"schema": "aristra.run.v1"` y un `type`. En versiones posteriores se añaden campos; ninguno se elimina ni se renombra.
+
+<AccordionGroup>
+  <Accordion title="init: lo que usa la ejecución">
+    ```json
+    {"schema":"aristra.run.v1","type":"init","version":"1.2.1","session":"ses_8f1c…","source":"aristra","model":"gemini-3.8-flash","payer":"aristra_credits","mode":"default","folder":"/home/ci/repo","sandbox":true}
+    ```
+
+    `payer` es `aristra_credits` (tu saldo de Aristra; el nombre se mantiene por los scripts), `own_key`, `subscription`, `local` o `none`.
+  </Accordion>
+  <Accordion title="item: algo del turno terminó">
+    `item.kind` es `user`, `reply`, `reasoning`, `step`, `notice` o `compaction`. Un paso tiene su `tool`, `type`, `title`, `status`, `output`, `durationMs`, los `changes` de archivos que hizo, `attachments` (la salida completa cuando era más larga) y, en modo Auto, la `review` del revisor.
+
+    ```json
+    {"schema":"aristra.run.v1","type":"item","item":{"kind":"step","id":"itm_51a2…","tool":"shell","type":"command","title":"npm test","status":"completed","output":"Tests: 42 passed","durationMs":5120}}
+    ```
+  </Accordion>
+  <Accordion title="delta: el texto a medida que se escribe (con --partial)">
+    Texto añadido a una respuesta (`stream` es `text`), a un resumen del razonamiento (`reasoning`) o a la salida de un paso (`output`), a medida que se escribe. `text` es solo lo nuevo.
+
+    ```json
+    {"schema":"aristra.run.v1","type":"delta","item":"itm_9c0e…","stream":"text","text":"The test failed because "}
+    ```
+  </Accordion>
+  <Accordion title="approval: un paso que preguntó y cómo se decidió">
+    ```json
+    {"schema":"aristra.run.v1","type":"approval","step":"itm_77b3…","tool":"shell","title":"git push","decision":"declined","reason":"No one was there to approve this (an unattended run), so it did not run. This command requires approval"}
+    ```
+  </Accordion>
+  <Accordion title="notice: novedades de la ejecución que no son un paso">
+    Por ejemplo, una llamada al modelo a punto de reintentarse: `level` y `text`. En el modo texto, va a stderr.
+  </Accordion>
+  <Accordion title="control_response: la respuesta a una solicitud de control">
+    Con `--input-format stream-json`, la respuesta a cada solicitud de control: `requestId`, `subtype` (`success` o `error`) y `error`.
+  </Accordion>
+  <Accordion title="result: el último (la única línea con --output json)">
+    ```json
+    {"schema":"aristra.run.v1","type":"result","status":"completed","exitCode":0,"session":"ses_8f1c…","turn":"trn_2d4a…","result":"The test now passes: …","usage":{"input":18234,"output":912,"cached":12000,"cacheWrite":0,"reasoning":256},"payer":"aristra_credits","durationMs":48211,"unanswered":0,"permissionDenials":[]}
+    ```
+
+    | Campo | Significado |
+    |---|---|
+    | `status` | `completed`, `failed` o `interrupted` |
+    | `exitCode` | El código de salida del proceso |
+    | `session`, `turn` | Ids, para `--resume` y `aristra attach` |
+    | `result` | La respuesta final |
+    | `usage` | Tokens: `input`, `output`, `cached`, `cacheWrite`, `reasoning` |
+    | `unanswered` | Pasos rechazados porque nadie podía aprobarlos |
+    | `permissionDenials` | Cada paso rechazado: `step`, `tool`, `title`, `reason` |
+    | `payer` | Quién pagó |
+    | `durationMs` | Cuánto duró el turno |
+    | `error` | Por qué falló o se detuvo |
+    | `errorKind` | Cuando lo hizo fallar una llamada al modelo: `auth`, `entitlement`, `rate_limited`, `overloaded`, `context_overflow`, `invalid_request`, `network`, `refused` o `unknown` |
+    | `retryAt` | Cuándo dijo el proveedor que se puede volver a intentar (milisegundos Unix) |
+    | `structuredOutput` | Con `--json-schema`, el valor que dio el modelo |
+    | `terminalReason` | `max_turns` o `structured_output_retries`, cuando un límite terminó el turno |
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,96 @@
+---
+title: "Planes y precios"
+description: "La cuenta Free y los planes Plus, Pro y Max: qué incluye cada uno, el uso mensual en dólares, cuándo se reinicia y qué pasa al llegar a cero o cuando termina un plan."
+---
+
+Cada plan incluye su precio en uso cada mes: Plus cuesta $20 al mes e incluye $20 de uso. Todos los modelos están en todos los planes, al precio de su propio proveedor. Una cuenta Free también chatea en la web y en el teléfono, con su saldo.
+
+<CardGroup cols={3}>
+  <Card title="Plus" img="/images/tier-dawn.jpg">
+    $20 al mes, con $20 de uso cada mes. 10 GB de archivos, 6 chats a la vez.
+  </Card>
+  <Card title="Pro" img="/images/tier-day.jpg">
+    $100 al mes, con $100 de uso cada mes. 100 GB de archivos, 10 chats a la vez.
+  </Card>
+  <Card title="Max" img="/images/tier-night.jpg">
+    $200 al mes, con $200 de uso cada mes. 200 GB de archivos, 16 chats a la vez y la computadora en la nube más grande.
+  </Card>
+</CardGroup>
+
+## Los planes
+
+| | Free | Plus | Pro | Max |
+|---|---|---|---|---|
+| Precio al mes | $0 | $20 | $100 | $200 |
+| Aristra Desktop, la CLI y Aristra Code en tu computadora | Sí | Sí | Sí | Sí |
+| En la web y el teléfono | Chats, con tu saldo | Completo | Completo | Completo |
+| Uso incluido cada mes | Ninguno | $20 | $100 | $200 |
+| Los modelos de Aristra | Todos, con tu saldo | Todos | Todos | Todos |
+| Búsqueda web y otras herramientas alojadas | Con tu saldo | Con tu uso | Con tu uso | Con tu uso |
+| Memoria en tu cuenta, en todos los dispositivos | Sí | Sí | Sí | Sí |
+| Sincronización de chats y acceso remoto a tus computadoras | No | Sí | Sí | Sí |
+| Conectores, tareas programadas en la nube y canales | No | Sí | Sí | Sí |
+| Computadora en la nube | Con recargas, hasta 4 GB, disco de 100 GB | Hasta 4 GB, disco de 25 GB | Hasta 4 GB, disco de 100 GB | Hasta 8 GB, disco de 100 GB |
+| Almacenamiento de archivos | 1 GB | 10 GB | 100 GB | 200 GB |
+| Documentos de Craft en tu cuenta | No | Sí | Sí | Sí |
+| Chats a la vez | 4 | 6 | 10 | 16 |
+| Recargas, de cualquier importe desde $10 | Sí | Sí | Sí | Sí |
+
+Una cuenta nueva también recibe un [crédito inicial](/es/account/credits) de $1, una sola vez. Paga modelos y herramientas, así que puedes probar los chats en la web antes de recargar.
+
+Elige o cambia de plan en **Billing**, en `app.aristralabs.com/account/billing`. El pago se hace a través de Stripe.
+
+## Qué paga tu uso
+
+El uso mensual de tu plan y, después, tu [saldo de recargas](/es/account/credits) pagan:
+
+- **Los modelos de Aristra**, según los tokens que usa cada llamada, al precio del propio proveedor. El precio de cada modelo está en [Models and prices](https://app.aristralabs.com/models).
+- **Las herramientas alojadas**: la búsqueda de Brave, la lectura de páginas web, el sandbox de código y el navegador en la nube, las imágenes, la transcripción y la lectura de documentos. Consulta [Uso y precios](/es/account/usage).
+- **Una computadora en la nube**: el tiempo que está despierta y su disco, esté despierta o dormida. Consulta [Computadora en la nube](/es/surfaces/cloud-computer).
+
+Un modelo propio (tu clave, tu plan de ChatGPT, un modelo en tu computadora) no cuesta nada en Aristra.
+
+<AccordionGroup>
+  <Accordion title="¿Cuándo se reinicia mi uso?">
+    En tu fecha de facturación de cada mes. El uso que sobra no se acumula. Tu saldo de recargas es aparte: cada recarga dura 12 meses y se usa cuando se agota el uso del mes.
+  </Accordion>
+  <Accordion title="¿Qué pasa al llegar a cero?">
+    Aristra se detiene antes del siguiente paso de pago y lo indica. Una llamada que ya está en curso termina y se cobra completa, así que tu saldo puede quedar unos centavos por debajo de cero; tu siguiente cargo, recarga o mes lo salda primero. [Recarga](/es/account/credits) desde $10, cambia el chat a un modelo propio con `/model` o espera al reinicio. Con un plan, una computadora en la nube se duerme y conserva su disco. Sin plan, cuando se acaba tu saldo de recargas, se detiene y su disco se conserva durante 30 días; una recarga dentro de ese plazo la recupera.
+  </Accordion>
+  <Accordion title="¿Qué pasa cuando cambio de plan?">
+    Una mejora empieza de inmediato, y recibes la diferencia entre el uso mensual de los dos planes, en proporción al tiempo que queda del periodo de facturación. Un cambio a un plan inferior empieza al final del periodo de facturación. Una computadora en la nube más grande de lo que permite el nuevo plan baja entonces a su tamaño máximo; su disco se queda como está.
+  </Accordion>
+  <Accordion title="¿Por qué Billing dice que todos los planes están ocupados?">
+    Los planes se abren por tandas mientras Aristra One es nuevo. Cuando una tanda se agota, Billing lo indica antes de que pagues, y no se cobra nada. Tu cuenta sigue funcionando como hasta ahora, y pronto se abren más planes.
+  </Accordion>
+  <Accordion title="¿Hay un límite de lo rápido que puedo gastar mi uso mensual?">
+    No. Es un único importe sin límite diario ni semanal.
+  </Accordion>
+</AccordionGroup>
+
+## Cuando te suscribes
+
+Tus computadoras siguen el plan de la cuenta en pocos minutos. El día en que empieza un plan:
+
+- **Aristra Desktop ofrece, una sola vez,** compartir los chats de este Mac con tu teléfono y la web, y permitir que los chats en la nube lean una carpeta de aquí. Ninguna es obligatoria. Más adelante, las mismas opciones están en el menú de un chat (**Continue on phone and web**) y en el menú de una carpeta (**Use from other devices**).
+- **En la terminal**, `/remote-control` comparte el chat en el que estás.
+
+## Cuando termina un plan
+
+Tu cuenta se queda, como cuenta Free, y no se elimina nada de lo que creaste.
+
+| | Qué pasa |
+|---|---|
+| Chats | Siguen todos aquí. Los chats nuevos en la web se pagan con tu saldo |
+| Craft | Se abre para leer y [exportar](/es/account/export). No se guarda nada nuevo: los documentos nuevos de Craft se guardan en tu Mac |
+| Archivos | Siguen todos aquí, para abrirlos y descargarlos. Si superas el 1 GB de una cuenta Free, los archivos nuevos se rechazan hasta que elimines algunos; no se elimina nada por ti |
+| Memoria de la cuenta | Sigue siendo tuya en todos los dispositivos, y Aristra sigue aprendiendo, como en todas las cuentas |
+| Computadora en la nube | Sigue funcionando con tu saldo de recargas, hasta Large (4 GB); una más grande baja a Large. Si no queda saldo, se detiene: su disco se conserva durante 30 días y recibes un correo una semana antes de que se elimine |
+| Tareas programadas en la nube y canales | En pausa. Vuelven a empezar cuando renuevas |
+| Remote Control y tus computadoras | Los chats compartidos se pueden seguir leyendo. Seguir, responder e iniciar chats en tus computadoras desde la web se detiene hasta que renuevas |
+| Conectores | Siguen en la lista. No puedes conectarlos ni cambiarlos hasta que renuevas |
+| Claves de API de proyecto | Dejan de funcionar hasta que renuevas |
+| Saldo de recargas | Sigue siendo tuyo. Paga los chats en la web y los modelos y herramientas de Aristra en tu computadora |
+| Aristra Desktop y la Aristra CLI | Siguen funcionando con tu propio modelo |
+
+Renueva en **Billing** para recuperarlo todo como estaba.

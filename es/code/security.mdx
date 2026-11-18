@@ -1,0 +1,102 @@
+---
+title: "Seguridad y privacidad"
+description: "Qué sale de tu computadora, cómo funcionan el inicio de sesión y los secretos, cómo se contiene a Aristra Code, los registros y cómo desactivar la telemetría."
+---
+
+## Qué sale de tu computadora
+
+Un chat en tu computadora se guarda en `~/.aristra`. Qué sale, y hacia quién:
+
+| Qué | Adónde va | Cuándo |
+|---|---|---|
+| La llamada al modelo: la conversación y las herramientas que se ofrecen | El origen del chat: Aristra, OpenAI (tu plan de ChatGPT), el proveedor de tu clave, tu endpoint personalizado. Nada si el modelo está en tu computadora | En cada llamada al modelo |
+| Tu perfil: tu nombre, tu ocupación y tu nota **About you** | Se lee de Aristra | Los turnos de un chat, como máximo cada diez minutos |
+| La memoria de tu cuenta para esta carpeta | Se lee de Aristra, etiquetada con el remoto del repositorio y el nombre de la carpeta, nunca con su ruta | Los turnos de los chats con la memoria activada |
+| Lo que Aristra Code guarda en la memoria, y las notas sobre un repositorio | Aristra | Al guardarse |
+| Una búsqueda web | La búsqueda de Aristra, o Brave con tu propia clave | Cuando busca |
+| Las palabras de búsqueda, cuando la búsqueda de Aristra no puede responder | La búsqueda pública gratuita de Exa, Parallel, Firecrawl o Keenable | Salvo que `web.keylessFallback` sea `false` |
+| La llamada de un conector | Aristra, que la ejecuta | Cuando un chat usa una app conectada a tu cuenta |
+| Las llamadas a un servidor MCP que añadiste | Ese servidor | Cuando un chat lo usa |
+| Los archivos de tu carpeta, cuando los comandos se ejecutan en un sandbox en la nube | El sandbox de Aristra o E2B | Solo si eliges uno |
+| Una página web | Se obtiene directamente desde tu computadora | Cuando lee una |
+| Un paso que comprueba el revisor del modo Auto | El revisor de Aristra, o tu propio modelo | En el modo Auto, para lo que de otro modo preguntaría |
+| Eventos de uso e informes de errores sin contenido | Aristra | Salvo que los desactives |
+| Un chat compartido, o las llamadas de un chat en la nube a una carpeta de aquí | Aristra | Solo cuando compartes un chat o conectas una carpeta |
+| Los archivos que te envía Aristra Code | Aristra | Cuando envía un archivo a tu teléfono o a la web |
+| El estado de los pull requests, `/pr` y Auto-fix | GitHub o GitLab, con tu propio inicio de sesión de `gh` o `glab` | En una rama con un pull request |
+| Los catálogos de plugins y los plugins | Los marketplaces que añades (el de Anthropic desde GitHub de forma predeterminada) | Cuando añades o actualizas un marketplace o instalas un plugin |
+
+Las llamadas a los modelos de Aristra pasan por los servidores de Aristra hacia el proveedor del modelo y se miden en tu cuenta; esa llamada no guarda nada de la conversación.
+
+### Con plan y sin plan
+
+Con la sesión iniciada, lo que Aristra recuerda de ti se guarda en tu cuenta de Aristra, con o sin plan, así que te acompaña a la web, a tu teléfono y a tus otras computadoras.
+
+| | Con un plan | Sin plan |
+|---|---|---|
+| La transcripción de un chat | En esta computadora. Nunca se sube | Igual |
+| Un chat que compartes con la web | Sus turnos se guardan en tu cuenta como un chat, y **Search and reference past chats** puede encontrarlo | No disponible |
+| Lo que Aristra recuerda de ti | La memoria de tu cuenta: se lee en cada turno y la escriben las herramientas de memoria, así que sale de esta computadora | Igual |
+| Las notas sobre un repositorio | Archivos en esta computadora, copiados en un solo sentido a tu cuenta | Igual |
+| Los archivos | En esta computadora, salvo que guardes una copia en tu cuenta | Igual |
+
+Sin la sesión iniciada, Aristra no guarda ningún recuerdo de ti. Una computadora que guardaba la memoria en archivos antes de que la memoria viniera con todas las cuentas envía esas notas a tu cuenta una sola vez, la primera vez que inicia un chat con la sesión iniciada.
+
+## Inicio de sesión
+
+`aristra login` (o la primera ejecución) añade esta computadora como dispositivo de tu cuenta de Aristra, en tu navegador o con un código que escribes en cualquier dispositivo (por SSH, o con `--device-code`). Crea:
+
+- **Un dispositivo** en tu cuenta, que la lista de dispositivos del sitio web muestra y puede revocar.
+- **Una clave del dispositivo.** En un Mac se crea en el Secure Enclave, así que no se puede copiar fuera del chip; en Linux, es una clave de software en el almacén de credenciales. Cada renovación del inicio de sesión se firma con ella, así que un token robado no sirve en otro lugar. Un Mac sin Secure Enclave (un Mac Intel sin chip T2, una máquina virtual) inicia sesión sin clave del dispositivo.
+- **Tokens**: un token de acceso que dura 15 minutos y un token de actualización que dura 30 días, guardados en el almacén de credenciales.
+
+`aristra logout` cierra la sesión aquí y revoca el dispositivo. Cerrar la sesión del dispositivo desde el sitio web también lo revoca.
+
+## Dónde se guardan los secretos
+
+Las claves de proveedores, los secretos de MCP y todos los inicios de sesión se guardan en el almacén de credenciales de Aristra, nunca en un archivo de configuración. **Las superficies pueden escribir un secreto, pero nunca leerlo de vuelta.** El almacén está sellado con una clave de tu llavero; un comando que apruebas se ejecuta con tu propio acceso, así que podría llegar a él. Añade `"deny": ["read(~/.aristra/**)"]` a tus permisos para mantener fuera las herramientas del agente y los comandos dentro del sandbox.
+
+| Almacén | Dónde |
+|---|---|
+| Llavero de macOS | `~/.aristra/credentials.enc`, sellado con una clave aleatoria guardada en tu llavero de inicio de sesión |
+| Llavero de Linux | El mismo archivo sellado, con la clave en Secret Service |
+| Archivo | `~/.aristra/credentials.json` (legible solo por ti), cuando no responde ningún llavero (en Linux, también cuando `secret-tool` no está instalado). `ARISTRA_CREDENTIALS_STORE` tiene prioridad sobre `credentials.store` |
+
+`credentials.store` (`auto`, `keychain`, `file`) elige; `aristra doctor` indica cuál está en uso.
+
+## Cómo se contiene a Aristra Code
+
+| Amenaza | Qué la detiene |
+|---|---|
+| Una página web, un archivo o la salida de una herramienta le dicen al agente que haga algo dañino | Las comprobaciones de permisos y el sandbox. El contenido externo llega al modelo marcado como no fiable. El revisor del modo Auto nunca ve los resultados de las herramientas |
+| Un comando intenta llegar a la red o escribir fuera de la carpeta | Las aprobaciones de todo comando que haga algo más que leer y, una vez que lo activas, el [sandbox](/es/code/configure/sandbox): la red solo a través de su proxy hacia los hosts que permites, y escrituras solo en las carpetas del chat |
+| Un servidor MCP malicioso | Su paquete se comprueba primero contra el malware conocido, sus herramientas preguntan hasta que confías en él y `"sandbox": true` lo ejecuta en un sandbox |
+| La configuración de un repositorio intenta permitirlo todo | Las reglas, el modo y la configuración del sandbox de una carpeta solo cuentan después de que confíes en ella, y los servidores de su `.mcp.json` preguntan antes de iniciarse. El revisor, el lugar donde se guardan los secretos y los modelos auxiliares solo salen de tu propia configuración |
+| El agente edita la configuración o los archivos de agente de un repositorio | Los cambios en `.aristra`, `.claude`, `.git`, `.vscode`, `.idea`, los archivos de inicio del shell y `.mcp.json` nunca se ejecutan solo por una regla: preguntan en todos los modos, y en Auto los decide el revisor |
+| Un secreto se filtra a un registro | Los valores que parecen secretos se enmascaran en los resultados de las herramientas, los eventos, los registros y las exportaciones |
+| Una computadora portátil robada | Secretos sellados con una clave de tu llavero de inicio de sesión, y el inicio de sesión vinculado a la clave del dispositivo. Revoca el dispositivo en el sitio web |
+
+<Tip>
+Dentro del sandbox, las lecturas están abiertas de forma predeterminada. Cierra las carpetas de credenciales con reglas de denegación: `"deny": ["read(~/.ssh/**)", "read(~/.aws/**)"]`.
+</Tip>
+
+Solo tu usuario puede hablar con el runtime: escucha en un socket privado verificado con tu cuenta de usuario, nunca en la red.
+
+## Registros
+
+El runtime escribe su registro en `~/.aristra/logs/runtime.log`, con los secretos enmascarados, y lo conserva siete días. `aristra logs` lo lee, `aristra logs -f` lo sigue y `ARISTRA_LOG_LEVEL` fija cuánto detalle incluye.
+
+`aristra diagnostics export` escribe un paquete de soporte en `~/.aristra/diagnostics/`: versiones, comprobaciones, tu propio archivo de configuración, tamaños de tablas (sin mensajes) y registros, enmascarados de nuevo y sin direcciones de correo. No envía nada; revisa su contenido antes de compartirlo.
+
+## Telemetría
+
+Aristra Code envía eventos de uso e informes de errores sin contenido. Nunca se envía ningún prompt, respuesta, código, comando, contenido de archivo, nombre de archivo o de carpeta, ruta, URL, nombre de servidor MCP ni mensaje de error: cada valor es una categoría, un recuento, una duración, una hora o un identificador de una lista fija, como el nombre de un modelo. No se envía nada mientras no tienes la sesión iniciada, y los eventos que no se pueden enviar se descartan, nunca se escriben en el disco.
+
+| Desactivar | Eventos de uso | Informes de errores |
+|---|---|---|
+| Configuración | `telemetry.usage: false` | `telemetry.errors: false` |
+| Entorno | `ARISTRA_DISABLE_TELEMETRY=1` | `ARISTRA_DISABLE_ERROR_REPORTING=1` |
+| Ambos | `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC=1` | |
+| Aristra Desktop | Settings › General › Privacy › **Share usage data** | **Send error reports** |
+
+Las variables de entorno se leen cuando se inicia el runtime: ejecuta `aristra runtime stop` después de definirlas. `aristra doctor` indica si cada una está activada.
