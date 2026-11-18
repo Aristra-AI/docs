@@ -156,7 +156,7 @@ The approval page names the **Application** (**Aristra Desktop**, **Aristra Code
 
 Only approve a sign-in you started yourself, just now. Aristra will never ask you to approve a code. **Deny** connects nothing, and the sign-in on that computer expires by itself.
 
-A signed-in computer stays signed in while you use it. One that isn't used for 30 days asks you to sign in again. An account can have 20 computers and script tokens at once. Each counts until it's signed out in **Settings › Devices**, even one whose sign-in has lapsed.
+A signed-in computer stays signed in while you use it. One that isn't used for 30 days asks you to sign in again. An account can have 20 computers and script tokens signed in at once. One whose sign-in has lapsed no longer counts.
 
 ### Sign out
 
@@ -165,7 +165,9 @@ A signed-in computer stays signed in while you use it. One that isn't used for 3
 | The website, in this browser | Choose your name at the bottom of the sidebar, then **Log out**. Your computers stay signed in |
 | This Mac | In Aristra Desktop, open the account menu (your name, bottom left) and choose **Sign out**. Running chats stop, here and in the terminal |
 | This computer, in a terminal | Stop running chats first, then run `aristra logout`, or `/logout` in a chat. Aristra Desktop on this computer signs out too |
-| Another computer | On the website, open **Settings › Devices** and choose **Sign out** next to it. Its chats and files stay on it |
+| Another computer | On the website, open **Settings › Devices** and choose **Sign out** next to it. Its chats and files stay on it. Your cloud computer is stopped or deleted from **Manage** instead |
+| Every computer at once | In Aristra Desktop, **Settings › Account › Sign out all**. Every computer and token for scripts signs out, this Mac included. Your cloud computer and web sessions stay as they are |
+| Your ChatGPT plan | `aristra logout chatgpt` in a terminal (or `/logout chatgpt` in a chat), or **Sign out** on **ChatGPT plan** in Aristra Desktop's **Settings › Models**. Aristra stays signed in |
 
 Signing out of Aristra keeps your ChatGPT sign-in and API keys on that computer. Chats on a computer show again when the same account signs back in.
 
@@ -182,7 +184,7 @@ Signing out of Aristra keeps your ChatGPT sign-in and API keys on that computer.
     The browser may be on another device, or unable to reach this computer. Switch to a code: **Use a code instead** in Aristra Desktop, **c** while the terminal waits, or `/login code` in a chat.
   </Accordion>
   <Accordion title="Revoke an existing device before connecting another">
-    Your account has 20 computers and script tokens. In **Settings › Devices** on the website, sign out the ones you no longer use (a computer whose sign-in has lapsed still counts), then sign in again.
+    Your account has 20 computers and script tokens signed in. In **Settings › Devices** on the website, sign out the ones you no longer use, then sign in again.
   </Accordion>
   <Accordion title="Your account is on the waitlist">
     Aristra lets people in gradually. Once your place is ready (Aristra emails you), start the sign-in again on the computer.
