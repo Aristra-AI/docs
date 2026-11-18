@@ -162,7 +162,10 @@
   },
   "footer": {
     "socials": {
-      "website": "https://aristralabs.com"
+      "website": "https://aristralabs.com",
+      "x": "https://x.com/AristraAI",
+      "linkedin": "https://www.linkedin.com/company/aristralabs",
+      "github": "https://github.com/Aristra-AI"
     }
   },
   "background": {
