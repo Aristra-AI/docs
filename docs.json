@@ -11,8 +11,8 @@
     "family": "Inter"
   },
   "logo": {
-    "light": "/logo/aristra.svg",
-    "dark": "/logo/aristra.svg"
+    "light": "/logo/aristra-labs-light.svg",
+    "dark": "/logo/aristra-labs-dark.svg"
   },
   "favicon": "/favicon.svg",
   "navbar": {
