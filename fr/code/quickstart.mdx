@@ -1,0 +1,97 @@
+---
+title: "Démarrage rapide"
+description: "Installez Aristra Code, connectez-vous, choisissez votre modèle et menez à bien une première tâche dans l'un de vos projets."
+---
+
+Ce guide vous mène de zéro installation à une première modification terminée. Il utilise le terminal ; le même chat fonctionne aussi dans [Aristra Desktop](/fr/code/desktop).
+
+<Steps>
+  <Step title="Installer">
+    ```sh
+    curl -fsSL https://aristralabs.com/install.sh | sh
+    ```
+
+    Cette commande installe la dernière version pour votre machine (macOS sur Apple silicon ou Intel, Linux sur x64 ou arm64) dans votre dossier personnel, sans accès root. Si `~/.local/bin` n'est pas encore dans votre `PATH`, l'installateur l'ajoute au profil de votre shell et vous le signale. Ouvrez ensuite un nouveau terminal.
+
+    Vérifiez l'installation :
+
+    ```sh
+    aristra --version
+    aristra doctor
+    ```
+
+    `aristra doctor` vérifie votre configuration et marque chaque ligne `ok` ou `fix`, avec la marche à suivre pour corriger. Sous Windows, utilisez WSL2 ; consultez [Installation](/fr/code/setup).
+  </Step>
+
+  <Step title="Le lancer dans un projet">
+    ```sh
+    cd ~/code/my-project
+    aristra
+    ```
+
+    Le premier lancement ne demande que ce dont il a encore besoin, un écran à la fois :
+
+    1. **Sign in to Aristra.** Chaque chat nécessite un compte Aristra, y compris les chats avec vos propres clés ou sur un modèle local. Le compte est gratuit : consultez [ce qui est gratuit et ce qu'ajoute un forfait](/fr/account/overview). Appuyez sur Enter pour vous connecter **In your browser** : votre navigateur ouvre la page de connexion (sinon, ouvrez le lien que le terminal affiche), et vous choisissez **Approve**. Sans navigateur (par SSH, par exemple), **With a code, on another device** vient en premier : ouvrez app.aristralabs.com/desktop/device sur n'importe quel appareil et saisissez le code. Pendant que la connexion par navigateur attend, appuyez sur c pour passer à un code. Esc passe cette étape, et `/login` vous connecte plus tard. Toutes les étapes se trouvent dans [Se connecter](/fr/quickstart).
+    2. **Choose the model new chats start with.** Chaque choix indique qui paie : votre solde Aristra, votre forfait ChatGPT, votre propre clé, ou « runs on this computer ». Changez-le à tout moment avec `/model`. Pour utiliser votre forfait ChatGPT, une clé ou un modèle local, consultez [Utiliser votre propre modèle](/fr/own-models).
+    3. **Faites confiance au dossier.** Aristra Code lit, modifie et exécute des fichiers dans un dossier auquel vous faites confiance. « No, exit » est sélectionné en premier ; appuyez sur Down, puis sur Enter, pour lui faire confiance. La réponse est enregistrée pour le dépôt et ses sous-dossiers. Votre dossier personnel n'est considéré comme de confiance que pour ce lancement.
+    4. **Nouveaux serveurs MCP.** Si le fichier `.mcp.json` du dossier contient des serveurs sur lesquels vous ne vous êtes pas encore prononcé, il vous demande lesquels utiliser. Démarrer en Bypass permissions affiche d'abord un avertissement à accepter.
+  </Step>
+
+  <Step title="Demander une modification">
+    Tapez ce que vous voulez faire et appuyez sur Enter :
+
+    ```text
+    › Find why the date parser fails on leap years and fix it. Run the tests when you are done.
+    ```
+
+    Vous verrez :
+    - La réponse s'afficher au fil de l'eau en Markdown.
+    - Chaque étape sur une ligne : `Read src/date.ts`, `Search for leap`, `Edit src/date.ts`, `$ npm test`.
+    - Le diff de chaque modification et la sortie de chaque commande, réduits à quelques lignes. Ctrl+O ouvre la sortie complète de la dernière étape.
+    - La ligne d'état, avec ce qu'il fait et le taux de remplissage du contexte du modèle, et le pied de page, avec le mode, la pull request de la branche, le modèle et qui paie.
+  </Step>
+
+  <Step title="Approuver ce qu'il demande">
+    Les nouveaux chats démarrent en mode **Manual** : la lecture, la recherche et les commandes qui ne font que lire s'exécutent seules (avec le bac à sable activé, les commandes qui y tournent aussi), et les autres modifications demandent d'abord votre accord. Une demande d'approbation affiche la commande ou le diff exact avec trois réponses :
+
+    - **Yes** pour cette seule étape.
+    - **Yes, and don't ask again** pour ce type d'étape, ce qui enregistre une règle (ou autorise les modifications pour le reste du chat).
+    - **No**.
+
+    Appuyez sur Tab sur Yes ou No pour ajouter une note que le modèle lira.
+
+    Appuyez sur Shift+Tab pour passer d'un mode à l'autre : **Accept edits** (les modifications dans le dossier s'exécutent seules), **Plan** (explorer et proposer d'abord), **Auto** (le relecteur d'Aristra décide de ce qui vous serait demandé) et retour à Manual. Consultez [Autorisations](/fr/code/configure/permissions).
+  </Step>
+</Steps>
+
+## Configurer votre modèle
+
+Les modèles d'Aristra sont prêts dès que vous vous connectez. Pour fonctionner avec votre forfait ChatGPT, votre propre clé de fournisseur ou un modèle sur votre ordinateur (Ollama, LM Studio ou un autre serveur), suivez [Utiliser votre propre modèle](/fr/own-models) : chaque option a ses étapes pour Aristra Desktop et le terminal. Choisissez-le ensuite avec `/model` ; il devient le modèle par défaut des nouveaux chats.
+
+## Au quotidien
+
+| Vous voulez | Faites ceci |
+|---|---|
+| Démarrer dans ce dossier | `aristra` |
+| Démarrer avec un prompt | `aristra "explain the build system"` |
+| Reprendre le chat le plus récent de ce dossier | `aristra -c` |
+| Revenir à un chat précédent | `aristra resume`, ou `/resume` dans un chat |
+| Ouvrir un chat qui s'exécute ailleurs | `aristra attach <id>` |
+| Exécuter un tour dans un script ou une CI | `aristra run "fix the lint errors" -o json` |
+| Voir les chats de ce dossier | `aristra sessions` (`--all` pour tous les dossiers) |
+| Choisir un autre modèle | `/model`, ou `aristra models` pour les lister |
+| Ajouter une clé de fournisseur | `aristra keys add openai` (ou `anthropic`, `gemini`, `openrouter`) |
+| Changer un paramètre | `aristra config set permissions.defaultMode acceptEdits` |
+| Reprendre votre configuration Claude Code ou Codex | `aristra import claude-code` (ou `codex`), avec un aperçu d'abord |
+| Vérifier votre configuration | `aristra doctor` |
+
+Dans un chat, `/help` liste toutes les commandes et tous les raccourcis.
+
+## Étapes suivantes
+
+<CardGroup cols={2}>
+  <Card title="L'app de terminal" icon="terminal" href="/fr/code/terminal">Les raccourcis, réorienter un tour en cours, la file d'attente, revenir en arrière.</Card>
+  <Card title="Mémoire et instructions" icon="brain" href="/fr/code/guides/memory">Apprenez-lui votre projet avec `AGENTS.md`.</Card>
+  <Card title="Git et pull requests" icon="code-branch" href="/fr/code/guides/git">Les worktrees, les diffs, `/pr` et la correction automatique.</Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/fr/code/desktop">Les mêmes chats dans l'onglet Code de l'app Mac.</Card>
+</CardGroup>

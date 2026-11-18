@@ -1,0 +1,67 @@
+---
+title: "Fonctionnement d'Aristra Code"
+sidebarTitle: "Fonctionnement"
+description: "L'Aristra Runtime derrière chaque surface, ce que fait un tour, et où se trouvent vos chats, vos paramètres et vos secrets."
+---
+
+## Un agent, plusieurs surfaces
+
+Le programme que vous tapez, `aristra`, est un client. L'agent lui-même est l'**Aristra Runtime**, un processus en arrière-plan sur votre ordinateur que partagent toutes vos surfaces : le terminal, [Aristra Desktop](/fr/code/desktop), les [éditeurs](/fr/code/editors) et une [machine distante](/fr/code/remote-machines) que vous joignez par SSH.
+
+```text
+ aristra (terminal)    Aristra Desktop    an editor (aristra acp)    aristra --remote <host>
+          \                  |                    |                         |
+           '------------ the runtime protocol on a private socket ---------'
+                                       |
+                            Aristra Runtime (one per user)
+          chats, turns, approvals, permissions, sandbox, tools, models,
+          sign-in and secrets, settings, memory, MCP servers, scheduled tasks
+                                       |
+   Out only: api.aristralabs.com, the model providers you use, model servers on
+   this computer, and the pages, MCP servers and services your chats use
+```
+
+Comme elles partagent un seul runtime :
+
+- Un chat démarré dans le terminal apparaît dans l'onglet Code d'Aristra Desktop, et inversement.
+- Une demande d'approbation peut recevoir une réponse depuis n'importe quelle surface ouverte. La première réponse l'emporte, et les autres surfaces voient qui a répondu.
+- Un tour en cours ne dépend pas de la fenêtre ou du terminal qui l'a lancé. Quitter le terminal pendant qu'un tour s'exécute vous demande s'il faut le laisser continuer.
+
+Le runtime démarre quand une surface en a besoin et s'arrête de lui-même après dix minutes d'inactivité. Il n'écoute jamais sur le réseau : les surfaces le joignent par un socket que seul votre compte utilisateur peut ouvrir.
+
+## Ce que fait un tour
+
+Quand vous envoyez un message, Aristra Code exécute une boucle jusqu'à ce que le travail soit terminé :
+
+1. **Rassembler le contexte.** Votre message, le chat jusqu'ici, vos fichiers d'instructions (`AGENTS.md` et les règles), la mémoire et les outils qu'il peut utiliser sont envoyés au modèle.
+2. **Agir.** Le modèle demande des outils : lire un fichier, chercher, modifier, exécuter une commande, récupérer une page, appeler un serveur MCP. Chaque demande passe par vos [autorisations](/fr/code/configure/permissions) : elle s'exécute, vous est soumise, ou est refusée.
+3. **Vérifier.** Le résultat de chaque outil revient au modèle, qui décide de l'étape suivante : un autre outil, ou une réponse.
+
+Vous pouvez intervenir à tout moment : envoyez un message pour réorienter le tour à sa prochaine étape, mettez-en un en file d'attente pour après, ou appuyez sur Esc pour l'arrêter. Les longues conversations sont résumées quand le contexte du modèle se remplit ; consultez [Contexte](/fr/code/guides/context).
+
+## Les chats sur votre ordinateur et dans le cloud
+
+La plupart des chats s'exécutent sur votre ordinateur, dans un dossier que vous choisissez, et sont enregistrés dans `~/.aristra` sur cet ordinateur. Certains s'exécutent plutôt dans le cloud :
+
+| | Sur votre ordinateur | Dans le cloud |
+|---|---|---|
+| Démarré avec | `aristra`, l'onglet Code d'Aristra Desktop | `aristra --cloud`, le site web, votre téléphone |
+| Enregistré | Dans `~/.aristra` sur cet ordinateur | Dans votre compte Aristra |
+| Modèles | Toute source que vous avez configurée | Les modèles d'Aristra, sur votre solde |
+| Nécessite un forfait | Non : gratuit avec un modèle à vous | Non : payé depuis votre solde ; un forfait ajoute une consommation mensuelle. Consultez [Forfaits et tarifs](/fr/account/plans) |
+| Un dossier | Son dossier de travail | Facultatif : un dossier de cet ordinateur qu'il lit et modifie via le runtime |
+
+Un chat sur votre ordinateur peut aussi être poursuivi depuis votre téléphone et le web avec [Remote Control](/fr/code/remote-control) ; le travail continue de s'exécuter ici. Consultez [Chats cloud](/fr/code/cloud-chats) pour les chats exécutés par l'agent cloud d'Aristra.
+
+## Où se trouvent les choses
+
+| Quoi | Où |
+|---|---|
+| Le programme | `~/.local/bin/aristra`, un lien vers `~/.local/share/aristra/versions/<version>/` |
+| Vos données : chats, paramètres, journaux, secrets | `~/.aristra/` (ou `ARISTRA_HOME`) |
+| Vos paramètres | `~/.aristra/settings.json` |
+| Les paramètres d'un projet | `<folder>/.aristra/settings.json` et `settings.local.json` |
+| Les instructions d'un projet | `AGENTS.md` (ou `.aristra/AGENTS.md`) dans chaque dossier, du dépôt jusqu'en bas, `.aristra/rules/*.md`, et votre fichier privé `AGENTS.local.md` ; les fichiers `CLAUDE.md` de Claude Code là où il n'y a pas d'`AGENTS.md` |
+| Le journal du runtime | `~/.aristra/logs/runtime.log` (`aristra logs`) |
+
+Les secrets comme les jetons de connexion et les clés de fournisseur sont scellés avec une clé conservée dans votre trousseau de session (ou votre trousseau de clés Linux ; si aucun des deux ne répond, un fichier que vous seul pouvez lire). La connexion de votre ordinateur est liée à une clé d'appareil qui, sur un Mac doté d'une Secure Enclave, s'y trouve. Consultez [Sécurité et confidentialité](/fr/code/security).

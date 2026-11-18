@@ -1,0 +1,38 @@
+---
+title: "Objectifs"
+description: "Fixez une condition avec /goal, et Aristra Code continue de travailler jusqu'à ce qu'elle soit remplie : les tests passent, le build est vert, la page s'affiche."
+---
+
+Un objectif est une condition qu'Aristra Code vérifie avant de s'arrêter. Quand un tour est sur le point de se terminer, un petit modèle lit le chat et décide si l'objectif est rempli. Si ce n'est pas le cas, le tour continue, avec la raison. Si c'est le cas, l'objectif est levé et le chat indique qu'il a été atteint, avec le temps, le nombre de tours et le nombre de tokens qu'il a fallu.
+
+```text
+/goal all tests in packages/api pass and the linter is clean
+/goal                # show the current goal
+/goal clear          # remove it
+```
+
+Un objectif fait jusqu'à 4 000 caractères. `/goal` ne fonctionne que dans un dossier de confiance, et pas quand `disableAllHooks` est défini.
+
+Dans Aristra Desktop, choisissez **Goal** dans le menu `/` d'un chat.
+
+## Rédiger un bon objectif
+
+Un objectif fonctionne mieux quand Aristra Code peut le vérifier en exécutant quelque chose, et non quand c'est une question d'appréciation :
+
+| Bon | Difficile à vérifier |
+|---|---|
+| `npm test` passe sans test ignoré | Le code est propre |
+| Le build réussit et le bundle fait moins de 200 Ko | L'app est rapide |
+| `/health` renvoie 200 sur le serveur local | L'API fonctionne |
+
+Donnez à Aristra Code la commande qui le vérifie, dans l'objectif ou dans votre `AGENTS.md`, pour que chaque tour puisse vérifier au lieu de deviner.
+
+## Comment il se termine
+
+- **Atteint :** l'objectif est levé, et le chat l'indique.
+- **Non atteint :** le tour continue avec la raison donnée par la vérification.
+- **Impossible :** si la vérification décide que l'objectif ne peut pas être atteint, l'objectif est levé et le tour se termine, avec la raison.
+- **Non atteint 8 fois de suite** sans appel d'outil entre-temps : le tour se termine quand même, et l'objectif reste.
+- **Échec de la vérification** (pas de réponse en 30 secondes, ou aucun modèle configuré pour elle) : le tour se termine, et l'objectif reste.
+
+Tant qu'un travail en arrière-plan est encore en cours dans le chat, la vérification l'attend. Esc arrête le tour comme d'habitude ; l'objectif reste jusqu'à ce que vous le leviez, qu'il soit atteint, ou que la vérification le juge impossible.

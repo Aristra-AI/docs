@@ -1,0 +1,105 @@
+---
+title: "Git et pull requests"
+description: "Travaillez dans des worktrees git, relisez les diffs, commitez, ouvrez des pull requests, suivez leurs vérifications et leurs revues avec /pr, et laissez Aristra Code corriger ce qu'elles signalent avec /autofix-pr."
+---
+
+Aristra Code travaille directement avec git : il lit l'état de votre dépôt au début de chaque chat, commite dans le style de votre dépôt, ouvre des pull requests avec votre propre connexion `gh`, et peut surveiller une pull request et corriger ce que signalent ses vérifications et ses relecteurs.
+
+## Worktrees
+
+Un worktree est un checkout séparé de votre dépôt sur sa propre branche : un chat peut ainsi travailler sans toucher à votre dossier, et plusieurs chats peuvent travailler en même temps.
+
+<Tabs>
+  <Tab title="Terminal">
+    ```sh
+    aristra -w                 # a new worktree with a random name
+    aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
+    aristra -w auth-refactor --resume <id>   # move an existing chat into it
+    ```
+
+    Quand vous quittez, un worktree sans modifications est supprimé ; sinon, on vous demande s'il faut le garder, et la commande de reprise le nomme.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Dans un nouveau chat Code, ouvrez le menu **+** sous la zone de message et choisissez **Work in a new worktree**. Le terminal, Review et les actions sur les fichiers du chat utilisent tous le worktree. L'option n'apparaît que lorsque le dossier du chat se trouve dans un dépôt git.
+
+    Le menu des branches sous la zone de message liste les branches du dépôt du dossier. Une branche qu'un autre worktree a déjà extraite affiche **Open its worktree** : la choisir ajoute ce worktree comme dossier et y démarre un nouveau chat, puisque git ne permet d'extraire une branche que dans un seul worktree à la fois.
+  </Tab>
+</Tabs>
+
+Un nouveau worktree part de la branche par défaut de votre origin (récupérée quand elle date de plus d'un jour). Les paramètres de `worktree` :
+
+| Paramètre | Effet |
+|---|---|
+| `worktree.baseRef` | `"fresh"` (par défaut) : partir de la branche par défaut de l'origin. `"head"` : partir du commit courant |
+| `worktree.symlinkDirectories` | Des dossiers liés depuis le checkout principal au lieu d'être copiés, comme `node_modules` |
+| `worktree.sparsePaths` | Des chemins à extraire seuls, avec le sparse checkout de git, pour les gros dépôts |
+
+Un nouveau worktree reçoit votre `.aristra/settings.local.json`, et les fichiers ignorés que nomme le `.worktreeinclude` de votre dépôt (comme `.env`) y sont copiés.
+
+Les sous-agents peuvent aussi travailler dans leurs propres worktrees ; consultez [Sous-agents](/fr/code/guides/subagents). Aristra Code ne déplace un chat dans un worktree que si vous ou vos instructions le lui demandez.
+
+## Diffs
+
+```text
+/diff
+```
+
+affiche vos modifications non commitées et ce que chaque tour a modifié, du plus récent au plus ancien. Left et Right passent de l'un à l'autre, Enter affiche le diff d'un fichier.
+
+Dans le [rendu plein écran](/fr/code/terminal), `/diff` ouvre un panneau à côté du chat qui se rafraîchit à mesure qu'Aristra Code modifie des fichiers : les modifications de ce chat, les modifications non commitées ou celles de la branche (Ctrl+X B pour basculer). Cliquez sur un fichier pour y aller, ou sur **ask** pour joindre son diff à votre prochain message.
+
+Dans Aristra Desktop, **Review** (⌥⌘B) affiche la même chose : les modifications non commitées, la branche par rapport à sa base, ou les modifications du dernier tour, chaque fichier étant à un clic de votre éditeur.
+
+## Commits
+
+Demandez un commit, ou lancez :
+
+```text
+/commit [guidance]
+```
+
+Aristra Code lit `git status`, le diff, la branche et les commits récents, indexe les fichiers par leur nom et rédige un message dans le style de votre dépôt. Il ne modifie jamais votre configuration git, ne contourne jamais les hooks, n'amende jamais, ne commite jamais de secrets et ne pousse jamais, sauf si vous le demandez.
+
+## Pull requests
+
+```text
+/create-pr            # commit what's uncommitted, push, and open a pull request
+/create-pr --draft    # as a draft
+```
+
+Sur une branche avec une pull request ouverte, le pied de page affiche `PR #412`, coloré selon l'état de sa revue : vert quand elle est approuvée, rouge quand des modifications sont demandées, jaune en attente de revue, grisé pour un brouillon. Il utilise votre propre connexion `gh` (ou `glab` pour les merge requests GitLab). `prStatusFooterEnabled: false` le masque.
+
+```text
+/pr [number]
+```
+
+ouvre la pull request de la branche : son statut, ses vérifications et ses relecteurs, puis Overview, Checks, Files et Commits.
+
+| Touche | Effet |
+|---|---|
+| `m` | Fusionner (demande confirmation), ou l'action de la file de fusion |
+| `a` | Approuver |
+| `w` | Activer ou désactiver la fusion automatique |
+| `d` | Convertir en brouillon |
+| `o` | L'ouvrir sur GitHub |
+| `x`, `X` | Relancer une vérification échouée, ou toutes les vérifications échouées |
+| `s` | Placer une vérification échouée dans le prompt pour Aristra Code |
+| `f` | Placer les conflits de fusion dans le prompt |
+| `g` | Rafraîchir |
+
+Dans Aristra Desktop, le bouton **PR #N** de l'en-tête ouvre la même pull request à côté du chat, avec Reply et Resolve sur les commentaires de revue. Sur une branche qui n'en a pas, l'en-tête propose **Create PR**, **Create draft PR** ou **Manually create PR**.
+
+## Correction automatique
+
+```text
+/autofix-pr           # watch the branch's pull request
+/autofix-pr 412       # watch that one
+/autofix-pr stop
+```
+
+Avec Auto-fix activé, Aristra Code consulte GitHub chaque minute et réveille le chat quand des vérifications échouent, que des conflits de fusion apparaissent, ou que des personnes autorisées à pousser sur le dépôt (ou des apps) laissent de nouveaux commentaires de revue. Chaque réveil apparaît dans le chat sur sa propre ligne, qui se déplie sur ce qu'a dit GitHub, et Aristra Code corrige et pousse. Dans Aristra Desktop, activez **Auto-fix CI & address comments** dans le panneau de pull request de votre propre pull request.
+
+<Note>
+`/pr`, le pied de page et Auto-fix appellent l'API de GitHub avec votre connexion `gh`. Lancez `gh auth login` une fois si ce n'est pas déjà fait.
+</Note>

@@ -1,0 +1,132 @@
+---
+title: "Modèles"
+description: "Choisissez le modèle sur lequel fonctionne Aristra Code et qui le paie : les modèles d'Aristra sur votre solde Aristra, votre forfait ChatGPT, vos propres clés de fournisseur, un modèle sur votre ordinateur ou un endpoint personnalisé. Modèles de repli et consommation."
+---
+
+Chaque chat fonctionne sur un modèle provenant d'une **source**, et chaque source a un **payeur**. Aristra Code indique qui paie dans le pied de page, dans `/model`, dans `aristra status` et dans `aristra models`, avant l'exécution d'un tour.
+
+| Qui paie | Affiché comme | Sources |
+|---|---|---|
+| Aristra | Votre solde Aristra, au prix du fournisseur de chaque modèle | `aristra` |
+| Votre forfait ChatGPT | your plan | `chatgpt` |
+| Vous, avec votre propre clé | your key | Une clé de fournisseur que vous avez ajoutée, un endpoint personnalisé |
+| Personne | this computer (**This Mac** dans Aristra Desktop) | Ollama, LM Studio, un endpoint personnalisé sur votre ordinateur ou votre réseau |
+
+Chaque chat nécessite une connexion à Aristra, quelle que soit sa source : votre compte conserve votre mémoire et vos paramètres d'un appareil à l'autre. La configuration pas à pas de chaque source se trouve dans [Utiliser votre propre modèle](/fr/own-models).
+
+## Sources
+
+<AccordionGroup>
+  <Accordion title="Aristra">
+    Les modèles d'Aristra, payés depuis votre solde : d'abord le crédit de bienvenue de $1 d'un nouveau compte, puis la consommation mensuelle d'un forfait, puis les recharges. Tous les modèles sont disponibles avec tous les forfaits, listés avec leur fenêtre de contexte et leurs niveaux de raisonnement, et un modèle plus cher consomme votre solde plus vite. Consultez [Votre solde et vos recharges](/fr/account/credits). Le prix de chaque modèle se trouve sur [Models and prices](https://app.aristralabs.com/models). Vos fichiers et vos commandes restent sur votre ordinateur ; ce que lit le modèle part dans l'appel au modèle. Consultez [Sécurité](/fr/code/security) pour savoir ce qui sort d'autre.
+
+    Chaque modèle dispose de sa fenêtre complète. Certains fournisseurs facturent davantage pour un long prompt, et Aristra aussi, pour cette seule requête : Claude Haiku 5.5 au-delà de 100K tokens, GPT-5.4 et versions ultérieures (hors mini et nano) au-delà de 272K, Gemini 3.1 Pro au-delà de 200K.
+  </Accordion>
+  <Accordion title="Votre forfait ChatGPT">
+    Votre abonnement ChatGPT fournit le modèle ; Aristra Code exécute le tour avec ses propres outils et approbations. Connectez-vous depuis `/model` : choisissez **Sign in with your ChatGPT plan**, ouvrez la page qu'il affiche et saisissez le code. `/usage` affiche les limites sur 5 heures et hebdomadaires du forfait. `aristra logout chatgpt` (ou `/logout chatgpt`) vous déconnecte du forfait et conserve la connexion à Aristra.
+  </Accordion>
+  <Accordion title="Vos propres clés de fournisseur">
+    ```sh
+    aristra keys add openai        # asks for the key, hidden
+    aristra keys list              # which are set, never the key itself
+    aristra keys remove openai
+    ```
+
+    | Source | Fournisseur |
+    |---|---|
+    | `openai` | OpenAI |
+    | `anthropic` | Anthropic |
+    | `gemini` | Google Gemini |
+    | `openrouter` | OpenRouter |
+    | `fireworks` | Fireworks AI |
+    | `deepseek` | DeepSeek |
+    | `xai` | xAI |
+    | `moonshot` | Kimi (Moonshot) |
+    | `zai` | Z.AI (GLM) |
+    | `minimax` | MiniMax |
+
+    Les clés vont dans le magasin d'identifiants d'Aristra, jamais dans un fichier de paramètres. Un chat prend en compte une clé modifiée à son tour suivant.
+  </Accordion>
+  <Accordion title="Les modèles sur votre ordinateur">
+    Ollama et LM Studio ne nécessitent pas de clé. Tant que leur serveur ne répond pas, le terminal indique qu'il ne tourne pas, les Settings d'Aristra Desktop affichent **Not running** (y compris pour Ollama sans modèle), et son menu des modèles les omet.
+
+    - **Ollama** est cherché là où l'indique `OLLAMA_HOST`, lu comme Ollama le lit, sinon à `localhost:11434`. Définissez `OLLAMA_HOST` avant le démarrage du runtime ; après l'avoir modifiée, lancez `aristra runtime stop`.
+    - **LM Studio** est cherché uniquement à `localhost:1234`.
+    - **Outils** : Aristra Code travaille avec des outils, choisissez donc un modèle capable de les appeler. Un modèle qui ne le peut pas échoue avec l'erreur de son serveur.
+    - **Fenêtre de contexte** : au moins 16 384 tokens. Ollama en donne souvent moins par défaut ; le tour s'arrête alors et indique comment l'augmenter (Context length dans l'app Ollama, ou `OLLAMA_CONTEXT_LENGTH=16384`). LM Studio est vérifié une fois le modèle chargé ; chargez-le avec 16K ou plus. Avant chaque tour sur Ollama, Aristra attend que le modèle soit chargé.
+    - **Taille** : `aristra models` donne pour chaque modèle la mention **fits this computer**, **tight on memory** ou **too big for this computer** (`/model` : **fits**, **tight on memory**, **too big for this computer**, avec la mémoire ; Aristra Desktop : **Fits**, **Tight fit**, **Too big**). L'estimation correspond au modèle plus sa mémoire de travail pour une fenêtre de 16K ou plus, rapportés à la mémoire totale de votre ordinateur : « fits » jusqu'à 75 %, « tight » jusqu'à 90 %. C'est un conseil ; n'importe quel modèle peut quand même être choisi.
+    - **Où** : les modèles locaux fonctionnent dans les chats sur cet ordinateur. Les chats cloud utilisent les modèles d'Aristra. Dans Aristra Desktop, un chat Code avec un dossier réglé sur **On this Mac** peut les utiliser.
+    - **Limites** : les images sont omises pour un modèle qui ne les accepte pas, et les modèles locaux n'ont pas de niveaux de raisonnement : `/effort` ne s'applique donc pas.
+    - `aristra doctor` interroge chaque serveur local pendant 5 secondes et liste comme prêts ceux qui répondent. Un serveur local qui ne répond pas n'est marqué `fix` que s'il est la source de votre modèle par défaut (celui du terminal).
+  </Accordion>
+  <Accordion title="Un endpoint personnalisé">
+    Tout serveur qui parle Chat Completions, Responses ou Messages d'Anthropic : vLLM, le serveur de llama.cpp, une passerelle d'entreprise, un proxy. Vous pouvez en configurer un à la fois.
+
+    - **Aristra Desktop** : **Settings › Models**, sous **On this Mac**, **Custom endpoint › Set up** : un nom, l'API, la **Base URL**, ainsi que la clé et les identifiants des modèles si besoin.
+    - **Terminal** : `aristra keys add custom` demande l'adresse, l'API qu'il parle, ses modèles, un nom et une clé. Ou indiquez-les avec `--url`, `--wire chat_completions|responses|anthropic`, `--name` et `--model` (à répéter pour chaque modèle), avec `--no-key` pour un serveur qui n'en a pas besoin. `aristra keys remove custom` supprime l'endpoint.
+
+    L'adresse inclut le chemin de l'API, généralement `/v1`, pour Chat Completions et Responses ; pour Anthropic Messages, omettez `/v1`. Elle doit être en `https://` ; `http://` ne fonctionne que pour `localhost`, `127.0.0.1` ou `::1`. Les modèles viennent de la liste du serveur ; les noms que vous indiquez servent quand cette liste est illisible, et toujours pour Anthropic Messages.
+
+    Il est conservé dans `~/.aristra/sources.json`, et sa clé dans le magasin d'identifiants, liée à l'adresse : une nouvelle adresse nécessite de saisir à nouveau la clé. Son payeur est « this computer » quand son adresse est sur votre ordinateur ou votre réseau, sinon « your key ». Aristra suppose une fenêtre de 128K pour lui et ne la vérifie pas ; un serveur qui indique que la conversation est trop longue reçoit un résumé et une nouvelle tentative.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+La connexion avec un abonnement Claude n'est pas proposée : utilisez les modèles Claude via Aristra ou avec votre propre clé Anthropic. Les modèles Google s'utilisent avec une clé API ou via votre forfait Aristra.
+</Note>
+
+## Choisir un modèle
+
+- `/model` dans un chat liste toutes les sources avec qui les paie et leurs modèles. En choisir un change celui du chat et en fait le modèle par défaut des nouveaux chats.
+- `/effort [level|auto]` règle l'intensité de la réflexion du modèle : `low`, `medium`, `high` et, sur certains modèles, `xhigh` ou `max`. Les modèles locaux et les endpoints personnalisés n'ont pas de niveaux.
+- `aristra -m <model> --source <source>` choisit pour un seul chat. `--source` seul prend le modèle par défaut de cette source.
+- Dans Aristra Desktop, le menu des modèles sous la zone de saisie choisit pour un nouveau chat, et **Settings › Models › Default model** définit le modèle par défaut des nouveaux chats. Aristra Desktop conserve son propre modèle par défaut, distinct de celui du terminal.
+
+Le modèle par défaut se trouve dans vos paramètres :
+
+```json ~/.aristra/settings.json
+{ "model": { "source": "anthropic", "model": "claude-sonnet-5-5", "effort": "high" } }
+```
+
+## Quand un appel de modèle échoue
+
+Une erreur du serveur, une surcharge ou une connexion interrompue est retentée avant que du texte n'ait été transmis, jusqu'à 10 fois (`ARISTRA_MAX_RETRIES`, 15 au plus), et la ligne d'état le signale ; si un modèle de repli est prêt, trois surcharges d'affilée lui passent la main. Sans modèle de repli, une limite de débit est attendue tant que chaque attente dure une minute ou moins. Ensuite, la suite dépend de l'échec :
+
+| Échec | Ce qui suit |
+|---|---|
+| Surcharge, réseau | Nouvelle tentative, puis le modèle suivant de votre liste de repli |
+| Limite de débit | Le modèle suivant de la liste ; sinon le tour échoue et indique quand la limite se réinitialise |
+| Déconnecté, solde épuisé | Le modèle suivant de la liste provenant d'une autre source |
+| Contexte trop long | Résumé puis nouvelle tentative |
+| Requête rejetée, autres erreurs | Le modèle suivant de votre liste de repli |
+| Refus | Le tour échoue. On ne demande jamais à un autre modèle ce qu'un modèle a refusé |
+
+La liste de repli est `model.fallback` dans vos propres paramètres :
+
+```json ~/.aristra/settings.json
+{
+  "model": {
+    "source": "anthropic", "model": "claude-sonnet-5-5",
+    "fallback": [
+      { "source": "openrouter", "model": "anthropic/claude-sonnet-5-5" },
+      { "source": "aristra", "model": "gemini-3.8-flash" }
+    ]
+  }
+}
+```
+
+**Le payeur ne change jamais en silence.** Un tour ne passe de lui-même qu'à un modèle payé par le même payeur. Passer à un autre payeur vous est d'abord demandé, et un script ne change jamais de payeur. La liste de repli n'est lue que dans vos propres paramètres : un dépôt ne peut donc pas faire passer vos chats sur vos autres clés.
+
+## Les modèles pour le travail autour d'un chat
+
+Les titres, les résumés des longs chats et le filet de sécurité de la mémoire appellent aussi un modèle. Ils utilisent, dans l'ordre :
+
+1. Le vôtre, défini par `auxiliary.title`, `auxiliary.summary` et `auxiliary.memory` dans vos paramètres, chacun sous la forme `{"source": ..., "model": ...}` provenant de l'une de vos propres sources (pas `aristra`) (`auxiliary.title: "off"` garde vos premiers mots comme titre).
+2. Sur les modèles d'Aristra, le modèle d'arrière-plan d'Aristra : un modèle moins cher et plus rapide, pour les titres et le filet de sécurité de la mémoire. Les résumés utilisent le modèle du chat.
+3. Le modèle du chat.
+
+Sur un modèle local, les titres attendent la fin du tour. Un modèle annexe qui échoue ne fait jamais échouer le chat. Le relecteur du mode Auto a son propre modèle ; consultez [Autorisations](/fr/code/configure/permissions).
+
+## Consommation
+
+`/usage` affiche les tokens de ce chat par modèle et qui les a payés, le taux de remplissage du contexte, et chaque forfait auquel vous êtes connecté : votre solde Aristra en dollars et sa date de renouvellement, ainsi que les limites de votre forfait ChatGPT. Il montre aussi ce qui contribue à votre consommation sur le dernier jour et la dernière semaine. `aristra run --usage-file <path>` écrit la consommation d'une exécution de script.

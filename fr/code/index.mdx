@@ -1,0 +1,75 @@
+---
+title: "Vue d'ensemble d'Aristra Code"
+sidebarTitle: "Vue d'ensemble"
+description: "Aristra Code est l'agent de code d'Aristra. Il lit votre code, modifie des fichiers, exécute des commandes et travaille avec git, dans votre terminal, dans Aristra Desktop, dans votre éditeur et depuis votre téléphone."
+---
+
+Aristra Code travaille dans un dossier de votre ordinateur. Dites-lui simplement ce que vous voulez faire : il lit le code dont il a besoin, apporte les modifications dans les fichiers, exécute vos tests et vos commandes, et vous demande avant de faire quoi que ce soit que vous n'avez pas autorisé. Il retient les instructions de votre projet d'un chat à l'autre, travaille avec git et les pull requests, et fonctionne sur le modèle de votre choix.
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Au premier lancement, il vous connecte à Aristra, vous demande avec quel modèle démarrent les nouveaux chats et vous demande si vous faites confiance au dossier. Ensuite, vous tapez ce que vous voulez. Le [démarrage rapide](/fr/code/quickstart) vous guide dans une première vraie tâche.
+
+## Où il s'exécute
+
+Le terminal, Aristra Desktop et votre éditeur parlent au même agent sur votre ordinateur, l'Aristra Runtime : un chat démarré dans l'un apparaît donc dans les autres, et n'importe lequel peut approuver sa prochaine étape. Avec un forfait, Remote Control partage un chat avec votre téléphone et le web.
+
+<CardGroup cols={2}>
+  <Card title="Terminal" icon="terminal" href="/fr/code/terminal">
+    La commande `aristra` : l'app complète dans votre terminal, avec toutes les commandes et tous les raccourcis.
+  </Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/fr/code/desktop">
+    L'onglet Code de l'app Mac : les chats regroupés par dossier, avec un terminal, un navigateur, les modifications et la pull request à côté du chat.
+  </Card>
+  <Card title="Éditeurs" icon="code" href="/fr/code/editors">
+    Aristra Code dans Zed et les autres éditeurs qui parlent l'Agent Client Protocol.
+  </Card>
+  <Card title="Téléphone et web" icon="mobile" href="/fr/code/remote-control">
+    Remote Control : poursuivez un chat depuis votre téléphone ou app.aristralabs.com pendant que le travail reste sur votre ordinateur.
+  </Card>
+</CardGroup>
+
+## Ce que vous pouvez faire
+
+<AccordionGroup>
+  <Accordion title="Créer des fonctionnalités et corriger des bugs">
+    Décrivez la modification, ou collez l'erreur. Aristra Code trouve le code concerné, planifie la modification, modifie les fichiers et exécute vos tests jusqu'à ce qu'ils passent.
+
+    ```sh
+    aristra "the date parser fails on leap years: find why, fix it, and run the tests"
+    ```
+  </Accordion>
+  <Accordion title="Travailler avec git et les pull requests">
+    Il écrit des commits, travaille dans son propre worktree git quand vous le demandez, affiche les vérifications et les revues de la pull request ouverte avec `/pr`, et peut surveiller une pull request et corriger ce que signalent ses vérifications et ses relecteurs avec `/autofix-pr`. Consultez [Git et pull requests](/fr/code/guides/git).
+  </Accordion>
+  <Accordion title="Faire avancer le travail en arrière-plan">
+    Les longues commandes passent en arrière-plan et préviennent le chat quand elles se terminent. `/loop` répète un prompt, les tâches planifiées s'exécutent selon un calendrier, et `/goal` le fait travailler jusqu'à ce qu'une condition que vous fixez soit remplie. Consultez [Travail en arrière-plan](/fr/code/guides/background).
+  </Accordion>
+  <Accordion title="Connecter vos outils">
+    Ajoutez des serveurs MCP, utilisez les connecteurs de votre compte Aristra, écrivez des skills pour le travail que vous répétez, exécutez vos propres commandes lors d'événements avec les hooks, et installez des plugins qui regroupent tout cela. Consultez [Étendre](/fr/code/extend/mcp).
+  </Accordion>
+  <Accordion title="L'utiliser dans des scripts">
+    `aristra run` et `aristra -p` exécutent un tour sans l'app, pour les scripts et la CI, avec une sortie JSON. Consultez [Mode non interactif](/fr/code/non-interactive).
+  </Accordion>
+</AccordionGroup>
+
+## Vos modèles, vos règles
+
+- **Modèles.** Utilisez les modèles d'Aristra sur votre solde Aristra, au prix de leurs fournisseurs, votre forfait ChatGPT, vos propres clés de fournisseur (OpenAI, Anthropic, Gemini, OpenRouter et d'autres) ou un modèle qui tourne sur votre ordinateur. Chaque chat indique qui paie. Consultez [Modèles](/fr/code/configure/models).
+- **Gratuit sur votre ordinateur.** Aristra Code avec un modèle à vous ne coûte rien. La mémoire de votre compte sur tous vos appareils est incluse avec chaque compte. Un forfait ajoute le reste de ce qu'Aristra héberge : une consommation mensuelle de ses modèles, Remote Control, les connecteurs et un ordinateur cloud. Sans forfait, les chats dans le cloud et les modèles d'Aristra sont payés depuis votre solde, en commençant par un crédit de bienvenue de $1, et un ordinateur cloud fonctionne avec des recharges. Consultez [Votre compte et Aristra One](/fr/account/overview).
+- **Autorisations.** Les chats démarrent en mode Manual : la lecture, la recherche et les commandes qui ne font que lire s'exécutent seules, et les modifications demandent d'abord votre accord. Accept edits, Plan et Auto sont à portée de Shift+Tab. Consultez [Autorisations](/fr/code/configure/permissions).
+- **Bac à sable.** Désactivé par défaut. Activez-le avec `/sandbox`, et les commandes s'exécutent dans un bac à sable du système d'exploitation qui limite ce qu'elles peuvent écrire et joindre. Consultez [Bac à sable](/fr/code/configure/sandbox).
+- **Instructions.** Un fichier `AGENTS.md` dans votre dépôt indique à Aristra Code comment fonctionne votre projet ; c'est le même fichier que lisent les autres agents de code. Consultez [Mémoire et instructions](/fr/code/guides/memory).
+
+## Étapes suivantes
+
+<CardGroup cols={2}>
+  <Card title="Démarrage rapide" icon="play" href="/fr/code/quickstart">Installez, connectez-vous et menez à bien une première tâche.</Card>
+  <Card title="Fonctionnement" icon="diagram-project" href="/fr/code/how-it-works">Le runtime, les surfaces et l'emplacement de vos données.</Card>
+  <Card title="Commandes" icon="slash" href="/fr/code/reference/commands">Toutes les commandes que vous pouvez taper dans un chat.</Card>
+  <Card title="Référence du CLI" icon="rectangle-terminal" href="/fr/code/reference/cli">Toutes les sous-commandes et options d'`aristra`.</Card>
+</CardGroup>

@@ -1,0 +1,187 @@
+---
+title: "Serveurs MCP"
+description: "Donnez plus d'outils à Aristra Code avec des serveurs Model Context Protocol : ajoutez-les pour vous, pour un projet ou pour tous les utilisateurs d'un dépôt, approuvez ceux d'un projet, accordez votre confiance, connectez-vous avec OAuth et isolez un serveur dans le bac à sable."
+---
+
+Les serveurs [Model Context Protocol](https://modelcontextprotocol.io) donnent plus d'outils à Aristra Code : une base de données, un outil de suivi des tickets, un outil de design, une API interne. Aristra Code les exécute pour les chats sur votre ordinateur. Les chats cloud utilisent les outils de l'agent cloud, les connecteurs de votre compte Aristra et les serveurs MCP accessibles par une adresse que vous ajoutez sur la page Connectors du site web. Les serveurs que vous ajoutez avec `aristra mcp` n'y sont pas utilisés.
+
+## Ajouter un serveur
+
+Un serveur qui s'exécute comme un programme sur votre ordinateur :
+
+```sh
+aristra mcp add fs --cwd ~/notes -- npx -y @modelcontextprotocol/server-filesystem ~/notes
+aristra mcp add db --secret DATABASE_URL=postgres://... -- uvx mcp-server-postgres
+```
+
+Un serveur accessible par une adresse :
+
+```sh
+aristra mcp add sentry --url https://mcp.sentry.dev/mcp
+aristra mcp add internal --url https://tools.example.com/mcp --header Authorization="Bearer ..."
+```
+
+Le programme et ses arguments viennent après `--`. Ensuite :
+
+```sh
+aristra mcp test fs        # start it and list its tools
+aristra mcp list           # every server here, its scope and its state
+aristra mcp get fs         # one server's details
+aristra mcp trust fs       # let its tools run without asking, in this project
+```
+
+## Portées
+
+Un serveur est conservé dans l'une de trois portées. `-s` (`--scope`) la choisit quand vous en ajoutez ou en supprimez un.
+
+| Portée | Utilisé dans | Partagé | Conservé dans |
+|---|---|---|---|
+| `local` (par défaut) | Ce projet uniquement | Non | Vos paramètres, sous le projet |
+| `project` | Ce projet | Oui, via le dépôt | `.mcp.json` dans le dossier |
+| `user` | Tous vos projets | Non | Vos paramètres, sous `mcp.servers` |
+
+```sh
+aristra mcp add -s user github -- npx -y @modelcontextprotocol/server-github
+aristra mcp add -s project docs --url https://docs.example.com/mcp
+aristra mcp remove -s local fs
+```
+
+Le projet est la racine du dépôt : un serveur local ajouté dans un sous-dossier ou un worktree est donc disponible dans tout le dépôt. Quand un même nom existe dans plusieurs portées, le serveur local passe avant celui du projet, qui passe avant le vôtre, qui passe avant celui d'un plugin. Un serveur local ou de projet qui s'exécute comme un programme s'exécute dans le projet.
+
+## Le .mcp.json d'un projet
+
+Un dépôt peut apporter ses propres serveurs dans un `.mcp.json`, le même fichier que lit Claude Code :
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"] },
+    "docs": { "type": "http", "url": "https://docs.example.com/mcp", "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" } }
+  }
+}
+```
+
+Il est lu dans le dossier du chat et dans chaque dossier au-dessus ; le fichier le plus proche l'emporte.
+
+**Un serveur de projet ne s'exécute qu'une fois que vous l'avez approuvé.** Quand vous lancez `aristra` dans le dossier, il vous interroge sur chaque nouveau serveur : l'utiliser, l'utiliser ainsi que tous les futurs serveurs de ce projet, ou continuer sans lui. S'il y en a plusieurs, ils apparaissent dans une liste à cocher. Un chat dans un dossier dans Aristra Desktop pose la même question au-dessus de sa zone de saisie, et `/mcp` permet d'en approuver ou d'en rejeter un plus tard.
+
+Vos réponses sont conservées dans vos propres paramètres, jamais dans le dépôt. `aristra mcp reset-project-choices` les oublie, pour qu'on vous pose de nouveau la question.
+
+<Note>
+Un dépôt ne peut pas approuver ses propres serveurs. Les approbations présentes dans les paramètres `.aristra` du dossier ne comptent qu'une fois que vous faites confiance au dossier, et un rejet compte d'où qu'il vienne. Une exécution que personne ne surveille (`aristra run`, une tâche planifiée) ne peut pas demander : elle utilise donc un serveur encore en attente d'approbation, mais jamais un serveur rejeté.
+</Note>
+
+Un `.mcp.json` est partagé avec tous ceux qui ont le dépôt : il ne contient donc aucun secret. Écrivez `${VAR}` et définissez la variable dans votre environnement. Faire confiance à un serveur de projet ne s'applique qu'à ce projet.
+
+## L'écran /mcp
+
+`/mcp` dans un chat liste les serveurs qu'il voit, regroupés par portée, chacun avec son état. Choisissez-en un pour voir ses détails et :
+
+- l'approuver ou le rejeter, pour un serveur de projet pas encore approuvé ;
+- vous authentifier, vous réauthentifier ou effacer sa connexion, pour un serveur accessible par une adresse ;
+- le reconnecter ;
+- le désactiver ou l'activer pour ce projet uniquement ;
+- voir ses outils.
+
+`/mcp reconnect`, `/mcp enable` et `/mcp disable` font la même chose pour un serveur que vous nommez, ou pour tous.
+
+### Depuis du JSON ou Claude Desktop
+
+```sh
+aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop whose name is free here (macOS)
+```
+
+`aristra import claude-code` et `aristra import codex` récupèrent aussi les serveurs de ces outils, avec un aperçu d'abord.
+
+## Où les serveurs sont conservés
+
+Un serveur utilisateur se trouve dans vos propres paramètres sous `mcp.servers`, et un serveur local sous le projet dans le même fichier, jamais avec un secret : les valeurs fournies avec `--secret`, `--header` et `--client-secret` vont dans le magasin d'identifiants d'Aristra. Un serveur de projet se trouve dans le `.mcp.json` du dossier.
+
+```json ~/.aristra/settings.json
+{
+  "mcp": {
+    "servers": {
+      "fs": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/notes"],
+        "cwd": "/Users/me/notes"
+      },
+      "sentry": { "url": "https://mcp.sentry.dev/mcp" }
+    }
+  },
+  "permissions": { "trustedMcpServers": ["fs"] }
+}
+```
+
+| Champ | Pour | Signification |
+|---|---|---|
+| `type` | Les deux | `stdio` ou `http`. Les serveurs SSE et WebSocket ne sont pas pris en charge |
+| `command`, `args` | Programmes | Le programme et ses arguments |
+| `env` | Programmes | Les variables d'environnement non secrètes |
+| `cwd` | Programmes | Le dossier dans lequel il s'exécute, où il peut écrire |
+| `writable` | Programmes | D'autres dossiers où il peut écrire |
+| `sandbox` | Programmes | `true` l'exécute dans le bac à sable (par défaut `false`) |
+| `url` | Adresses | L'adresse du serveur |
+| `headers` | Adresses | Les en-têtes non secrets |
+| `headersHelper` | Adresses | Une commande dont la sortie JSON ajoute des en-têtes à chaque connexion |
+| `oauth` | Adresses | `clientId`, `scopes`, `callbackPort`, `authServerMetadataUrl`, pour un serveur qui en a besoin |
+| `alwaysLoad` | Les deux | `true` garde ses outils en permanence dans la liste du modèle, jamais derrière la recherche d'outils |
+| `timeout` | Les deux | Le nombre de secondes que peut durer un appel |
+| `enabled` | Les deux | `false` conserve l'entrée sans démarrer le serveur |
+| `toolCosts`, `spendLimit`, `costUnit` | Les deux | Le coût de ses outils, la limite de dépense d'un chat pour ce serveur, et l'unité (`credits` par défaut). La demande d'approbation d'un appel payant affiche son coût, et un appel au-delà de la limite demande toujours votre accord |
+
+`${VAR}` et `${VAR:-default}` dans `command`, `args`, `env`, `url` et `headers` sont lus dans l'environnement de votre shell de connexion. Pour un serveur accessible par une adresse, les variables qui contiennent des identifiants bien connus (clés cloud, jetons de registres de paquets, `ANTHROPIC_API_KEY` et autres) sont lues comme vides, et `ARISTRA_TOKEN` n'est jamais renseigné.
+
+<Note>
+Le `.aristra/settings.json` d'un dépôt ne peut pas ajouter de serveurs MCP : les serveurs d'un dépôt sont ceux de son `.mcp.json`, utilisés une fois que vous les avez approuvés. Quand l'agent modifie un `.mcp.json`, il demande toujours votre accord d'abord.
+</Note>
+
+## Confiance
+
+Un serveur MCP est du code que vous n'avez pas écrit, et ses outils peuvent tout faire :
+
+- **Tant que vous ne faites pas confiance à un serveur**, chacun de ses outils demande votre accord avant de s'exécuter, sauf si une règle l'autorise (en mode Auto, c'est le relecteur qui décide).
+- **Une fois que vous faites confiance à un serveur** avec `aristra mcp trust <name>`, ses outils s'exécutent sans demander, comme le ferait une règle autorisant `mcp__<name>`. Une règle de refus ou de demande l'emporte toujours, et en Read only, un outil que le serveur ne marque pas en lecture seule est refusé.
+- **La confiance appartient au serveur auquel vous l'avez accordée, dans sa portée.** Un serveur à vous ou celui d'un plugin est de confiance partout ; un serveur local ou de projet uniquement dans son projet. Un serveur du même nom venant d'une autre portée, comme le `.mcp.json` d'un dépôt ou le `--mcp-config` d'une exécution, n'obtient jamais cette confiance.
+
+Les règles fonctionnent aussi : `mcp__github` pour tous les outils d'un serveur, ou `mcp__github__create_issue` pour un seul, dans `permissions.allow`, `ask` ou `deny`. Consultez [Autorisations](/fr/code/configure/permissions).
+
+## Bac à sable
+
+Un serveur qui s'exécute comme un programme démarre avec vos droits d'accès. Avec `"sandbox": true` (`aristra mcp add --sandbox`), il s'exécute dans le bac à sable, avec le réseau autorisé : il peut tout lire sauf vos dossiers privés (`~/.ssh`, `~/.aws` et les autres identifiants) et les données d'Aristra, et ne peut écrire que dans son propre dossier (`cwd`), les dossiers de `writable`, les caches de paquets et son propre dossier temporaire.
+
+Avant qu'un serveur ne démarre via `npx`, `bunx`, `uvx` ou `pipx`, son paquet est vérifié dans la base de données OSV des logiciels malveillants connus, et un paquet malveillant connu est refusé.
+
+## Se connecter avec OAuth
+
+Un serveur qui nécessite une connexion affiche « sign-in needed » dans `aristra mcp list` :
+
+```sh
+aristra mcp login sentry                 # in a browser on this computer
+aristra mcp login sentry --device-code   # with a code, when the server offers it
+aristra mcp logout sentry
+```
+
+Les jetons vont dans le magasin d'identifiants et sont rafraîchis avant leur expiration. Un serveur qui nécessite un scope OAuth particulier l'obtient via `aristra mcp add-json`, dans `oauth.scopes`.
+
+## Ressources, prompts et questions
+
+- **Ressources.** Quand un serveur propose des ressources, Aristra Code peut les lister et les lire.
+- **Les prompts** deviennent des commandes : `/mcp__<server>__<prompt> <arguments>`.
+- **Questions.** Un serveur peut vous poser une question pendant l'exécution de son outil, sous forme de formulaire ou de lien à ouvrir. Elle est posée comme n'importe quelle demande d'approbation.
+
+## Appels longs et nombreux outils
+
+- Un appel échoue quand le serveur n'envoie rien pendant 30 minutes (un programme) ou 5 minutes (une adresse), sauf si son `timeout` en dispose autrement. Dans votre propre chat, un appel encore en cours après deux minutes passe en arrière-plan, et son résultat parvient au chat quand il se termine. Dans un sous-agent ou une exécution que personne ne surveille, le tour l'attend.
+- Les outils MCP se trouvent derrière la recherche d'outils : le modèle trouve l'outil dont il a besoin au lieu de recevoir des centaines de définitions d'outils à chaque tour. `mcp.toolSearch: false` les place plutôt dans la liste d'outils du modèle, tronquée pour que la liste complète, outils propres d'Aristra Code compris, ne dépasse pas 128.
+- Les serveurs d'un chat se connectent à l'ouverture du chat : ils sont donc prêts pour votre premier message. Quand les outils d'un serveur changent, Aristra Code les liste de nouveau, en plein tour si nécessaire.
+- Un serveur qui s'exécute comme un programme est arrêté avec SIGINT (un serveur dans Docker s'arrête à ce signal), puis SIGTERM après 100 ms et SIGKILL 400 ms plus tard.
+
+## Serveurs fournis par des plugins
+
+Un [plugin](/fr/code/extend/plugins) peut apporter des serveurs MCP dans son `.mcp.json` ou dans le `mcpServers` de son manifeste. Ils sont nommés `plugin:<plugin>:<server>`, et leurs outils demandent votre accord avant chaque appel, sauf si une règle les autorise (`mcp__plugin_<plugin>_<server>`).
+
+## Pour les organisations
+
+Une politique gérée peut autoriser ou refuser des serveurs par nom, par commande ou par adresse. Consultez [Politique gérée](/fr/code/configure/managed-policy).

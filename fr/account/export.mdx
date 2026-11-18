@@ -1,0 +1,41 @@
+---
+title: "Appareils, téléchargements et export"
+description: "Voyez et déconnectez les ordinateurs de votre compte, téléchargez Aristra Desktop et l'Aristra CLI, et récupérez une copie des données de votre compte."
+---
+
+## Appareils
+
+**Devices** liste tous les ordinateurs connectés à votre compte : Aristra Desktop, l'Aristra CLI et un ordinateur cloud. Chacun indique s'il est en ligne et quand il a été vu pour la dernière fois.
+
+**Sign out** retire un ordinateur de votre compte. Ses chats et ses fichiers y restent ; il doit se reconnecter pour utiliser votre compte.
+
+## Téléchargements
+
+**Downloads** propose Aristra Desktop pour Mac et la commande qui installe l'Aristra CLI :
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+```
+
+Les deux sont gratuits et fonctionnent avec un modèle à vous. Consultez [Installer Aristra Code](/fr/code/setup).
+
+## Export
+
+**Import and export** vous donne les données de votre compte dans un seul fichier zip. Il ne nécessite pas de forfait : vous pouvez donc toujours récupérer ce que vous avez créé, y compris après la fin d'un forfait.
+
+| Dans le fichier | |
+|---|---|
+| `chats/` | Tous les chats enregistrés dans votre compte, chacun sous forme de fichier Markdown, avec une liste de tous les chats |
+| `memory/` | Ce qu'Aristra retient de vous et de votre travail, sous forme de fichier lisible et de données |
+| `files/files.csv` | La liste de vos fichiers : nom, type, taille et date, et le chat auquel un fichier était joint |
+| `usage.csv` | Un an de lignes de consommation |
+| `README.txt` | Ce que contient le fichier, et ce qu'il ne contient pas |
+
+Un fichier contient au plus 5 000 chats (les plus récents), 20 000 souvenirs, 20 000 fichiers et 50 000 lignes de consommation, et `README.txt` indique si quelque chose a été laissé de côté. Vous pouvez exporter jusqu'à 6 fois par heure.
+
+Conservés ailleurs :
+
+- **Vos fichiers eux-mêmes** se téléchargent depuis **Files**.
+- **Les documents Craft** s'exportent depuis le menu de chaque document, en Markdown, Word ou PDF.
+- **Les chats sur un ordinateur** que vous n'avez pas partagés restent sur cet ordinateur, dans `~/.aristra`. Ils n'ont jamais atteint votre compte.
+- **Les chats et la mémoire d'un ordinateur cloud** s'exportent depuis sa propre page. Consultez [Ordinateur cloud](/fr/surfaces/cloud-computer).

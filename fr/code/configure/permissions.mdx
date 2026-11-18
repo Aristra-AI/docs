@@ -1,0 +1,132 @@
+---
+title: "Autorisations"
+description: "Contrôlez ce qu'Aristra Code fait de lui-même et ce qui vous est d'abord demandé : les modes, les règles, la confiance accordée à un dossier, les approbations, le mode Plan et le relecteur du mode Auto."
+---
+
+Avant chaque appel d'outil, Aristra Code décide s'il s'exécute, s'il vous est soumis, s'il passe par le relecteur du mode Auto, ou s'il est refusé. Un seul ensemble de règles décide pour toutes les surfaces : une règle a donc le même sens dans le terminal, dans Aristra Desktop, dans les scripts et dans les éditeurs.
+
+Les approbations sont le garde-fou. Le [bac à sable](/fr/code/configure/sandbox), désactivé par défaut, est la frontière de sécurité une fois que vous l'activez. Une commande dans le bac à sable ne peut pas écrire en dehors des dossiers du chat et ne joint que les hôtes que vous autorisez : elle s'exécute donc sans demander, sauf si une règle en dispose autrement.
+
+## Modes
+
+| Mode | S'exécute seul | Tout le reste |
+|---|---|---|
+| **Manual** (`default`) | Les lectures, recherches et listages dans les dossiers du chat, les commandes qui ne font que lire et, avec le bac à sable activé, les commandes qui y tournent ; ce que couvrent vos règles d'autorisation | Vous est demandé |
+| **Accept edits** | En plus, les modifications de fichiers dans les dossiers du chat, ainsi que `mkdir`, `touch`, `rm`, `rmdir`, `mv`, `cp` et `sed` dans ces dossiers | Vous est demandé |
+| **Plan** | Comme Manual. Aristra Code explore et rédige un plan, sans rien modifier tant que vous ne l'avez pas approuvé. Dans un chat qui peut utiliser Bypass permissions, le mode Plan laisse tout s'exécuter, comme Bypass | Vous est demandé |
+| **Auto** | Comme Accept edits, sauf que vos règles d'autorisation pour les interpréteurs et les lanceurs (`shell(python:*)`, `shell(npm run:*)` et autres) ne s'appliquent pas : ces commandes passent par le relecteur | Passe par le relecteur du mode Auto au lieu de vous être demandé |
+| **Don't ask** (`dontAsk`) | Comme Manual | Refusé |
+| **Bypass permissions** | Tout, sauf ce que couvre une règle de refus ou de demande, les contrôles de sécurité, et les outils qui nécessitent toujours votre intervention | |
+| **Read only** | Les lectures, recherches et listages | Refusé : rien ne change |
+
+**Changez de mode** avec Shift+Tab (Manual, Accept edits, Plan, puis Bypass permissions quand le chat peut l'utiliser, puis Auto) ou avec `/mode <name>`. Un changement s'applique à partir de l'appel d'outil suivant, et une demande d'approbation déjà en attente est revérifiée : si le nouveau mode l'autorise, elle s'exécute.
+
+**Le mode de départ** vient de `--permission-mode`, sinon de `permissions.defaultMode` dans vos paramètres, sinon c'est Manual.
+
+**Désactiver des modes.** `permissions.disableAutoMode: "disable"` désactive Auto. Bypass permissions n'est disponible que dans un chat démarré avec `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions` ou `--permission-mode bypassPermissions`, affiche un avertissement la première fois, est refusé à root (sauf avec `IS_SANDBOX=1`), et une [politique gérée](/fr/code/configure/managed-policy) peut le désactiver. Aristra Desktop ne le propose pas.
+
+## Règles
+
+Une règle s'écrit `tool` ou `tool(specifier)`. Les noms d'outils de Claude Code fonctionnent aussi (`Bash(npm test:*)`, `Read`, `Edit`, `WebFetch`).
+
+| Règle | Couvre | Spécificateur |
+|---|---|---|
+| `shell` | Les commandes | La commande exacte, `prefix:*` pour les commandes qui commencent par ces mots (`shell(npm run:*)`), ou `*` comme joker (`shell(git log *)`) |
+| `read` | La lecture, le listage et la recherche de fichiers | Un motif de chemin |
+| `edit` | La modification et l'écriture de fichiers | Un motif de chemin |
+| `web_fetch` | La récupération d'une page, et le réseau du bac à sable | `domain:example.com` |
+| `mcp__server` | Les outils d'un serveur MCP | `mcp__server` pour tous, `mcp__server__tool` pour un seul |
+| `memory`, `browser`, `mcp` | Tous les outils de mémoire, les deux navigateurs, tous les outils MCP | Aucun |
+| `workflow` | Un workflow enregistré | Son nom |
+| Tout autre nom d'outil | Cet outil | Aucun |
+
+```json .aristra/settings.json
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["shell(npm test:*)", "shell(git diff:*)", "edit(/src/**)"],
+    "ask": ["shell(git push:*)"],
+    "deny": ["read(~/.env*)", "web_fetch(domain:pastebin.com)"],
+    "additionalDirectories": ["../shared"]
+  }
+}
+```
+
+- **Les motifs de chemin** suivent le style gitignore : `//abs/path` depuis la racine, `~/path` depuis votre dossier personnel, `/path` depuis le dossier du projet dans les paramètres d'un projet, ou depuis `~/.aristra` dans les vôtres, et tout le reste depuis le dossier du chat. `**` traverse les dossiers, `*` non.
+- **Les commandes composées** (`;`, `&&`, `|`, redirections) : une règle d'autorisation doit couvrir chaque partie ; une règle de refus ou de demande qui correspond à n'importe quelle partie suffit. Les commandes enveloppes comme `timeout` et `nohup` sont traversées.
+- **Un refus, où qu'il soit, l'emporte sur une autorisation, où qu'elle soit.**
+
+`aristra doctor` et `/config` signalent les règles illisibles ou qui ne peuvent jamais s'appliquer.
+
+### D'où viennent les règles
+
+| Source | Où |
+|---|---|
+| Politique gérée | Définie par un administrateur ; ses règles de refus l'emportent sur tout |
+| Vous | `~/.aristra/settings.json` |
+| Vous, pour un dossier | `projects` dans `~/.aristra/settings.json` |
+| Le projet, partagé | `<folder>/.aristra/settings.json`, commité avec le dépôt |
+| Le projet, à vous | `<folder>/.aristra/settings.local.json`, où « don't ask again » enregistre |
+| Une exécution | `aristra run --allow`, `--deny` et `--settings` |
+| Un skill | Les outils qu'il autorise, pendant son exécution |
+| Un chat | Les réponses « during this session » et `/add-dir` |
+
+`/permissions` liste chaque règle par source, vous permet d'en ajouter ou d'en supprimer, affiche les dossiers du chat, et liste les étapes que le relecteur d'Auto a récemment bloquées.
+
+## Faire confiance à un dossier
+
+Les paramètres d'un dépôt sont écrits par la personne qui l'a créé. Avant le premier chat dans un dossier, Aristra Code vous demande si vous lui faites confiance. « No, exit » est sélectionné en premier. Votre confiance est enregistrée pour le dépôt et ses sous-dossiers. Tant que vous ne faites pas confiance à un dossier, seules ses règles de refus et de demande comptent, et ses skills et ses hooks sont ignorés. `/folder` indique si le dossier courant est de confiance.
+
+## Contrôles de sécurité
+
+Certaines modifications vous sont demandées dans tous les modes, Bypass compris, et aucune règle d'autorisation ne les laisse passer. En mode Auto, le relecteur décide du premier type ; il ne peut jamais approuver les autres :
+
+- L'écriture dans les dossiers `.git`, `.vscode`, `.idea`, `.claude` et `.aristra`, et dans `.gitconfig`, `.gitmodules`, les fichiers de démarrage du shell, `.ripgreprc`, `.mcp.json` et `.claude.json` (un worktree d'agent sous `.aristra/worktrees` n'est pas protégé).
+- Les commandes `rm` et `rmdir` risquées : une cible qui est une variable vide ou non définie ; un `rm` récursif de la sortie d'une commande ; la racine, votre dossier personnel, un dossier de premier niveau, le dossier du chat ou un dossier au-dessus ; un `rm` récursif ou avec motif sur un disque monté (`/Volumes`, `/mnt`, `/media`) ; un motif relatif après `cd` ; et, dans un script `sh -c`, un `rm` dont la cible n'est connue qu'à l'exécution.
+- Le déplacement du chat dans un worktree autre que le sien.
+- Un outil qui nécessite toujours votre intervention, comme quitter le mode Plan ou payer.
+
+## Approbations
+
+Quand un appel vous est soumis, chaque surface ouverte l'affiche avec ce qu'il ferait et la raison de la demande. La première réponse l'emporte.
+
+| Réponse | Effet |
+|---|---|
+| **Yes** | Cet appel s'exécute |
+| **Yes, and don't ask again for** `rule` | Enregistre la règle (modifiable d'abord, pour les commandes) dans le `settings.local.json` du dossier |
+| **Yes, and don't ask again for** `X, Y, and Z` **commands in** `folder` | Pour une commande en plusieurs parties : enregistre une règle pour chaque partie, chacune étant nommée dans la réponse |
+| **Yes, allow reading from** `X/` | Permet au chat de lire ce dossier pour le reste du chat |
+| **Yes, and don't ask again for** `host` | Pour une commande dans le bac à sable qui joint un nouvel hôte : enregistre `web_fetch(domain:host)` |
+| **Yes, and switch to accept edits** | Fait passer le chat en Accept edits |
+| **Yes, allow all edits in** `X/` **during this session** | Ajoute ce dossier au chat et le fait passer en Accept edits |
+| **No** | L'appel ne s'exécute pas et le tour s'arrête. Avec une note (Tab), le tour continue avec votre note comme raison |
+
+Les demandes d'approbation attendent 30 minutes (`approvals.timeoutMinutes`), puis sont refusées.
+
+## Questions
+
+Aristra Code peut vous poser des questions à choix multiples : une à quatre à la fois, chacune avec des options, et vous pouvez toujours répondre avec vos propres mots ou choisir **Chat about this** pour en discuter d'abord. Les questions sont posées dans tous les modes sauf Don't ask, et jamais lors d'une exécution de script. En mode Plan, il pose ses questions de cette façon avant de rédiger le plan.
+
+## Mode Plan
+
+Aristra Code passe de lui-même en mode Plan pour une tâche qui mérite d'être planifiée, ou c'est vous qui le choisissez. Il explore, écrit le plan dans `~/.aristra/plans/<chat>.md`, et demande s'il peut continuer :
+
+- **Yes, and use auto mode** (ou bypass permissions ou accept edits, quand Auto est désactivé) : quitte le mode Plan pour ce mode.
+- **Yes, manually approve edits:** passe en Manual.
+- **Tell Aristra what to change:** il révise le plan.
+
+Ctrl+G ouvre le plan dans votre éditeur ; ce que vous enregistrez est le plan que vous approuvez.
+
+## Le relecteur du mode Auto
+
+En mode Auto, ce qui vous serait autrement demandé passe par un modèle relecteur. Les lectures, les recherches et ce qu'autorise Accept edits s'exécutent sans lui. Les règles de refus, les outils qui nécessitent toujours votre intervention et les contrôles de sécurité qu'il ne peut pas approuver (`rm` risqué, autre worktree) ne lui parviennent jamais ; il décide en revanche des écritures dans les fichiers protégés.
+
+- **Ce qu'il voit :** vos propres mots, les appels précédents de l'agent sans leurs résultats (pour qu'une page web ne puisse pas s'adresser à lui), votre `AGENTS.md` en tant que données, et l'action elle-même.
+- **Quand il bloque**, l'agent apprend pourquoi et qu'il ne doit pas contourner le blocage. Quand il ne peut pas décider, l'appel est refusé, jamais autorisé. Une action trop longue pour qu'il la lise en entier, ou un chat sans relecteur (`review.enabled: false`), vous est soumise à la place.
+- **Après 3 blocages d'affilée, ou 20 dans un chat**, il vous demande à la place.
+- **`/retry`** laisse les étapes qu'il vient de bloquer s'exécuter une fois, telles quelles.
+- **Qui relit :** sur les modèles d'Aristra et le forfait ChatGPT, le relecteur d'Aristra, gratuitement. Avec votre propre clé, un endpoint personnalisé ou un modèle local, ce modèle (ou `review.model`), payé comme ce modèle. `autoMode` (`allow`, `soft_deny`, `environment`) et `review.policy` lui ajoutent vos propres consignes.
+
+## Changer le mode depuis le web
+
+Dans un chat partagé avec [Remote Control](/fr/code/remote-control), le sélecteur de mode du site web change le mode du chat sur votre ordinateur. Un mode qui laisse davantage s'exécuter sans demander nécessite d'abord une nouvelle vérification de connexion.

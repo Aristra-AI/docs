@@ -1,0 +1,75 @@
+---
+title: "Skills"
+description: "Regroupez le travail que vous répétez dans des fichiers SKILL.md qu'Aristra Code utilise quand une tâche s'y prête, ou que vous lancez avec /name. Inclut les skills intégrés."
+---
+
+Un skill est un ensemble d'instructions pour un type de tâche : la façon dont votre équipe rédige les notes de version, comment préparer un correctif urgent, une checklist pour relire une migration. C'est un fichier `SKILL.md` au même format que celui de Claude Code : un skill passe donc de l'un à l'autre. Les autres champs de Claude Code (`allowed-tools`, `model`, `context`, `agent`, `hooks`, `paths`, `shell`) sont ignorés : un skill qui les utilise se charge quand même, sans eux.
+
+## Où se trouvent les skills
+
+| Emplacement | Utilisé dans |
+|---|---|
+| `~/.aristra/skills/<name>/SKILL.md` | Tous les chats |
+| `<folder>/.aristra/skills/<name>/SKILL.md` | Les chats de ce dossier, une fois que vous lui faites confiance |
+| Un [plugin](/fr/code/extend/plugins) | Tous les chats, sous la forme `plugin-name:skill-name` |
+
+Le dossier d'un skill peut contenir d'autres fichiers à côté de `SKILL.md` (modèles, scripts, exemples) vers lesquels le skill oriente Aristra Code. Pour utiliser vos skills Claude Code, copiez leurs dossiers de `~/.claude/skills/` vers `~/.aristra/skills/` (un dossier lié est ignoré), ou lancez `aristra import claude-code` en nommant les skills voulus avec `--only`, puisqu'ils ne font pas partie de sa sélection par défaut.
+
+## Écrire un skill
+
+```markdown ~/.aristra/skills/release-notes/SKILL.md
+---
+name: release-notes
+description: Write release notes from the merged pull requests since the last tag
+when_to_use: When the user asks for release notes or a changelog entry
+argument-hint: "[version]"
+---
+
+1. Find the last tag with `git describe --tags --abbrev=0`.
+2. List the merged pull requests since then with `git log <tag>..HEAD --merges --oneline`.
+3. Group them under Added, Changed and Fixed, one line each, in the past tense.
+4. Title the notes "Release $ARGUMENTS". Use the template in ${ARISTRA_SKILL_DIR}/template.md.
+```
+
+| Champ | Signification |
+|---|---|
+| `name` | Un nom d'affichage. Vous tapez le nom du dossier : `/release-notes` pour `skills/release-notes/` |
+| `description` | Ce qu'il fait, montré au modèle |
+| `when_to_use` | Quand l'utiliser, ajouté à ce que voit le modèle |
+| `argument-hint` | Ce qu'il faut taper après `/name`, affiché dans le menu des commandes |
+| `user-invocable` | `false` le retire du menu `/` (le modèle peut toujours l'utiliser) |
+| `disable-model-invocation` | `true` le cache au modèle (vous pouvez toujours taper `/name`) |
+
+Dans le corps, `$ARGUMENTS` correspond à tout ce qui est tapé après `/name`, `$1` à `$9` à ses mots, et `${ARISTRA_SKILL_DIR}` au dossier du skill.
+
+## Comment les skills sont utilisés
+
+- **Par Aristra Code.** À chaque tour, le modèle voit les noms et les descriptions de vos skills. Quand l'un d'eux correspond à la tâche, il charge les instructions complètes du skill.
+- **Par vous.** Tapez `/` et choisissez un skill, ou tapez `/release-notes 2.4.0`. Les instructions du skill sont envoyées avec `2.4.0` comme arguments.
+
+`/help` liste vos skills sous les commandes. Les [workflows](/fr/code/guides/subagents) enregistrés et les prompts des serveurs MCP apparaissent dans le même menu.
+
+## Skills intégrés
+
+| Skill | Effet | Aristra Code peut l'utiliser de lui-même |
+|---|---|---|
+| `/init` | Rédige le `AGENTS.md` du dossier à partir du code | Non |
+| `/code-review [level] [target]` (ou `/review`) | Relit le diff courant, une pull request, une branche ou un chemin à la recherche de bugs et de nettoyages, les plus graves d'abord | Oui |
+| `/simplify [target]` | Nettoie le code modifié sans changer ce qu'il fait | Oui |
+| `/security-review` | Une revue de sécurité des modifications de la branche : uniquement les vulnérabilités probables et exploitables | Oui |
+| `/update-config [request]` | Modifie vos paramètres : règles d'autorisation, hooks, bac à sable, serveurs MCP | Oui |
+| `/fewer-permission-prompts` | Ajoute à la liste d'autorisations du dossier les commandes en lecture seule et les outils MCP que vous approuvez le plus | Oui |
+| `/debug [issue]` | Lit le journal d'Aristra pour trouver ce qui n'a pas fonctionné | Non |
+| `/verify [what to check]` | Lance l'app modifiée, vérifie que la modification fonctionne et renvoie PASS, FAIL, BLOCKED ou SKIP | Non |
+| `/commit [guidance]` | Commite les modifications avec un message dans le style du dépôt, sans contourner les hooks, sans amender et sans commiter de secrets | Non |
+| `/create-pr [--draft]` | Commite, pousse et ouvre une pull request | Non |
+| `/loop [interval] [prompt]` (ou `/proactive`) | Exécute un prompt ou une commande à intervalles réguliers, ou à son propre rythme. Consultez [Travail en arrière-plan](/fr/code/guides/background) | Oui |
+| `/workflow-authoring` | La référence complète pour écrire des scripts de [workflow](/fr/code/guides/subagents) | Oui |
+
+`/code-review` accepte un niveau : `low` (une passe rapide), `medium` (le premier niveau par défaut), `high`, `xhigh` et `max` (le plus approfondi). Sans niveau, il utilise le dernier niveau indiqué dans ce chat. `--fix` applique les constats, `--comment` les publie sur la pull request, et `--max-findings <n>` (ou `all`) fixe le nombre de constats qu'il rapporte.
+
+Un skill à vous nommé `init` ou `security-review` remplace le skill intégré.
+
+## Confiance
+
+Les skills d'un dossier ne comptent qu'une fois que vous faites confiance au dossier : un dépôt que vous venez de cloner ne peut donc pas placer d'instructions devant Aristra Code.

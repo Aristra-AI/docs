@@ -1,0 +1,45 @@
+---
+title: "Consommation et prix"
+description: "Voyez où est passé votre argent, par modèle et par outil, ce que coûte en dollars chaque modèle et chaque outil hébergé, et choisissez la recherche web qu'utilise Aristra."
+---
+
+**Usage**, à `app.aristralabs.com/account/usage`, montre où est passé votre argent. Dans l'Aristra CLI, `/usage` affiche votre solde et le chat dans lequel vous êtes, et Aristra Desktop propose **Settings › Usage**.
+
+## Ce qu'affiche la page
+
+| | |
+|---|---|
+| **Spent** | Le total de la période (7, 30 ou 90 jours), et la part venue de votre consommation mensuelle, de votre solde rechargé et du crédit de bienvenue |
+| **Spending over time** | Une colonne par jour, répartie entre les modèles, les outils et l'ordinateur cloud. Pointez un jour pour voir ses chiffres, ou ouvrez **Show as a table** |
+| **By model** | Chaque modèle : requêtes, tokens en entrée, tokens lus depuis le cache et écrits dans le cache, tokens en sortie, et coût |
+| **Tools and cloud** | Chaque outil hébergé et votre ordinateur cloud : ce que vous avez utilisé, et le coût. Une recherche gratuite affiche Free |
+| **Recent tool calls** | Les derniers appels, avec le coût de chacun |
+| **Download CSV** | Toutes les lignes de consommation de la période, avec leur coût exact en dollars américains |
+
+Les totaux sont arrondis au centime. Un débit isolé de moins d'un centime apparaît comme `<$0.01` dans un total et avec quatre décimales sur sa propre ligne ($0.0053) : rien de ce qui vous a coûté de l'argent n'affiche $0.00.
+
+## Prix des modèles
+
+Chaque modèle est facturé au prix de son fournisseur : Aristra n'y ajoute rien. Le prix de chaque modèle pour un million de tokens en entrée et en sortie se trouve sur [Models and prices](https://app.aristralabs.com/models). L'entrée lue depuis le cache coûte moins cher. Certains modèles coûtent plus cher pour un prompt très long, pour cet appel uniquement ; la page indique à partir de combien de tokens.
+
+## Prix des outils
+
+| Outil | Prix |
+|---|---|
+| Recherche web (Brave ; aussi la recherche d'actualités, d'images et de vidéos) | Gratuite dans les chats sur le web et sur votre téléphone ; $0.0075 par recherche depuis Aristra Desktop, le CLI ou un ordinateur cloud |
+| Commandes shell dans le bac à sable, et le navigateur cloud | $0.003 la minute. Exécuter du code avec l'outil de code d'Aristra est gratuit |
+| Lecture d'une page web | $0.01 la page |
+| Génération d'images | 1.5 fois le prix du modèle d'image lui-même |
+| Transcription | $0.001 la minute d'audio |
+| Lecture d'une page de document | $0.006 la page, $0.015 avec la vision |
+| Ordinateur cloud | De $0.0122 à $0.0881 l'heure d'activité, selon la taille |
+| Disque de l'ordinateur cloud | $0.18 par mois et par Go, actif ou en veille |
+| Appel de connecteur | Pas encore facturé |
+
+La liste à jour se trouve sur la page Usage. Les outils qui s'exécutent sur votre propre ordinateur (les fichiers, le shell, git, vos serveurs MCP) ne coûtent rien, pas plus que votre mémoire : l'enregistrer, l'importer, y chercher, et l'apprentissage d'Aristra à partir de vos chats. Un chat qui utilise la mémoire ne paie que ses propres tokens. Une recherche ou une lecture de page qui échoue ne coûte rien ; une commande dans le bac à sable est facturée pour le temps pendant lequel elle a tourné, même quand elle échoue.
+
+## La recherche qu'utilise Aristra
+
+Aristra cherche sur le web avec Brave. Une recherche dans un chat sur le web ou sur votre téléphone ne coûte rien ; une recherche depuis Aristra Desktop, le CLI ou un ordinateur cloud coûte $0.0075, sur votre solde. Quand votre solde y est épuisé, les recherches passent par la recherche publique gratuite d'Exa, Parallel, Firecrawl ou Keenable, avec seulement les mots de la recherche envoyés, sauf si vous désactivez ce comportement (`web.keylessFallback`).
+
+Sur votre propre ordinateur, vous pouvez aussi définir **votre propre clé Brave** (Aristra Desktop : **Settings › Tools & keys**). Votre clé passe alors toujours en premier et ne coûte rien sur Aristra. Si cette clé ne peut pas être lue, Aristra vous le signale : il ne bascule pas discrètement vers une recherche payée depuis votre solde. Supprimez la clé dans Settings pour revenir à la recherche d'Aristra.

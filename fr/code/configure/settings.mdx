@@ -1,0 +1,48 @@
+---
+title: "Paramètres"
+description: "Où se trouvent les paramètres d'Aristra Code, comment les couches se combinent, quelles clés un dépôt ne peut pas modifier, et comment les lire et les modifier."
+---
+
+Les paramètres sont des fichiers JSON lus par l'Aristra Runtime : le terminal, Aristra Desktop et toutes les autres surfaces utilisent donc les mêmes paramètres. Ils ne contiennent jamais de secret : les clés et les jetons vont dans le [magasin d'identifiants](/fr/code/security).
+
+## Les fichiers
+
+| Portée | Fichier | Partagé |
+|---|---|---|
+| Les vôtres | `~/.aristra/settings.json` | Non : les vôtres, pour tous les dossiers |
+| Le projet | `<folder>/.aristra/settings.json` | Oui : commitez-le pour le partager avec votre équipe |
+| Le projet, les vôtres | `<folder>/.aristra/settings.local.json` | Non : tenu à l'écart de git |
+| Politique gérée | Définie par un administrateur ; consultez [Politique gérée](/fr/code/configure/managed-policy) | Imposée sur l'ordinateur |
+
+Les couches suivantes l'emportent : les vôtres, puis celles du projet, puis le fichier local du projet, puis le `--settings` d'une exécution de script, puis la politique gérée, qui l'emporte sur tout. Les objets fusionnent clé par clé, les listes de toutes les couches sont réunies (sans doublons), et les autres valeurs sont remplacées par une couche ultérieure.
+
+Les règles d'autorisation s'additionnent aussi d'un fichier à l'autre, et un refus, où qu'il soit, l'emporte. Consultez [Autorisations](/fr/code/configure/permissions).
+
+## Ce qu'un dépôt ne peut pas modifier
+
+Les fichiers d'un projet ne comptent qu'une fois que vous [faites confiance au dossier](/fr/code/configure/permissions). D'ici là, seules leurs règles de refus et de demande sont lues.
+
+Certaines clés ne sont lues que dans votre propre fichier, que vous fassiez confiance au dossier ou non : un dépôt ne peut donc pas les modifier. Il s'agit de `projects`, `mcp`, `review`, `credentials`, `auxiliary` et `model.fallback`. Les hooks sont lus dans votre fichier et dans le `settings.json` d'un projet de confiance, jamais dans `settings.local.json`. `runtime`, `approvals`, `telemetry`, `web` et `permissions.trustedMcpServers` ne sont lus que dans votre fichier et dans une politique gérée. Le `settings.json` d'un projet ne peut pas définir `autoMode` ni les clés de prompt d'Auto et de Bypass (`settings.local.json` le peut), aucun des deux fichiers de projet ne peut définir `pluginConfigs`, et un projet peut seulement désactiver les workflows.
+
+## Lire et modifier les paramètres
+
+```sh
+aristra config get                              # every setting in effect here
+aristra config get <key>                        # one value, and the file it comes from
+aristra config get permissions --json
+aristra config set permissions.defaultMode auto # in your own file
+aristra config set permissions.allow '["shell(npm test *)"]' --project   # in the project's file
+aristra config edit                             # your file in your editor
+```
+
+Dans un chat, `/config` affiche vos paramètres en vigueur et le fichier d'où vient chacun. Vous pouvez aussi demander à Aristra Code de modifier un paramètre : le skill intégré `/update-config` s'en charge.
+
+Les paramètres prennent effet immédiatement : le runtime relit un fichier chaque fois qu'il change. Après avoir modifié à la main `runtime`, `approvals` ou `credentials.store`, lancez `aristra runtime stop` pour qu'ils s'appliquent. Une section non conforme est ignorée avec un avertissement qui la nomme, et le reste s'applique quand même. `aristra doctor`, `/config` et `aristra config get` affichent les avertissements.
+
+## Vérifier un fichier de paramètres
+
+`aristra doctor`, `/config` et `aristra config get` vérifient vos fichiers de paramètres et nomment toute section non conforme. Un JSON Schema pour les éditeurs est prévu à `https://aristralabs.com/schemas/aristra-settings.json` ; il n'est pas encore publié : une ligne `$schema` qui pointe vers cette adresse ne fonctionne donc pas aujourd'hui.
+
+## Tous les paramètres
+
+La [référence des paramètres](/fr/code/reference/settings) liste chaque clé, sa valeur par défaut et ce qu'elle fait.

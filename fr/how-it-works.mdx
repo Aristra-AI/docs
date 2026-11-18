@@ -1,0 +1,41 @@
+---
+title: "Fonctionnement d'Aristra"
+sidebarTitle: "Fonctionnement"
+description: "Votre compte, Aristra Cloud et votre propre ordinateur : où s'exécute chaque chat, où il est conservé, quels modèles il utilise et qui paie."
+---
+
+## Votre compte
+
+Votre compte Aristra contient ce qui vous suit partout : vos chats dans le cloud, votre [mémoire](/fr/memory), vos [fichiers](/fr/files), vos [projets](/fr/projects), vos documents [Craft](/fr/craft), vos [apps connectées](/fr/connectors), ainsi que votre solde et votre forfait. Chaque surface à laquelle vous vous connectez accède au même compte.
+
+## Où s'exécute un chat
+
+Un chat s'exécute à l'un de ces trois endroits :
+
+| | Aristra Cloud | Votre ordinateur | Votre ordinateur cloud |
+|---|---|---|---|
+| Ce qui l'exécute | L'agent cloud d'Aristra | L'Aristra Runtime, sur votre Mac ou votre machine Linux | L'Aristra Runtime, sur votre propre ordinateur dans le cloud d'Aristra |
+| Démarré depuis | Le site web, votre téléphone, Aristra Desktop (l'onglet Chat, et les chats de l'onglet Code réglés pour s'exécuter dans le cloud), le terminal avec `aristra --cloud` et, avec un forfait, Telegram et les tâches planifiées | Le terminal, l'onglet Code d'Aristra Desktop (On this Mac), votre éditeur | Sa page sur le site web, Telegram, ses propres tâches planifiées |
+| Ce avec quoi il travaille | Son propre bac à sable, le web, vos fichiers et vos apps connectées | Vos dossiers, votre shell et vos outils | Son propre disque, son shell et ses outils |
+| Modèles | Les modèles d'Aristra | Tous : ceux d'Aristra, vos propres clés, votre forfait ChatGPT, un modèle sur votre ordinateur | Les modèles d'Aristra, ou votre forfait ChatGPT |
+| Qui paie | Votre solde | Votre solde pour les modèles d'Aristra ; rien avec votre propre modèle | La consommation mensuelle d'un forfait ou vos recharges (jamais le crédit de bienvenue) : ses modèles, son temps d'activité et son disque, actif ou en veille |
+| Conservé | Dans votre compte | Sur votre ordinateur (`~/.aristra`) | Dans votre compte, ou sur son propre disque si vous le choisissez |
+
+Les chats dans Aristra Cloud sont les mêmes sur toutes les surfaces : un chat démarré sur le web apparaît dans l'onglet Chat d'Aristra Desktop et dans les [chats cloud](/fr/code/cloud-chats) du terminal.
+
+Un chat sur votre ordinateur y reste. Avec un forfait, [Remote Control](/fr/code/remote-control) le partage sur le web et sur votre téléphone pendant que le travail continue sur votre ordinateur.
+
+## Aristra Code
+
+[Aristra Code](/fr/surfaces/aristra-code), c'est Aristra qui travaille dans un dossier de votre ordinateur : il lit et modifie des fichiers, exécute des commandes et travaille avec git, en vous demandant avant tout ce que vous n'avez pas autorisé. Le terminal, l'onglet Code d'Aristra Desktop et votre éditeur parlent tous au même runtime sur votre ordinateur : un chat démarré dans l'un apparaît donc dans les autres. [Fonctionnement d'Aristra Code](/fr/code/how-it-works) donne les détails.
+
+## Ce qui vous suit, et ce qui reste
+
+- **La mémoire** est conservée dans votre compte et accompagne chaque chat que vous démarrez en étant connecté, sur toutes les surfaces, sauf si vous la désactivez. Consultez [Mémoire](/fr/memory).
+- **Votre profil** (votre nom, votre profession et **About you**) ouvre chaque chat que vous démarrez en étant connecté, quel que soit l'état de l'interrupteur Memory. Les exceptions sont un chat incognito quand Memory est désactivé, et un ordinateur cloud qui conserve sa mémoire sur son propre disque. Dans un chat avec d'autres personnes, seuls votre nom et votre profession sont utilisés.
+- **Les fichiers** de votre compte apparaissent sur le site web, dans Aristra Desktop et avec `/files` dans le terminal. Un fichier sur votre Mac n'arrive dans votre compte que si vous l'y enregistrez. Consultez [Fichiers](/fr/files).
+- **Les chats sur votre ordinateur** ne sont pas dans votre compte, sauf si vous les partagez avec Remote Control : l'apprentissage nocturne d'Aristra à partir de vos chats ne les lit donc pas.
+
+## Qui paie
+
+Les modèles et les outils hébergés d'Aristra sont payés depuis votre solde : d'abord le crédit de bienvenue de $1 d'un nouveau compte, puis la consommation mensuelle de votre forfait, puis vos recharges. Un modèle à vous ([Utiliser votre propre modèle](/fr/own-models)) ne coûte rien sur Aristra. Consultez [Votre solde et vos recharges](/fr/account/credits).

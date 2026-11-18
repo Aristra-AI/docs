@@ -1,0 +1,101 @@
+---
+title: "Plugins"
+description: "Installez des plugins qui regroupent des skills, des commandes, des agents, des hooks, des serveurs MCP et des serveurs de langage, depuis des marketplaces au format de Claude Code."
+---
+
+Un plugin regroupe des skills, des commandes, des agents, des hooks, des serveurs MCP, des serveurs de langage et des workflows en un seul élément à installer. Aristra Code utilise le format de plugin de Claude Code : un plugin écrit pour Claude Code fonctionne donc ici, et les marketplaces de Claude Code fonctionnent telles quelles. Ses styles de sortie, ses thèmes, ses canaux et ses moniteurs ne sont pas chargés, et un matcher de hook qui nomme les outils de Claude Code (`Bash`, `Edit`) ne correspond pas à ceux d'Aristra Code (`shell`, `edit_file`).
+
+## Installer un plugin
+
+<Tabs>
+  <Tab title="Terminal">
+    ```sh
+    aristra plugin install <plugin>                  # from your marketplaces
+    aristra plugin install <plugin>@<marketplace>    # from one marketplace
+    aristra plugin install <plugin> -s project       # for everyone in this project
+    aristra plugin list
+    ```
+
+    Dans un chat, `/plugin` ouvre le gestionnaire de plugins, et `/reload-plugins` active les modifications sans démarrer de nouveau chat.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Ouvrez Settings › **Plugins** pour parcourir les marketplaces, et installer, activer, désactiver et configurer des plugins.
+  </Tab>
+</Tabs>
+
+Les éléments d'un plugin portent son nom : ses skills et ses commandes sous la forme `/plugin-name:skill-name`, et de même pour ses agents et ses workflows : plusieurs plugins peuvent ainsi coexister.
+
+### Portées
+
+| Portée | Où elle est enregistrée | Qui en bénéficie |
+|---|---|---|
+| `user` (par défaut) | `~/.aristra/settings.json` | Vous, dans tous les dossiers |
+| `project` | `.aristra/settings.json` | Toutes les personnes qui travaillent dans le projet, une fois qu'elles lui font confiance et l'installent aussi (`aristra plugin list` leur indique comment) |
+| `local` | `.aristra/settings.local.json` | Vous, dans ce projet |
+
+Le paramètre est `enabledPlugins`. Les plugins d'un projet ne comptent qu'une fois que vous faites confiance au dossier.
+
+## Marketplaces
+
+Une marketplace est un catalogue de plugins : un dépôt git, une URL, un fichier ou un dossier contenant `.claude-plugin/marketplace.json`.
+
+```sh
+aristra plugin marketplace add anthropics/claude-plugins-official
+aristra plugin marketplace add https://example.com/marketplace.json
+aristra plugin marketplace list
+aristra plugin marketplace update
+aristra plugin marketplace remove <name>
+```
+
+La marketplace officielle d'Anthropic est ajoutée la première fois que vous lancez Aristra Code de façon interactive. `ARISTRA_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL=1` l'empêche. Un projet peut suggérer des marketplaces à son équipe dans `extraKnownMarketplaces`.
+
+## Gérer les plugins
+
+| Commande | Effet |
+|---|---|
+| `aristra plugin enable <plugin>`, `disable <plugin>` | Activer ou désactiver un plugin sans le supprimer (`disable -a` pour tous) |
+| `aristra plugin update <plugin>` | Mettre à jour vers la version la plus récente |
+| `aristra plugin uninstall <plugin>` | Le supprimer (`--keep-data` conserve son dossier de données) |
+| `aristra plugin prune` | Supprimer les dépendances installées pour des plugins que vous avez supprimés depuis |
+| `aristra plugin configure <plugin>` | Afficher ou définir les options que déclare un plugin |
+| `aristra plugin validate <path>` | Vérifier un plugin ou une marketplace que vous écrivez |
+
+Les plugins des marketplaces d'Anthropic se mettent à jour en arrière-plan, et Aristra Code vous prévient quand l'un d'eux l'a fait. Pour une autre marketplace, activez la mise à jour automatique dans `/plugin`, ou avec `autoUpdate: true` dans son entrée `extraKnownMarketplaces`. `ARISTRA_DISABLE_AUTOUPDATER=1` désactive les mises à jour. Les options peuvent aussi être définies à l'installation : `--config KEY=VALUE`.
+
+### Essayer un plugin sans l'installer
+
+```sh
+aristra --plugin-dir ./my-plugin
+aristra run --plugin-dir ./my-plugin.zip "..."
+```
+
+charge un plugin depuis un dossier ou un `.zip` pour un seul chat.
+
+## Ce qu'un plugin peut apporter
+
+| Élément | Devient |
+|---|---|
+| `skills/`, `commands/` | Des [skills](/fr/code/extend/skills) et des commandes, sous la forme `/plugin-name:name` |
+| `agents/` | Des [agents personnalisés](/fr/code/guides/subagents), sous la forme `plugin-name:agent-name`. L'agent d'un plugin ne peut pas définir `permissionMode`, `hooks` ni `mcpServers` |
+| `hooks/hooks.json` | Des [hooks](/fr/code/extend/hooks) |
+| `.mcp.json` | Des [serveurs MCP](/fr/code/extend/mcp) |
+| Serveurs de langage | L'intelligence du code : Aristra Code peut aller aux définitions, trouver les références et lire les diagnostics grâce à eux |
+| `workflows/` | Des [workflows](/fr/code/guides/subagents) |
+| `bin/` | Des programmes ajoutés à la fin du `PATH` des commandes qu'exécute Aristra Code |
+| `settings.json` | Ses paramètres `agent` et `subagentStatusLine` |
+
+<Warning>
+Un plugin exécute du code sur votre ordinateur : ses hooks, ses serveurs MCP et ses programmes. L'installer vaut consentement à leur exécution : les hooks d'un plugin ne demandent donc pas d'approbation un par un. N'installez des plugins que depuis des marketplaces de confiance.
+</Warning>
+
+## Pour les organisations
+
+Une [politique gérée](/fr/code/configure/managed-policy) peut contrôler les plugins :
+
+| Clé | Effet |
+|---|---|
+| `strictKnownMarketplaces` | Seules ces marketplaces peuvent être ajoutées |
+| `blockedMarketplaces` | Des marketplaces qui ne peuvent jamais être ajoutées |
+| `enabledPlugins` | Des plugins activés ou désactivés pour tout le monde ; une valeur gérée l'emporte |
+| `pluginTrustMessage` | Le message de votre organisation, affiché quand quelqu'un installe un plugin |
+| `disableSideloadFlags` | Refuser `--plugin-dir` |
