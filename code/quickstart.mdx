@@ -160,7 +160,7 @@ Every chat runs on a model from a **source**, and each source says who pays. Ari
     **In Aristra Desktop**
 
     1. Do steps 1 to 3 above.
-    2. Open **Settings › Models**. Under **On this Mac**, **Ollama** shows **Connected** and how many models are installed. If it says **Not running**, start Ollama and choose **Check again**.
+    2. Open **Settings › Models**. Under **On this Mac**, **Ollama** shows **Connected** and how many models are installed. If it says **Not running**, start Ollama (or pull a model, if none is installed) and choose **Check again**.
     3. In the **Code** tab, start a new chat, pick a **Folder**, and set **Where it runs** to **On this Mac**.
     4. In the model menu, choose your model under **Ollama**. It shows **Fits**, **Tight fit** or **Too big**.
 
@@ -205,10 +205,10 @@ Every chat runs on a model from a **source**, and each source says who pays. Ari
     2. Add it, for a server on this computer with no key:
 
        ```sh
-       aristra keys add custom --url http://localhost:8000/v1 --model qwen3-coder --no-key
+       aristra keys add custom --url http://localhost:8000/v1 --wire chat_completions --name "My server" --model qwen3-coder --no-key
        ```
 
-       Or run `aristra keys add custom` and answer each question: the address, the API it speaks (`chat_completions`, `responses` or `anthropic`), its model names, a name and its key.
+       Or run `aristra keys add custom` and answer each question: the address, the API it speaks (`chat_completions`, `responses` or `anthropic`), its model names, a name and its key. A flag you leave out is asked; press Enter for its default.
     3. It says **Saved** with the name and address. Check its models:
 
        ```sh
@@ -227,7 +227,7 @@ Every chat runs on a model from a **source**, and each source says who pays. Ari
 
     - Include the API's path, usually `/v1`, for Chat Completions and Responses. For Anthropic Messages, leave `/v1` out.
     - Use `https://`. Plain `http://` works only for `localhost`, `127.0.0.1` or `::1`, so a server on another machine needs `https://`.
-    - The model names you give are used when the server doesn't list its models, and always for Anthropic Messages.
+    - The model names you give are used when the server's model list can't be read, and always for Anthropic Messages.
     - It pays as **this computer** when the address is on your computer or network, else as **your key**.
 
     `aristra keys remove custom` removes the server.

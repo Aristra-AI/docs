@@ -11,7 +11,7 @@ This guide takes you from no account to a first chat, then to Aristra on your Ma
   <Step title="Make your account">
     Go to [app.aristralabs.com](https://app.aristralabs.com) and choose **Sign up**.
 
-    - **While Aristra opens in batches**, the page shows **Join the waitlist**. Enter your email and choose **Join waitlist**. Aristra emails you when your place is ready; nothing else is needed until then.
+    - **While Aristra opens in batches**, the page shows **Join the waitlist** (or **We are full for now**, when every place is taken). Enter your email and choose **Join waitlist**. Aristra emails you when your place is ready; nothing else is needed until then.
     - **With an invitation link**, open the link in your invite email. It brings you straight to the form, which takes your email from the invitation.
     - **Once sign-up is open**, the page shows **Create your account**.
 
@@ -71,7 +71,7 @@ Aristra Desktop, the terminal and your editors on one computer share one sign-in
     2. Enter your **Email** and choose **Send reset code**.
     3. Enter the **Code** from the email and a **New password**, then choose **Reset password**. This also signs you in.
 
-    Signing in on a new browser may ask for a code from your email first, on the same **Check your email** screen.
+    Signing in on a new browser may also ask, after your password, for a code from your email, on the same **Check your email** screen.
   </Tab>
 
   <Tab title="Aristra Desktop">
@@ -120,7 +120,7 @@ Aristra Desktop, the terminal and your editors on one computer share one sign-in
 
     **Over SSH, or on another machine**
 
-    Over SSH, or on Linux without a display, the code comes first, since there is no browser on that computer. With `aristra --remote <host>`, the other machine signs in as its own computer: sign in there with a code (`aristra --remote <host> login` always uses one).
+    Over SSH, or on Linux without a display, the code comes first, since there is no browser on that computer. With `aristra --remote <host>`, the other machine signs in as its own computer: sign in there with a code, by choosing **With a code, on another device** or typing `/login code` (`aristra --remote <host> login` always uses one).
 
     **Inside a chat**
 
@@ -152,11 +152,11 @@ Aristra Desktop, the terminal and your editors on one computer share one sign-in
 
 ### Approving a computer
 
-The approval page names the **Application** (Aristra Desktop, Aristra Code in a terminal, or Aristra for an editor), the **Computer**, and the **Account** it joins. The computer joins whichever account the website is signed in to, so check the **Account** row before you choose **Approve**.
+The approval page names the **Application** (**Aristra Desktop**, **Aristra Code in a terminal**, or just **Aristra** for an editor), the **Computer**, and the **Account** it joins. The computer joins whichever account the website is signed in to, so check the **Account** row before you choose **Approve**.
 
 Only approve a sign-in you started yourself, just now. Aristra will never ask you to approve a code. **Deny** connects nothing, and the sign-in on that computer expires by itself.
 
-A signed-in computer stays signed in while you use it. One that isn't used for 30 days asks you to sign in again. An account can have 20 computers (and script tokens) signed in at once.
+A signed-in computer stays signed in while you use it. One that isn't used for 30 days asks you to sign in again. An account can have 20 computers and script tokens at once. Each counts until it's signed out in **Settings › Devices**, even one whose sign-in has lapsed.
 
 ### Sign out
 
@@ -164,7 +164,7 @@ A signed-in computer stays signed in while you use it. One that isn't used for 3
 |---|---|
 | The website, in this browser | Choose your name at the bottom of the sidebar, then **Log out**. Your computers stay signed in |
 | This Mac | In Aristra Desktop, open the account menu (your name, bottom left) and choose **Sign out**. Running chats stop, here and in the terminal |
-| This computer, in a terminal | `aristra logout`, or `/logout` in a chat. Aristra Desktop on this computer signs out too |
+| This computer, in a terminal | Stop running chats first, then run `aristra logout`, or `/logout` in a chat. Aristra Desktop on this computer signs out too |
 | Another computer | On the website, open **Settings › Devices** and choose **Sign out** next to it. Its chats and files stay on it |
 
 Signing out of Aristra keeps your ChatGPT sign-in and API keys on that computer. Chats on a computer show again when the same account signs back in.
@@ -176,16 +176,16 @@ Signing out of Aristra keeps your ChatGPT sign-in and API keys on that computer.
     A browser sign-in lasts 5 minutes and a code 10 minutes. Start the sign-in again on the computer (**Sign in** in Aristra Desktop, `aristra login` in a terminal) for a new page or code.
   </Accordion>
   <Accordion title="The code isn't accepted">
-    Check each letter. Codes use consonants only, so there is no O or I to confuse with 0 or 1, and you can type the code with or without the dash. After 10 tries in 10 minutes, wait a few minutes and start the sign-in again.
+    Check each letter. Codes use consonants only, so there is no O or I to confuse with 0 or 1, and you can type the code with or without the dash. After 10 code checks in 10 minutes (each **Continue** and **Approve** counts), wait a few minutes and start the sign-in again.
   </Accordion>
   <Accordion title="The browser page never reaches the computer">
     The browser may be on another device, or unable to reach this computer. Switch to a code: **Use a code instead** in Aristra Desktop, **c** while the terminal waits, or `/login code` in a chat.
   </Accordion>
   <Accordion title="Revoke an existing device before connecting another">
-    Your account has 20 computers signed in. Sign one out in **Settings › Devices** on the website, then sign in again.
+    Your account has 20 computers and script tokens. In **Settings › Devices** on the website, sign out the ones you no longer use (a computer whose sign-in has lapsed still counts), then sign in again.
   </Accordion>
   <Accordion title="Your account is on the waitlist">
-    Aristra lets people in gradually. Your computer connects once your place is ready; Aristra emails you.
+    Aristra lets people in gradually. Once your place is ready (Aristra emails you), start the sign-in again on the computer.
   </Accordion>
   <Accordion title="Sign out of the current Aristra account before signing in to another">
     A computer is signed in to one Aristra account at a time. Sign out on it first, then sign in with the other account. To approve with a different account, sign out of the website in that browser first.
