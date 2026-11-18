@@ -11,8 +11,8 @@
     "family": "Inter"
   },
   "logo": {
-    "light": "/logo/aristra.svg",
-    "dark": "/logo/aristra.svg"
+    "light": "/logo/aristra-labs-light.svg",
+    "dark": "/logo/aristra-labs-dark.svg"
   },
   "favicon": "/favicon.svg",
   "navbar": {
@@ -20,6 +20,13 @@
       "type": "button",
       "label": "Open Aristra",
       "href": "https://app.aristralabs.com"
+    }
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "This page isn't here",
+      "description": "It may have moved when the docs were reorganized. Search with **⌘K**, or start from the [Overview](/), the [Quickstart](/quickstart), [Use your own model](/own-models) or the [Aristra Code quickstart](/code/quickstart)."
     }
   },
   "navigation": {
@@ -155,7 +162,10 @@
   },
   "footer": {
     "socials": {
-      "website": "https://aristralabs.com"
+      "website": "https://aristralabs.com",
+      "x": "https://x.com/AristraAI",
+      "linkedin": "https://www.linkedin.com/company/aristralabs",
+      "github": "https://github.com/Aristra-AI"
     }
   },
   "background": {
@@ -163,5 +173,139 @@
       "light": "#FFFFFF",
       "dark": "#121212"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/account/web",
+      "destination": "/surfaces/web"
+    },
+    {
+      "source": "/configure/managed-policy",
+      "destination": "/code/configure/managed-policy"
+    },
+    {
+      "source": "/configure/models",
+      "destination": "/code/configure/models"
+    },
+    {
+      "source": "/configure/permissions",
+      "destination": "/code/configure/permissions"
+    },
+    {
+      "source": "/configure/sandbox",
+      "destination": "/code/configure/sandbox"
+    },
+    {
+      "source": "/configure/settings",
+      "destination": "/code/configure/settings"
+    },
+    {
+      "source": "/configure/terminal",
+      "destination": "/code/configure/terminal"
+    },
+    {
+      "source": "/extend/hooks",
+      "destination": "/code/extend/hooks"
+    },
+    {
+      "source": "/extend/mcp",
+      "destination": "/code/extend/mcp"
+    },
+    {
+      "source": "/extend/plugins",
+      "destination": "/code/extend/plugins"
+    },
+    {
+      "source": "/extend/skills",
+      "destination": "/code/extend/skills"
+    },
+    {
+      "source": "/guides/background",
+      "destination": "/code/guides/background"
+    },
+    {
+      "source": "/guides/chats",
+      "destination": "/code/guides/chats"
+    },
+    {
+      "source": "/guides/context",
+      "destination": "/code/guides/context"
+    },
+    {
+      "source": "/guides/git",
+      "destination": "/code/guides/git"
+    },
+    {
+      "source": "/guides/goals",
+      "destination": "/code/guides/goals"
+    },
+    {
+      "source": "/guides/memory",
+      "destination": "/code/guides/memory"
+    },
+    {
+      "source": "/guides/subagents",
+      "destination": "/code/guides/subagents"
+    },
+    {
+      "source": "/reference/cli",
+      "destination": "/code/reference/cli"
+    },
+    {
+      "source": "/reference/commands",
+      "destination": "/code/reference/commands"
+    },
+    {
+      "source": "/reference/environment",
+      "destination": "/code/reference/environment"
+    },
+    {
+      "source": "/reference/glossary",
+      "destination": "/glossary"
+    },
+    {
+      "source": "/reference/settings",
+      "destination": "/code/reference/settings"
+    },
+    {
+      "source": "/reference/tools",
+      "destination": "/code/reference/tools"
+    },
+    {
+      "source": "/security",
+      "destination": "/code/security"
+    },
+    {
+      "source": "/setup",
+      "destination": "/code/setup"
+    },
+    {
+      "source": "/surfaces/cloud-chats",
+      "destination": "/code/cloud-chats"
+    },
+    {
+      "source": "/surfaces/editors",
+      "destination": "/code/editors"
+    },
+    {
+      "source": "/surfaces/non-interactive",
+      "destination": "/code/non-interactive"
+    },
+    {
+      "source": "/surfaces/remote-control",
+      "destination": "/code/remote-control"
+    },
+    {
+      "source": "/surfaces/remote-machines",
+      "destination": "/code/remote-machines"
+    },
+    {
+      "source": "/surfaces/terminal",
+      "destination": "/code/terminal"
+    },
+    {
+      "source": "/troubleshooting",
+      "destination": "/code/troubleshooting"
+    }
+  ]
 }
