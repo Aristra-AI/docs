@@ -1,0 +1,117 @@
+---
+title: "托管策略"
+description: "面向管理员：通过配置描述文件或托管设置文件，在每台电脑上强制执行规则、关闭模式、允许或阻止MCP服务器，以及固定任何设置。"
+---
+
+管理员可以设置一个策略，让电脑上的每个对话都遵循它，无论是在终端、Aristra Desktop还是其他任何使用端：任何人都无法覆盖的规则、关闭Auto模式、允许或阻止MCP服务器、关闭遥测。它使用与Claude Code托管设置相同的键。
+
+## 策略来自哪里
+
+Aristra Code会读取第一个包含策略的来源：
+
+| 顺序 | 来源 | 位置 |
+|---|---|---|
+| 1 | 针对用户的macOS配置描述文件（MDM），域为`com.aristralabs.aristra` | `/Library/Managed Preferences/<user>/com.aristralabs.aristra.plist` |
+| 2 | 针对电脑的同一配置描述文件 | `/Library/Managed Preferences/com.aristralabs.aristra.plist` |
+| 3 | 托管设置文件：先是`managed-settings.json`，然后按名称顺序在其上合并每个`managed-settings.d/*.json` | macOS：`/Library/Application Support/Aristra/`。Linux：`/etc/aristra/` |
+
+用户自己的偏好设置永远不会被当作策略读取，任何使用端都不能写入策略。文件发生变化时会被重新读取。放在托管设置旁边的指令文件（`AGENTS.md`、`rules/*.md`）也适用于每个对话。
+
+## 示例
+
+```json /Library/Application Support/Aristra/managed-settings.json
+{
+  "permissions": {
+    "deny": ["shell(git push:*)", "read(~/.aws/**)", "web_fetch(domain:pastebin.com)"],
+    "ask": ["shell(npm publish:*)"],
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
+  "telemetry": { "usage": false, "errors": false },
+  "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
+  "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
+}
+```
+
+策略中的值优先于每个用户和每个文件夹的设置。
+
+## 规则
+
+- **拒绝规则**会在其他任何处理之前拒绝调用：任何允许规则、会话内的答复、模式（包括Bypass）或审核模型都无法覆盖它们。它们涉及的路径在沙箱中也会对命令关闭。
+- **询问规则**会询问，包括在Bypass模式下（在Auto模式下，由审核模型决定）。
+- **允许规则**与用户的允许规则一样生效，适用于所有文件夹。
+- **`permissions.allowManagedPermissionRulesOnly: true`**：策略中的规则成为唯一有效的规则。此时审批只提供Yes和No。
+
+## 模式
+
+- **`permissions.disableAutoMode: "disable"`**：在所有地方关闭Auto模式。已经处于Auto模式的对话会从下一轮开始询问，并给出提示。
+- **`permissions.disableBypassPermissionsMode: "disable"`**：关闭Bypass permissions模式，并禁止`aristra run --dangerously-skip-sandbox`。
+
+## 沙箱
+
+任何沙箱设置都可以固定，例如设置`sandbox.allowUnsandboxedCommands: false`，让命令始终在沙箱中运行。在沙箱开启的情况下，仓库将无法关闭它，只有你自己的设置、`--settings`和策略可以把命令排除在沙箱之外，你用`!`运行的命令也会在沙箱中运行。有两个键只存在于策略中：
+
+| 键 | 作用 |
+|---|---|
+| `sandbox.network.allowManagedDomainsOnly` | 只有策略中的主机有效，并且不会询问任何内容 |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | 只有策略中的`allowRead`路径有效 |
+
+## MCP服务器
+
+| 键 | 含义 |
+|---|---|
+| `deniedMcpServers` | 永远不能运行的服务器。始终优先 |
+| `allowedMcpServers` | 存在时，只有匹配的服务器可以运行。空列表表示不允许任何服务器 |
+
+| 条目 | 匹配 |
+|---|---|
+| `{"serverName": "github"}` | 按名称匹配服务器，来自任何来源（设置、`.mcp.json`、插件） |
+| `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | 按确切的命令和参数匹配程序服务器 |
+| `{"serverUrl": "https://mcp.company.example/*"}` | 按地址匹配服务器，`*`匹配任意内容 |
+
+当允许列表中有命令（或地址）条目时，程序（或地址）服务器必须匹配其中之一；仅名称匹配是不够的。
+
+被策略排除的服务器会被禁用，`aristra mcp list`会显示“Your organization's policy does not allow this MCP server.”
+
+## 钩子、插件和工作流
+
+| 键 | 作用 |
+|---|---|
+| `hooks` | 为所有人运行的钩子，无需每个用户批准 |
+| `allowManagedHooksOnly` | 只运行策略的钩子，以及策略开启的插件的钩子 |
+| `disableAllHooks` | 不运行任何钩子 |
+| `enabledPlugins` | 为所有人开启或关闭的插件；托管的值优先 |
+| `strictKnownMarketplaces`（或`allowedMarketplaces`） | 只能添加这些插件市场 |
+| `blockedMarketplaces` | 永远不能添加的插件市场 |
+| `pluginTrustMessage` | 你的说明文字，在有人安装插件时显示 |
+| `disableSideloadFlags` | 拒绝`--plugin-dir` |
+| `disableWorkflows` | 关闭工作流 |
+
+托管设置旁边的`agents/`文件夹会为所有人添加自定义智能体，并覆盖用户的同名智能体。
+
+## 其他任何设置
+
+大多数设置都可以用同样的方式固定：`telemetry.usage`、`telemetry.errors`、`approvals.timeoutMinutes`、`memory.enabled`等。只从每个用户自己的文件中读取的设置（`review`、`credentials`、`auxiliary`、`mcp`、`model.fallback`、`runtime.notifications`、`runtime.maxRunningTurns`）不能由策略固定。当策略固定了遥测、工作流、沙箱开关和免费搜索回退时，Aristra Desktop会把它们显示为由你的组织设置。
+
+## 检查策略
+
+```sh
+aristra doctor        # says where the policy comes from
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
+```
+
+## 试用策略
+
+在没有策略的电脑上，把Aristra Code指向你自己的一个策略文件夹（请先停止运行时，因为它在启动时读取该变量）：
+
+```sh
+mkdir -p ~/aristra-policy
+cat > ~/aristra-policy/managed-settings.json <<'EOF'
+{ "permissions": { "deny": ["shell(git push *)"], "disableAutoMode": "disable" } }
+EOF
+aristra runtime stop
+ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
+```
+
+对于设置和指令，只有在不存在管理员策略时才会读取`ARISTRA_MANAGED_SETTINGS_DIR`，所以它永远无法替代管理员的策略。

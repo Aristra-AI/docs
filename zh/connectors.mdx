@@ -1,0 +1,36 @@
+---
+title: "连接器"
+description: "连接Gmail、Google Calendar、Google Drive、Slack、Notion、GitHub等应用，让Aristra可以在你的对话、Aristra Code和定时任务中读取它们并在其中执行操作。需要套餐。"
+---
+
+连接器把你的某个应用连接到你的Aristra账户，让Aristra可以读取它并在其中执行操作：查找一封邮件、添加一个日历事件、更新一个Notion页面、创建一个GitHub issue。连接器随[套餐](/zh/account/plans)提供。
+
+## 支持的应用
+
+Gmail、Google Calendar、Google Drive、Google Docs、Google Sheets、Outlook、Slack、Discord、Notion、Airtable、Linear、Jira、Trello、GitHub、Sentry、Datadog、Databricks、Supabase、Figma、Canva、Dropbox、Calendly、Zoom、YouTube、HubSpot、Attio、Mailchimp、Stripe、LinkedIn、Facebook、Reddit和X。
+
+## 连接应用
+
+1. 在网站上打开**Customize › Connectors**。
+2. 选择一个应用，然后选择**Connect**。
+3. 在该应用自己的页面上登录并允许访问。完成后你会回到Connectors页面。
+
+访问权限已过期的应用会显示**Needs reconnect**；选择**Reconnect**即可。**Disconnect**会移除Aristra对它的访问权限。
+
+对于应用的每个操作，你都可以选择**Always allow**、**Needs approval**或**Blocked**。
+
+## Aristra在哪里使用它们
+
+- **对话**：在网站、手机、Aristra Desktop的Chat标签页和[Telegram](/zh/surfaces/telegram)上。
+- **[Aristra Code](/zh/surfaces/aristra-code)**：在你的电脑上，需已登录。每次调用都由Aristra的服务器发出，所以这些应用的登录凭据永远不会到达你的电脑。
+- **[定时任务](/zh/scheduled-tasks)**，它们还可以在已连接的应用中发生某件事时启动。
+
+## 用于对话的MCP服务器
+
+在**Customize › Connectors**下，你还可以通过地址添加你自己的MCP服务器，可以带上请求头，或使用该服务器自己的登录方式。在你信任它之前，Aristra会在它的每个工具运行前询问你；信任之后，它的只读工具无需询问即可运行。你在网站和Telegram上的对话会使用它。
+
+Aristra Code的MCP服务器和技能在你的电脑上设置。参见[MCP服务器](/zh/code/extend/mcp)和[技能](/zh/code/extend/skills)。
+
+## 从其他AI应用使用Aristra
+
+**Customize › MCP**会给你一个地址，你可以把它粘贴到ChatGPT、Claude或其他支持自定义连接器的助手中，让它使用你的Aristra记忆和文件。其使用费用从你的余额中扣除。

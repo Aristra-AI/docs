@@ -1,0 +1,133 @@
+---
+title: "沙箱"
+description: "默认关闭的沙箱：用/sandbox或在设置中开启它，以及它在macOS和Linux上如何限制命令：命令可以读取、写入和访问什么，网络提示，localhost，你自己的代理，以及在沙箱之外运行命令。"
+---
+
+沙箱默认关闭：Aristra Code在你电脑上运行的命令拥有你自己的访问权限，由[权限检查](/zh/code/configure/permissions)决定哪些命令无需询问即可运行，哪些需要先询问。
+
+开启沙箱后，命令会在沙箱中运行。审批回答的是“这个命令应该运行吗？”；沙箱则决定命令运行后可以访问什么。由于沙箱中的命令只能写入对话的文件夹，只能访问你允许的主机，所以它无需询问即可运行（`sandbox.autoAllowBashIfSandboxed`，默认开启）。拒绝和询问规则仍然适用，有些命令仍会经过常规检查：在开头设置未知变量的命令、传递`NAME=value`参数的命令、指向其他用户主文件夹的命令、重定向到`/dev/tcp`或`/dev/udp`的命令，或者既删除文件又切换文件夹的命令。有风险的`rm`命令以及过于复杂而无法检查的命令总是会询问。
+
+## 开启沙箱
+
+- **在终端中**：运行`/sandbox`并选择一种模式：**with auto-allow**（沙箱中的命令无需询问即可运行）、**with regular permissions**（它们仍像没有沙箱时一样询问）或**No sandbox**。选择会保存在文件夹的`.aristra/settings.local.json`中。`/sandbox exclude "npm run test:*"`会在同一个文件中添加一个总是在沙箱之外运行的命令模式。当团队的[策略](/zh/code/configure/managed-policy)设置了沙箱时，`/sandbox`会说明这一点，并且不做任何更改。
+- **在Aristra Desktop中**：Settings > Permissions > **Run commands in a sandbox**，适用于所有文件夹。
+- **在设置中**：`"sandbox": {"enabled": true}`。
+
+如果沙箱无法启动（例如Linux上缺少bubblewrap），命令会在沙箱之外运行，对话中会提示一次。设置了`sandbox.failIfUnavailable`时，这一轮根本不会开始。
+
+## 命令可以做什么
+
+| | 允许 | 拒绝 |
+|---|---|---|
+| **读取** | 所有内容，但`read(...)`拒绝规则或`sandbox.filesystem.denyRead`指定的内容除外 | 这些路径 |
+| **写入** | 对话的文件夹、`$TMPDIR`、你的`edit(...)`允许规则和`sandbox.filesystem.allowWrite`中的路径 | 其他所有位置 |
+| **网络** | 通过沙箱的代理：你允许的主机会被放行，其他主机会询问 | 所有直接连接，以及`localhost`（除非你允许） |
+
+**永远不可写入**，无论规则怎么说：设置文件、文件夹的`.aristra/settings*.json`和技能、shell启动文件（`.bashrc`、`.zshrc`等）、`.claude/skills`、`.claude/commands`、`.claude/agents`、`.gitconfig`、`.gitmodules`、`.ripgreprc`、`.mcp.json`、位于文件夹根目录的裸仓库文件、`.vscode`、`.idea`、`.git/hooks`，以及`.git/config`（除非开启了`sandbox.filesystem.allowGitConfig`）。`.git`的其余部分仍可写入，所以git可以正常工作。命令也不能重命名这些文件或它们的上层文件夹。
+
+## 命令如何运行
+
+- **在你shell的环境中**：Aristra Code会读取一次你的`.zshrc`（或`.bashrc`），并保留其中的函数、别名、`PATH`和变量，所以`nvm`、`pyenv`、Homebrew的工具以及你的别名都能正常工作，即使运行时是由Aristra Desktop启动的。
+- **`$TMPDIR`在命令之间保持不变**，所以一条命令留在那里的文件，下一条命令也能看到。在macOS上，`/tmp`本身不可写入；Aristra Code使用`$TMPDIR`。
+- **超时**：命令默认有2分钟（模型最多可以要求10分钟）。到达超时时间仍在运行的命令会转到后台，而不是被停止，智能体会获得它到目前为止的输出。参见[后台工作](/zh/code/guides/background)。
+- **停止**：被停止的命令（按Esc、通过`/tasks`、删除其对话、运行时停止）会连同它启动的所有内容一起结束：先发送SIGTERM，2秒后发送SIGKILL。如果运行时本身崩溃，它的命令启动的内容仍会结束。
+
+## 网络
+
+沙箱中的命令只能通过沙箱的代理访问网络，该代理在你的电脑上运行。命令的环境会让常用工具指向这个代理（`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、通过ssh的git等）。对于每个主机：
+
+1. 你的`web_fetch(domain:...)`拒绝规则指定的主机会被拒绝。
+2. `sandbox.network.allowedDomains`或你的`web_fetch(domain:...)`允许规则中的主机会被放行。`*.example.com`涵盖子域名。
+3. 其他任何主机都会在命令的步骤上询问：
+
+   > **Network request outside of sandbox**
+   > Host: registry.npmjs.org
+   > Do you want to allow this connection?
+   > 1. Yes
+   > 2. Yes, and don't ask again for registry.npmjs.org
+   > 3. No, and tell Aristra what to do differently (esc)
+
+**Yes**会放行这一次连接；之后的连接仍会询问。**Yes, and don't ask again**会在文件夹的`.aristra/settings.local.json`中保存`web_fetch(domain:registry.npmjs.org)`。**No**会拒绝该连接；命令会看到失败。
+
+代理会拒绝解析到你自己电脑、链路本地地址或云元数据地址的域名。它从不解密流量。脚本和定时任务会直接拒绝没有规则涵盖的主机，而不是询问。
+
+当沙箱拒绝某个连接时，命令的结果末尾会注明它拒绝了什么，智能体会读取这些内容：
+
+```text
+<sandbox_violations>
+deny network-outbound example.org:443 (user denied)
+</sandbox_violations>
+```
+
+## 让命令使用localhost
+
+开发服务器、测试夹具服务器或本地数据库需要监听某个端口，而沙箱默认会拒绝：
+
+```sh
+aristra config set sandbox.network.allowLocalBinding true
+```
+
+这会让命令可以监听和连接`localhost`，但仅限于此。在Linux上，这项设置不起作用：每条命令都有自己的网络，所以它可以监听和访问它自己的`localhost`，但无法访问你电脑`localhost`上的服务器，也无法访问另一条命令启动的服务器。
+
+## 使用你自己的代理
+
+如果你的网络要经过你所在组织的过滤代理：
+
+```sh
+aristra config set sandbox.network.httpProxyPort 8080
+```
+
+之后，命令的HTTP和HTTPS流量会发往`localhost:8080`，由该代理决定它们可以访问什么。`sandbox.network.socksProxyPort`对SOCKS也是如此。
+
+## 在沙箱之外运行命令
+
+有些命令需要沙箱拒绝的东西：写入文件夹之外的位置、忽略代理设置的工具、Unix套接字上的服务（macOS）。这时Aristra Code可能会请求在沙箱之外运行某一条命令，并说明原因。它会经过针对沙箱外命令的常规检查：在Manual模式下，除非它只做读取或有规则允许它，否则会询问；Auto模式会把需要询问的操作交给审核模型；Read only则会拒绝它。
+
+- `sandbox.allowUnsandboxedCommands: false`会关闭这项功能。
+- `sandbox.excludedCommands`列出总是在沙箱之外运行的命令（`docker:*`、`make`），它们仍会经过检查。这只是为了方便，而不是安全边界。
+- `aristra run --dangerously-skip-sandbox`会让一次脚本运行中的所有命令都在沙箱之外运行。只在机器本身就是边界的地方使用它：CI运行器、容器、用完即弃的虚拟机。
+
+## macOS
+
+沙箱使用Seatbelt，默认拒绝。
+
+- **在沙箱内无法访问钥匙串**。git的钥匙串凭据助手无法读取已保存的登录信息，所以需要登录信息的push或fetch会请求在沙箱之外运行。
+- **通过系统进行证书检查**：`pip` 24.2及更高版本，以及`gh`等Go工具，会通过一个被沙箱关闭的macOS系统服务检查证书，所以它们在沙箱内会因证书或网络错误而失败。Aristra Code只能看到这个错误，看不到原因，所以如果它没有主动请求在沙箱之外运行该命令，请告诉它这样做。`sandbox.enableWeakerNetworkIsolation: true`会改为对所有命令开放该服务，但这也会通过它开放一条出口。
+
+## Linux
+
+沙箱使用bubblewrap（`bwrap`）：除可写入的路径外，整个文件系统都是只读的；它有自己的网络命名空间，网络会被转发到代理。当它无法启动时，命令会在沙箱之外运行，对话中会说明一次原因（设置了`sandbox.failIfUnavailable`时，这一轮不会开始），`aristra doctor`会在Sandbox下显示它：
+
+| 问题 | 解决方法 |
+|---|---|
+| 没有安装bubblewrap | `sudo apt-get install bubblewrap`或`sudo dnf install bubblewrap` |
+| 系统阻止了bubblewrap所需的用户命名空间（Ubuntu 24.04及更高版本） | 用AppArmor配置文件为bubblewrap允许它们 |
+| 在容器内，bubblewrap无法挂载`/proc` | 如果容器就是你的边界，请设置`sandbox.enableWeakerNestedSandbox: true` |
+
+## MCP服务器
+
+作为程序运行的MCP服务器启动时不在沙箱中；条目中设置了`"sandbox": true`的服务器会获得它自己的沙箱。参见[MCP服务器](/zh/code/extend/mcp)。
+
+## 设置
+
+沙箱设置来自你自己的设置、受信任文件夹的设置和托管策略。列表会在它们之间合并。
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `sandbox.enabled` | `false` | 命令在沙箱中运行（`/sandbox`） |
+| `sandbox.failIfUnavailable` | `false` | 与`enabled`一起使用：沙箱无法启动时，这一轮不会开始，而不是在沙箱之外运行命令 |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | 沙箱中的命令无需询问即可运行，除非有拒绝或询问规则涵盖它 |
+| `sandbox.allowUnsandboxedCommands` | `true` | Aristra Code是否可以请求在沙箱之外运行命令 |
+| `sandbox.excludedCommands` | `[]` | 总是在沙箱之外运行的命令，仍会经过检查 |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | 更多要开放或关闭的路径 |
+| `sandbox.filesystem.allowGitConfig` | `false` | 允许命令写入`.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | 命令无需询问即可访问的主机 |
+| `sandbox.network.allowLocalBinding` | `false` | 允许命令监听和访问`localhost` |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | 无 | 改为把命令的流量发送到你自己的代理 |
+| `sandbox.network.allowUnixSockets` | `[]` | 命令可以连接的Unix套接字（macOS） |
+| `sandbox.ignoreViolations` | `{}` | 不向智能体报告的拒绝 |
+| `sandbox.enableWeakerNestedSandbox` | `false` | 用于无法挂载`/proc`的容器内（Linux） |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | 为位于使用自有证书颁发机构的代理之后的`gh`等Go工具，开放macOS的证书服务 |
+| `sandbox.network.allowAllUnixSockets` | `false` | 允许命令连接任何Unix套接字 |
+
+托管策略还有`sandbox.filesystem.allowManagedReadPathsOnly`和`sandbox.network.allowManagedDomainsOnly`。参见[托管策略](/zh/code/configure/managed-policy)。

@@ -1,0 +1,29 @@
+---
+title: "Aristra Code"
+description: "在你电脑上的文件夹中工作的Aristra：它读取你的代码、编辑文件、运行命令并使用git，可在你的终端、Aristra Desktop的Code标签页和编辑器中使用。"
+---
+
+Aristra Code就是在你电脑上的文件夹中工作的Aristra。告诉它你想完成什么：它会读取所需的代码，跨文件进行修改，运行你的测试和命令，并在做任何你没有允许的事情之前先询问你。搭配你自己的模型时它是免费的，你与它的对话保存在你的电脑上，除非你从Aristra Desktop在云端运行某个对话。
+
+## 在哪里使用
+
+| | |
+|---|---|
+| [终端](/zh/code/terminal) | `aristra`命令：终端中的完整应用，适用于Mac或Linux |
+| [Aristra Desktop的Code标签页](/zh/code/desktop) | 你的文件夹及其对话，对话旁边还有终端、浏览器、改动和拉取请求 |
+| [你的编辑器](/zh/code/editors) | Zed以及其他支持Agent Client Protocol的编辑器 |
+| [手机和网页版](/zh/code/remote-control) | 开通套餐后，Remote Control让你在手机或网站上继续对话，而工作仍留在你的电脑上 |
+| [脚本和CI](/zh/code/non-interactive) | `aristra run`不启动应用，只运行一轮，用于脚本和CI |
+| [另一台机器](/zh/code/remote-machines) | `aristra --remote <host>`可以在你通过SSH访问的机器上工作 |
+
+它们都与你电脑上的同一个智能体（Aristra Runtime）通信，所以在其中一处开始的对话也会显示在其他几处。
+
+## 开始使用
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Aristra Desktop内置了Aristra Code，所以你不需要在它之外再安装CLI。[Aristra Code快速入门](/zh/code/quickstart)会带你完成第一个真实任务，这些文档的**Aristra Code**标签页涵盖了其他所有内容：[权限](/zh/code/configure/permissions)、[模型](/zh/code/configure/models)、[git](/zh/code/guides/git)、[MCP服务器](/zh/code/extend/mcp)、[技能](/zh/code/extend/skills)、[钩子](/zh/code/extend/hooks)和[命令参考](/zh/code/reference/commands)。

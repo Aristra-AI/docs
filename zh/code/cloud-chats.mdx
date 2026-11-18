@@ -1,0 +1,100 @@
+---
+title: "云端对话"
+description: "由Aristra的云端智能体运行并保存在你账户中的对话，可以从终端或Aristra Desktop开始，并可选择在你电脑上的某个文件夹中工作。"
+---
+
+云端对话保存在你的Aristra账户中，在Aristra的服务器上运行，与网站和手机上的智能体相同。Aristra Code会在你电脑上的对话旁边列出、打开、开始和继续云端对话。
+
+如果你想要一台自己在云端的机器，带有能在对话之间保存你的文件和工具的磁盘，参见[云电脑](/zh/surfaces/cloud-computer)。
+
+云端对话从你的[余额](/zh/account/credits)中扣费：先用新账户的$1初始额度，然后是套餐的每月用量，最后是充值。余额用完时，新消息会提示你；你电脑上的对话仍可以继续使用你自己的模型。
+
+当你希望对话保存在你的账户中（这样在网页版和手机上也能看到）、需要云端智能体的工具（它的浏览器、它的沙箱、你连接的账户、Craft文档），或者需要一个在你电脑休眠时也能继续的对话时，请使用云端对话。如果要在某个文件夹中使用任意模型和你电脑的沙箱工作，请使用你电脑上的对话。
+
+| | 在你的电脑上 | 在云端 |
+|---|---|---|
+| 运行在 | 这里的Aristra Runtime | Aristra的云端智能体 |
+| 保存在 | 这台电脑的`~/.aristra`中 | 你的Aristra账户中 |
+| 模型 | 你设置的任何来源 | Aristra的模型，和网站上一样计费 |
+| 文件 | 对话的文件夹，在这台电脑的沙箱中 | 连接了文件夹时为这台电脑上的文件夹；否则为云端智能体自己的沙箱 |
+| 模式 | Manual、Accept edits、Plan、Auto、Read only、Don't ask（你允许时还有Bypass permissions） | 和网站上一样，Manual或Auto |
+
+## 开始云端对话
+
+```sh
+aristra --cloud                                        # a new cloud chat
+aristra --cloud "draft the launch email"               # with a first message
+aristra --cloud --folder ~/code/site "update the docs" # working in a folder on this computer
+aristra --cloud --incognito                            # incognito
+aristra --cloud --project "Q4 launch"                  # in a project
+```
+
+在Aristra Desktop中，在新Code对话的消息框下方选择一个文件夹和**In the cloud**，或者在Chat标签页中开始对话。
+
+云端对话运行Aristra的模型：用`--source aristra -m <model>`指定一个（`aristra models --source aristra`会列出它们）。不指定时，如果你的默认模型是Aristra模型，就使用它，否则使用Aristra的默认模型。
+
+## 列出、打开和继续
+
+```sh
+aristra sessions --cloud                  # your account's chats, newest first
+aristra resume <id>                       # open one
+aristra run -r <id> "next step, please"   # one more turn from a script
+```
+
+打开云端对话时，会从你的账户中读取它的对话记录，包括步骤、文件和文档。已经在进行中的运行会被实时跟踪。按Esc可以取消运行。`/rename`和`aristra sessions delete <id>`会在你的账户中重命名和删除它。在网站上开始或删除的对话会在两分钟内出现或消失。
+
+## 你电脑上的文件夹
+
+云端对话可以在你电脑上的某个文件夹中工作：云端智能体通过你的电脑读取、搜索和修改那里的文件，不会触及该文件夹之外的任何内容。它不能在其中运行命令。
+
+```sh
+aristra --cloud --folder ~/code/site                        # start one in a folder
+aristra sessions connect-folder <id> --folder ~/code/site   # give an existing cloud chat a folder here
+```
+
+- 文件夹中的调用遵循这台电脑的规则：只在文件夹内部进行，遵循它的拒绝规则并排除机密文件，每次修改都只按显示并批准的内容写入。审批会显示在终端、Aristra Desktop和网站上；以最先给出的答复为准。
+- 为此，你的电脑会与Aristra保持一个出站连接。你的电脑上没有任何监听服务。
+- 你的电脑休眠时，对话对文件夹的调用会等待或失败，云端智能体会告诉你。
+- 每个文件夹还有一个针对从网站或手机发起的对话的级别：**Off**（默认）、**Read only**或**Read and edit**。在Aristra Desktop中该文件夹菜单的**Use from other devices**下设置。Read only和Read and edit随套餐提供。
+
+## 无痕
+
+`aristra --cloud --incognito`会开始一个不会出现在你账户列表和记忆中的对话。你离开后，你的电脑上不会保留它的任何内容。它没有文件夹，也没有项目，账户会在它最后一次活动的30天后删除它。
+
+## 项目
+
+`aristra --cloud --project <name>`会在你个人工作区的该项目中开始对话，所以它会在网站上显示在该项目下，并使用项目的指令和记忆。加上`--folder`时，项目会记住这个文件夹；项目的主文件夹是它在Aristra Desktop中的新对话开始的地方。项目在网站上创建。
+
+## 模式和提问
+
+云端对话处于**Manual**模式（智能体在你的设置不允许的每一步之前询问你）或**Auto**模式（由Aristra的审核模型决定这些步骤）。它使用为它选择的模式，否则使用你在网站设置中的账户默认模式。Shift+Tab或`/mode`可以切换，选择会保存在对话上。
+
+当云端智能体在运行中途向你提问时（需要批准的步骤、带选项的问题、表单），运行会暂停，问题会作为审批出现在每个使用端中。对外部网站的请求可以在本对话剩余时间内被允许。带选项的问题在Aristra Desktop或网站上最容易回答。
+
+## 附件
+
+你附加到云端对话的文件会随对话一起保存在你的账户中，包括它的文字和文件本身，直到你删除该对话。无痕对话不会保留任何附件。Aristra可以读取PDF、Word、Excel、PowerPoint、旧版Office文件、OpenDocument、RTF和EPUB，还能用OCR免费读取PDF中最多100页扫描页。一条消息最多可以携带5个文件，总共不超过50 MB。
+
+- 如果模型接受PDF，10页及以下的PDF会完整发送给模型，所以模型还能看到页面的样子。
+- 不超过2,000行和100,000个字符的文本会完整放入消息中。更长的文件只放入开头部分，智能体需要时会读取其余部分。
+- 在之后的轮次中，智能体仍然拥有对话中之前附加的文件：它可以再次读取其中任何一个，或者把PDF的页面当作图片查看。
+
+在你电脑上的对话中附加的文件会和对话一起留在你的电脑上（参见[对话](/zh/code/guides/chats)）。
+
+## 云端智能体生成的文件
+
+```sh
+aristra sessions download <id>          # every file the chat's agent made
+aristra sessions download <id> <key>    # one, by the key its step names
+```
+
+文件会保存在`~/.aristra/attachments/`下，并打印出它们的路径。
+
+## 把云端对话复制到你的电脑
+
+```sh
+aristra sessions import <id>
+aristra sessions import <id> --folder ~/code/site --source anthropic --model claude-sonnet-5-5
+```
+
+这会把云端对话复制为你电脑上的一个新对话，以便在某个文件夹中使用任意模型继续。云端对话保持原样。复制是单向的：你在副本中做的任何事情都不会发回云端对话。

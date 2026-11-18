@@ -1,0 +1,97 @@
+---
+title: "快速入门"
+description: "安装Aristra Code、登录、选择模型，并在你自己的项目中完成第一个任务。"
+---
+
+本指南带你从什么都没安装开始，到完成第一个改动。它使用终端；同样的对话在[Aristra Desktop](/zh/code/desktop)中也可以进行。
+
+<Steps>
+  <Step title="安装">
+    ```sh
+    curl -fsSL https://aristralabs.com/install.sh | sh
+    ```
+
+    这会把适用于你机器的最新版本（Apple芯片或Intel上的macOS，x64或arm64上的Linux）安装到你的主文件夹中，不需要root权限。如果`~/.local/bin`还不在你的`PATH`中，安装程序会把它添加到你的shell配置文件中，并告诉你。安装完成后请打开一个新终端。
+
+    检查安装：
+
+    ```sh
+    aristra --version
+    aristra doctor
+    ```
+
+    `aristra doctor`会检查你的环境配置，并把每一行标记为`ok`或`fix`，同时说明如何修复。在Windows上，请使用WSL2；参见[安装与配置](/zh/code/setup)。
+  </Step>
+
+  <Step title="在项目中启动">
+    ```sh
+    cd ~/code/my-project
+    aristra
+    ```
+
+    第一次运行时，它只会询问它还需要的信息，每次一个页面：
+
+    1. **登录Aristra**。每个对话都需要一个Aristra账户，包括使用你自己的密钥或本地模型的对话。账户是免费的：参见[哪些是免费的、套餐会增加什么](/zh/account/overview)。按Enter选择**In your browser**登录：浏览器会打开登录页面（如果没有打开，请打开终端打印出的链接），然后你选择**Approve**。没有浏览器时（例如通过SSH），会先显示**With a code, on another device**：在任意设备上打开app.aristralabs.com/desktop/device并输入验证码。在等待浏览器登录时，按c可以切换为验证码。按Esc可以跳过，之后再用`/login`登录。所有步骤都在[登录](/zh/quickstart)中。
+    2. **选择新对话默认使用的模型**。每个选项都会标明由谁付费：你的Aristra余额、你的ChatGPT套餐、你自己的密钥，或“runs on this computer”。你可以随时用`/model`更改。要使用你的ChatGPT套餐、密钥或本地模型，参见[使用你自己的模型](/zh/own-models)。
+    3. **信任这个文件夹**。Aristra Code会在你信任的文件夹中读取、编辑和运行文件。默认选中的是“No, exit”；按Down，然后按Enter，即可信任它。这个答复会对该仓库及其子文件夹保存。你的主文件夹只在本次运行中受信任。
+    4. **新的MCP服务器**。如果文件夹的`.mcp.json`中有你还没有答复过的服务器，它会询问你要使用哪些。以Bypass permissions模式启动时，会先显示一个需要你接受的警告。
+  </Step>
+
+  <Step title="提出修改要求">
+    输入你想完成的事情，然后按Enter：
+
+    ```text
+    › Find why the date parser fails on leap years and fix it. Run the tests when you are done.
+    ```
+
+    你会看到：
+    - 回复以Markdown格式流式显示。
+    - 每一步显示为一行：`Read src/date.ts`、`Search for leap`、`Edit src/date.ts`、`$ npm test`。
+    - 每次编辑的diff和每条命令的输出，截取为几行。Ctrl+O可以打开最新一步的完整输出。
+    - 状态行显示它正在做什么以及模型的上下文已用多少，页脚显示模式、当前分支的拉取请求、模型以及由谁付费。
+  </Step>
+
+  <Step title="批准它的请求">
+    新对话以**Manual**模式开始：读取、搜索和只读命令会自动运行（开启沙箱时，沙箱中的命令也会自动运行），其他修改则会先询问。审批会显示确切的命令或diff，并提供三个答复：
+
+    - **Yes**：只批准这一步。
+    - **Yes, and don't ask again**：批准这类步骤，并保存一条规则（或者在本对话剩余时间内允许编辑）。
+    - **No**。
+
+    在Yes或No上按Tab，可以添加一条模型会读到的备注。
+
+    按Shift+Tab循环切换模式：**Accept edits**（文件夹中的编辑会自动运行）、**Plan**（先探索并提出方案）、**Auto**（由Aristra的审核模型决定原本需要询问的步骤），然后回到Manual。参见[权限](/zh/code/configure/permissions)。
+  </Step>
+</Steps>
+
+## 设置你的模型
+
+登录后即可使用Aristra的模型。要使用你的ChatGPT套餐、你自己的服务商密钥或你电脑上的模型（Ollama、LM Studio或其他服务器）运行，请按照[使用你自己的模型](/zh/own-models)操作：每种方式都有Aristra Desktop和终端的步骤。然后用`/model`选择它；它会成为新对话的默认模型。
+
+## 日常使用
+
+| 你想要 | 操作 |
+|---|---|
+| 在这个文件夹中启动 | `aristra` |
+| 带着提示词启动 | `aristra "explain the build system"` |
+| 继续这个文件夹最新的对话 | `aristra -c` |
+| 回到之前的对话 | `aristra resume`，或在对话中输入`/resume` |
+| 打开在别处运行的对话 | `aristra attach <id>` |
+| 在脚本或CI中运行一轮 | `aristra run "fix the lint errors" -o json` |
+| 查看这个文件夹的对话 | `aristra sessions`（加`--all`查看所有文件夹） |
+| 选择另一个模型 | `/model`，或用`aristra models`列出模型 |
+| 添加服务商密钥 | `aristra keys add openai`（或`anthropic`、`gemini`、`openrouter`） |
+| 修改设置 | `aristra config set permissions.defaultMode acceptEdits` |
+| 迁移你的Claude Code或Codex配置 | `aristra import claude-code`（或`codex`），会先显示预览 |
+| 检查你的环境配置 | `aristra doctor` |
+
+在对话中，`/help`会列出所有命令和快捷键。
+
+## 后续步骤
+
+<CardGroup cols={2}>
+  <Card title="终端应用" icon="terminal" href="/zh/code/terminal">快捷键、引导正在运行的一轮、排队、回退。</Card>
+  <Card title="记忆与指令" icon="brain" href="/zh/code/guides/memory">用`AGENTS.md`让它了解你的项目。</Card>
+  <Card title="Git与拉取请求" icon="code-branch" href="/zh/code/guides/git">工作树、diff、`/pr`和自动修复。</Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/zh/code/desktop">在Mac应用的Code标签页中使用同样的对话。</Card>
+</CardGroup>

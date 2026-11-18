@@ -1,0 +1,59 @@
+---
+title: "编辑器"
+description: "通过Agent Client Protocol在Zed和其他编辑器中使用Aristra Code，以及通过链接打开它。"
+---
+
+## Zed和其他ACP编辑器
+
+`aristra acp`通过[Agent Client Protocol](https://agentclientprotocol.com)为编辑器提供服务。编辑器会替你启动它。
+
+在Zed中，在你的设置里把Aristra添加为智能体服务器：
+
+```json
+{
+  "agent_servers": {
+    "Aristra": { "type": "custom", "command": "aristra", "args": ["acp"] }
+  }
+}
+```
+
+然后从Zed的智能体面板中开始一个Aristra线程。如果这台电脑还没有登录Aristra，Zed会要求你登录，这会在浏览器中打开Aristra的登录页面。
+
+编辑器中的线程就是这台电脑上一个普通的Aristra Code对话：`aristra sessions`会列出它（在那个文件夹中运行，或加上`--all`），Aristra Desktop会显示它，它的审批也可以从任何使用端回复。
+
+| 在编辑器中 | 会发生什么 |
+|---|---|
+| 新建线程 | 在编辑器的文件夹中新建对话，使用你的默认模型和模式。该文件夹在这个对话中无需询问即被信任 |
+| 模式菜单 | Manual、Accept edits、Plan、Auto（除非你的设置关闭了Auto）和Read only。在其他地方选择的模式也会同步到编辑器 |
+| 你的提示词 | 一轮。链接的文件和图片会作为附件；粘贴的资源会被引用 |
+| 线程 | 回复和推理过程以流式显示；每一步都显示为一个工具调用，附带它的命令、diff和输出 |
+| 权限请求 | 每个审批，提供Yes、一个允许更多操作的答复（针对这个对话，或保存为规则）以及No。问题会显示它的选项 |
+| Stop | 停止这一轮 |
+| 打开旧线程 | 重放对话的历史记录 |
+
+Aristra Code使用它自己的工具（以及你开启时它自己的沙箱），而不是编辑器的文件系统或终端；它也使用你设置中它自己的MCP服务器，而不是编辑器的。
+
+<Tip>
+如果想把编辑器的对话与你自己的对话分开（例如使用测试账户时），可以在智能体服务器中添加`"env": {"ARISTRA_HOME": "/path/to/home"}`。
+</Tip>
+
+## 从Aristra Desktop打开你的编辑器
+
+Aristra Desktop的**Open in**按钮会在VS Code、Cursor、Zed、Windsurf或Xcode（Xcode会打开文件夹中的项目）中打开对话的文件夹，取决于你安装了哪些。在**Review**中，每个改动过的文件都会在VS Code、Cursor、Zed或Windsurf中打开，并定位到第一处改动。
+
+## 打开终端的链接
+
+`aristra-cli://open`链接会打开一个终端，在某个文件夹中运行Aristra Code，并在输入框中预先填好一段提示词：
+
+```text
+aristra-cli://open?cwd=/Users/you/code/site&q=Review%20the%20open%20issues
+aristra-cli://open?repo=acme/site&q=Fix%20the%20failing%20build
+```
+
+| 参数 | 含义 |
+|---|---|
+| `cwd` | 文件夹，使用绝对路径 |
+| `repo` | 代替`cwd`，指定一个GitHub `owner/repo`：使用你上次使用它时所在的克隆，否则使用你的主文件夹 |
+| `q` | 提示词，最多5,000个字符。它会被放入输入框，在你按Enter之前绝不会发送 |
+
+和任何文件夹一样，会询问该文件夹的信任问题。在Mac或Linux上，当你以交互方式运行Aristra Code时，它会注册链接处理程序（如果处理程序缺失或指向旧版本，会再次注册）；把`disableDeepLinkRegistration`设为`"disable"`可以关闭这一行为。

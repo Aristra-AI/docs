@@ -1,0 +1,75 @@
+---
+title: "技能"
+description: "把你重复做的工作打包成SKILL.md文件，Aristra Code会在任务合适时使用它们，你也可以用/name运行它们。包括内置技能。"
+---
+
+技能是针对某类任务的一组指令：你的团队如何撰写发布说明、如何发布热修复、审查数据库迁移的检查清单。它是一个`SKILL.md`文件，格式与Claude Code的相同，所以技能可以在两者之间通用。Claude Code的其他字段（`allowed-tools`、`model`、`context`、`agent`、`hooks`、`paths`、`shell`）会被忽略：使用了这些字段的技能仍会加载，只是不包含这些字段。
+
+## 技能保存在哪里
+
+| 位置 | 使用范围 |
+|---|---|
+| `~/.aristra/skills/<name>/SKILL.md` | 所有对话 |
+| `<folder>/.aristra/skills/<name>/SKILL.md` | 在你信任该文件夹后，该文件夹中的对话 |
+| [插件](/zh/code/extend/plugins) | 所有对话，名称为`plugin-name:skill-name` |
+
+技能的文件夹中除了`SKILL.md`之外，还可以放其他文件（模板、脚本、示例），由技能引导Aristra Code去使用。要使用你的Claude Code技能，请把它们的文件夹从`~/.claude/skills/`复制到`~/.aristra/skills/`（链接的文件夹会被跳过），或者运行`aristra import claude-code`并用`--only`指定你想要的技能，因为它们不在默认选择中。
+
+## 编写技能
+
+```markdown ~/.aristra/skills/release-notes/SKILL.md
+---
+name: release-notes
+description: Write release notes from the merged pull requests since the last tag
+when_to_use: When the user asks for release notes or a changelog entry
+argument-hint: "[version]"
+---
+
+1. Find the last tag with `git describe --tags --abbrev=0`.
+2. List the merged pull requests since then with `git log <tag>..HEAD --merges --oneline`.
+3. Group them under Added, Changed and Fixed, one line each, in the past tense.
+4. Title the notes "Release $ARGUMENTS". Use the template in ${ARISTRA_SKILL_DIR}/template.md.
+```
+
+| 字段 | 含义 |
+|---|---|
+| `name` | 显示名称。你输入的是文件夹的名称：对于`skills/release-notes/`，输入`/release-notes` |
+| `description` | 它做什么，会展示给模型 |
+| `when_to_use` | 何时使用它，会添加到模型看到的内容中 |
+| `argument-hint` | 在`/name`之后要输入什么，显示在命令菜单中 |
+| `user-invocable` | 设为`false`会让它不出现在`/`菜单中（模型仍可以使用它） |
+| `disable-model-invocation` | 设为`true`会让模型无法使用它（你仍可以输入`/name`） |
+
+在正文中，`$ARGUMENTS`是在`/name`之后输入的全部内容，`$1`到`$9`是其中的各个单词，`${ARISTRA_SKILL_DIR}`是技能的文件夹。
+
+## 技能如何被使用
+
+- **由Aristra Code使用**：每一轮，模型都会看到你的技能的名称和描述。当某个技能适合当前任务时，它会加载该技能的完整指令。
+- **由你使用**：输入`/`并选择一个技能，或者输入`/release-notes 2.4.0`。技能的指令会被发送，并以`2.4.0`作为它的参数。
+
+`/help`会在命令下方列出你的技能。已保存的[工作流](/zh/code/guides/subagents)和MCP服务器的提示词也会出现在同一个菜单中。
+
+## 内置技能
+
+| 技能 | 作用 | Aristra Code是否可以自行使用 |
+|---|---|---|
+| `/init` | 根据代码编写文件夹的`AGENTS.md` | 否 |
+| `/code-review [level] [target]`（或`/review`） | 审查当前的diff、拉取请求、分支或路径，查找bug和可清理之处，最严重的排在最前 | 是 |
+| `/simplify [target]` | 清理改动过的代码，而不改变其功能 | 是 |
+| `/security-review` | 对当前分支的改动进行安全审查：只报告很可能存在且可被利用的漏洞 | 是 |
+| `/update-config [request]` | 修改你的设置：权限规则、钩子、沙箱、MCP服务器 | 是 |
+| `/fewer-permission-prompts` | 把你最常批准的只读命令和MCP工具添加到文件夹的允许列表中 | 是 |
+| `/debug [issue]` | 读取Aristra的日志，找出哪里出了问题 | 否 |
+| `/verify [what to check]` | 运行改动后的应用，检查改动是否有效，并报告PASS、FAIL、BLOCKED或SKIP | 否 |
+| `/commit [guidance]` | 按仓库的风格撰写提交信息并提交改动，不跳过钩子、不修改已有提交、不提交机密信息 | 否 |
+| `/create-pr [--draft]` | 提交、推送并创建拉取请求 | 否 |
+| `/loop [interval] [prompt]`（或`/proactive`） | 按间隔或自行掌握节奏运行一段提示词或一条命令。参见[后台工作](/zh/code/guides/background) | 是 |
+| `/workflow-authoring` | 编写[工作流](/zh/code/guides/subagents)脚本的完整参考 | 是 |
+
+`/code-review`接受一个级别：`low`（快速检查一遍）、`medium`（首次使用时的默认值）、`high`、`xhigh`和`max`（最彻底）。不指定时，它使用你在这个对话中上一次给出的级别。`--fix`会应用发现的问题，`--comment`会把它们发布到拉取请求上，`--max-findings <n>`（或`all`）设置它报告多少条。
+
+你自己的名为`init`或`security-review`的技能会替换对应的内置技能。
+
+## 信任
+
+只有在你信任某个文件夹之后，该文件夹中的技能才会生效，这样你刚克隆的仓库就无法把指令塞给Aristra Code。

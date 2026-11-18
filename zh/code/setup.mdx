@@ -1,0 +1,96 @@
+---
+title: "安装与配置"
+description: "在macOS、Linux以及通过WSL在Windows上安装、更新、切换版本和卸载Aristra Code。"
+---
+
+## 系统要求
+
+| 系统 | 支持情况 |
+|---|---|
+| macOS | Apple芯片和Intel。Apple芯片版本也可以在通过Rosetta运行的shell中安装 |
+| Linux | 使用glibc的x64和arm64。开启沙箱时需要bubblewrap（`bwrap`）。暂不支持Alpine（musl） |
+| Windows | 通过WSL2和Ubuntu等Linux发行版，使用Linux版本。登录页面通过`$BROWSER`指定的程序打开（在WSL上通常是`wslview`）。如果没有这样的程序，请用验证码登录 |
+
+每个版本都包含它所需的一切，包括它自己的Node和Python，所以除了`curl`或`wget`之外，不需要预先安装任何东西。
+
+## 安装
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh              # the latest release
+curl -fsSL https://aristralabs.com/install.sh | sh -s stable    # the stable channel
+curl -fsSL https://aristralabs.com/install.sh | sh -s 1.2.1     # one version
+```
+
+该脚本会：
+
+1. 选择适合你机器的版本。
+2. 下载它，并根据该版本的清单校验其SHA-256校验和。
+3. 把它安装到`~/.local/share/aristra/versions/<version>/`，并让`~/.local/bin/aristra`指向它。
+4. 当`~/.local/bin`不在你的`PATH`中，或者有另一个`aristra`排在它前面时，把它添加到你的shell配置文件中（对于fish，它会打印需要运行的`fish_add_path`命令）。
+5. 如果有用npm或bun安装的旧版`aristra`会在你的`PATH`中排在前面，它会提出将其删除。
+6. 提出启动`aristra`。
+
+问题会在终端上询问，所以通过`curl | sh`运行时也能正常工作。没有终端时，或设置了`ARISTRA_NON_INTERACTIVE=1`时，它不会询问任何问题，而是采用安全的答复。
+
+<Warning>
+安装程序拒绝在你自己的shell中通过`sudo`运行，因为那样会安装到root的主文件夹中。如果你确实要通过sudo为root安装，请设置`ARISTRA_INSTALL_ALLOW_SUDO=1`。在以root身份运行的容器或CI中，它会照常为root安装。
+</Warning>
+
+## 发布通道
+
+| 通道 | 说明 |
+|---|---|
+| `latest` | 最新版本。默认通道 |
+| `stable` | 已发布约一周且没有出现问题的版本 |
+
+你安装时使用的通道会被记住，`aristra update`会跟随它。大约每周发布一次新版本。
+
+## 更新、切换和回滚
+
+```sh
+aristra update            # the newest release on your channel
+aristra update --check    # only say whether there is one
+aristra install latest    # switch to the latest channel
+aristra install stable    # switch to the stable channel
+aristra install 1.2.1     # switch to exactly that version (a rollback when it is older)
+```
+
+正在使用的版本和最新的两个版本会保留在磁盘上，所以回滚到其中之一不需要下载任何东西。更新绝不会中断正在运行的对话：已经在运行的运行时会在空闲后停止，下一条命令会启动新的运行时。
+
+[Aristra Desktop](/zh/code/desktop)自带一份Aristra Code。终端和桌面应用始终共用一个运行时，即已安装的最新兼容版本。
+
+## 安装了什么
+
+```text
+~/.local/bin/aristra                 a link to the version in use
+~/.local/share/aristra/
+  channel                            latest or stable
+  versions/<version>/                the program, its runtime and their licenses
+```
+
+你的数据不在这里：对话、设置、日志和机密信息保存在`~/.aristra`中。参见[文件与环境变量](/zh/code/reference/environment)。
+
+## 卸载
+
+目前还没有卸载命令。要删除Aristra Code及其保存的所有内容：
+
+```sh
+aristra logout                    # sign out and remove this computer from your account
+aristra service uninstall         # if you turned on the background service
+aristra runtime stop --now        # stop the runtime
+rm ~/.local/bin/aristra
+rm -rf ~/.local/share/aristra      # every installed version
+rm -rf ~/.aristra                 # your data: chats, settings, logs, secrets
+```
+
+在Mac上，还要从登录钥匙串中删除用于加密你机密信息的密钥：
+
+```sh
+security delete-generic-password -s Aristra-credentials
+```
+
+在带有密钥环的Linux上，运行`secret-tool clear service Aristra-credentials`。然后删除安装程序添加到你shell配置文件中的代码块（如果有）。
+
+<Note>
+Aristra Desktop使用同一个`~/.aristra`文件夹。删除它也会删除桌面应用在这台Mac上的对话。
+</Note>

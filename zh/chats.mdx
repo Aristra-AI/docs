@@ -1,0 +1,69 @@
+---
+title: "对话"
+description: "在网页版、手机或Aristra Desktop上开始对话，选择模型，附加文件，使用无痕对话，查找和导出对话，以及Aristra在对话中能做什么。"
+---
+
+网站、手机或Aristra Desktop的Chat标签页上的对话在Aristra Cloud中运行，并保存在你的账户中，所以在你登录的任何地方都是同一个对话。在你电脑上某个文件夹中进行的对话是[Aristra Code](/zh/surfaces/aristra-code)对话。
+
+## 开始对话
+
+- **在网页版或手机上**：使用[app.aristralabs.com](https://app.aristralabs.com)侧边栏中的**New chat**。
+- **在Aristra Desktop中**：在**Chat**视图中新建对话。你需要先登录。
+- **在Mac上的任何地方**：按<strong>⌥Space</strong>打开快速输入，输入内容，然后按Enter。
+- **在[项目](/zh/projects)中**：从项目中开始对话，它会使用项目的指令、文件和记忆。
+- **从Telegram**：需要套餐。参见[Telegram](/zh/surfaces/telegram)。
+
+## 选择模型
+
+消息框中发送按钮旁边的模型选择器列出了Aristra的模型：Claude Haiku、Sonnet和Opus 5.5，GPT-6 Luna、GPT-6.1 Terra和GPT-6.1 Sol，以及Gemini 3.5 Flash-Lite、3.8 Flash和3.1 Pro。**Auto**使用Gemini 3.8 Flash。每个模型都会显示它的费用高低（$到$$$），有些模型还可以让你选择思考的强度（Low、Medium、High，部分模型还有Extra High和Max）。每个账户都可以使用所有模型。
+
+每条消息都从你的余额中扣费：先用新账户的初始额度，然后是套餐的每月用量，最后是充值。价格见[Models and prices](https://app.aristralabs.com/models)。余额用完时，消息框会提示你，并提供充值或开通套餐的选项。
+
+## Aristra在对话中能做什么
+
+| | |
+|---|---|
+| **搜索和阅读网页** | 搜索网页、新闻、图片和视频，并阅读页面。<strong>+</strong>菜单中有**Web search**和**URL extraction**开关 |
+| **读取你的文件** | 附件、你账户中的文件，以及逐页读取PDF |
+| **运行代码** | 在它自己的Linux沙箱中：分析数据，生成PDF、Word、Excel和PowerPoint文件以及图表 |
+| **生成图片** | 在<strong>+</strong>菜单中选择**Create image**，并选择一种风格 |
+| **展示内容** | 图表和示意图、天气、地图、对比表格，以及邮件草稿（它无法发送邮件） |
+| **记忆** | 在你们交谈时保存、更新和遗忘记忆。参见[记忆](/zh/memory) |
+| **向你提问** | 在需要你回答时，提出一个问题或给出一个简短的表单 |
+| **在你的应用中工作** | 开通套餐后，使用你连接的应用。参见[连接器](/zh/connectors) |
+| **撰写文档** | 开通套餐后，在对话旁边撰写[Craft](/zh/craft)文档 |
+| **安排工作** | 开通套餐后，使用[定时任务](/zh/scheduled-tasks) |
+
+## 附加文件
+
+选择<strong>+</strong>，然后选择**Upload files or images**，或者选择**Attach from Files**来附加账户中已有的文件。一条消息最多可以携带5个文件，每个最大50 MB，总共不超过50 MB。Aristra可以读取PDF（包括扫描页）、Word、Excel、PowerPoint、文本、CSV、JSON、代码和图片。
+
+你附加的文件会随对话一起保存，并计入你的[存储空间](/zh/files)，直到你删除该对话。
+
+## 编辑和重新生成
+
+将鼠标悬停在消息上可以编辑它，悬停在回复上可以重新生成。每个版本都会保留：消息上的箭头可以在各版本之间切换。
+
+## 无痕对话
+
+在网页版上选择对话顶部的幽灵图标，或在Aristra Desktop的Chat标签页中新建对话时选择它。在终端中，运行`aristra --cloud --incognito`。无痕对话：
+
+- 不会出现在你的对话列表中，其中的任何内容都不会保存到你的记忆中，之后也不会被用来学习。
+- 在Memory开启时，仍然可以使用Aristra已经记住的关于你的内容。
+- 离开后就无法再次打开。
+- 在最后一条消息的30天后被删除。
+
+## 查找对话
+
+- **在网页版上**：**Chats**页面列出所有对话，并可按标题查找。**⌘K**会打开你最近的对话、项目和操作。**⌘F**可以在当前打开的对话中查找文字。
+- **在Aristra Desktop中**：**⌘K**可以按标题查找对话，查找文件夹和命令，还能查找这台Mac上对话消息中的文字。
+
+## 导出或删除
+
+对话的菜单中有**Rename**、**Export as Markdown**、<strong>Copy transcript (Markdown)</strong>和**Delete**。删除对话会同时删除它和它的文件。要一次性复制所有对话，参见[导出](/zh/account/export)。
+
+对话不能以公开链接的形式共享。要分享Aristra写的内容，请发布一篇[Craft](/zh/craft)文档。
+
+## 语音
+
+在Aristra Desktop中，消息框里的麦克风按钮可以听写最长10分钟的语音，并替你输入成文字，费用从你的余额中扣除，每分钟$0.001。在[Telegram](/zh/surfaces/telegram)上，Aristra可以读取语音消息。

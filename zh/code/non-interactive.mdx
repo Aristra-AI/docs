@@ -1,0 +1,155 @@
+---
+title: "非交互模式"
+description: "用aristra run或aristra -p从脚本和CI运行Aristra Code：运行一轮，输出文本或JSON，并返回你可以据此处理的退出状态。"
+---
+
+`aristra run`（或`aristra -p`）运行一轮后退出。它从不等待提示：需要审批的步骤会被拒绝，模型会被告知原因，运行以状态3退出。
+
+```sh
+aristra run "fix the failing test"
+git diff | aristra run "write a commit message for this" -o json
+aristra run -o stream-json --partial --permission-mode auto --allow "shell(npm test:*)" "make the tests pass"
+```
+
+通过stdin管道传入的文本会添加在提示词之后，中间以一个空行分隔。给出提示词时，如果stdin在3秒内没有发送任何内容，就会被跳过（stderr会说明）；`< /dev/null`可以跳过等待。
+
+由`aristra run`开始的新对话会信任它的文件夹，所以文件夹的`.aristra`设置会生效，这与Claude Code的`-p`相同。
+
+## 选项
+
+| 选项 | 含义 |
+|---|---|
+| `-o, --output text\|json\|stream-json` | `text`打印最终回复。`json`打印一个`result`对象。`stream-json`在事件发生时打印它们，每行一个JSON对象（也可以写作`--output-format`） |
+| `--partial` | 与`stream-json`一起使用时，还会在写出文字时输出`delta`事件 |
+| `-m, --model <id>`, `--source <id>` | 模型及其来源。不指定时使用你的默认值 |
+| `--permission-mode <mode>` | `manual`（或`default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`或`read_only` |
+| `--permission-prompts host\|none` | 需要询问的步骤发往哪里：两者都会拒绝它，因为没有人在场回答 |
+| `--allow-dangerously-skip-permissions` | 允许对话之后切换到`bypassPermissions` |
+| `--allow <rule>`, `--deny <rule>` | 只用于本次运行的权限规则，例如`shell(npm test *)`。可重复使用。任何地方的拒绝规则仍然优先 |
+| `--add-dir <path>` | 对话可以工作的另一个文件夹。可重复使用 |
+| `--folder <path>` | 要工作的文件夹；默认为当前文件夹 |
+| `--plugin-dir <path>` | 只在本次运行中从文件夹或`.zip`加载插件；如果是一个包含多个插件的文件夹，会逐一加载。可重复使用 |
+| `-c, --continue`, `-r, --resume <id>` | 继续这个文件夹最新的对话，或继续指定的对话 |
+| `--fork-session` | 与`--continue`或`--resume`一起使用：在副本中继续，保持原对话不变 |
+| `--no-session-persistence` | 不保留任何内容：运行结束时删除本次运行的对话 |
+| `-w, --worktree [name]` | 在仓库的git工作树中工作，新建或复用，之后保留 |
+| `--max-turns <n>` | 在`n`轮模型调用后结束（也可用`ARISTRA_MAX_TURNS`） |
+| `--run-budget <seconds>` | 达到这个时间的80%时，告诉智能体停止探索并交付已有的成果 |
+| `--json-schema <schema>` | 回复必须是符合这个JSON Schema的值；它会作为`structuredOutput`返回 |
+| `--system-prompt <text>`, `--system-prompt-file <path>` | 替换新对话的Aristra系统提示词。你的`AGENTS.md`仍然生效 |
+| `--append-system-prompt <text>`, `--append-system-prompt-file <path>` | 追加到新对话系统提示词的末尾 |
+| `--agent <agent>` | 以你的某个[自定义智能体](/zh/code/guides/subagents)身份运行新对话 |
+| `--settings <file-or-json>` | 只用于本次运行的额外设置，优先于你自己的设置和项目设置 |
+| `--setting-sources <list>` | 要读取哪些设置文件：`user`、`project`、`local`，以逗号分隔；`""`表示都不读取 |
+| `--mcp-config <config>` | 本次运行使用的MCP服务器，以JSON或文件形式提供：`{"mcpServers": {...}}`。可重复使用 |
+| `--strict-mcp-config` | 只使用`--mcp-config`中的服务器 |
+| `--input-format stream-json` | 从stdin读取用户消息，每行一个JSON对象；每条消息开始一轮 |
+| `--usage-file <path>` | 把本次运行的token用量以JSON格式写入该文件 |
+| `--no-daemon` | 使用一个独立的运行时，随运行结束而结束 |
+| `--dangerously-skip-sandbox` | 在沙箱之外运行命令。只在机器本身就是边界的地方使用：CI运行器、容器、虚拟机 |
+| `--dangerously-skip-permissions` | 以`bypassPermissions`启动。除非设置了`IS_SANDBOX=1`，否则对root用户拒绝 |
+| `--verbose` | 与`--output json`一起使用时，把所有事件放在一个JSON数组中输出 |
+
+在`run`之前加上`--remote <host>`，会通过SSH在另一台机器上运行它；参见[远程机器](/zh/code/remote-machines)。
+
+## 在CI中
+
+在已登录Aristra的电脑上，`aristra setup-token`会打印一个令牌，它可以在一年内用你账户的Aristra余额运行模型，除此之外什么也做不了。把它存储为名为`ARISTRA_TOKEN`的CI机密：
+
+```sh
+export ARISTRA_TOKEN=...   # from aristra setup-token
+aristra run --source aristra "summarize the failing tests" < test-output.txt
+```
+
+在Aristra网站上让它对应的设备退出登录，即可撤销它。
+
+<Warning>
+在CI中没有人可以批准步骤。请用`--allow`精确允许任务所需的操作，或者用`--permission-mode auto`让Aristra的审核模型来决定，并检查退出状态。
+</Warning>
+
+## 退出状态
+
+| 状态 | 何时 |
+|---|---|
+| 0 | 这一轮已完成 |
+| 1 | 失败：出错、无法访问运行时、达到`--max-turns`，或者没有符合`--json-schema`的值 |
+| 2 | 用法错误：未知选项、没有提示词 |
+| 3 | 已完成，但至少有一步因为没有人可以批准而被拒绝 |
+| 130 | 被Ctrl+C停止 |
+
+使用`--permission-mode dontAsk`时，原本需要询问的操作会被拒绝且不计入，所以状态仍为0。
+
+被拒绝规则拒绝的步骤不会使状态变为3：规则只是做了它该做的事。这两类步骤都会列在`result.permissionDenials`中。使用`--permission-mode auto`时，由审核模型决定原本需要询问的操作；当它连续阻止3步，或在一个对话中累计阻止20步后，运行会以状态1停止。
+
+## 通过stdin传入消息
+
+使用`--output stream-json --input-format stream-json`时，stdin上的每一行都是一条消息，各轮会在同一个对话中依次运行：
+
+```json
+{"type":"user","message":{"role":"user","content":"Fix the failing test"}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Now run the linter"}]}}
+{"type":"control_request","request_id":"r1","request":{"subtype":"interrupt"}}
+```
+
+`interrupt`会停止正在运行的一轮，`end_session`会在各轮结束后结束运行。stdin结束时，运行也会结束。
+
+## 输出事件
+
+每个`stream-json`事件都有`"schema": "aristra.run.v1"`和一个`type`。之后的版本会添加字段，但不会删除或重命名任何字段。
+
+<AccordionGroup>
+  <Accordion title="init：本次运行使用的内容">
+    ```json
+    {"schema":"aristra.run.v1","type":"init","version":"1.2.1","session":"ses_8f1c…","source":"aristra","model":"gemini-3.8-flash","payer":"aristra_credits","mode":"default","folder":"/home/ci/repo","sandbox":true}
+    ```
+
+    `payer`为`aristra_credits`（你的Aristra余额；为兼容脚本保留了这个名称）、`own_key`、`subscription`、`local`或`none`。
+  </Accordion>
+  <Accordion title="item：这一轮中某项内容已完成">
+    `item.kind`为`user`、`reply`、`reasoning`、`step`、`notice`或`compaction`。步骤包含它的`tool`、`type`、`title`、`status`、`output`、`durationMs`、它做出的文件改动`changes`、`attachments`（输出较长时的完整输出），在Auto模式下还有审核模型的`review`。
+
+    ```json
+    {"schema":"aristra.run.v1","type":"item","item":{"kind":"step","id":"itm_51a2…","tool":"shell","type":"command","title":"npm test","status":"completed","output":"Tests: 42 passed","durationMs":5120}}
+    ```
+  </Accordion>
+  <Accordion title="delta：正在写出的文字（使用--partial时）">
+    添加到回复（`stream`为`text`）、推理摘要（`reasoning`）或步骤输出（`output`）中的文字，在写出时实时输出。`text`只包含新增的部分。
+
+    ```json
+    {"schema":"aristra.run.v1","type":"delta","item":"itm_9c0e…","stream":"text","text":"The test failed because "}
+    ```
+  </Accordion>
+  <Accordion title="approval：需要询问的步骤，以及它是如何决定的">
+    ```json
+    {"schema":"aristra.run.v1","type":"approval","step":"itm_77b3…","tool":"shell","title":"git push","decision":"declined","reason":"No one was there to approve this (an unattended run), so it did not run. This command requires approval"}
+    ```
+  </Accordion>
+  <Accordion title="notice：不属于步骤的运行消息">
+    例如一次即将重试的模型调用：包含`level`和`text`。在文本模式下，它会输出到stderr。
+  </Accordion>
+  <Accordion title="control_response：对控制请求的回复">
+    使用`--input-format stream-json`时，对每个控制请求的回复：包含`requestId`、`subtype`（`success`或`error`）和`error`。
+  </Accordion>
+  <Accordion title="result：最后一个事件（使用--output json时唯一的一行）">
+    ```json
+    {"schema":"aristra.run.v1","type":"result","status":"completed","exitCode":0,"session":"ses_8f1c…","turn":"trn_2d4a…","result":"The test now passes: …","usage":{"input":18234,"output":912,"cached":12000,"cacheWrite":0,"reasoning":256},"payer":"aristra_credits","durationMs":48211,"unanswered":0,"permissionDenials":[]}
+    ```
+
+    | 字段 | 含义 |
+    |---|---|
+    | `status` | `completed`、`failed`或`interrupted` |
+    | `exitCode` | 进程的退出状态 |
+    | `session`, `turn` | ID，用于`--resume`和`aristra attach` |
+    | `result` | 最终回复 |
+    | `usage` | token数：`input`、`output`、`cached`、`cacheWrite`、`reasoning` |
+    | `unanswered` | 因为没有人可以批准而被拒绝的步骤数 |
+    | `permissionDenials` | 每个被拒绝的步骤：`step`、`tool`、`title`、`reason` |
+    | `payer` | 由谁付费 |
+    | `durationMs` | 这一轮运行了多长时间 |
+    | `error` | 失败或停止的原因 |
+    | `errorKind` | 当模型调用导致失败时：`auth`、`entitlement`、`rate_limited`、`overloaded`、`context_overflow`、`invalid_request`、`network`、`refused`或`unknown` |
+    | `retryAt` | 服务商表示可以再次请求的时间（Unix毫秒） |
+    | `structuredOutput` | 使用`--json-schema`时，模型给出的值 |
+    | `terminalReason` | 当某个限制结束了这一轮时，为`max_turns`或`structured_output_retries` |
+  </Accordion>
+</AccordionGroup>

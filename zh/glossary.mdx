@@ -1,0 +1,130 @@
+---
+title: "术语表"
+description: "这些文档中的术语是什么意思：Aristra Code、使用端、对话、运行时、模式、规则、沙箱、技能、钩子等。"
+---
+
+## A
+
+**AGENTS.md**：一个写给编程智能体的Markdown指令文件，保存在你的仓库中。Aristra Code在每个对话开始时都会读取它，并按层级读取，从你所在组织的那一层一直到你正在工作的文件夹。参见[记忆与指令](/zh/code/guides/memory)。
+
+**Approval**（审批）：Aristra Code在执行某一步之前向你确认的请求，会显示在每个打开的使用端中。以最先给出的答复为准。参见[权限](/zh/code/configure/permissions)。
+
+**Aristra CLI**：即`aristra`命令，也就是终端里的Aristra Code。参见[CLI参考](/zh/code/reference/cli)。
+
+**Aristra Code**：在你电脑上的文件夹中工作的Aristra，也是Aristra的使用端之一：可以在终端、Aristra Desktop的Code标签页和编辑器中使用，也可以通过Remote Control从手机和网页版使用。参见[Aristra Code](/zh/surfaces/aristra-code)。
+
+**Aristra Cloud**：Aristra托管的一切：Aristra的模型、云端智能体、云电脑、Remote Control与共享对话、账户记忆（每个账户都有）、存储空间、Craft、连接器、渠道以及云端定时任务。参见[套餐与定价](/zh/account/plans)。
+
+**Aristra Desktop**：Aristra的Mac应用，其中Chat标签页用于你在Aristra Cloud中的对话，Code标签页用于Aristra Code。参见[Aristra Desktop](/zh/surfaces/desktop)。
+
+**Aristra One**：你的Aristra账户的套餐（Free、Plus、Pro或Max）及其附带的一切：你的余额、用量和设备，都在你的账户页面上。参见[你的账户与Aristra One](/zh/account/overview)。
+
+**Aristra Runtime**：你电脑上的后台进程，为每个使用端运行Aristra Code：对话、轮次、审批、工具、模型和设置。参见[工作原理](/zh/code/how-it-works)。
+
+**Auto mode**（Auto模式）：一种[模式](/zh/glossary)，由审核模型来决定那些原本需要询问你的步骤。参见[权限](/zh/code/configure/permissions)。
+
+## B
+
+**Balance**（余额）：用于支付Aristra的模型、托管工具和云电脑的金额，以美元计：先使用一次性的$1初始额度（不能用于云电脑），然后是套餐的每月用量，最后是你的充值余额。参见[你的余额与充值](/zh/account/credits)。
+
+**Background task**（后台任务）：在对话继续进行的同时运行的工作：一条耗时较长的命令、一个智能体、一个工作流。`/tasks`会列出它们。参见[后台工作](/zh/code/guides/background)。
+
+## C
+
+**Chat**（对话）：与Aristra的一次对话，有自己的模型和历史记录。Aristra Code中的对话还有一个文件夹和一种模式。Aristra在每个使用端都称之为“chat”。参见[对话](/zh/chats)。
+
+**Checkpoint**（检查点）：在你的每条消息处建立的还原点。`/rewind`可以回到其中一个。参见[对话](/zh/code/guides/chats)。
+
+**Cloud computer**（云电脑）：你自己在Aristra Cloud中的Linux机器，带有一块保存你的文件和工具的磁盘。它从你的余额中扣费，余额可以来自套餐，也可以来自充值。参见[云电脑](/zh/surfaces/cloud-computer)。
+
+**Cloud chat**（云端对话）：由Aristra的云端智能体运行并保存在你账户中的对话，与在你电脑上运行的对话相对。参见[云端对话](/zh/code/cloud-chats)。
+
+**Command**（命令）：你在对话中`/`后面输入的内容，例如`/model`或`/compact`。参见[命令](/zh/code/reference/commands)。不要与`aristra mcp add`这类`aristra`子命令混淆，也不要与智能体运行的shell命令混淆。
+
+**Compaction**（压缩）：对长对话中较早的部分进行总结，使它能放进模型的上下文。参见[上下文](/zh/code/guides/context)。
+
+**Connector**（连接器）：连接到你Aristra账户的应用（Gmail、GitHub、Slack等），云端对话和Aristra Code都可以使用。
+
+**Context**（上下文）：模型在一轮中读取的全部内容。`/context`会显示上下文被哪些内容占用。
+
+**Craft**：你与Aristra一起写或自己写的文档，带有评论、版本和发布链接：有套餐时保存在你的账户中，没有套餐时保存在你使用Aristra Desktop的Mac上。参见[Craft](/zh/craft)。
+
+## D
+
+**Device key**（设备密钥）：把这台电脑上的登录与它绑定在一起的密钥；在Mac上，它保存在Secure Enclave中。参见[安全](/zh/code/security)。
+
+## F
+
+**Files**（文件）：保存在你账户中的文件：你添加的、你附加到对话中的以及Aristra生成的。它们位于网站和Aristra Desktop的**Files**中，计入你账户的存储空间。参见[文件](/zh/files)。
+
+**Folder**（文件夹）：对话工作的地方：对话在这里读取和修改文件，它的命令也在这里运行。
+
+## H
+
+**Hook**（钩子）：你的一条命令，或者Aristra向其发送请求的网址，会在某个事件发生时运行，例如在工具运行之前。参见[钩子](/zh/code/extend/hooks)。
+
+**Incognito chat**（无痕对话）：不保存在你的历史记录中、Aristra也绝不会从中学习的对话。参见[对话](/zh/chats)。
+
+## M
+
+**MCP server**（MCP服务器）：通过Model Context Protocol为Aristra Code提供更多工具的程序或地址。参见[MCP服务器](/zh/code/extend/mcp)。
+
+**Mode**（模式）：决定有多少操作无需询问即可运行：Manual、Accept edits、Plan、Auto、Don't ask、Bypass permissions、Read only。按Shift+Tab切换。参见[权限](/zh/code/configure/permissions)。
+
+**Managed policy**（托管策略）：管理员在每台电脑上强制执行的设置。参见[托管策略](/zh/code/configure/managed-policy)。
+
+**Memory**（记忆）：Aristra对你的记忆，保存在你的账户中：在你们交谈时保存，并在每晚从你的对话中学习。每个账户都有记忆功能，用一个开关就能关闭。参见[记忆](/zh/memory)。
+
+## N
+
+**Non-interactive mode**（非交互模式）：用`aristra run`或`aristra -p`从脚本或CI中运行一轮。参见[非交互模式](/zh/code/non-interactive)。
+
+## P
+
+**Payer**（付费方）：由谁为一次模型调用付费：你的Aristra余额、你的ChatGPT套餐、你自己的密钥；如果是你电脑上的模型，则无需付费。参见[模型](/zh/code/configure/models)。
+
+**Plan**（套餐）：Plus、Pro或Max：一种月度订阅，开放Aristra托管的其余功能（Remote Control与共享对话、Craft、连接器、云端定时任务和渠道；记忆每个账户都有），并每月包含与套餐价格等额的Aristra模型用量。参见[套餐与定价](/zh/account/plans)。
+
+**Plan mode**（Plan模式）：Aristra Code在改动任何内容之前，先探索并写出计划的一种模式。
+
+**Plugin**（插件）：由技能、命令、智能体、钩子、MCP服务器和语言服务器组成的组合包，可以一次性安装。参见[插件](/zh/code/extend/plugins)。
+
+**Project**（项目）：一项工作的对话、文件、指令和记忆，集中保存在一起，并且在你的每台Mac上都可以有一个主文件夹。参见[项目](/zh/projects)。
+
+## R
+
+**Remote Control**：从手机或网页版继续在你电脑上运行的对话。参见[Remote Control](/zh/code/remote-control)。
+
+**Rule**（规则）：一种权限设置，用于允许、询问或拒绝某个工具调用，例如`shell(npm test:*)`。拒绝优先于允许。
+
+## S
+
+**Sandbox**（沙箱）：开启后（`/sandbox`；默认关闭）命令所运行的操作系统边界：限定命令可以写入哪些位置、可以访问哪些主机。参见[沙箱](/zh/code/configure/sandbox)。
+
+**Scheduled task**（定时任务）：Aristra在设定时间运行的提示词；在云端，也可以在你的应用中发生某件事时运行。在你自己的电脑上，它不需要套餐（使用Aristra模型的任务从你的余额中扣费），并且只在Aristra于那台电脑上运行时执行；在Aristra的云端，它随套餐提供。参见[定时任务](/zh/scheduled-tasks)和[后台工作](/zh/code/guides/background)。
+
+**Skill**（技能）：一个针对某类任务的`SKILL.md`指令文件，Aristra Code会在合适时使用它，你也可以用`/name`运行它。参见[技能](/zh/code/extend/skills)。
+
+**Source**（来源）：对话所用模型的来源：`aristra`、`chatgpt`、服务商密钥、本地服务器或自定义端点。
+
+**Starter credit**（初始额度）：新账户获得的一次性$1，每个邮箱地址只有一次。它可用于支付Aristra的模型和托管工具，但不能用于云电脑。参见[你的余额与充值](/zh/account/credits)。
+
+**Steering**（引导）：在一轮运行期间发送消息，让它在下一步加入这一轮。
+
+**Subagent**（子智能体）：Aristra Code启动的智能体，有自己的任务和独立的上下文，完成后会汇报结果。参见[子智能体与工作流](/zh/code/guides/subagents)。
+
+**Surface**（使用端）：你使用Aristra的任何地方：网页版和手机、Aristra Desktop、Aristra Code（终端、Desktop的Code标签页、编辑器）、Telegram和云电脑。它们共用你的账户。参见[什么是Aristra](/zh)。
+
+## T
+
+**Tool**（工具）：Aristra Code可以执行的操作：读取文件、编辑、运行命令、获取网页、调用MCP服务器。参见[工具](/zh/code/reference/tools)。
+
+**Top-up**（充值）：你向余额中添加的金额，可以是$10到$500之间的任意金额（新账户在一笔$5或以上的付款结算之前，累计最多只能充值$100）。它在套餐的每月用量之后使用，有效期12个月。参见[你的余额与充值](/zh/account/credits)。
+
+**Trust**（信任）：你对“某个文件夹自己的设置、技能和钩子是否可以生效”的答复。在该文件夹中开始第一个对话之前会询问你。
+
+**Turn**（轮次）：你的一条消息，以及Aristra Code在回复你之前所做的一切。
+
+## W
+
+**Worktree**（工作树）：你的仓库在独立分支上的另一个git检出，让对话可以在不触碰你文件夹的情况下工作。参见[Git与拉取请求](/zh/code/guides/git)。

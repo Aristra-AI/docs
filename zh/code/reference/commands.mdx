@@ -1,0 +1,110 @@
+---
+title: "命令"
+description: "你可以在终端的Aristra Code中输入的所有命令，从/help到/remote-control。"
+---
+
+在终端中，在输入框开头输入`/`即可打开命令菜单：其中包括命令和你的[技能](/zh/code/extend/skills)，会随着你的输入进行筛选。Up和Down用于选择，Tab补全，Enter运行（需要参数的命令会等你输入参数），Esc关闭菜单并清空输入框。未知的命令不会被发送。如果要发送一条以`/`开头的消息，请在开头加一个空格。
+
+Aristra Desktop的`/`菜单有它自己的简短列表；参见[Desktop的Code标签页](/zh/code/desktop)。对于`aristra`子命令和参数，参见[CLI参考](/zh/code/reference/cli)。
+
+## 对话
+
+| 命令 | 作用 |
+|---|---|
+| `/new`（或`/clear`、`/reset`） | 在这个文件夹中开始新对话 |
+| `/resume` | 回到之前的对话 |
+| `/search <words>` | 在这台电脑上所有对话的消息中查找文字。`/search #2`会打开第二个结果所在的对话 |
+| `/rename <title>` | 重命名这个对话 |
+| `/branch [name]` | 把这个对话按当前状态复制为一个新对话，并在副本中继续 |
+| `/fork <directive>` | 启动一个带有这个对话完整上下文的后台智能体，让它执行指令并汇报结果 |
+| `/btw <question>` | 在不打断正在运行的一轮的情况下问一个附带问题；答案不会加入对话 |
+| `/queue <message>` | 在正在运行的一轮结束后发送这条消息 |
+| `/rewind`（或`/checkpoint`） | 把代码和/或对话恢复到你某条消息之前的状态 |
+| `/export [md\|json]` | 把这个对话保存到`~/.aristra/exports/`中的文件 |
+| `/copy [N]` | 把最新的回复（或倒数第N条）复制到剪贴板 |
+| `/files [words \| find WORDS \| open N \| save PATH \| update N]` | 你的对话共享、生成或修改过的文件、你附加的文件，以及登录后你账户中的文件，最新的在前；输入文字会搜索名称、文件夹和对话标题，`find WORDS`在文件内容中搜索（对于PDF还会给出所在页），`open N`在对应的应用中打开一个文件（账户中的文件会先下载），`save PATH`把这里的某个文件的副本保存到你的账户，`update N [replace\|keep-both]`在文件改动后替换已保存的副本 |
+| `/recap` | 立即生成对话的一行回顾 |
+| `/exit`（`/quit`） | 退出；正在运行的一轮可以继续运行 |
+
+## 上下文和记忆
+
+| 命令 | 作用 |
+|---|---|
+| `/context [all]` | 以网格形式显示占用模型上下文的内容，并给出建议 |
+| `/compact [instructions]` | 总结到目前为止的对话，保留指令中要求保留的内容 |
+| `/autocompact [auto\|<tokens>]` | 为这个模型设置上下文用到多满时开始总结 |
+| `/memory` | 编辑你的指令文件（`AGENTS.md`），或打开仓库的笔记 |
+| `/init` | 根据代码编写这个文件夹的`AGENTS.md` |
+| `/goal [<condition> \| clear]` | 设置一个Aristra Code在停止之前检查的条件。参见[目标](/zh/code/guides/goals) |
+
+## 模型和权限
+
+| 命令 | 作用 |
+|---|---|
+| `/model` | 选择模型，并显示由谁为它付费 |
+| `/effort [level\|auto]` | 模型的思考强度：`low`、`medium`、`high`，部分模型还有`xhigh`或`max` |
+| `/mode [mode]` | 设置权限模式：`manual`（或`default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`（当你用`--dangerously-skip-permissions`或`--allow-dangerously-skip-permissions`启动`aristra`时）、`read_only`。不指定模式时，切换到下一个模式。云端对话有`manual`和`auto` |
+| `/permissions` | 按来源列出的规则、对话的文件夹，以及Auto模式最近阻止的步骤 |
+| `/sandbox [exclude <pattern>]` | 在[沙箱](/zh/code/configure/sandbox)中运行命令（默认关闭）：with auto-allow、with regular permissions，或者完全不使用。`exclude`会添加一个总是在沙箱之外运行的命令 |
+| `/add-dir <path>` | 让这个对话可以在另一个文件夹中工作 |
+| `/retry` | 让Auto模式的审核模型刚刚阻止的步骤按原样运行一次 |
+| `/folder` | 这个对话的文件夹，以及它是否受信任 |
+
+## Git和拉取请求
+
+| 命令 | 作用 |
+|---|---|
+| `/diff` | 未提交的改动以及每一轮的改动。在全屏模式下，会在对话旁边显示diff面板 |
+| `/pr [number]` | 当前分支的拉取请求：状态、检查、文件、审查和合并 |
+| `/create-pr [--draft]` | 提交、推送并创建拉取请求 |
+| `/commit [guidance]` | 按仓库的风格撰写提交信息并提交改动 |
+| `/autofix-pr [number\|stop]` | 盯住拉取请求，修复失败的检查、冲突和审查评论 |
+
+参见[Git与拉取请求](/zh/code/guides/git)。
+
+## 后台工作
+
+| 命令 | 作用 |
+|---|---|
+| `/tasks`（或`/bashes`） | 所有在后台运行的内容：智能体、工作流、命令。按x停止其中一个 |
+| `/schedule [pause\|resume\|run\|remove N]`（或`/scheduled`） | 保存在这台电脑上的[定时任务](/zh/code/guides/background)，带有编号；按编号修改其中一个。要创建定时任务，用平常的话提出要求即可 |
+| `/workflows` | 正在运行和已完成的工作流：它们的阶段和智能体 |
+
+参见[后台工作](/zh/code/guides/background)。
+
+## 扩展
+
+| 命令 | 作用 |
+|---|---|
+| `/mcp [reconnect\|enable\|disable [<server>\|all]]` | 管理MCP服务器：批准项目的服务器、登录、重新连接、在这个项目中关闭某个服务器、查看工具 |
+| `/hooks` | 按事件列出你的钩子，以及哪些仍需批准 |
+| `/plugin [subcommand]`（或`/plugins`、`/marketplace`） | 管理插件和插件市场 |
+| `/reload-plugins` | 重新读取你的插件，并在这个对话中让改动生效 |
+| `/<skill> [args]` | 运行你的某个技能或已保存的工作流（插件的则为`/<plugin>:<name>`） |
+| `/mcp__<server>__<prompt> [args]` | 运行MCP服务器的提示词 |
+
+## 你的账户和设置
+
+| 命令 | 作用 |
+|---|---|
+| `/help` | 所有命令、你的技能和快捷键 |
+| `/status` | 你的账户及其套餐、运行时和模型来源 |
+| `/usage` | 这个对话使用的token以及由谁付费、你以美元计的Aristra余额和你的套餐限额，以及哪些内容占用了你的用量。没有Aristra套餐时，显示各项费用由什么支付 |
+| `/config` | 当前生效的设置，以及每项来自哪个文件 |
+| `/login [code]`, `/logout` | 登录Aristra（`code`：使用验证码，在另一台设备上），或在这台电脑上退出登录 |
+| `/remote-control [off]`（或`/rc`） | 在手机和网页版上继续这个对话。随套餐提供。参见[Remote Control](/zh/code/remote-control) |
+| `/remote-control computer [on\|off]` | 允许网页版和手机在这台电脑上开始对话。默认关闭 |
+| `/remote-control folder [on\|off]` | 允许来自网页版和手机的对话在你当前所在的文件夹中开始 |
+| `/release-notes` | 每个版本有哪些变化 |
+
+## 终端
+
+| 命令 | 作用 |
+|---|---|
+| `/tui [default\|fullscreen]` | 选择渲染器：经典渲染器或全屏渲染器 |
+| `/keybindings` | 打开你的键盘快捷键文件 |
+| `/terminal-setup` | 在你的终端中设置一个换行按键（Shift+Enter或Option+Enter） |
+
+## 内置技能
+
+以下命令作为[技能](/zh/code/extend/skills)运行：`/init`、`/code-review`（或`/review`）、`/simplify`、`/security-review`、`/update-config`、`/fewer-permission-prompts`、`/debug`、`/verify`、`/commit`、`/create-pr`和`/loop`（或`/proactive`），以及`workflow-authoring`，即Aristra Code编写工作流时读取的参考。`/deep-research <question>`会运行Aristra Code的内置[工作流](/zh/code/guides/subagents)。

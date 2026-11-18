@@ -1,0 +1,101 @@
+---
+title: "钩子"
+description: "在Aristra Code的事件上运行你自己的命令：工具运行之前和之后、你发送消息时、一轮结束时。设置、事件、载荷、答复和批准。"
+---
+
+钩子是Aristra Code在某个事件发生时运行的一条你自己的命令：工具运行之前、运行之后、你发送消息时、一轮结束时。你可以用它按团队的规则检查命令、在编辑后格式化文件、记录智能体做了什么，或者为提示词添加上下文。钩子使用Claude Code的格式：相同的事件、stdin和答复。工具名称使用Aristra Code的名称，所以指向Claude Code工具（`Bash`、`Edit`、`Write`）的匹配器需要改用Aristra Code的名称（`shell`、`edit_file`、`write_file`）。`aristra import claude-code`会替你修改它们，`if`规则则两种名称都可以使用。
+
+## 声明钩子
+
+钩子来自你自己的设置（`~/.aristra/settings.json`）、受信任文件夹的`.aristra/settings.json`、[插件](/zh/code/extend/plugins)的`hooks/hooks.json`、[自定义智能体](/zh/code/guides/subagents)的`hooks`（在该智能体运行期间生效）以及[托管策略](/zh/code/configure/managed-policy)。`.aristra/settings.local.json`中的钩子不会运行。在设置中：
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell|write_file",
+        "hooks": [
+          { "type": "command", "command": "~/.aristra/hooks/check.sh", "timeout": 10, "onFailure": "block" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      { "matcher": "edit_file|write_file", "hooks": [{ "type": "command", "command": "npx prettier --write \"$ARISTRA_PROJECT_DIR\"" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "~/.aristra/hooks/add-ticket-context.sh" }] }
+    ]
+  }
+}
+```
+
+| 字段 | 含义 |
+|---|---|
+| `matcher` | 钩子适用于什么：对于工具事件和`PermissionDenied`，是工具名称；也可以是智能体类型、通知类型、压缩触发方式、命令名称（`UserPromptExpansion`）、启动来源（`SessionStart`）或错误（`StopFailure`）。其他事件会忽略它。可以是一个名称、用`\|`连接的多个名称，或一个正则表达式。省略它则匹配所有内容 |
+| `type` | `command`，或`http`：事件会以JSON格式POST到`url`，2xx响应的正文会被当作钩子的答复（`allowedHttpHookUrls`限制可以发往哪里；`headers`只能从`allowedEnvVars`中获取`$VAR`）。它不会在`SessionStart`上运行，也不会发送到除这台电脑之外的私有网络地址 |
+| `if` | 调用必须匹配的权限规则，例如`Bash(git *)` |
+| `once` | 在对话中只运行一次 |
+| `async` | 在后台运行，永不阻塞（`asyncRewake`：它以2退出时会在对话中说明） |
+| `command` | 通过shell运行 |
+| `args` | 以这些参数把`command`作为程序运行，不经过shell |
+| `timeout` | 秒数，默认60，最多300（`SessionEnd`为10）。到达超时时间，以及你停止这一轮时，钩子及其启动的所有内容都会被停止 |
+| `onFailure` | `"block"`：崩溃、超时或打印了无法读取的JSON的钩子，会在其事件允许的地方进行阻止，而不是被跳过 |
+
+## 批准钩子
+
+钩子会以你的全部访问权限、在沙箱之外运行你的代码。所以只有在你批准了它的事件和确切命令之后，它才会运行，批准一次即可。在此之前，它会被跳过，对话中也会说明这一点。
+
+```sh
+aristra hooks list                                     # every hook, approved or not
+aristra hooks approve PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks revoke PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks test PreToolUse --tool shell --input '{"command": "git push --force"}'
+aristra hooks test UserPromptSubmit --prompt "deploy to production"
+```
+
+修改钩子的命令会使它成为一个需要重新批准的新钩子。在对话中，`/hooks`会列出你的钩子以及哪些仍需批准。Aristra Desktop的设置中也会列出它们，并提供Approve和Revoke。
+
+插件的钩子和托管策略的钩子不会逐个询问：安装插件或你所在组织的策略就代表同意。`disableAllHooks: true`会关闭除你所在组织的钩子之外的所有钩子（如果在策略中设置，组织的钩子也会被关闭）。策略中的`allowManagedHooksOnly: true`只运行策略的钩子以及策略开启的插件的钩子。
+
+## 事件
+
+| 事件 | 何时 | 载荷中额外包含 |
+|---|---|---|
+| `SessionStart` | 自Aristra启动以来对话的第一轮：新对话的`source`为`startup`，之前的对话为`resume`。子智能体的对话中不会触发 | `source` |
+| `UserPromptSubmit` | 你发送了一条消息，在模型看到它之前 | `prompt` |
+| `UserPromptExpansion` | 你输入了一个技能或提示词命令，在它被使用之前 | `expansion_type`、`command_name`、`command_args`、`command_source`、`prompt` |
+| `PreToolUse` | 工具调用之前，权限检查之前 | `tool_name`、`tool_input`、`tool_use_id` |
+| `PermissionRequest` | 某个工具调用即将询问你（或者在无人可问时即将被拒绝） | `tool_name`、`tool_input`、`tool_use_id`、`permission_suggestions` |
+| `PostToolUse` | 工具调用运行之后 | `tool_name`、`tool_input`、`tool_use_id`、`tool_response`、`duration_ms`、`mcp_server` |
+| `PostToolUseFailure` | 工具调用在运行过程中失败 | `tool_name`、`tool_input`、`tool_use_id`、`error`、`is_interrupt`、`duration_ms` |
+| `PostToolBatch` | 一次回复中的所有调用都已完成 | `tool_calls` |
+| `Notification` | 审批已等待6秒，或者回复已等待你一分钟 | `message`、`notification_type` |
+| `PermissionDenied` | Auto模式的审核模型拒绝了某个工具调用；返回`hookSpecificOutput.retry: true`的钩子可以让模型再试一次 | `tool_name`、`tool_input`、`tool_use_id`、`reason` |
+| `Stop` | 这一轮即将结束 | `stop_hook_active`、`last_assistant_message`、`background_tasks`、`session_crons` |
+| `SubagentStart` | 某个智能体即将启动 | `agent_id`、`agent_type` |
+| `SubagentStop` | 某个智能体的这一轮即将结束 | 与`Stop`相同，另外还有`agent_id`、`agent_type`和`agent_transcript_path`（始终为空） |
+| `StopFailure` | 一轮因模型错误而结束 | `error`、`error_details`、`last_assistant_message` |
+| `PreCompact` | 较早的消息被总结之前 | `trigger`（`auto`或`manual`）、`custom_instructions` |
+| `PostCompact` | 总结之后 | `trigger`、`compact_summary` |
+| `SessionEnd` | 对话已被删除，或Aristra正在停止 | `reason` |
+
+每个载荷还包含`hook_event_name`、`session_id`、`transcript_path`（始终为空）、`cwd`、`permission_mode`，在一轮进行中还有`prompt_id`和`turn_id`；在子智能体的对话中还有`agent_id`和`agent_type`；对话设置了推理强度时还有`effort`。它以JSON形式通过钩子的stdin传入。钩子运行时使用你的环境，外加`ARISTRA_PROJECT_DIR`（以及`CLAUDE_PROJECT_DIR`），即对话的文件夹。
+
+## 答复
+
+| 钩子 | 含义 |
+|---|---|
+| 以0退出且不打印任何内容 | 继续 |
+| 以2退出 | 阻止工具调用、提示词或该事件所涉及的内容，以stderr作为原因。来自`PostToolUse`时：stderr会与结果一起发给模型。来自`Stop`时：让这一轮继续，并把stderr交给模型 |
+| 打印`{"decision": "block", "reason": "..."}` | 阻止，并给出该原因 |
+| 打印`hookSpecificOutput.permissionDecision`：`"deny"`、`"ask"`或`"allow"` | 拒绝该调用、让它询问，或跳过询问（拒绝规则、询问规则和安全检查仍然适用，始终需要你确认的步骤仍会询问） |
+| 来自`PermissionRequest`时，打印`hookSpecificOutput.decision: {"behavior": "allow" \| "deny", ...}` | 替你答复该审批 |
+| 来自`PreToolUse`时，打印`hookSpecificOutput.updatedInput` | 改用这些参数运行工具 |
+| 打印`additionalContext`（或者来自`UserPromptSubmit`、`UserPromptExpansion`和`SessionStart`的纯文本） | 添加给模型 |
+| 打印`systemMessage` | 显示在对话中 |
+| 打印`continue: false`以及`stopReason` | 停止：调用或提示词被拒绝，或这一轮结束 |
+| 来自`PostToolUse`时，打印`hookSpecificOutput.updatedToolOutput`（MCP工具则为`updatedMCPToolOutput`） | 模型会读取这个内容，而不是工具的输出 |
+| 来自`PreCompact`时，打印文本 | 添加到摘要的指令中 |
+
+同一事件的钩子会并行运行。任何一个阻止都会生效（拒绝优先于询问，询问优先于允许），每个上下文都会计入，并使用最后一次修改后的输入。Stop钩子和`/goal`检查加在一起，最多可以让一轮在模型不调用工具的情况下连续继续8次（`ARISTRA_STOP_HOOK_BLOCK_CAP`可以修改这个值）；当`stop_hook_active`为true时，钩子应返回成功。

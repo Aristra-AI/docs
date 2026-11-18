@@ -1,0 +1,132 @@
+---
+title: "权限"
+description: "控制Aristra Code哪些操作可以自行执行、哪些需要先询问：模式、规则、信任文件夹、审批、Plan模式以及Auto模式的审核模型。"
+---
+
+在每次工具调用之前，Aristra Code都会决定它是直接运行、询问你、交给Auto模式的审核模型，还是被拒绝。所有使用端都由同一套规则决定，所以一条规则在终端、Aristra Desktop、脚本和编辑器中的含义都相同。
+
+审批是安全提示。[沙箱](/zh/code/configure/sandbox)默认关闭，开启后它就是安全边界。沙箱中的命令无法写入对话文件夹之外的位置，只能访问你允许的主机，所以除非有规则另行规定，否则它无需询问即可运行。
+
+## 模式
+
+| 模式 | 自动运行的操作 | 其他操作 |
+|---|---|---|
+| **Manual**（`default`） | 对话文件夹中的读取、搜索和列出，只读命令，以及开启沙箱时在沙箱中运行的命令；你的允许规则所涵盖的操作 | 询问 |
+| **Accept edits** | 还包括对话文件夹中的文件编辑，以及在那里运行的`mkdir`、`touch`、`rm`、`rmdir`、`mv`、`cp`和`sed` | 询问 |
+| **Plan** | 与Manual相同。Aristra Code会探索并撰写计划，在你批准之前不做任何改动。在可以使用Bypass permissions的对话中，Plan模式会像Bypass一样让所有操作运行 | 询问 |
+| **Auto** | 与Accept edits相同，但你针对解释器和运行器的允许规则（`shell(python:*)`、`shell(npm run:*)`等）不适用：这些命令会交给审核模型 | 交给Auto模式的审核模型，而不是询问你 |
+| **Don't ask**（`dontAsk`） | 与Manual相同 | 拒绝 |
+| **Bypass permissions** | 所有操作，但拒绝或询问规则涵盖的操作、安全检查以及始终需要你的工具除外 | |
+| **Read only** | 读取、搜索和列出 | 拒绝：不做任何改动 |
+
+**切换**：按Shift+Tab（依次为Manual、Accept edits、Plan，对话可以使用时还有Bypass permissions，然后是Auto），或使用`/mode <name>`。切换从下一次工具调用开始生效，已经在等待的审批会被重新检查：如果新模式允许它，它就会运行。
+
+**初始模式**来自`--permission-mode`，否则来自你设置中的`permissions.defaultMode`，否则为Manual。
+
+**关闭模式**：`permissions.disableAutoMode: "disable"`会关闭Auto。Bypass permissions只在用`--dangerously-skip-permissions`、`--allow-dangerously-skip-permissions`或`--permission-mode bypassPermissions`启动的对话中可用，第一次使用时会显示警告，对root用户拒绝（除非设置了`IS_SANDBOX=1`），并且[托管策略](/zh/code/configure/managed-policy)可以关闭它。Aristra Desktop不提供这个模式。
+
+## 规则
+
+规则的形式是`tool`或`tool(specifier)`。Claude Code的工具名称也可以使用（`Bash(npm test:*)`、`Read`、`Edit`、`WebFetch`）。
+
+| 规则 | 涵盖 | 限定符 |
+|---|---|---|
+| `shell` | 命令 | 确切的命令；`prefix:*`表示以这些词开头的命令（`shell(npm run:*)`）；或`*`作为通配符（`shell(git log *)`） |
+| `read` | 读取、列出和搜索文件 | 路径模式 |
+| `edit` | 编辑和写入文件 | 路径模式 |
+| `web_fetch` | 获取网页，以及沙箱的网络访问 | `domain:example.com` |
+| `mcp__server` | MCP服务器的工具 | `mcp__server`表示全部，`mcp__server__tool`表示其中一个 |
+| `memory`, `browser`, `mcp` | 所有记忆工具、两种浏览器、所有MCP工具 | 无 |
+| `workflow` | 已保存的工作流 | 它的名称 |
+| 其他任何工具名称 | 该工具 | 无 |
+
+```json .aristra/settings.json
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["shell(npm test:*)", "shell(git diff:*)", "edit(/src/**)"],
+    "ask": ["shell(git push:*)"],
+    "deny": ["read(~/.env*)", "web_fetch(domain:pastebin.com)"],
+    "additionalDirectories": ["../shared"]
+  }
+}
+```
+
+- **路径模式**采用gitignore风格：`//abs/path`从根目录开始，`~/path`从你的主文件夹开始，`/path`在项目设置中从项目文件夹开始、在你自己的设置中从`~/.aristra`开始，其他写法从对话所在的文件夹开始。`**`可以跨越文件夹，`*`不能。
+- **复合命令**（`;`、`&&`、`|`、重定向）：允许规则必须涵盖每个部分；拒绝或询问规则只要匹配任何一个部分就足够了。`timeout`和`nohup`这类包装命令会被穿透检查。
+- **任何地方的拒绝都优先于任何地方的允许**。
+
+`aristra doctor`和`/config`会指出无法读取或永远不会生效的规则。
+
+### 规则来自哪里
+
+| 来源 | 位置 |
+|---|---|
+| 托管策略 | 由管理员设置；它的拒绝规则优先于一切 |
+| 你 | `~/.aristra/settings.json` |
+| 你，针对某个文件夹 | `~/.aristra/settings.json`中的`projects` |
+| 项目，共享 | `<folder>/.aristra/settings.json`，随仓库一起提交 |
+| 项目，你自己的 | `<folder>/.aristra/settings.local.json`，“don't ask again”保存在这里 |
+| 一次运行 | `aristra run --allow`、`--deny`和`--settings` |
+| 技能 | 它运行期间允许的工具 |
+| 一个对话 | “during this session”类的答复和`/add-dir` |
+
+`/permissions`会按来源列出每条规则，让你添加或删除规则，显示对话的文件夹，并列出Auto的审核模型最近阻止的步骤。
+
+## 信任文件夹
+
+仓库的设置由创建它的人编写。在某个文件夹中开始第一个对话之前，Aristra Code会询问你是否信任它。默认选中的是“No, exit”。信任的选择会对该仓库及其子文件夹保存。在你信任某个文件夹之前，只有它的拒绝和询问规则生效，它的技能和钩子会被忽略。`/folder`会告诉你当前文件夹是否受信任。
+
+## 安全检查
+
+有些改动在每种模式下都会询问，包括Bypass，任何允许规则都无法放行它们。在Auto模式下，审核模型可以决定第一类；其他几类它永远无法批准：
+
+- 写入`.git`、`.vscode`、`.idea`、`.claude`和`.aristra`文件夹，以及写入`.gitconfig`、`.gitmodules`、shell启动文件、`.ripgreprc`、`.mcp.json`和`.claude.json`（`.aristra/worktrees`下的智能体工作树不受保护）。
+- 有风险的`rm`和`rmdir`命令：目标是空变量或未设置的变量；递归`rm`某条命令的输出；根目录、你的主文件夹、顶层文件夹、对话的文件夹或其上层文件夹；递归或通配`rm`已挂载的驱动器（`/Volumes`、`/mnt`、`/media`）；`cd`之后的相对通配符；以及在`sh -c`脚本中，目标只有在运行时才能确定的`rm`。
+- 把对话移到不属于它自己的工作树中。
+- 始终需要你确认的工具，例如退出Plan模式或付款。
+
+## 审批
+
+当某个调用需要询问时，每个打开的使用端都会显示它，以及它会做什么、为什么需要询问。以最先给出的答复为准。
+
+| 答复 | 效果 |
+|---|---|
+| **Yes** | 运行这次调用 |
+| **Yes, and don't ask again for** `rule` | 把该规则（对于命令，可以先编辑）保存到文件夹的`settings.local.json`中 |
+| **Yes, and don't ask again for** `X, Y, and Z` **commands in** `folder` | 对于由多个部分组成的命令：为每个部分保存一条规则，每条都会在答复中列出 |
+| **Yes, allow reading from** `X/` | 在本对话剩余时间内允许读取该文件夹 |
+| **Yes, and don't ask again for** `host` | 对于访问新主机的沙箱命令：保存`web_fetch(domain:host)` |
+| **Yes, and switch to accept edits** | 把对话切换到Accept edits |
+| **Yes, allow all edits in** `X/` **during this session** | 把该文件夹添加到对话中，并切换到Accept edits |
+| **No** | 不运行该调用，并停止这一轮。如果附带备注（Tab），这一轮会以你的备注作为原因继续 |
+
+审批会等待30分钟（`approvals.timeoutMinutes`），然后被拒绝。
+
+## 提问
+
+Aristra Code可以向你提出多选题：一次一到四个，每个都有选项，你总是可以用自己的话回答，或者选择**Chat about this**先讨论一下。除了Don't ask之外，所有模式下都会提问，但脚本运行中绝不会提问。在Plan模式下，它会在撰写计划之前以这种方式提问。
+
+## Plan模式
+
+对于值得规划的任务，Aristra Code会自行进入Plan模式，你也可以自己选择它。它会探索，把计划写入`~/.aristra/plans/<chat>.md`，然后询问是否继续：
+
+- **Yes, and use auto mode**（如果Auto关闭，则为bypass permissions或accept edits）：以该模式退出Plan模式。
+- **Yes, manually approve edits**：退出到Manual模式。
+- **Tell Aristra what to change**：它会修改计划。
+
+Ctrl+G会在你的编辑器中打开计划；你保存的内容就是你批准的计划。
+
+## Auto模式的审核模型
+
+在Auto模式下，原本需要询问的操作会交给一个审核模型，而不是你。读取、搜索以及Accept edits允许的操作无需经过它即可运行。拒绝规则、始终需要你的工具，以及它不能批准的安全检查（有风险的`rm`、另一个工作树）永远不会到达它；对受保护文件的写入则由它决定。
+
+- **它看到什么**：你自己说的话、智能体之前的调用（不含结果，这样网页就无法与它对话）、作为数据的你的`AGENTS.md`，以及操作本身。
+- **当它阻止时**，智能体会被告知原因，并被告知不要绕过它。当它无法决定时，调用会被拒绝，绝不会被允许。太长而无法完整读取的操作，或者没有审核模型的对话（`review.enabled: false`），会改为询问你。
+- **连续阻止3次，或在一个对话中累计阻止20次之后**，它会改为询问你。
+- **`/retry`**：让它刚刚阻止的步骤按原样运行一次。
+- **谁来审核**：使用Aristra的模型和ChatGPT套餐时，由Aristra的审核模型审核，免费。使用你自己的密钥、自定义端点或本地模型时，由该模型（或`review.model`）审核，按该模型的方式付费。`autoMode`（`allow`、`soft_deny`、`environment`）和`review.policy`可以为它添加你自己的说明。
+
+## 从网页版更改模式
+
+在用[Remote Control](/zh/code/remote-control)共享的对话中，网站的模式选择器会切换你电脑上该对话的模式。切换到让更多操作无需询问即可运行的模式之前，需要先重新进行登录验证。

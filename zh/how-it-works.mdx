@@ -1,0 +1,41 @@
+---
+title: "Aristra的工作原理"
+sidebarTitle: "工作原理"
+description: "你的账户、Aristra Cloud和你自己的电脑：每个对话在哪里运行、保存在哪里、使用哪些模型，以及由谁付费。"
+---
+
+## 你的账户
+
+你的Aristra账户保存着随你到处走的一切：你在云端的对话、你的[记忆](/zh/memory)、你的[文件](/zh/files)、你的[项目](/zh/projects)、你的[Craft](/zh/craft)文档、你[连接的应用](/zh/connectors)，以及你的余额和套餐。你登录的每个使用端访问的都是同一个账户。
+
+## 对话在哪里运行
+
+对话在以下三个地方之一运行：
+
+| | Aristra Cloud | 你的电脑 | 你的云电脑 |
+|---|---|---|---|
+| 由谁运行 | Aristra的云端智能体 | Aristra Runtime，在你的Mac或Linux机器上 | Aristra Runtime，在你自己位于Aristra云端的电脑上 |
+| 从哪里开始 | 网站、手机、Aristra Desktop（Chat标签页，以及设为在云端运行的Code标签页对话）、使用`aristra --cloud`的终端，以及有套餐时的Telegram和定时任务 | 终端、Aristra Desktop的Code标签页（On this Mac）、你的编辑器 | 它在网站上的页面、Telegram、它自己的定时任务 |
+| 可以使用什么 | 它自己的沙箱、网页、你的文件和连接的应用 | 你的文件夹、你的shell和你的工具 | 它自己的磁盘、shell和工具 |
+| 模型 | Aristra的模型 | 任意模型：Aristra的模型、你自己的密钥、你的ChatGPT套餐、你电脑上的模型 | Aristra的模型，或你的ChatGPT套餐 |
+| 由谁付费 | 你的余额 | Aristra的模型由你的余额支付；使用你自己的模型则不收费 | 套餐的每月用量或你的充值（绝不使用初始额度）：包括它的模型、它的唤醒时长，以及它的磁盘（无论唤醒还是休眠） |
+| 保存在哪里 | 你的账户中 | 你的电脑上（`~/.aristra`） | 你的账户中，或者按你的选择保存在它自己的磁盘上 |
+
+Aristra Cloud中的对话在每个使用端都是同一批对话：在网页版上开始的对话会显示在Aristra Desktop的Chat标签页中，也会显示在终端的[云端对话](/zh/code/cloud-chats)中。
+
+你电脑上的对话会留在那里。开通套餐后，[Remote Control](/zh/code/remote-control)会把它共享到网页版和手机上，而工作仍在你的电脑上继续运行。
+
+## Aristra Code
+
+[Aristra Code](/zh/surfaces/aristra-code)就是在你电脑上的文件夹中工作的Aristra：它读取和编辑文件、运行命令、使用git，在做任何你没有允许的事情之前都会先询问你。终端、Aristra Desktop的Code标签页和你的编辑器都与你电脑上的同一个运行时通信，所以在其中一处开始的对话也会显示在其他几处。详情参见[Aristra Code的工作原理](/zh/code/how-it-works)。
+
+## 哪些会跟随你，哪些会留在原处
+
+- **记忆**保存在你的账户中，会进入你在登录状态下开始的每个对话，在每个使用端都是如此，除非你把它关闭。参见[记忆](/zh/memory)。
+- **你的个人资料**（你的名字、职业和**About you**）会出现在你登录状态下开始的每个对话的开头，无论Memory开关如何设置。例外情况是：Memory关闭时的无痕对话，以及把记忆保存在自己磁盘上的云电脑。在有其他人参与的对话中，只会使用你的名字和职业。
+- 账户中的**文件**会显示在网站上、Aristra Desktop中，以及终端里的`/files`中。Mac上的文件只有在你把它保存到账户中时才会进入账户。参见[文件](/zh/files)。
+- **你电脑上的对话**不在你的账户中，除非你用Remote Control共享它们，所以Aristra每晚从你的对话中学习时不会读取它们。
+
+## 由谁付费
+
+Aristra的模型和托管工具从你的余额中支付：先用新账户的$1初始额度，然后是套餐的每月用量，最后是充值。使用你自己的模型（[使用你自己的模型](/zh/own-models)）时，Aristra不收取任何费用。参见[你的余额与充值](/zh/account/credits)。

@@ -1,0 +1,101 @@
+---
+title: "Aristra Code中的指令与记忆"
+sidebarTitle: "指令与记忆"
+description: "用AGENTS.md和规则告诉Aristra Code你的项目如何运作，以及它如何在不同对话之间记住你和你的仓库。"
+---
+
+Aristra Code在开始每个对话时都了解四类内容：
+
+| | 是什么 | 由谁编写 |
+|---|---|---|
+| **指令文件** | `AGENTS.md`和规则：你的项目如何构建、测试和审查 | 你（或`/init`） |
+| **你账户的记忆** | 你是谁以及你喜欢的工作方式，在每台设备上都可用。每个账户都有。参见[记忆](/zh/memory) | Aristra Code，根据你告诉它的内容 |
+| **文件中的记忆** | 同样的内容，保存在设为**Kept on the computer only**的云电脑上的文件中 | Aristra Code，根据你告诉它的内容 |
+| **关于仓库的笔记** | 针对这台电脑上某个仓库的纠正、进行中的工作以及各种内容所在的位置 | Aristra Code，在工作过程中 |
+
+登录后，记忆保存在你的Aristra账户中，所以它会跟随你到网页版、手机和你的其他电脑上。保留记忆、写入记忆、导入和搜索记忆都不收费：使用你记忆的对话只需为它自己的token付费。
+
+## 指令文件
+
+`AGENTS.md`文件告诉Aristra Code你的项目如何运作：如何构建和测试、它的约定、需要避免什么。其他编程智能体读取的也是这个文件。文件按层级读取，越靠后的层级权重越高：
+
+| 层级 | 文件 |
+|---|---|
+| 你所在组织的 | [托管策略](/zh/code/configure/managed-policy)旁边的`AGENTS.md`和`rules/*.md` |
+| 你自己的，适用于所有项目 | `~/.aristra/AGENTS.md`和`~/.aristra/rules/*.md` |
+| 从磁盘顶层一直到对话所在文件夹的每个文件夹 | `AGENTS.md`、`.aristra/AGENTS.md`和`.aristra/rules/*.md`（提交到仓库中），以及`AGENTS.local.md`（你自己的，不提交） |
+
+为Claude Code配置的仓库可以直接使用：只要缺少Aristra的某个文件名，就会改为读取对应的Claude Code文件（用`CLAUDE.md`代替`AGENTS.md`，以及`.claude/CLAUDE.md`、`.claude/rules/`、`CLAUDE.local.md`）。规则文件夹会连同其子文件夹一起读取。
+
+```text
+/init       write this folder's AGENTS.md from the code
+/memory     open an instruction file (or the repository's notes) in your editor
+```
+
+### 只适用于部分文件的规则
+
+规则文件可以通过其front matter中的`paths`，只适用于某些路径：
+
+```markdown .aristra/rules/api.md
+---
+paths: src/api/**/*.ts
+---
+
+Every handler validates its input with the schemas in src/api/schemas.ts.
+```
+
+Aristra Code第一次读取匹配的文件时，该规则才会进入模型。子文件夹自己的`AGENTS.md`也是这样：Aristra Code第一次读取该子文件夹中的文件时才会读取它。
+
+### 引入其他文件
+
+指令文件中的`@path`会引入另一个文件（相对于该文件、从`~/`开始，或使用绝对路径），最多嵌套五层：
+
+```markdown AGENTS.md
+See @docs/testing.md for how to run the test suites.
+```
+
+引入的文件必须位于对话的文件夹之内，你自己的`~/.aristra`文件除外。作为HTML注释的行会被忽略，所以你可以给编辑该文件的人留下备注。
+
+## 你账户的记忆
+
+当对话开启了记忆时，每一轮都会以你的Aristra账户记住的、与这里相关的内容开始，Aristra Code会用它的记忆工具记住、纠正和遗忘内容，并在对话中说明。它与网站和手机上的记忆是同一份；[记忆](/zh/memory)介绍了它如何保存、每晚如何学习、如何关闭和编辑。
+
+- **单个对话**：只有当你账户的Memory开关开启时，对话才会读取和保存记忆；关闭它后，大约一分钟内，Aristra Desktop和终端中的所有对话都会停止使用记忆。在Aristra Desktop中，在开关关闭时开始的对话永远不会使用记忆，即使你之后重新开启也是如此。在终端中，设置里的`memory.enabled: false`会让对话在开始时就关闭记忆。
+- **无痕**：Aristra Code在你电脑上运行的对话没有无痕模式。`aristra --cloud --incognito`会在Aristra Cloud中开始一个无痕对话；参见[记忆](/zh/memory)。
+- 在Aristra Code读取了网页等外部内容之后保存的记忆，必须引用你说过的话，这样网页就无法植入记忆。
+
+## 文件中的记忆
+
+你账户的记忆需要你登录：未登录时，Aristra Code不会保留关于你的任何记忆。设为**Kept on the computer only**的[云电脑](/zh/surfaces/cloud-computer)则会把记忆保存在它自己磁盘上的文件中：
+
+```text
+~/.aristra/memory/
+  MEMORY.md            the index, one line per note
+  user_role.md         a note
+  feedback_style.md
+```
+
+每个对话都会读取索引以及有帮助的笔记，Aristra Code会像处理任何文件一样编写和修正它们。你也可以自己阅读和编辑它们。它们留在那台电脑上：不会发送任何内容到你的账户。
+
+在每个账户都有记忆功能之前就用文件保存记忆的电脑，会在它第一次以登录状态开始对话时，把这些笔记导入你账户的记忆中（第一天最多500条）。
+
+## 关于仓库的笔记
+
+在记忆开启时，Aristra Code会在工作过程中保存关于仓库的笔记：你的纠正（“总是先运行linter”）、进行中的工作及其原因，以及代码之外的各种内容所在的位置。它们是仓库之外的Markdown文件，所以不会出现在`git status`中：
+
+```text
+~/.aristra/projects/<repository path, with dashes>/memory/   (for example -Users-you-code-app)
+  MEMORY.md            the index, one line per note
+  feedback_tests.md    a note
+  project_launch.md
+```
+
+每一轮都会看到索引以及最多五条明显有帮助的笔记，每条笔记在每个对话中只出现一次，并附有它的时间，以及一条提醒：在依赖它们之前先检查代码。笔记也会复制到你的账户中，所以你的其他电脑以及在该仓库中的网页对话也能看到它们。
+
+笔记绝不会重复代码、git或你的`AGENTS.md`中已经说明的内容。当你纠正了Aristra Code而它没有保存任何内容时，它会在这一轮之后保存这条经验，引用你的话，并在对话中说明。
+
+## 这台电脑上之前的对话
+
+问起之前的工作时（“我们关于缓存是怎么决定的？”“你上周写的那个脚本”），Aristra Code可以搜索、读取和列出你在这台电脑上过去的对话，并引用当时说过的话。它只搜索已经在这里的内容，所以无论有没有套餐都可以使用，也不会发送任何内容到任何地方。
+
+在无痕对话中、关闭了记忆的对话中，或者在你账户的**Memory**或**Search and reference past chats**关闭时，不会提供此功能；它也绝不会显示无痕对话或你当前所在的对话。网页版上的对话则在网页版上搜索，使用你账户设置中的**Search and reference past chats**。

@@ -1,0 +1,80 @@
+---
+title: "子智能体与工作流"
+description: "把工作交给在自己的上下文中运行的子智能体、编写自定义智能体、派生对话、向其他对话发送消息，以及用工作流运行多个智能体。"
+---
+
+## 子智能体
+
+Aristra Code可以把任务的一部分交给子智能体：一个拥有自己上下文的智能体，在后台工作并汇报结果。用它可以把大规模搜索排除在主对话之外，或者同时进行多项调查。你可以主动要求（“并行调查这三个模块”），也可以让Aristra Code自己决定。
+
+| 内置类型 | 用途 |
+|---|---|
+| `general-purpose` | 任何任务，可以使用后台智能体可用的所有工具 |
+| `Explore` | 在代码库中进行只读搜索 |
+| `Plan` | 只读规划：设计方案以及涉及的文件 |
+
+每个子智能体都在对话的文件夹中工作，使用对话的模式和模型（除非调用时指定了其他模型），并且可以启动它自己的子智能体，最多嵌套三层。一个对话中最多可以同时运行20个，包括其智能体自己启动的智能体。它的审批会在你的对话（即链条最顶端的那个对话）中询问，并注明是哪个智能体。
+
+**你会看到什么**。状态行会对正在运行的智能体计数（“2 local agents”），`/tasks`会列出它们，并用几个字说明每个智能体正在做什么。按Enter可以打开其中一个，你在那里输入的内容会发送给该智能体。某个智能体完成时，对话中会出现一行它的摘要，Aristra Code会读取结果并继续。
+
+## 派生对话
+
+```text
+/fork write the migration for the new schema
+```
+
+派生是一个以这个对话的完整上下文开始的子智能体，所以它不需要任何背景介绍。它会完成你要求的那一件事并汇报结果，同时你可以继续在这里工作。如果你想自己在对话的副本中继续，请改用`/branch`。
+
+## 自定义智能体
+
+`~/.aristra/agents/`（适用于所有文件夹）或项目的`.aristra/agents/`（在你信任它之后）中的Markdown文件，会添加一种智能体类型，格式与Claude Code的相同：
+
+```markdown .aristra/agents/migration-reviewer.md
+---
+name: migration-reviewer
+description: Reviews database migrations for locking, data loss and rollback safety
+tools: read_file, grep, glob, shell
+model: sonnet
+---
+
+You review database migrations. For each migration, check ...
+```
+
+| 字段 | 含义 |
+|---|---|
+| `name`, `description` | 智能体的名称，以及它的用途（会展示给模型）。缺少其中任何一个的文件会被跳过 |
+| `tools`, `disallowedTools` | 它可以使用哪些工具。`mcp__server`表示某个服务器的工具 |
+| `model` | `inherit`、`sonnet`、`opus`、`haiku`、`fable`（这四个只在对话使用Claude模型时可用）或某个模型ID |
+| `effort` | 它的推理强度 |
+| `permissionMode` | 它运行时使用的模式，除非你的对话处于`acceptEdits`、`auto`、`bypassPermissions`或`plan`模式，此时它会沿用对话的模式 |
+| `maxTurns` | 它的模型调用轮数上限 |
+| `isolation` | 设为`worktree`可以给它一个独立的git工作树 |
+| `skills`, `hooks`, `mcpServers`, `memory` | 它加载的技能、它运行期间生效的钩子、它自己的MCP服务器，以及它自己的记忆文件夹 |
+| `initialPrompt` | 当整个对话以这个智能体身份运行时，放在你的第一条消息之前 |
+| `color` | 它在列表中的颜色：red、blue、green、yellow、purple、orange、pink或cyan |
+| `omitClaudeMd` | 设为`true`会排除文件夹的指令文件 |
+
+文件正文就是它的系统提示词。项目中的智能体会覆盖你自己的同名智能体，你所在组织的智能体会覆盖两者。
+
+### 以智能体身份运行整个对话
+
+`aristra --agent migration-reviewer`会开始一个按该智能体的提示词、工具和模型运行的对话。在Aristra Desktop中，新Code对话的<strong>+</strong>菜单会把你的智能体列为**Run as …**。`agent`设置可以把某个智能体设为新对话的默认智能体。
+
+## 工作树
+
+设置了`isolation: worktree`的子智能体会在`.aristra/worktrees/agent-<id>`下获得它自己的git工作树，这样并行的智能体永远不会编辑相同的文件。完成后，它没有修改过的工作树会被删除；修改过的则会保留，它的路径和分支会附在汇报中。
+
+## 对话之间的消息
+
+Aristra Code可以按名称向子智能体发送消息，也可以向你这台电脑上当前打开或正在工作的其他Aristra对话发送消息。你可以说“告诉正在处理API的那个对话，schema已经改了”。消息到达那个对话时，会标记为来自另一个对话。如果某个对话的权限模式与发送方不同，它不会接收这条消息，发送方会收到通知。
+
+## 工作流
+
+对于大规模的分发任务（“审查每个包”“从多个角度研究这个问题”），请让它使用工作流。Aristra Code会编写一个简短的脚本，按固定顺序运行多个智能体：并行、分阶段或流水线方式。运行前会先询问你，显示它的描述和各个阶段（Ctrl+E显示脚本），除非有规则允许它（对于已保存的工作流为`workflow(<name>)`），或者你的模式不需要询问。在Auto模式下，由审核模型决定。
+
+- 运行在后台执行，最多同时运行16个智能体；如果你电脑的CPU核心数减二比这个数少，则以后者为准。
+- `/workflows`会实时显示每次运行的阶段和智能体，提供停止、暂停、重试或跳过某个智能体的按键，按**s**可以把脚本保存为一个命名的工作流。
+- 已保存的工作流位于`~/.aristra/workflows/`或项目的`.aristra/workflows/`中，以`/<name> args`的形式运行。
+- Aristra Code内置了`/deep-research <question>`：它会从多个角度搜索网页，让质疑者检查每一个论断，并撰写一份带引用的报告。
+
+在设置中设置`disableWorkflows: true`（或`enableWorkflows: false`），或设置`ARISTRA_DISABLE_WORKFLOWS=1`，即可关闭工作流。

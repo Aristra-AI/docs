@@ -1,0 +1,105 @@
+---
+title: "Git与拉取请求"
+description: "在git工作树中工作、查看diff、提交、创建拉取请求、用/pr跟踪它们的检查和审查，以及用/autofix-pr让Aristra Code修复它们报告的问题。"
+---
+
+Aristra Code可以直接使用git：它会在每个对话开始时读取你仓库的状态，按你仓库的风格提交，用你自己的`gh`登录创建拉取请求，还可以盯住一个拉取请求，修复检查和审查者报告的问题。
+
+## 工作树
+
+工作树是你仓库在独立分支上的另一个检出，让对话可以在不触碰你文件夹的情况下工作，也让多个对话可以同时工作。
+
+<Tabs>
+  <Tab title="终端">
+    ```sh
+    aristra -w                 # a new worktree with a random name
+    aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
+    aristra -w auth-refactor --resume <id>   # move an existing chat into it
+    ```
+
+    离开时，没有改动的工作树会被删除；否则会询问你是否保留它，恢复命令会写明它的名字。
+  </Tab>
+  <Tab title="Aristra Desktop">
+    在新的Code对话中，打开消息框下方的<strong>+</strong>菜单，选择**Work in a new worktree**。对话的终端、Review和文件操作都会使用该工作树。只有当对话的文件夹位于git仓库中时，才会出现这个选项。
+
+    消息框下方的分支菜单会列出文件夹所在仓库的分支。已被另一个工作树检出的分支会显示**Open its worktree**：选择它会把那个工作树添加为文件夹，并在那里开始一个新对话，因为git一次只能在一个工作树中切换到某个分支。
+  </Tab>
+</Tabs>
+
+新工作树会从你origin的默认分支开始（如果超过一天没有获取，会先获取）。`worktree`中的设置：
+
+| 设置 | 作用 |
+|---|---|
+| `worktree.baseRef` | `"fresh"`（默认）：从origin的默认分支开始。`"head"`：从当前提交开始 |
+| `worktree.symlinkDirectories` | 从主检出链接而不是复制的文件夹，例如`node_modules` |
+| `worktree.sparsePaths` | 对于大型仓库，使用git的稀疏检出，只检出这些路径 |
+
+新工作树会获得你的`.aristra/settings.local.json`，你仓库的`.worktreeinclude`中列出的被忽略文件（例如`.env`）也会被复制进去。
+
+子智能体也可以在它们自己的工作树中工作；参见[子智能体](/zh/code/guides/subagents)。只有在你或你的指令要求时，Aristra Code才会把对话移到工作树中。
+
+## Diff
+
+```text
+/diff
+```
+
+这条命令会显示你未提交的改动以及每一轮所做的改动，最新的在前。Left和Right在它们之间切换，Enter显示某个文件的diff。
+
+在[全屏渲染器](/zh/code/terminal)中，`/diff`会在对话旁边打开一个面板，并随着Aristra Code的编辑而刷新：显示这个对话的改动、未提交的改动或当前分支的改动（Ctrl+X B切换）。点击某个文件可以跳转到它，或者点击**ask**把它的diff附加到你的下一条消息中。
+
+在Aristra Desktop中，**Review**（⌥⌘B）显示同样的内容：未提交的改动、当前分支相对于其基准的改动，或者上一轮的编辑，每个文件只需一次点击即可在你的编辑器中打开。
+
+## 提交
+
+让它提交，或者运行：
+
+```text
+/commit [guidance]
+```
+
+Aristra Code会读取`git status`、diff、当前分支和最近的提交，按文件名暂存文件，并按你仓库的风格撰写提交信息。除非你要求，否则它绝不会修改你的git配置、跳过钩子、修改已有提交（amend）、提交机密信息或推送。
+
+## 拉取请求
+
+```text
+/create-pr            # commit what's uncommitted, push, and open a pull request
+/create-pr --draft    # as a draft
+```
+
+在有已打开拉取请求的分支上，页脚会显示`PR #412`，并按审查状态着色：已批准为绿色，要求修改为红色，等待审查为黄色，草稿为暗色。它使用你自己的`gh`登录（GitLab合并请求则使用`glab`）。`prStatusFooterEnabled: false`会隐藏它。
+
+```text
+/pr [number]
+```
+
+这条命令会打开当前分支的拉取请求：先显示它的状态、检查和审查者，然后是Overview、Checks、Files和Commits。
+
+| 按键 | 作用 |
+|---|---|
+| `m` | 合并（会请你确认），或执行合并队列的操作 |
+| `a` | 批准 |
+| `w` | 开启或关闭自动合并 |
+| `d` | 转换为草稿 |
+| `o` | 在GitHub上打开 |
+| `x`, `X` | 重新运行一个失败的检查，或所有失败的检查 |
+| `s` | 把一个失败的检查放入给Aristra Code的提示词中 |
+| `f` | 把合并冲突放入提示词中 |
+| `g` | 刷新 |
+
+在Aristra Desktop中，标题栏中的**PR #N**会在对话旁边打开同一个拉取请求，审查评论上有Reply和Resolve。在没有拉取请求的分支上，标题栏会提供**Create PR**、**Create draft PR**或**Manually create PR**。
+
+## 自动修复
+
+```text
+/autofix-pr           # watch the branch's pull request
+/autofix-pr 412       # watch that one
+/autofix-pr stop
+```
+
+开启Auto-fix后，Aristra Code每分钟检查一次GitHub，当检查失败、出现合并冲突，或者有权推送到该仓库的人（或应用）留下新的审查评论时，就会唤醒对话。每次唤醒都会在对话中显示为单独的一行，展开后可以看到GitHub给出的内容，然后Aristra Code会修复并推送。在Aristra Desktop中，在你自己拉取请求的拉取请求面板中开启**Auto-fix CI & address comments**。
+
+<Note>
+`/pr`、页脚和Auto-fix会用你的`gh`登录调用GitHub的API。如果你还没有登录，请运行一次`gh auth login`。
+</Note>
