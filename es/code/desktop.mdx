@@ -1,0 +1,73 @@
+---
+title: "La pestaña Code de Aristra Desktop"
+sidebarTitle: "Aristra Desktop"
+description: "Usa Aristra Code en la pestaña Code de Aristra Desktop para Mac: chats agrupados por carpeta, con una terminal, un navegador, los cambios y el pull request junto al chat."
+---
+
+La pestaña **Code** de [Aristra Desktop](/es/surfaces/desktop) es Aristra Code en tu Mac: tus carpetas con sus chats, y todo lo que usas al programar junto al chat. Usa el mismo runtime y la misma carpeta `~/.aristra` que la terminal, así que un chat iniciado en una aparece en la otra.
+
+## Iniciar un chat en la pestaña Code
+
+Debajo del cuadro de mensaje de un chat nuevo en la pestaña Code:
+
+| Opción | Qué hace |
+|---|---|
+| **Folder** | La carpeta en la que trabaja el chat. Un chat nuevo empieza en la última carpeta que usaste. **Add folder…** añade una |
+| **Where it runs** | **On this Mac**: se guarda solo aquí, con cualquier modelo que hayas configurado. **In the cloud**, pagado con tu [saldo](/es/account/credits) o un [plan](/es/account/plans): se guarda en tu cuenta de Aristra, también en la web y en tu teléfono, mientras la carpeta se queda en este Mac |
+| **Project** | Un proyecto de Aristra: sus instrucciones y su memoria. Un chat de un proyecto se ejecuta en la nube, en la carpeta principal del proyecto si tiene una en este Mac |
+| **Permissions** | Para un chat en este Mac: **Manual** (always ask before making changes), **Accept edits**, **Plan** o **Auto** (Aristra handles permission decisions). Puedes cambiar en cualquier momento del chat. Un chat en la nube usa Manual o Auto, como en el sitio web |
+| **Menú +** | Para un chat en este Mac: **Work in a new worktree** (en una carpeta de git) le da al chat su propio worktree y su propia rama, así que la carpeta se queda como está. Tus agentes personalizados aparecen como **Run as …**, y **Share my profile** y **Permissions and tools** también están aquí |
+
+Debajo del cuadro, un chat nuevo muestra la rama de la carpeta y cuántos archivos cambiaron; su menú abre Review changes o cambia de rama. La página de inicio de la pestaña Code muestra tus chats recientes, los pull requests, el trabajo de este mes y la actividad.
+
+## Junto al chat
+
+La cabecera de un chat de Code tiene los paneles que usas al programar. Se muestra un panel lateral cada vez, y la terminal se abre debajo del chat. Terminal, Review, Open in y Pull request son para los chats en este Mac.
+
+| Panel | Se abre con | Qué muestra |
+|---|---|---|
+| **Terminal** | ⌘J | Un shell real en la carpeta del chat (la de su worktree, en un chat que tenga uno). Cada chat conserva sus propios shells, en pestañas, que siguen ejecutándose mientras el panel está oculto |
+| **Review** | ⌥⌘B | Los cambios de la carpeta: los que no tienen commit, todos los cambios respecto a la rama predeterminada u otra rama, un commit concreto o las ediciones del último turno. Cada archivo se abre en tu editor en su primer cambio |
+| **Browser** | ⇧⌘B, o un enlace en una respuesta | Un navegador real con pestañas. El agente también puede usarlo, con tu consentimiento para cada sitio |
+| **Files** | La cabecera, o una tarjeta de archivo en el chat | Los archivos del chat, con vistas previas de texto, PDF, imágenes y archivos de Office |
+| **Pull request** | **PR #N** en la cabecera | El pull request del chat: estado, checks, archivos, commits y la conversación, con Merge, Approve y la opción de volver a ejecutar los checks |
+| **Open in** | El botón del editor en la cabecera | La carpeta en VS Code, Cursor, Zed, Windsurf o Xcode (los que tengas instalados), en Finder o en el panel Terminal del chat |
+
+En una rama sin pull request, la cabecera ofrece **Create PR**, **Create draft PR** o **Manually create PR**. En el panel Pull request, en un pull request abierto tuyo, el interruptor **Auto-fix CI & address comments** despierta el chat cuando fallan los checks, aparecen conflictos o comentan los revisores. Consulta [Git y pull requests](/es/code/guides/git).
+
+## En el chat
+
+- **Los pasos** se agrupan en un resumen de una línea que se despliega para mostrar cada comando, edición y lectura. Las ediciones muestran sus diffs.
+- **Las aprobaciones** aparecen en el chat con el comando o el diff exactos. Una aprobación se puede responder desde cualquier superficie, y gana la primera respuesta.
+- **Mientras se ejecuta una respuesta** en un chat en este Mac, Enter envía tu mensaje a ella en su siguiente paso, y ⌘Enter (o el botón de enviar) lo pone en cola para después. Un mensaje con archivos siempre espera en la cola. Los mensajes en cola esperan encima del cuadro, donde puedes enviar uno ya, reordenarlos o quitarlos.
+- **El menú /** tiene Add files or photos, las opciones del menú +, New Craft doc (junto al chat) y Mention a Craft doc y, en un chat en este Mac, Context usage, Compact y Goal. (Tus skills están en el menú `/` de la terminal, y Aristra Code las usa en todas las superficies.) Escribe `!` para ejecutar tú mismo un comando en la carpeta del chat.
+- **Restore to here**, en uno de tus mensajes de un chat en este Mac, vuelve a antes de ese mensaje: el código y la conversación, o solo una de las dos cosas.
+- **Los comandos en segundo plano** y los agentes del chat aparecen encima del cuadro de mensaje mientras se ejecutan, cada uno con su salida y un botón Stop.
+
+## Carpetas
+
+Cada carpeta de la barra lateral muestra sus chats, del más reciente al más antiguo. Su menú tiene **New chat here**, **Open terminal**, **Review changes**, **Use from other devices** y **Open in Finder**.
+
+- Se sigue una carpeta cuando le cambias el nombre o la mueves. Si Aristra no la encuentra, la barra lateral lo indica y ofrece **Locate folder…**.
+- **Use from other devices** permite que el sitio web y tu teléfono lean la carpeta, o la lean y la cambien, en los chats iniciados con ella en este Mac: **Off**, **Read only** o **Read and edit**. Cada cambio pedido desde otro dispositivo necesita allí una nueva verificación del inicio de sesión, o tu respuesta en este Mac. **Activity from other devices…** muestra lo que hicieron. Read only y Read and edit vienen con un [plan](/es/account/plans).
+- Los chats de programación cuya carpeta está en otro Mac aparecen en **On other devices**.
+
+## Continuar en tu teléfono y en la web
+
+Haz clic derecho en un chat que se ejecuta en este Mac y elige **Continue on phone and web**. El chat se guarda en tu cuenta, y puedes leer y enviar mensajes desde app.aristralabs.com o tu teléfono mientras el trabajo sigue ejecutándose aquí. Consulta [Remote Control](/es/code/remote-control). Esto, y el inicio de chats desde la web, vienen con un [plan](/es/account/plans).
+
+Para iniciar un chat nuevo en este Mac desde la web o tu teléfono, activa **Settings › General › From the web and phone** y luego permite las carpetas en las que puede empezar un chat. Consulta [Iniciar un chat en tu computadora](/es/code/remote-control).
+
+## Tareas programadas e Inbox
+
+Una tarea programada en este Mac ejecuta un prompt en una carpeta según un calendario (una vez, cada hora, a diario, los días laborables o cada semana), en un chat nuevo cada vez o en un mismo chat. No necesita plan; una tarea con uno de los modelos de Aristra se paga con tu saldo. Crea una en el formulario de tareas, o pídela en un chat ("todos los días laborables a las 9, revisa la compilación") y aprueba la tarea que te muestra Aristra. Con un [plan](/es/account/plans), una tarea puede ejecutarse en la nube, incluso con este Mac apagado. La **Inbox** de la pestaña Code muestra todas las ejecuciones, con puntos de no leído; una ejecución sin nada que contar llega ya leída. Las tareas en este Mac se ejecutan mientras Aristra está abierto, o con la app cerrada si activas **Keep Aristra running in the background** (Settings › General; el formulario de tareas lo ofrece una vez). Consulta [Trabajo en segundo plano](/es/code/guides/background).
+
+## Atajos de teclado
+
+| Teclas | Acción |
+|---|---|
+| ⌘J | Terminal |
+| ⌥⌘B | Review |
+| ⇧⌘B | Browser |
+
+El resto están en [Aristra Desktop](/es/surfaces/desktop).

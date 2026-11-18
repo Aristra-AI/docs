@@ -1,0 +1,96 @@
+---
+title: "Instalación"
+description: "Instala, actualiza, cambia de versión y desinstala Aristra Code en macOS, Linux y Windows mediante WSL."
+---
+
+## Requisitos del sistema
+
+| Sistema | Compatibilidad |
+|---|---|
+| macOS | Apple silicon e Intel. La compilación para Apple silicon también se instala en un shell que se ejecuta con Rosetta |
+| Linux | x64 y arm64 con glibc. El sandbox, cuando lo activas, necesita bubblewrap (`bwrap`). Alpine (musl) todavía no es compatible |
+| Windows | Mediante WSL2 con una distribución de Linux como Ubuntu, usando la compilación para Linux. Las páginas de inicio de sesión se abren con el programa que indica `$BROWSER` (en WSL, normalmente `wslview`). Si no hay ninguno, inicia sesión con un código |
+
+Cada compilación lleva todo lo que necesita, incluidos su propio Node y su propio Python, así que no hay que instalar nada antes aparte de `curl` o `wget`.
+
+## Instalar
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh              # the latest release
+curl -fsSL https://aristralabs.com/install.sh | sh -s stable    # the stable channel
+curl -fsSL https://aristralabs.com/install.sh | sh -s 1.2.1     # one version
+```
+
+El script:
+
+1. Elige la compilación para tu máquina.
+2. La descarga y comprueba su suma SHA-256 con el manifiesto de la versión.
+3. La instala en `~/.local/share/aristra/versions/<version>/` y hace que `~/.local/bin/aristra` apunte a ella.
+4. Añade `~/.local/bin` al perfil de tu shell cuando no está en tu `PATH` o cuando otro `aristra` va primero (con fish, muestra el comando `fish_add_path` que debes ejecutar).
+5. Ofrece eliminar un `aristra` anterior instalado con npm o bun que iría primero en tu `PATH`.
+6. Ofrece iniciar `aristra`.
+
+Las preguntas se hacen en la terminal, así que funcionan con `curl | sh`. Sin terminal, o con `ARISTRA_NON_INTERACTIVE=1`, no pregunta nada y elige la respuesta segura.
+
+<Warning>
+El instalador se niega a ejecutarse con `sudo` desde tu propio shell, porque se instalaría en la carpeta personal de root. Para instalarlo para root mediante sudo a propósito, define `ARISTRA_INSTALL_ALLOW_SUDO=1`. En un contenedor o en CI que se ejecuta como root, se instala para root como de costumbre.
+</Warning>
+
+## Canales de versiones
+
+| Canal | Qué es |
+|---|---|
+| `latest` | La versión más reciente. El predeterminado |
+| `stable` | Una versión que lleva publicada alrededor de una semana sin problemas |
+
+Se recuerda el canal desde el que instalas, y `aristra update` lo sigue. Sale una versión aproximadamente cada semana.
+
+## Actualizar, cambiar de versión y volver atrás
+
+```sh
+aristra update            # the newest release on your channel
+aristra update --check    # only say whether there is one
+aristra install latest    # switch to the latest channel
+aristra install stable    # switch to the stable channel
+aristra install 1.2.1     # switch to exactly that version (a rollback when it is older)
+```
+
+La versión en uso y las dos más recientes se quedan en el disco, así que volver a una de ellas no descarga nada. Una actualización nunca interrumpe un chat en curso: el runtime que ya se está ejecutando se detiene cuando queda inactivo, y el siguiente comando inicia el nuevo.
+
+[Aristra Desktop](/es/code/desktop) lleva su propia copia de Aristra Code. La terminal y la app de escritorio siempre comparten un solo runtime, el más reciente compatible que esté instalado.
+
+## Qué se instala
+
+```text
+~/.local/bin/aristra                 a link to the version in use
+~/.local/share/aristra/
+  channel                            latest or stable
+  versions/<version>/                the program, its runtime and their licenses
+```
+
+Tus datos no están aquí: los chats, la configuración, los registros y los secretos viven en `~/.aristra`. Consulta [Archivos y variables de entorno](/es/code/reference/environment).
+
+## Desinstalar
+
+Todavía no hay un comando para desinstalar. Para eliminar Aristra Code y todo lo que guarda:
+
+```sh
+aristra logout                    # sign out and remove this computer from your account
+aristra service uninstall         # if you turned on the background service
+aristra runtime stop --now        # stop the runtime
+rm ~/.local/bin/aristra
+rm -rf ~/.local/share/aristra      # every installed version
+rm -rf ~/.aristra                 # your data: chats, settings, logs, secrets
+```
+
+En un Mac, elimina también del llavero de inicio de sesión la clave que sellaba tus secretos:
+
+```sh
+security delete-generic-password -s Aristra-credentials
+```
+
+En Linux con un llavero, ejecuta `secret-tool clear service Aristra-credentials`. Después, elimina el bloque que el instalador añadió al perfil de tu shell, si lo hay.
+
+<Note>
+Aristra Desktop usa la misma carpeta `~/.aristra`. Eliminarla también elimina los chats de la app de escritorio en este Mac.
+</Note>

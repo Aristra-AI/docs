@@ -1,0 +1,156 @@
+---
+title: "CLI参考"
+description: "每个aristra子命令和参数：用于对话、脚本、账户、模型、扩展、设置和支持的Aristra CLI。"
+---
+
+Aristra CLI就是`aristra`命令：终端中的Aristra Code。每个子命令都可以用`--help`显示用法；少数子命令会以用法错误（状态2）的形式显示。对于在对话中输入的命令，参见[命令](/zh/code/reference/commands)。
+
+```text
+aristra [options] [prompt]          Aristra Code in this folder
+aristra run [options] [prompt]      one turn, non-interactive (also: aristra -p or --print, as the first argument)
+aristra <command> ...
+```
+
+任何不是子命令的内容都会被当作提示词：`aristra fix the build`会以“fix the build”开始一个对话。
+
+## 全局选项
+
+| 选项 | 作用 |
+|---|---|
+| `--remote <host>` | 通过SSH在另一台机器上运行，放在命令之前或之后均可。哪些命令仍在这台电脑上执行，参见[远程机器](/zh/code/remote-machines) |
+| `-v`, `--version` | 打印版本 |
+| `-h`, `--help` | 列出子命令 |
+| `--help-agent` | 列出交互选项 |
+
+子命令成功时以`0`退出，失败时以`1`退出（错误信息输出到stderr），用法错误时以`2`退出。`aristra run`还会增加`3`和`130`；参见[非交互模式](/zh/code/non-interactive)。`aristra serve`以运行时自己的状态退出（`3`：这个主目录已经有一个运行时在运行）。当你离开首次运行的页面时，`aristra`以`130`退出，与选择“No, exit”相同。
+
+## 开始对话
+
+```text
+aristra [options] [prompt...]
+aristra resume [id]
+aristra attach <id>
+```
+
+| 选项 | 作用 |
+|---|---|
+| `-c`, `--continue` | 继续这个文件夹最新的对话 |
+| `-r`, `--resume <id>` | 继续指定的对话 |
+| `-m`, `--model <id>` | 新对话使用的模型 |
+| `--source <id>` | 模型的来源：`aristra`、`chatgpt`、`openai`、`anthropic`、`gemini`、`ollama`、`lmstudio`、`custom`等 |
+| `--agent <agent>` | 以你的某个[自定义智能体](/zh/code/guides/subagents)身份运行对话 |
+| `-w`, `--worktree [name]` | 在git工作树中工作。参见[工作树](/zh/code/guides/git) |
+| `--permission-mode <mode>` | 初始模式：`manual`（或`default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`、`read_only` |
+| `--dangerously-skip-permissions` | 以Bypass permissions启动。除非设置了`IS_SANDBOX=1`，否则对root用户拒绝 |
+| `--allow-dangerously-skip-permissions` | 允许对话之后切换到Bypass permissions |
+| `--add-dir <path>` | 对话可以工作的另一个文件夹。可重复使用 |
+| `--plugin-dir <path>` | 为这个对话从文件夹或`.zip`加载插件。可重复使用 |
+| `--fullscreen` | 本次启动使用全屏渲染器 |
+| `--folder <path>` | 要工作的文件夹 |
+| `--cloud` | 由Aristra云端智能体运行的[云端对话](/zh/code/cloud-chats) |
+| `--incognito` | 与`--cloud`一起使用：不出现在你账户的列表中 |
+| `--project <name>` | 与`--cloud`一起使用：在该项目中开始对话 |
+
+不带ID的`aristra resume`会打开一个选择器。`aristra resume <id>`和`aristra attach <id>`会打开指定的对话，无论它是空闲、正在运行还是在等待审批。
+
+## 非交互运行
+
+`aristra run`（或`-p`）为脚本和CI运行一轮。它的选项和输出见[非交互模式](/zh/code/non-interactive)。
+
+## 对话
+
+```text
+aristra sessions [--all | --cloud] [--limit <n>] [--json]
+aristra sessions export <id> [--format md|json]
+aristra sessions delete <id> [--yes]
+aristra sessions import <id> [--folder <path>] [--source <id> --model <id>]
+aristra sessions connect-folder <id> [--folder <path>]
+aristra sessions download <id> [<key>]
+```
+
+| 形式 | 作用 |
+|---|---|
+| `sessions` | 这个文件夹的对话，最新的在前，来自每个使用端。`--all`列出所有文件夹，`--cloud`列出你账户的云端对话 |
+| `sessions export <id>` | 把对话写入`~/.aristra/exports/` |
+| `sessions delete <id>` | 删除对话及其文件。`--yes`跳过确认 |
+| `sessions import <id>` | 把云端对话复制为这台电脑上的一个新对话 |
+| `sessions connect-folder <id>` | 为云端对话指定这台电脑上的一个文件夹 |
+| `sessions download <id>` | 下载云端对话的智能体生成的文件 |
+
+## 你的账户
+
+| 命令 | 作用 |
+|---|---|
+| `aristra login [--device-code \| --browser]` | 登录，可以在浏览器中登录，也可以使用验证码（通过SSH或没有浏览器时默认使用验证码）。在等待浏览器登录时，按c改用验证码 |
+| `aristra logout` | 退出登录，并把这台电脑从你的账户中移除 |
+| `aristra setup-token [--name <name>]` | 打印一个用于CI的令牌，它可以在一年内用你的Aristra余额运行模型。参见[在CI中](/zh/code/non-interactive) |
+| `aristra status [--json]` | 你的账户、运行时和模型来源 |
+
+## 模型和密钥
+
+| 命令 | 作用 |
+|---|---|
+| `aristra models [--source <id>] [--json]` | 每个来源提供的模型，以及由谁付费；对于本地模型，还会显示它们是否适配 |
+| `aristra keys add <provider>` | 添加服务商密钥，或工具的密钥：`brave`用于网页搜索，`e2b`用于沙箱（以隐藏方式询问，或通过stdin管道传入） |
+| `aristra keys add custom [--url <address>] [--wire chat_completions\|responses\|anthropic] [--name <name>] [--model <id>]... [--no-key]` | 你自己的、支持OpenAI或Anthropic API的服务器 |
+| `aristra keys list` | 设置了哪些密钥，绝不显示密钥本身 |
+| `aristra keys remove <provider>` | 删除一个密钥 |
+
+## 扩展
+
+| 命令 | 作用 |
+|---|---|
+| `aristra mcp add [-s scope] <name> [--env K=V]... [--secret K=V]... [--cwd <folder>] [--writable <folder>]... [--sandbox] -- <command> [args]` | 添加一个作为程序运行的MCP服务器；`-s`为`local`（默认）、`project`或`user`。`--secret`会把值保存在你的凭据存储中，`--sandbox`会在沙箱中运行它，允许访问网络，只能写入它自己的文件夹（`--cwd`或项目）、`--writable`中的文件夹以及软件包启动器的缓存 |
+| `aristra mcp add [-s scope] <name> --url <url> [--header K=V]... [--client-id <id>] [--client-secret <secret>]` | 添加一个位于某个地址的MCP服务器 |
+| `aristra mcp add-json [-s scope] <name> <json> [--client-secret <secret>]` | 从JSON添加一个服务器 |
+| `aristra mcp add-from-claude-desktop [-s scope] [name...]` | 迁移Claude Desktop的程序（stdio）服务器（macOS） |
+| `aristra mcp list [--json]`, `get <name>`, `test <name>`, `remove [-s scope] <name>` | 列出、查看、试用或删除服务器 |
+| `aristra mcp reset-project-choices` | 清除你对这个项目`.mcp.json`服务器的批准 |
+| `aristra mcp trust <name>`, `untrust <name>` | 让某个服务器的工具无需询问即可运行（local或project服务器只在这个项目中），或取消这一设置 |
+| `aristra mcp login <name> [--device-code]`, `logout <name>` | 用OAuth登录服务器 |
+| `aristra hooks list [--json]`, `approve <event> <command>`, `revoke <event> <command>` | 你的钩子，以及批准它们 |
+| `aristra hooks test <event> [--tool <name> --input <json> \| --prompt <text>]` | 用一个样例运行某个事件的钩子 |
+| `aristra plugin install <plugin> [-s scope] [--config KEY=VALUE]` | 安装插件 |
+| `aristra plugin uninstall`, `enable`, `disable`, `update`, `list`, `prune` | 管理插件 |
+| `aristra plugin configure <plugin>` | 插件的选项 |
+| `aristra plugin validate <path>` | 检查插件或插件市场 |
+| `aristra plugin marketplace add <source>`, `list`, `remove <name>`, `update [name]` | 管理插件市场 |
+
+参见[MCP服务器](/zh/code/extend/mcp)、[钩子](/zh/code/extend/hooks)和[插件](/zh/code/extend/plugins)。
+
+## 设置
+
+| 命令 | 作用 |
+|---|---|
+| `aristra config get [key] [--json]` | 当前生效的设置，以及每项来自哪里 |
+| `aristra config set <key> <value> [--project \| --local]` | 修改设置，写入你的文件或项目的文件 |
+| `aristra config edit [--project \| --local]` | 在你的编辑器中打开设置文件 |
+| `aristra import <claude-code\|codex>` | 从Claude Code或Codex迁移你的指令、MCP服务器、权限规则、默认模式、钩子、技能、智能体和命令。会先显示预览。`--yes=<digest>`应用已勾选的项目（你自己的，不包括技能），`--only <id>`选择项目，包括技能和文件夹自己的项目，`--dry-run`显示结果，`--json`以JSON格式打印结果 |
+
+## 支持
+
+| 命令 | 作用 |
+|---|---|
+| `aristra doctor [--json]` | 检查你的环境配置，并说明如何修复每个问题 |
+| `aristra logs [-n <lines>] [-f]` | 运行时的日志 |
+| `aristra diagnostics export [--no-logs]` | 把去除了机密信息的支持包写入`~/.aristra/diagnostics/` |
+
+## 运行时
+
+| 命令 | 作用 |
+|---|---|
+| `aristra runtime status [--json]` | 运行时是否在运行，以及它持有什么。不会启动运行时 |
+| `aristra runtime stop [--now]` | 在没有任何内容运行时停止它；`--now`也会停止正在运行的轮次 |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（或`--every hour --at <minute>`，或`--once "<date> <time>"`）, `tasks pause\|resume\|run\|remove <id>` | 保存在这台电脑上的定时任务。`add`还接受`--name`、`--folder`、`--source`、`--model`、`--mode`和`--skip-missed`。参见[定时任务](/zh/code/guides/background) |
+| `aristra service install`, `uninstall [--now]`, `status [--json]` | 后台服务。参见[后台工作](/zh/code/guides/background) |
+| `aristra serve` | 自己运行运行时（`--socket`或`--stdio`）；各使用端会替你启动它 |
+| `aristra acp` | 通过Agent Client Protocol为编辑器提供服务。参见[编辑器](/zh/code/editors) |
+
+## 安装
+
+| 命令 | 作用 |
+|---|---|
+| `aristra update [--check]` | 更新到你所在通道的最新版本 |
+| `aristra install [latest\|stable\|<version>]` | 切换通道或版本（默认为`latest`） |
+
+参见[安装与配置](/zh/code/setup)。

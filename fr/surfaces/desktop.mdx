@@ -1,0 +1,63 @@
+---
+title: "Aristra Desktop"
+description: "L'app Aristra pour Mac : un onglet Chat pour vos conversations dans Aristra Cloud et un onglet Code pour Aristra Code, avec Files, Craft, la saisie rapide, la dictée et votre compte."
+---
+
+Aristra Desktop est l'app Aristra pour Mac (Apple silicon et Intel). Téléchargez-la depuis la page **Downloads** de votre compte et connectez-vous, dans votre navigateur ou avec un code. Sa barre latérale a deux onglets :
+
+- **Chat** : vos [chats](/fr/chats) sans dossier, avec Files et Craft. Ces chats s'exécutent dans Aristra Cloud (un chat à côté d'un document conservé sur ce Mac s'exécute sur ce Mac) et sont conservés dans votre compte : ce sont donc les mêmes chats que sur le site web et sur votre téléphone. Ils sont payés depuis votre [solde](/fr/account/credits) : le crédit de bienvenue d'un nouveau compte, la consommation mensuelle de votre forfait, puis les recharges.
+- **Code** : [Aristra Code](/fr/code/desktop). Vos dossiers avec leurs chats, et tout ce que vous utilisez pour coder, à côté du chat.
+
+Passez de l'un à l'autre avec le sélecteur en haut de la barre latérale, ou avec **⌥⌘←** et **⌥⌘→**. L'onglet sur lequel vous n'êtes pas affiche un point quand un chat y attend votre réponse (ambre) ou travaille (vert), ou quand l'onglet Code a des exécutions planifiées que vous n'avez pas lues (couleur d'accent). Ouvrir un chat, depuis la recherche, une notification ou le Dock, bascule sur son onglet.
+
+Aristra Desktop inclut Aristra Code : vous n'avez donc pas besoin d'installer l'Aristra CLI séparément. Les deux utilisent le même runtime et le même dossier `~/.aristra` : un chat démarré dans le terminal apparaît dans l'onglet Code, et inversement.
+
+## Démarrer un chat
+
+Un nouveau chat dans l'onglet Chat s'exécute dans le cloud : vous devez donc être connecté. Sur un nouveau chat :
+
+- **Project** : un [projet](/fr/projects), dont le chat utilise les instructions et la mémoire.
+- **Incognito** (le fantôme en haut à droite d'un nouveau chat) : un chat qui n'apparaît ni dans votre historique ni dans votre mémoire, et dont rien n'est conservé sur ce Mac. Consultez [Chats incognito](/fr/chats).
+- Le bouton **micro** : dictez jusqu'à 10 minutes, tapées pour vous et payées depuis votre solde.
+
+**La saisie rapide** (**⌥Space**, de n'importe où, ou **Aristra › Quick Entry**) ouvre une petite zone : tapez et appuyez sur Enter pour démarrer un chat sans ouvrir la fenêtre.
+
+## Files et Craft
+
+**Files** liste les fichiers que vos chats sur ce Mac ont partagés, produits ou modifiés et, une fois connecté, les fichiers de votre compte. Consultez [Fichiers](/fr/files).
+
+**Craft** contient vos documents, rédigés avec Aristra ou vous-même. Sans forfait, ils sont conservés sur ce Mac ; avec un forfait, dans votre compte. Consultez [Craft](/fr/craft).
+
+## Retrouver quelque chose que vous avez dit
+
+Appuyez sur **⌘K** et tapez. Sous les chats et les commandes dont le nom correspond, **In messages** liste ce qui a été dit dans tout chat de ce Mac qui contient vos mots. Choisissez-en un pour ouvrir son chat. La recherche s'exécute sur ce Mac et couvre les chats de ce Mac. Sur le site web, la page Chats retrouve les chats cloud par leur titre.
+
+## Votre forfait et votre compte
+
+**Settings › Aristra One**, ou **Aristra One** dans le menu du compte (votre nom, en bas à gauche) ou dans **⌘K**, ouvre les pages de votre compte sur app.aristralabs.com dans un nouvel onglet de votre navigateur : les forfaits, votre solde, les dépenses par jour, vos appareils, l'ordinateur cloud et l'export. **Settings › Billing** affiche votre forfait, les forfaits et les recharges, et **Settings › Usage** votre solde et vos dépenses, en dollars ; sans forfait en cours, **See plans** ouvre les forfaits sur le site web. Les paiements se font toujours sur la page de Stripe dans votre navigateur. Consultez [Forfaits](/fr/account/plans).
+
+## Mémoire
+
+**Settings › Memory** contient les interrupteurs Memory de votre compte, **See and edit your memory** (sur le site web), **Import from Codex and Claude Code**, et un **Memory folder** qui conserve une copie de votre mémoire sous forme de fichiers dans `~/Aristra/memory`. Consultez [Mémoire](/fr/memory).
+
+## Raccourcis clavier
+
+| Touches | Action |
+|---|---|
+| ⌘N | Nouveau chat |
+| ⌥⌘← / ⌥⌘→ | Chat / Code |
+| ⌘K | Chercher dans les chats, leurs messages et les commandes |
+| ⌘B | Afficher ou masquer la barre latérale |
+| ⌘J | Terminal |
+| ⌥⌘B | Review |
+| ⇧⌘B | Browser |
+| ⌘, | Settings |
+| ⌥Space | Saisie rapide, de n'importe où (configurable) |
+| ⌘W | Fermer une fenêtre de chat |
+| Return (ou ⌘Return) | Envoyer, selon le réglage de Settings › General |
+| ⇧Return | Nouvelle ligne |
+| ↑ | Rappeler votre dernier prompt, dans une zone vide |
+| Esc | Arrêter Aristra pendant qu'il travaille |
+| ⌘-click | Ouvrir un lien de l'autre façon |
+
+Dans l'onglet Code, d'autres raccourcis ouvrent les panneaux à côté d'un chat. Consultez [L'onglet Code d'Aristra Desktop](/fr/code/desktop).

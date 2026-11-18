@@ -1,0 +1,75 @@
+---
+title: "Descripción general de Aristra Code"
+sidebarTitle: "Descripción general"
+description: "Aristra Code es el agente de programación de Aristra. Lee tu código, edita archivos, ejecuta comandos y trabaja con git, en tu terminal, en Aristra Desktop, en tu editor y desde tu teléfono."
+---
+
+Aristra Code trabaja en una carpeta de tu computadora. Dile con palabras normales lo que quieres hacer: lee el código que necesita, hace los cambios en los archivos, ejecuta tus pruebas y comandos, y pregunta antes de hacer cualquier cosa que no hayas permitido. Recuerda las instrucciones de tu proyecto de un chat a otro, trabaja con git y pull requests, y funciona con el modelo que elijas.
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+La primera ejecución inicia tu sesión en Aristra, pregunta con qué modelo empiezan los chats nuevos y si confías en la carpeta. Después escribes lo que quieres. El [inicio rápido](/es/code/quickstart) te guía por una primera tarea real.
+
+## Dónde se ejecuta
+
+La terminal, Aristra Desktop y tu editor hablan con el mismo agente de tu computadora, el Aristra Runtime, así que un chat iniciado en uno aparece en los demás, y cualquiera de ellos puede aprobar su siguiente paso. Con un plan, Remote Control comparte un chat con tu teléfono y la web.
+
+<CardGroup cols={2}>
+  <Card title="Terminal" icon="terminal" href="/es/code/terminal">
+    El comando `aristra`: la app completa en tu terminal, con todos los comandos y teclas.
+  </Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/es/code/desktop">
+    La pestaña Code de la app para Mac: chats agrupados por carpeta, con una terminal, un navegador, los cambios y el pull request junto al chat.
+  </Card>
+  <Card title="Editores" icon="code" href="/es/code/editors">
+    Aristra Code dentro de Zed y otros editores compatibles con el Agent Client Protocol.
+  </Card>
+  <Card title="Teléfono y web" icon="mobile" href="/es/code/remote-control">
+    Remote Control: continúa un chat desde tu teléfono o app.aristralabs.com mientras el trabajo se queda en tu computadora.
+  </Card>
+</CardGroup>
+
+## Qué puedes hacer
+
+<AccordionGroup>
+  <Accordion title="Crear funciones y corregir errores">
+    Describe el cambio o pega el error. Aristra Code encuentra el código implicado, planifica el cambio, edita los archivos y ejecuta tus pruebas hasta que pasan.
+
+    ```sh
+    aristra "the date parser fails on leap years: find why, fix it, and run the tests"
+    ```
+  </Accordion>
+  <Accordion title="Trabajar con git y pull requests">
+    Escribe commits, trabaja en su propio worktree de git cuando se lo pides, muestra los checks y las revisiones del pull request abierto con `/pr`, y puede vigilar un pull request y corregir lo que indiquen sus checks y revisores con `/autofix-pr`. Consulta [Git y pull requests](/es/code/guides/git).
+  </Accordion>
+  <Accordion title="Mantener el trabajo en segundo plano">
+    Los comandos largos pasan a segundo plano y avisan al chat cuando terminan. `/loop` repite un prompt, las tareas programadas se ejecutan según un horario y `/goal` lo mantiene trabajando hasta que se cumpla una condición que fijas. Consulta [Trabajo en segundo plano](/es/code/guides/background).
+  </Accordion>
+  <Accordion title="Conectar tus herramientas">
+    Añade servidores MCP, usa los conectores de tu cuenta de Aristra, escribe skills para el trabajo que repites, ejecuta tus propios comandos ante eventos con hooks e instala plugins que agrupan todo esto. Consulta [Ampliar](/es/code/extend/mcp).
+  </Accordion>
+  <Accordion title="Usarlo desde scripts">
+    `aristra run` y `aristra -p` ejecutan un turno sin la app, para scripts y CI, con salida JSON. Consulta [Modo no interactivo](/es/code/non-interactive).
+  </Accordion>
+</AccordionGroup>
+
+## Tus modelos, tus reglas
+
+- **Modelos.** Usa los modelos de Aristra con tu saldo de Aristra, al precio de sus propios proveedores, tu plan de ChatGPT, tus propias claves de proveedores (OpenAI, Anthropic, Gemini, OpenRouter y otros) o un modelo que se ejecute en tu computadora. Cada chat indica quién paga. Consulta [Modelos](/es/code/configure/models).
+- **Gratis en tu computadora.** Aristra Code con un modelo propio no cuesta nada. La memoria de tu cuenta en todos los dispositivos viene con todas las cuentas. Un plan añade el resto de lo que Aristra aloja: uso mensual de sus modelos, Remote Control, conectores y una computadora en la nube. Sin plan, los chats en la nube y los modelos de Aristra se pagan con tu saldo, empezando por un crédito inicial de $1, y una computadora en la nube funciona con recargas. Consulta [Tu cuenta y Aristra One](/es/account/overview).
+- **Permisos.** Los chats empiezan en el modo Manual: leer, buscar y los comandos que solo leen se ejecutan solos, y los cambios preguntan primero. Accept edits, Plan y Auto están a un Shift+Tab de distancia. Consulta [Permisos](/es/code/configure/permissions).
+- **Sandbox.** Desactivado de forma predeterminada. Actívalo con `/sandbox` y los comandos se ejecutarán en un sandbox del sistema operativo que limita lo que pueden escribir y a qué pueden llegar. Consulta [Sandbox](/es/code/configure/sandbox).
+- **Instrucciones.** Un archivo `AGENTS.md` en tu repositorio le dice a Aristra Code cómo funciona tu proyecto; es el mismo archivo que leen otros agentes de programación. Consulta [Instrucciones y memoria](/es/code/guides/memory).
+
+## Próximos pasos
+
+<CardGroup cols={2}>
+  <Card title="Inicio rápido" icon="play" href="/es/code/quickstart">Instala, inicia sesión y termina una primera tarea.</Card>
+  <Card title="Cómo funciona" icon="diagram-project" href="/es/code/how-it-works">El runtime, las superficies y dónde viven tus datos.</Card>
+  <Card title="Comandos" icon="slash" href="/es/code/reference/commands">Todos los comandos que puedes escribir en un chat.</Card>
+  <Card title="Referencia de la CLI" icon="rectangle-terminal" href="/es/code/reference/cli">Todos los subcomandos y flags de `aristra`.</Card>
+</CardGroup>

@@ -1,0 +1,61 @@
+---
+title: "Mémoire"
+description: "Ce qu'Aristra retient de vous, comment il apprend de vos chats chaque nuit, l'interrupteur Memory et les chats incognito, et comment lire, modifier, importer et supprimer votre mémoire."
+---
+
+Aristra retient ce que vous lui dites sur vous, la façon dont vous aimez qu'il travaille et ce sur quoi vous travaillez : vous n'avez pas à le répéter. Votre mémoire est conservée dans votre compte, elle accompagne donc vos chats sur le web, sur votre téléphone, dans Aristra Desktop et dans le terminal. Chaque compte en dispose, avec ou sans forfait, et elle ne coûte rien : un chat qui utilise votre mémoire ne paie que ses propres tokens.
+
+## Votre profil
+
+Votre nom, votre profession et la note **About you** de la page **Profile** de votre compte ouvrent chaque chat, quel que soit l'état de l'interrupteur Memory, sauf un chat incognito quand Memory est désactivé. Dans un chat avec d'autres personnes, seuls votre nom et votre profession sont utilisés. C'est vous qui les avez saisis : ce sont donc des paramètres, et non quelque chose qu'Aristra a appris.
+
+## Ce qu'Aristra enregistre pendant le chat
+
+Quand vous dites à Aristra quelque chose qui mérite d'être gardé (une correction, une préférence durable, un fait sur vous, une décision, ou « retiens ceci »), il l'enregistre aussitôt et l'indique dans le chat. Il met à jour ou oublie un souvenir quand vous le corrigez ou le lui demandez. Il n'enregistre jamais de secrets comme des clés ou des mots de passe, n'enregistre des informations sensibles que si vous le lui demandez, et n'enregistre pas ce qu'une page web ou un fichier lui a dit de garder. Les chats avec d'autres personnes n'écrivent aucun souvenir.
+
+Vous pouvez aussi le demander : « retiens que je préfère les réponses courtes », « oublie où je travaille ».
+
+## Apprendre de vos chats passés
+
+Chaque nuit, Aristra lit les chats de votre compte depuis son dernier passage et garde ce qui comptera plus tard : un fait sur vous, la façon dont vous aimez les réponses, une décision ou un plan. Il garde au plus 15 souvenirs nouveaux ou mis à jour par nuit. Chacun cite ce que vous avez dit et nomme le chat d'où il vient, et un souvenir plus récent peut remplacer un souvenir plus ancien qu'il a modifié.
+
+Il réécrit aussi le résumé vous concernant qui ouvre chaque chat, avec ce sur quoi vous travaillez, les sujets en suspens, ainsi que les décisions et les thèmes récents.
+
+- La première nuit, il lit les 30 derniers jours.
+- Il a besoin que **Memory** et **Search and reference past chats** soient tous deux activés, et ne lit rien tant que l'un des deux est désactivé. Une fois les deux réactivés, il lit aussi les chats de cette période.
+- Il ne lit jamais les chats incognito, les chats avec d'autres personnes, les chats propres aux tâches planifiées, les chats supprimés, ni les chats démarrés avec Memory désactivé. Les chats conservés uniquement sur votre ordinateur ne sont pas dans votre compte : il ne les lit donc pas non plus.
+- Les chats sont envoyés au service de traitement par lots d'Anthropic pour être lus. Aristra y supprime le lot de chaque nuit une fois ses résultats enregistrés ; Anthropic n'en conserve jamais un plus de 29 jours. Cela ne vous coûte rien.
+
+## Désactiver la mémoire
+
+Votre compte a deux interrupteurs, sous **Personalization** sur le site web et sous **Settings › Memory** dans Aristra Desktop :
+
+- **Memory** : tant qu'il est désactivé, rien n'est utilisé ni enregistré. Une fois réactivé, Aristra peut apprendre des chats encore présents dans votre historique.
+- **Search and reference past chats** : quand Memory est activé, permet à Aristra de chercher dans vos chats précédents et de les évoquer quand ils sont utiles. Avec Memory désactivé, il apparaît désactivé, comme dans ChatGPT, et revient à son état précédent quand vous réactivez Memory.
+
+Un chat enregistre l'état de l'interrupteur Memory à son démarrage. Désactiver Memory s'applique immédiatement à tous les chats ; le réactiver s'applique aux chats que vous démarrez ensuite.
+
+## Chats incognito
+
+Aristra n'apprend jamais rien d'un chat incognito, et ce chat n'enregistre rien dans votre mémoire. Sur le web et dans l'onglet Chat d'Aristra Desktop, il peut quand même utiliser ce qu'Aristra retient déjà. Dans le terminal, `aristra --cloud --incognito` démarre un chat incognito dans Aristra Cloud, qui fonctionne de la même façon. Un chat qu'[Aristra Code](/fr/code/guides/memory) exécute sur votre ordinateur n'a pas de mode incognito. Consultez [Chats](/fr/chats).
+
+## Lire et modifier votre mémoire
+
+Ouvrez **Memory** dans la barre latérale du site web (dans Aristra Desktop, **Settings › Memory › See and edit your memory**) :
+
+| Onglet | Ce qu'il contient |
+|---|---|
+| **Summary** | Le résumé vous concernant qui ouvre chaque chat. Vous pouvez le modifier |
+| **Memories** | Tout ce qu'Aristra retient. **Learned from your chats**, en haut, liste ce qu'il a appris chaque nuit, chaque élément étant lié à son chat, avec **Forget** |
+| **Pages** | Vos souvenirs regroupés par projet, dépôt, dossier et sujet |
+| **Profile** | Votre profil |
+
+## Importer
+
+**Import** sur la page Memory fait entrer ce qu'un autre assistant retient de vous. Il vous donne un prompt à coller dans ChatGPT, Claude ou un autre assistant ; collez ou importez ce qu'il répond. Jusqu'à 500 souvenirs par jour, en comptant ce qu'Aristra a enregistré ce jour-là. Les souvenirs importés rejoignent le résumé la nuit suivante.
+
+Dans Aristra Desktop, **Settings › Memory** peut aussi importer ce dont Codex et Claude Code se souviennent sur votre Mac, et conserver une copie de votre mémoire sous forme de fichiers dans `~/Aristra/memory`.
+
+## La mémoire dans Aristra Code
+
+Aristra Code utilise la même mémoire de compte, et conserve aussi des notes sur chaque dépôt et lit vos fichiers `AGENTS.md`. Consultez [Instructions et mémoire](/fr/code/guides/memory).

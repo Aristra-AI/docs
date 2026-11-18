@@ -1,0 +1,29 @@
+---
+title: "Aristra Code"
+description: "コンピューター上のフォルダーで作業する Aristra。ターミナル、Aristra Desktop の Code タブ、エディターで、コードを読み、ファイルを編集し、コマンドを実行し、git を扱います。"
+---
+
+Aristra Code は、コンピューター上のフォルダーで作業する Aristra です。やりたいことを伝えると、必要なコードを読み、複数のファイルにまたがって変更を加え、テストやコマンドを実行します。許可していない操作の前には確認を求めます。自分のモデルを使えば無料で、チャットはコンピューター上に保存されます。ただし、Aristra Desktop からクラウドで実行したチャットは例外です。
+
+## 使える場所
+
+| | |
+|---|---|
+| [ターミナル](/ja/code/terminal) | `aristra` コマンド。Mac や Linux のターミナルで、すべての機能を使えるアプリです |
+| [Aristra Desktop の Code タブ](/ja/code/desktop) | フォルダーとそのチャット。チャットの横に、ターミナル、ブラウザー、変更内容、プルリクエストが並びます |
+| [エディター](/ja/code/editors) | Zed をはじめ、Agent Client Protocol に対応したエディター |
+| [スマートフォンとウェブ](/ja/code/remote-control) | プランがあれば、Remote Control で、作業をコンピューターに残したままスマートフォンやウェブサイトからチャットを続けられます |
+| [スクリプトと CI](/ja/code/non-interactive) | `aristra run` は、アプリを使わずに 1 つのターンを実行します。スクリプトや CI 向けです |
+| [別のマシン](/ja/code/remote-machines) | `aristra --remote <host>` で、SSH で接続できるマシン上で作業します |
+
+これらはすべて、コンピューター上の同じエージェントである Aristra Runtime とやり取りするため、どこかで始めたチャットは他の場所にも表示されます。
+
+## はじめに
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Aristra Desktop には Aristra Code が含まれているため、Desktop と並べて CLI を用意する必要はありません。[Aristra Code のクイックスタート](/ja/code/quickstart)では、最初の実際のタスクを順に説明しています。それ以外のことはすべて、このドキュメントの **Aristra Code** タブで説明しています。[権限](/ja/code/configure/permissions)、[モデル](/ja/code/configure/models)、[git](/ja/code/guides/git)、[MCP サーバー](/ja/code/extend/mcp)、[スキル](/ja/code/extend/skills)、[フック](/ja/code/extend/hooks)、[コマンドリファレンス](/ja/code/reference/commands)などです。

@@ -1,0 +1,73 @@
+---
+title: "Aristra Desktop的Code标签页"
+sidebarTitle: "Aristra Desktop"
+description: "在Mac版Aristra Desktop的Code标签页中使用Aristra Code：按文件夹分组的对话，对话旁边还有终端、浏览器、改动和拉取请求。"
+---
+
+[Aristra Desktop](/zh/surfaces/desktop)的**Code**标签页就是你Mac上的Aristra Code：你的文件夹及其对话，以及写代码时在对话旁边用到的一切。它与终端使用同一个运行时和`~/.aristra`文件夹，所以在其中一处开始的对话也会显示在另一处。
+
+## 在Code标签页中开始对话
+
+在Code标签页中新对话的消息框下方：
+
+| 选项 | 作用 |
+|---|---|
+| **Folder** | 对话工作的文件夹。新对话会从你上次使用的文件夹开始。<strong>Add folder…</strong>可以添加一个文件夹 |
+| **Where it runs** | **On this Mac**：只保存在这里，可以使用你设置的任何模型。**In the cloud**：从你的[余额](/zh/account/credits)或[套餐](/zh/account/plans)中扣费，保存到你的Aristra账户中，在网页版和手机上也能看到，而文件夹仍留在这台Mac上 |
+| **Project** | 一个Aristra项目：使用它的指令和记忆。项目对话在云端运行，如果项目在这台Mac上有主文件夹，就在主文件夹中运行 |
+| **Permissions** | 对于这台Mac上的对话：**Manual**（每次修改前都询问）、**Accept edits**、**Plan**或**Auto**（由Aristra处理权限决策）。你可以在对话中随时切换。云端对话和网站上一样，使用Manual或Auto |
+| **+ menu** | 对于这台Mac上的对话：**Work in a new worktree**（在git文件夹中）会为对话提供它自己的工作树和分支，让文件夹保持原样。你的自定义智能体显示为**Run as …**，**Share my profile**和**Permissions and tools**也在这里 |
+
+在输入框下方，新对话会显示文件夹的分支以及有多少文件发生了改动；它的菜单可以打开Review changes或切换分支。Code标签页的主页会显示你最近的对话、拉取请求、本月的工作和活动。
+
+## 对话旁边
+
+Code对话的标题栏中有你写代码时用到的面板。一次只显示一个侧面板，终端则在对话下方打开。Terminal、Review、Open in和Pull request适用于这台Mac上的对话。
+
+| 面板 | 打开方式 | 显示内容 |
+|---|---|---|
+| **Terminal** | ⌘J | 对话文件夹中的真实shell（对于在工作树中的对话，则是该工作树的文件夹）。每个对话都有自己的shell，以标签页形式显示，在面板隐藏时也会继续运行 |
+| **Review** | ⌥⌘B | 文件夹的改动：未提交的改动、相对于默认分支或另一个分支的所有改动、某一次提交，或者上一轮自己的编辑。每个文件都会在你的编辑器中打开，并定位到第一处改动 |
+| **Browser** | ⇧⌘B，或回复中的链接 | 一个带标签页的真实浏览器。智能体也可以使用它，但每个网站都需要你同意 |
+| **Files** | 标题栏，或对话中的文件卡片 | 对话的文件，可以预览文本、PDF、图片和Office文件 |
+| **Pull request** | 标题栏中的**PR #N** | 对话的拉取请求：状态、检查、文件、提交和讨论，还可以执行Merge、Approve和重新运行检查 |
+| **Open in** | 标题栏中的编辑器按钮 | 在VS Code、Cursor、Zed、Windsurf或Xcode（你已安装的那些）、Finder或对话的Terminal面板中打开文件夹 |
+
+在没有拉取请求的分支上，标题栏会提供**Create PR**、**Create draft PR**或**Manually create PR**。在Pull request面板中，对于你自己打开的拉取请求，**Auto-fix CI & address comments**开关会在检查失败、出现冲突或审查者发表评论时唤醒对话。参见[Git与拉取请求](/zh/code/guides/git)。
+
+## 在对话中
+
+- **步骤**会折叠成一行摘要，展开后可以看到每条命令、每次编辑和读取。编辑会显示它们的diff。
+- **审批**会显示在对话中，附带确切的命令或diff。审批可以从任何使用端回复，以最先给出的答复为准。
+- **回复正在进行时**，在这台Mac上的对话中，按Enter会把你的消息在下一步发送进去，⌘Enter（或发送按钮）则把它排队到之后。带文件的消息总是在队列中等待。排队的消息显示在输入框上方，你可以在那里立即发送某一条、调整顺序或删除它们。
+- **/菜单**中有Add files or photos、+菜单中的选项、New Craft doc（在对话旁边）和Mention a Craft doc，在这台Mac上的对话中还有Context usage、Compact和Goal。（你的技能在终端的`/`菜单中，Aristra Code在每个使用端都会使用它们。）输入`!`可以在对话的文件夹中自己运行命令。
+- 在这台Mac上的对话中，你某条消息上的**Restore to here**会回到它之前的状态：代码和对话都恢复，或者只恢复其中之一。
+- **后台命令**和对话的智能体在运行期间会列在消息框上方，每一项都有输出和Stop按钮。
+
+## 文件夹
+
+侧边栏中的每个文件夹都会列出它的对话，最新的在前。它的菜单中有**New chat here**、**Open terminal**、**Review changes**、**Use from other devices**和**Open in Finder**。
+
+- 当你重命名或移动文件夹时，Aristra会跟踪它。如果Aristra找不到它，侧边栏会提示你，并提供**Locate folder…**。
+- **Use from other devices**让网站和你的手机在这台Mac上用该文件夹开始的对话中，读取该文件夹，或读取并修改它：**Off**、**Read only**或**Read and edit**。从其他设备请求的每次修改，都需要在那台设备上重新进行登录验证，或者由你在这台Mac上答复。<strong>Activity from other devices…</strong>会列出它们做了什么。Read only和Read and edit随[套餐](/zh/account/plans)提供。
+- 文件夹位于另一台Mac上的编程对话会列在**On other devices**下。
+
+## 在手机和网页版上继续
+
+右键点击在这台Mac上运行的对话，选择**Continue on phone and web**。对话会保存到你的账户中，你可以在app.aristralabs.com或手机上阅读和发送消息，而工作仍在这里运行。参见[Remote Control](/zh/code/remote-control)。此功能以及从网页版开始对话都随[套餐](/zh/account/plans)提供。
+
+要从网页版或手机在这台Mac上开始新对话，请开启**Settings › General › From the web and phone**，然后允许对话可以在哪些文件夹中开始。参见[在你的电脑上开始对话](/zh/code/remote-control)。
+
+## 定时任务和Inbox
+
+这台Mac上的定时任务会按计划（一次、每小时、每天、工作日或每周）在某个文件夹中运行一段提示词，每次在新对话中运行，或者都在同一个对话中运行。它不需要套餐；使用Aristra模型的任务从你的余额中扣费。你可以在任务表单中创建，也可以在对话中提出要求（“每个工作日9点检查构建”），然后批准Aristra给你展示的任务。开通[套餐](/zh/account/plans)后，任务也可以改为在云端运行，即使这台Mac关机也可以。Code标签页中的**Inbox**会列出每次运行，未读的带有圆点；没有内容可报告的运行到达时就已标记为已读。这台Mac上的任务在Aristra打开时运行；开启**Keep Aristra running in the background**（Settings › General；任务表单会提示一次）后，应用关闭时也能运行。参见[后台工作](/zh/code/guides/background)。
+
+## 键盘快捷键
+
+| 按键 | 操作 |
+|---|---|
+| ⌘J | Terminal |
+| ⌥⌘B | Review |
+| ⇧⌘B | Browser |
+
+其余快捷键见[Aristra Desktop](/zh/surfaces/desktop)。

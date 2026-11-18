@@ -1,0 +1,98 @@
+---
+title: "工具"
+description: "Aristra Code可以使用的所有工具：文件、命令、后台工作、定时安排、网页、记忆、智能体、工作流、MCP，以及权限如何作用于每个工具。"
+---
+
+工具是Aristra Code可以执行的操作。每次调用都要经过你的[权限](/zh/code/configure/permissions)：直接运行、询问你、交给Auto模式的审核模型，或被拒绝。在权限规则中，可以使用工具的名称（`shell(npm test:*)`）、分组（`read(...)`表示`read_file`、`list_dir`、`glob`和`grep`；`edit(...)`表示`edit_file`、`write_file`、`notebook_edit`和`apply_patch`），或者Claude Code的名称（`Bash`、`Edit`、`WebFetch`）。
+
+为了让每次请求保持精简，有些工具只有在模型搜索它们时才会发送给模型。它们标记为*按需*。这在`mcp.toolSearch`开启（默认）时适用。
+
+## 文件
+
+| 工具 | 作用 | 在Manual模式下是否询问 |
+|---|---|---|
+| `read_file` | 读取文件，或其中某个范围的行。也可以读取图片，以及以文本形式读取PDF、Word、Excel、PowerPoint、OpenDocument、RTF和EPUB文件，读取在你的电脑上完成 | 在对话的文件夹中不询问 |
+| `list_dir` | 列出文件夹 | 在对话的文件夹中不询问 |
+| `glob` | 按模式查找文件（每次100个，并显示“Showing N of M”） | 在对话的文件夹中不询问 |
+| `grep` | 搜索文件内容 | 在对话的文件夹中不询问 |
+| `edit_file` | 替换文件中的文本。必须先读取该文件（较新的Claude模型对于它们能读取的文件可以跳过这一步）。如果文件在读取后被修改过，编辑会被拒绝，除非它仍然恰好只匹配一处 | 是 |
+| `write_file` | 创建或覆盖文件 | 是 |
+| `apply_patch` | 应用Codex格式的补丁。GPT模型会用它来代替`edit_file`和`write_file` | 是 |
+| `notebook_edit` | 替换、插入或删除Jupyter笔记本中的一个单元格（*按需*） | 是 |
+
+如果某次编辑破坏了Python、JSON或TOML文件的语法，会报告给模型。UTF-8或UTF-16（小端序，带字节顺序标记）编码的文件会保持原有编码；其他编码的文件，编辑工具会拒绝处理。编辑工具绝不会写入Word、Excel、PowerPoint、OpenDocument、RTF或EPUB文件，也不会覆盖PDF，因为模型只看到了它们的文本：Aristra Code会通过命令借助代码库来修改这些文件。
+
+## 命令和后台工作
+
+| 工具 | 作用 |
+|---|---|
+| `shell` | 运行命令，开启[沙箱](/zh/code/configure/sandbox)时在沙箱中运行（默认关闭）。它可能在后台运行，或者说明原因并请求在沙箱之外运行 |
+| `process_list`, `process_read`, `process_stop` | 列出、读取和停止后台命令、智能体、工作流运行和监视器 |
+| `monitor` | 运行一个脚本，其输出行会作为事件到达对话中，最长30分钟（默认5分钟）（*按需*） |
+| `cron_create`, `cron_delete`, `cron_list` | 在这个对话中安排提示词，运行一次或按cron计划运行（*按需*） |
+| `schedule_wakeup` | 为自行掌握节奏的`/loop`选择下一次查看的时间 |
+| `schedule_task` | 在这台电脑上保存或修改一个[定时任务](/zh/code/guides/background)。总是会先询问你（*按需*） |
+| `scheduled_tasks` | 列出已保存的定时任务，或暂停、恢复、运行或删除其中一个（*按需*） |
+| `session_search` | 搜索、读取或列出你在这台电脑上过去的对话，以便接续之前的工作。在无痕对话中、关闭了记忆的对话中，或者在你账户的**Memory**或**Search and reference past chats**关闭时不可用（*按需*） |
+| `push_notification` | 在你离开时，在这台电脑上给你发送通知（*按需*） |
+| `enter_worktree`, `exit_worktree` | 把对话移入git工作树或移回，只在你或你的指令要求时使用（*按需*） |
+
+## 向你提问
+
+| 工具 | 作用 |
+|---|---|
+| `ask_user_question` | 向你提出一到四个多选题。在每种模式下都会询问 |
+| `enter_plan_mode`, `exit_plan_mode` | 进入Plan模式，以及请你批准计划 |
+
+## 网页
+
+| 工具 | 作用 |
+|---|---|
+| `web_fetch` | 读取网页，从你的电脑获取。网页会缓存15分钟 |
+| `web_search` | 搜索网页：如果你设置了自己的Brave密钥，就使用它，否则通过Aristra的搜索（每次搜索从你的余额中扣除$0.0075；参见[用量与价格](/zh/account/usage)）。当Aristra的搜索无法提供服务时（你的余额已用完，或服务中断），会改用Exa、Parallel、Firecrawl或Keenable的免费公共搜索来回答，只发送搜索词（这些服务可能会保留它们）；在设置中用`web.keylessFallback: false`关闭此行为。每个对话最多200次搜索 |
+| `cloud_browser_*` | Aristra在云端运行的浏览器，用于需要浏览器的网页 |
+| `browser_*` | Aristra Desktop的浏览器面板：导航、后退、读取、查找、点击、输入、按键、滚动、选择和管理标签页，每个网站都需要你同意 |
+
+## 智能体和工作流
+
+| 工具 | 作用 |
+|---|---|
+| `agent` | 在后台启动一个[子智能体](/zh/code/guides/subagents)或派生 |
+| `send_message` | 向子智能体，或按名称向你这台电脑上另一个活动对话发送消息（*按需*） |
+| `list_agents` | 列出这个对话的智能体以及你其他的活动对话 |
+| `workflow` | 运行一个[工作流](/zh/code/guides/subagents)脚本，或按名称运行已保存的工作流 |
+| `skill` | 加载你的某个[技能](/zh/code/extend/skills) |
+| `task_create`, `task_get`, `task_update`, `task_list` | 为需要任务列表的模型维护对话的任务列表（当前的Claude模型不使用，除非设置了`ARISTRA_ENABLE_TODO_TOOLS=1`）；设置`ARISTRA_ENABLE_TASKS=false`时，由`todo_write`代替它们（*按需*） |
+| `update_plan`, `wrap_up` | 在Aristra Desktop中创建的对话里：显示在输入框上方的任务列表，以及包含后续步骤的收尾回顾 |
+
+## 记忆、你账户的文件和Craft
+
+| 工具 | 作用 |
+|---|---|
+| `memory_save`, `memory_update`, `memory_forget`, `memory_search` | 你的[账户记忆](/zh/code/guides/memory) |
+| `library_search`, `library_read` | 你账户中的文件（网站上的**Files**） |
+| `library_save` | 只在你要求时，把这台电脑上某个文件的副本保存到你账户的文件中；再次保存会替换该副本 |
+| `craft_list`, `craft_create`, `craft_read`, `craft_edit`, `craft_comment` | Aristra Desktop中的Craft文档 |
+| `present_files` | 以卡片形式向你展示文件 |
+| `send_user_file` | 在用[Remote Control](/zh/code/remote-control)共享的对话中，把文件发送到你的手机或网页版（*按需*） |
+
+## MCP、连接器和代码智能
+
+| 工具 | 作用 |
+|---|---|
+| `mcp__<server>__<tool>` | 你的某个[MCP服务器](/zh/code/extend/mcp)的工具 |
+| `connectors__<app>__<action>` | 连接到你Aristra账户的某个应用的操作（需要包含连接器的套餐） |
+| `tool_search`, `tool_describe`, `tool_call` | 查找和使用MCP及连接器工具，而无需每一轮都发送全部工具 |
+| `list_mcp_resources`, `read_mcp_resource` | 你的MCP服务器的资源（*按需*） |
+| `refresh_mcp_tools` | 在某个MCP服务器的工具发生变化后，重新列出你的MCP服务器的工具（*按需*） |
+| `lsp` | 通过插件的语言服务器跳转到定义、查找引用和读取诊断信息（*按需*） |
+
+## 脚本
+
+| 工具 | 作用 |
+|---|---|
+| `structured_output` | 返回符合`aristra run --json-schema`的答案 |
+
+## 模型看到的结果是什么样的
+
+超过50,000个字符或超过工具自身限制的工具结果，会被保存到一个模型可以打开的文件中，模型会看到2,000个字符的预览。来自外部的内容（网页、文件、工具输出）在到达模型时会被标记为不可信的数据，看起来像机密信息的值会被遮盖。

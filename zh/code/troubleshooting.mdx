@@ -1,0 +1,160 @@
+---
+title: "故障排除"
+description: "解决登录、运行时、模型、沙箱、审批、MCP服务器、钩子和终端方面的常见问题。"
+---
+
+## 先从这些开始
+
+```sh
+aristra doctor          # checks everything and says how to fix each problem
+aristra status          # your account, the runtime, the model sources
+aristra logs -n 200     # the runtime's log; -f follows it
+```
+
+`aristra doctor`会检查版本、你的账户、模型来源、沙箱、凭据存储、MCP服务器、你的设置文件、git、托管策略、遥测、安装和终端。每一行都是`ok`或`fix`，并说明该怎么做。
+
+如需支持，`aristra diagnostics export`会把一个支持包写入`~/.aristra/diagnostics/`，其中去除了机密信息和邮箱地址，也不包含任何消息。它不会发送任何内容；在分享之前请先查看其中的内容。在对话中，`/debug`技能会替你读取日志。
+
+## 登录
+
+<AccordionGroup>
+  <Accordion title="开始对话时提示“Sign in first”">
+    每个对话都需要登录Aristra，包括使用你自己的密钥和本地模型的对话。运行`aristra login`，或在对话中输入`/login`。
+  </Accordion>
+  <Accordion title="浏览器没有打开，或者我在另一台机器上">
+    在等待浏览器登录时，按`c`（或在对话中输入`/login code`）切换为验证码，并在10分钟内到任意设备上的app.aristralabs.com/desktop/device输入它。`aristra login --device-code`会直接从验证码开始。通过SSH时，默认使用验证码。在WSL上，请设置`BROWSER=wslview`。
+  </Accordion>
+  <Accordion title="我被自动退出了登录">
+    该设备已被撤销（在网站的设备列表中），或者登录在30天未使用后已过期：`aristra status`会显示“revoked”或“signed out”。请重新登录。
+  </Accordion>
+</AccordionGroup>
+
+## 运行时
+
+<AccordionGroup>
+  <Accordion title="运行时无法启动">
+    错误信息会说明原因。常见原因：
+
+    - **其他用户可以打开`~/.aristra`**。运行`chmod 700 ~/.aristra`。
+    - **它属于另一个用户**（在运行`sudo aristra ...`之后）。删除它或修正它的所有者。
+    - **存储是由更新版本的运行时写入的**。请更新：`aristra update`。
+  </Accordion>
+  <Accordion title="运行时反复停止">
+    崩溃的运行时会立即重启，2分钟内最多3次；之后终端会提示它失败了以及原因。请查看`aristra logs`；运行时在能够写日志之前打印的内容保存在`~/.aristra/logs/stderr.log`中。`aristra diagnostics export`需要运行时能够启动。
+  </Accordion>
+  <Accordion title="某项设置或环境变量似乎被忽略了">
+    设置文件会立即生效。环境变量（遥测、代理、托管设置文件夹）在运行时启动时读取：运行`aristra runtime stop`，然后重新运行你的命令。
+  </Accordion>
+</AccordionGroup>
+
+## 模型
+
+<AccordionGroup>
+  <Accordion title="&quot;No model source is ready&quot;">
+    登录Aristra，从`/model`登录你的ChatGPT套餐，或者用`aristra keys add <provider>`添加一个密钥。
+  </Accordion>
+  <Accordion title="余额已用完，或超出套餐限额">
+    这一轮会说明这一点以及限额何时重置。`/usage`会显示你以美元计的余额和你的限额，`/model`可以切换到另一个来源。`model.fallback`列表可以替你做这件事，在由另一个付费方付费之前会先询问你。要为余额充值，可以[充值](/zh/account/credits)，$10起。
+  </Accordion>
+  <Accordion title="&quot;This needs an Aristra plan&quot;">
+    搭配你自己的模型时，在你的电脑上使用Aristra是免费的。Aristra托管的其他内容随[套餐](/zh/account/plans)提供：Remote Control与共享对话、连接器以及Craft。每个账户都有账户记忆。没有套餐时，云端对话从你的[余额](/zh/account/credits)中扣费（新账户自带$1），云电脑使用充值运行。`/status`会显示你的套餐；各个套餐在你账户的Billing页面上。
+  </Accordion>
+  <Accordion title="&quot;Every plan for this launch is taken&quot;">
+    在Aristra One刚推出期间，套餐分批开放。你没有被扣费，你的账户也没有变化。稍后请从Billing再试一次。
+  </Accordion>
+  <Accordion title="网页搜索提示你的余额已用完">
+    在你的电脑上，使用Aristra的搜索每次从你的余额中扣除$0.0075。你可以[充值](/zh/account/credits)，在你的电脑上设置你自己的Brave密钥，或者保持免费公共搜索回退开启（`web.keylessFallback`），在你的余额用完时由它来回答。
+  </Accordion>
+  <Accordion title="&quot;Web search is set to your own Brave key&quot;">
+    你在这台电脑上设置了自己的Brave密钥，但现在无法读取它。在没有得到你明确指示的情况下，Aristra不会切换到从你余额中扣费的搜索。请在**Settings › Tools & keys**中重新添加密钥（或运行`aristra keys add brave`），或者在那里删除它（`aristra keys remove brave`），改用Aristra的搜索。
+  </Accordion>
+  <Accordion title="本地模型因窗口小于16K而失败">
+    Ollama默认以较短的上下文运行模型。在Ollama应用中调大Context length，或者设置`OLLAMA_CONTEXT_LENGTH=16384`或更大的值，然后重启Ollama。
+  </Accordion>
+</AccordionGroup>
+
+## 命令和沙箱
+
+<AccordionGroup>
+  <Accordion title="命令无法访问某个主机">
+    命令通过沙箱的代理访问网络。你还没有允许的主机会询问你；你拒绝过的主机会失败，并在输出之后显示`<sandbox_violations>`。你可以用`sandbox.network.allowedDomains`或`web_fetch(domain:...)`允许规则预先允许某个主机。忽略代理设置的工具（`ping`、某些数据库客户端）无法从沙箱中访问网络：请批准在沙箱之外运行它，或者把它列在`sandbox.excludedCommands`中。
+  </Accordion>
+  <Accordion title="在macOS上，pip install或gh因证书错误而失败">
+    这些工具会通过一个被沙箱关闭的macOS服务检查证书。让Aristra Code在沙箱之外运行它们（如果它没有主动请求，就让它这样做），或者设置`sandbox.enableWeakerNetworkIsolation: true`。参见[沙箱](/zh/code/configure/sandbox)。
+  </Accordion>
+  <Accordion title="开发服务器无法监听端口">
+    允许localhost：`aristra config set sandbox.network.allowLocalBinding true`。
+  </Accordion>
+  <Accordion title="命令无法写入它应该能写入的文件">
+    命令只能写入对话的文件夹、`$TMPDIR`以及你的规则开放的路径，绝不能写入设置文件、`.git/hooks`、`.git/config`、shell启动文件以及受保护列表中的其他内容。Aristra Code可以在你批准后用它的文件工具修改这些文件。
+  </Accordion>
+  <Accordion title="在Linux上，你开启的沙箱无法启动">
+    这时命令会在沙箱之外运行（对话中会说明），或者在设置了`sandbox.failIfUnavailable`时，这一轮不会开始。`aristra doctor`会在Sandbox下说明原因：安装bubblewrap，为它允许用户命名空间（Ubuntu 24.04及更高版本），或者在容器内设置`sandbox.enableWeakerNestedSandbox: true`。
+  </Accordion>
+</AccordionGroup>
+
+## 审批
+
+<AccordionGroup>
+  <Accordion title="审批消失了">
+    另一个使用端先回复了它，或者它在30分钟后超时并被拒绝。
+  </Accordion>
+  <Accordion title="脚本运行以状态3退出">
+    有操作请求批准，但没有人可以回复。为本次运行允许它（`--allow "shell(npm test *)"`），选择一种模式（`--permission-mode auto`），或者在你的设置中添加规则。`result.permissionDenials`会列出被拒绝的内容。
+  </Accordion>
+  <Accordion title="Auto模式一直在询问">
+    它的审核模型在连续阻止3步或在一个对话中累计阻止20步后会暂停；批准一步会让它重新开启。`/retry`会让被阻止的步骤运行一次。
+  </Accordion>
+</AccordionGroup>
+
+## 对话
+
+<AccordionGroup>
+  <Accordion title="&quot;Another Aristra runtime is running this session&quot;">
+    有一轮正在其中运行，可能是在另一个运行时中（`aristra run --no-daemon`、远程会话）。请等待它结束；已终止的运行时留下的占用会在60秒后过期。
+  </Accordion>
+  <Accordion title="一轮自行中断了">
+    运行时在这一轮运行期间停止了。对话中会显示“Aristra stopped while this was running”，输入框会提供“Continue from where you left off.”：按Enter发送它（在Aristra Desktop中，按Tab把它放入输入框），或者输入其他内容。
+  </Accordion>
+  <Accordion title="列表中缺少某个对话">
+    `aristra sessions`列出这个文件夹的对话，`--all`列出所有文件夹的对话，`--cloud`列出你账户的对话。无痕对话永远不会被列出。
+  </Accordion>
+</AccordionGroup>
+
+## MCP服务器、技能和钩子
+
+<AccordionGroup>
+  <Accordion title="MCP服务器无法连接">
+    `aristra mcp test <name>`会启动它并打印原因：程序不在你的`PATH`中；使用了`--sandbox`时，它写入了沙箱拒绝的位置（为它提供`--cwd`或`--writable`）；它的软件包被标记为恶意软件；它需要登录（`aristra mcp login <name>`）；或者它是你还没有批准的项目服务器。被策略阻止的服务器会在`aristra mcp list`中显示原因。
+  </Accordion>
+  <Accordion title="MCP工具每次都会询问">
+    该服务器不受信任：`aristra mcp trust <name>`。
+  </Accordion>
+  <Accordion title="文件夹的技能、钩子或规则被忽略了">
+    该文件夹不受信任。`/folder`会说明这一点。
+  </Accordion>
+  <Accordion title="钩子没有运行">
+    钩子只有在你批准后才会运行：先运行`aristra hooks list`，然后运行`aristra hooks approve <event> <command>`。`settings.local.json`中的钩子永远不会运行，`disableAllHooks`或团队的策略也可以关闭钩子；`aristra hooks list`会注明原因。
+  </Accordion>
+</AccordionGroup>
+
+## 终端
+
+<AccordionGroup>
+  <Accordion title="Shift+Enter会发送消息而不是换行">
+    运行`/terminal-setup`，或者使用Alt+Enter或Ctrl+J。
+  </Accordion>
+  <Accordion title="没有通知">
+    终端会在iTerm2、kitty和Ghostty中发送通知，在Apple的终端应用中则使用响铃；其他终端不会收到通知。请检查你终端的通知设置，并确认没有设置`ARISTRA_NO_NOTIFY`。Aristra Desktop会发送它自己的通知。
+  </Accordion>
+</AccordionGroup>
+
+## 从头开始
+
+```sh
+aristra runtime stop --now
+mv ~/.aristra ~/.aristra.bak     # keeps your chats, settings and secrets aside
+aristra                          # a fresh start: sign in again
+```
+
+如果想在不影响你实际配置的情况下尝试某些东西，请使用另一个主目录：`ARISTRA_HOME=~/aristra-scratch aristra`。

@@ -1,0 +1,132 @@
+---
+title: "Permisos"
+description: "Controla qué hace Aristra Code por su cuenta y qué pregunta antes: modos, reglas, confiar en una carpeta, aprobaciones, el modo Plan y el revisor del modo Auto."
+---
+
+Antes de cada llamada a una herramienta, Aristra Code decide si se ejecuta, te pregunta, pasa al revisor del modo Auto o se rechaza. Un único conjunto de reglas decide para todas las superficies, así que una regla significa lo mismo en la terminal, en Aristra Desktop, en los scripts y en los editores.
+
+Las aprobaciones son el aviso de seguridad. El [sandbox](/es/code/configure/sandbox), desactivado de forma predeterminada, es el límite de seguridad una vez que lo activas. Un comando dentro del sandbox no puede escribir fuera de las carpetas del chat y solo llega a los hosts que permites, así que se ejecuta sin preguntar salvo que una regla diga otra cosa.
+
+## Modos
+
+| Modo | Se ejecuta solo | Todo lo demás |
+|---|---|---|
+| **Manual** (`default`) | Lecturas, búsquedas y listados en las carpetas del chat, los comandos que solo leen y, con el sandbox activado, los comandos dentro de él; lo que cubran tus reglas de permitir | Pregunta |
+| **Accept edits** | Además, las ediciones de archivos en las carpetas del chat, y `mkdir`, `touch`, `rm`, `rmdir`, `mv`, `cp` y `sed` allí | Pregunta |
+| **Plan** | Como Manual. Aristra Code explora y escribe un plan, sin cambiar nada hasta que lo apruebes. En un chat que puede usar Bypass permissions, el modo Plan deja que todo se ejecute, como Bypass | Pregunta |
+| **Auto** | Como Accept edits, salvo que tus reglas de permitir para intérpretes y ejecutores (`shell(python:*)`, `shell(npm run:*)` y similares) no se aplican: esos comandos van al revisor | Va al revisor del modo Auto en lugar de preguntarte |
+| **Don't ask** (`dontAsk`) | Como Manual | Se rechaza |
+| **Bypass permissions** | Todo salvo lo que cubra una regla de denegación o de pregunta, las comprobaciones de seguridad y las herramientas que siempre te necesitan | |
+| **Read only** | Lecturas, búsquedas y listados | Se rechaza: no cambia nada |
+
+**Cambia de modo** con Shift+Tab (Manual, Accept edits, Plan, luego Bypass permissions si el chat puede usarlo, y luego Auto) o con `/mode <name>`. Un cambio se aplica desde la siguiente llamada a una herramienta, y una aprobación que ya está esperando se vuelve a comprobar: si el nuevo modo la permite, se ejecuta.
+
+**El modo inicial** viene de `--permission-mode` o, si no, de `permissions.defaultMode` en tu configuración o, si no, es Manual.
+
+**Desactivar modos.** `permissions.disableAutoMode: "disable"` desactiva Auto. Bypass permissions solo está disponible en un chat iniciado con `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions` o `--permission-mode bypassPermissions`, muestra una advertencia la primera vez, se rechaza para root (salvo con `IS_SANDBOX=1`) y una [política gestionada](/es/code/configure/managed-policy) puede desactivarlo. Aristra Desktop no lo ofrece.
+
+## Reglas
+
+Una regla es `tool` o `tool(specifier)`. Los nombres de herramientas de Claude Code también funcionan (`Bash(npm test:*)`, `Read`, `Edit`, `WebFetch`).
+
+| Regla | Cubre | Especificador |
+|---|---|---|
+| `shell` | Comandos | El comando exacto, `prefix:*` para los comandos que empiezan con esas palabras (`shell(npm run:*)`) o `*` como comodín (`shell(git log *)`) |
+| `read` | Leer, listar y buscar archivos | Un patrón de ruta |
+| `edit` | Editar y escribir archivos | Un patrón de ruta |
+| `web_fetch` | Obtener una página, y la red del sandbox | `domain:example.com` |
+| `mcp__server` | Las herramientas de un servidor MCP | `mcp__server` para todas, `mcp__server__tool` para una |
+| `memory`, `browser`, `mcp` | Todas las herramientas de memoria, ambos navegadores, todas las herramientas MCP | Ninguno |
+| `workflow` | Un flujo de trabajo guardado | Su nombre |
+| Cualquier otro nombre de herramienta | Esa herramienta | Ninguno |
+
+```json .aristra/settings.json
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["shell(npm test:*)", "shell(git diff:*)", "edit(/src/**)"],
+    "ask": ["shell(git push:*)"],
+    "deny": ["read(~/.env*)", "web_fetch(domain:pastebin.com)"],
+    "additionalDirectories": ["../shared"]
+  }
+}
+```
+
+- **Los patrones de ruta** usan el estilo de gitignore: `//abs/path` desde la raíz, `~/path` desde tu carpeta personal, `/path` desde la carpeta del proyecto en la configuración de un proyecto, o desde `~/.aristra` en la tuya, y cualquier otra cosa desde la carpeta del chat. `**` atraviesa carpetas; `*` no.
+- **Comandos compuestos** (`;`, `&&`, `|`, redirecciones): una regla de permitir debe cubrir cada parte; basta con que una regla de denegación o de pregunta coincida con cualquier parte. Los envoltorios como `timeout` y `nohup` se miran por dentro.
+- **Una denegación en cualquier lugar gana a un permiso en cualquier lugar.**
+
+`aristra doctor` y `/config` señalan las reglas que no se pueden leer o que nunca pueden aplicarse.
+
+### De dónde vienen las reglas
+
+| Origen | Dónde |
+|---|---|
+| Política gestionada | La define un administrador; sus reglas de denegación ganan a todo |
+| Tú | `~/.aristra/settings.json` |
+| Tú, para una carpeta | `projects` en `~/.aristra/settings.json` |
+| El proyecto, compartido | `<folder>/.aristra/settings.json`, incluido en el repositorio |
+| El proyecto, solo tuyo | `<folder>/.aristra/settings.local.json`, donde se guarda "don't ask again" |
+| Una ejecución | `aristra run --allow`, `--deny` y `--settings` |
+| Una skill | Las herramientas que permite, mientras se ejecuta |
+| Un chat | Las respuestas "during this session" y `/add-dir` |
+
+`/permissions` muestra todas las reglas por origen, te permite añadir o quitar una, muestra las carpetas del chat y muestra los pasos que el revisor de Auto bloqueó recientemente.
+
+## Confiar en una carpeta
+
+La configuración de un repositorio la escribe quien lo creó. Antes del primer chat en una carpeta, Aristra Code te pregunta si confías en ella. "No, exit" aparece seleccionado primero. Confiar se guarda para el repositorio y sus subcarpetas. Hasta que confíes en una carpeta, solo cuentan sus reglas de denegación y de pregunta, y sus skills y hooks se ignoran. `/folder` indica si la carpeta actual es de confianza.
+
+## Comprobaciones de seguridad
+
+Algunos cambios preguntan en todos los modos, Bypass incluido, y ninguna regla de permitir los deja pasar. En Auto, el revisor decide el primer tipo; nunca puede aprobar los demás:
+
+- Escribir en las carpetas `.git`, `.vscode`, `.idea`, `.claude` y `.aristra`, y en `.gitconfig`, `.gitmodules`, los archivos de inicio del shell, `.ripgreprc`, `.mcp.json` y `.claude.json` (un worktree de agente en `.aristra/worktrees` no está protegido).
+- Comandos `rm` y `rmdir` arriesgados: un destino que es una variable vacía o sin definir; un `rm` recursivo de la salida de un comando; la raíz, tu carpeta personal, una carpeta de primer nivel, la carpeta del chat o una carpeta superior a ella; un `rm` recursivo o con glob de una unidad montada (`/Volumes`, `/mnt`, `/media`); un glob relativo después de `cd`; y, en un script `sh -c`, un `rm` cuyo destino solo se conoce al ejecutarse.
+- Mover el chat a un worktree que no es el suyo.
+- Una herramienta que siempre te necesita, como salir del modo Plan o pagar.
+
+## Aprobaciones
+
+Cuando una llamada pregunta, todas las superficies abiertas la muestran con lo que haría y por qué pregunta. Gana la primera respuesta.
+
+| Respuesta | Efecto |
+|---|---|
+| **Yes** | Se ejecuta esta llamada |
+| **Yes, and don't ask again for** `rule` | Guarda la regla (que puedes editar antes, en los comandos) en el `settings.local.json` de la carpeta |
+| **Yes, and don't ask again for** `X, Y, and Z` **commands in** `folder` | Para un comando de varias partes: guarda una regla para cada parte, todas indicadas en la respuesta |
+| **Yes, allow reading from** `X/` | Permite que el chat lea esa carpeta durante el resto del chat |
+| **Yes, and don't ask again for** `host` | Para un comando en el sandbox que llega a un host nuevo: guarda `web_fetch(domain:host)` |
+| **Yes, and switch to accept edits** | Cambia el chat a Accept edits |
+| **Yes, allow all edits in** `X/` **during this session** | Añade esa carpeta al chat y lo cambia a Accept edits |
+| **No** | La llamada no se ejecuta y el turno se detiene. Con una nota (Tab), el turno continúa con tu nota como motivo |
+
+Las aprobaciones esperan 30 minutos (`approvals.timeoutMinutes`) y luego se rechazan.
+
+## Preguntas
+
+Aristra Code puede hacerte preguntas de opción múltiple: de una a cuatro a la vez, cada una con opciones, y siempre puedes responder con tus propias palabras o elegir **Chat about this** para hablarlo antes. Las preguntas se hacen en todos los modos salvo Don't ask, y nunca en una ejecución de script. En el modo Plan, pregunta de esta forma antes de escribir el plan.
+
+## Modo Plan
+
+Aristra Code entra por sí mismo en el modo Plan cuando una tarea merece planificarse, o lo eliges tú. Explora, escribe el plan en `~/.aristra/plans/<chat>.md` y pide permiso para continuar:
+
+- **Yes, and use auto mode** (o bypass permissions o accept edits, cuando Auto está desactivado): sale del modo Plan a ese modo.
+- **Yes, manually approve edits:** sale a Manual.
+- **Tell Aristra what to change:** revisa el plan.
+
+Ctrl+G abre el plan en tu editor; lo que guardes es el plan que apruebas.
+
+## El revisor del modo Auto
+
+En el modo Auto, lo que de otro modo preguntaría va a un modelo revisor en lugar de a ti. Las lecturas, las búsquedas y lo que permite Accept edits se ejecutan sin él. Las reglas de denegación, las herramientas que siempre te necesitan y las comprobaciones de seguridad que no puede aprobar (un `rm` arriesgado, otro worktree) nunca le llegan; sí decide las escrituras en archivos protegidos.
+
+- **Lo que ve:** tus propias palabras, las llamadas anteriores del agente sin sus resultados (para que una página web no pueda hablarle), tu `AGENTS.md` como datos y la acción en sí.
+- **Cuando bloquea**, se le dice al agente por qué y que no intente sortearlo. Cuando no puede decidir, la llamada se rechaza, nunca se permite. Una acción demasiado larga para leerla entera, o un chat sin revisor (`review.enabled: false`), te pregunta a ti.
+- **Después de 3 bloqueos seguidos, o 20 en un chat**, te pregunta a ti.
+- **`/retry`** deja que los pasos que acaba de bloquear se ejecuten una vez, tal como estaban.
+- **Quién revisa:** con los modelos de Aristra y el plan de ChatGPT, el revisor de Aristra, gratis. Con tu propia clave, un endpoint personalizado o un modelo local, ese modelo (o `review.model`), pagado como se paga ese modelo. `autoMode` (`allow`, `soft_deny`, `environment`) y `review.policy` le añaden tus propias indicaciones.
+
+## Cambiar el modo desde la web
+
+En un chat compartido con [Remote Control](/es/code/remote-control), el selector de modo del sitio web cambia el modo del chat en tu computadora. Un modo que deja ejecutar más cosas sin preguntar necesita antes una nueva verificación del inicio de sesión.

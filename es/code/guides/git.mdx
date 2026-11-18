@@ -1,0 +1,105 @@
+---
+title: "Git y pull requests"
+description: "Trabaja en worktrees de git, revisa diffs, haz commits, abre pull requests, sigue sus checks y revisiones con /pr y deja que Aristra Code corrija lo que indiquen con /autofix-pr."
+---
+
+Aristra Code trabaja directamente con git: lee el estado de tu repositorio al empezar cada chat, hace commits con el estilo de tu repositorio, abre pull requests con tu propio inicio de sesión de `gh` y puede vigilar un pull request y corregir lo que indiquen sus checks y sus revisores.
+
+## Worktrees
+
+Un worktree es un checkout aparte de tu repositorio en su propia rama, para que un chat pueda trabajar sin tocar tu carpeta y varios chats puedan trabajar a la vez.
+
+<Tabs>
+  <Tab title="Terminal">
+    ```sh
+    aristra -w                 # a new worktree with a random name
+    aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
+    aristra -w auth-refactor --resume <id>   # move an existing chat into it
+    ```
+
+    Al salir, un worktree sin cambios se elimina; si tiene cambios, se te pregunta si quieres conservarlo, y el comando para reanudar lo indica.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    En un chat nuevo de Code, abre el menú **+** debajo del cuadro de mensaje y elige **Work in a new worktree**. La terminal del chat, Review y las acciones de archivos usan todos el worktree. La opción solo aparece cuando la carpeta del chat está en un repositorio git.
+
+    El menú de ramas debajo del cuadro de mensaje muestra las ramas del repositorio de la carpeta. Una rama que tiene en checkout otro worktree indica **Open its worktree**: al elegirla, se añade ese worktree como carpeta y se inicia allí un chat nuevo, ya que git cambia a una rama en un solo worktree a la vez.
+  </Tab>
+</Tabs>
+
+Un worktree nuevo parte de la rama predeterminada de tu origin (que se actualiza con fetch si tiene más de un día). Ajustes en `worktree`:
+
+| Ajuste | Hace |
+|---|---|
+| `worktree.baseRef` | `"fresh"` (el predeterminado): partir de la rama predeterminada del origin. `"head"`: partir del commit actual |
+| `worktree.symlinkDirectories` | Carpetas enlazadas desde el checkout principal en lugar de copiadas, como `node_modules` |
+| `worktree.sparsePaths` | Rutas que se hacen checkout por separado, con el sparse checkout de git, para repositorios grandes |
+
+Un worktree nuevo recibe tu `.aristra/settings.local.json`, y se copian en él los archivos ignorados que indique el `.worktreeinclude` de tu repositorio (como `.env`).
+
+Los subagentes también pueden trabajar en sus propios worktrees; consulta [Subagentes](/es/code/guides/subagents). Aristra Code solo mueve un chat a un worktree cuando tú o tus instrucciones se lo piden.
+
+## Diffs
+
+```text
+/diff
+```
+
+muestra tus cambios sin commit y lo que cambió cada turno, del más reciente al más antiguo. Left y Right cambian entre ellos, y Enter muestra el diff de un archivo.
+
+En el [renderizador a pantalla completa](/es/code/terminal), `/diff` abre junto al chat un panel que se actualiza a medida que Aristra Code edita: los cambios de este chat, los cambios sin commit o los de la rama (Ctrl+X B cambia entre ellos). Haz clic en un archivo para ir a él, o en **ask** para adjuntar su diff a tu siguiente mensaje.
+
+En Aristra Desktop, **Review** (⌥⌘B) muestra lo mismo: los cambios sin commit, la rama respecto a su base o las ediciones del último turno, con cada archivo a un clic de tu editor.
+
+## Commits
+
+Pide un commit o ejecuta:
+
+```text
+/commit [guidance]
+```
+
+Aristra Code lee `git status`, el diff, la rama y los commits recientes, añade los archivos al staging por su nombre y escribe un mensaje con el estilo de tu repositorio. Nunca cambia tu configuración de git, omite hooks, hace amend, incluye secretos en un commit ni hace push, salvo que se lo pidas.
+
+## Pull requests
+
+```text
+/create-pr            # commit what's uncommitted, push, and open a pull request
+/create-pr --draft    # as a draft
+```
+
+En una rama con un pull request abierto, el pie muestra `PR #412`, coloreado según el estado de su revisión: verde si está aprobado, rojo si se piden cambios, amarillo si espera revisión y atenuado si es un borrador. Usa tu propio inicio de sesión de `gh` (o `glab` para los merge requests de GitLab). `prStatusFooterEnabled: false` lo oculta.
+
+```text
+/pr [number]
+```
+
+abre el pull request de la rama: su estado, sus checks y sus revisores, y después Overview, Checks, Files y Commits.
+
+| Tecla | Hace |
+|---|---|
+| `m` | Hacer merge (pide confirmación), o la acción de la cola de merge |
+| `a` | Aprobar |
+| `w` | Activar o desactivar el auto-merge |
+| `d` | Convertirlo en borrador |
+| `o` | Abrirlo en GitHub |
+| `x`, `X` | Volver a ejecutar un check fallido, o todos los checks fallidos |
+| `s` | Poner un check fallido en el prompt para Aristra Code |
+| `f` | Poner los conflictos de merge en el prompt |
+| `g` | Actualizar |
+
+En Aristra Desktop, **PR #N** en la cabecera abre el mismo pull request junto al chat, con Reply y Resolve en los comentarios de revisión. En una rama sin pull request, la cabecera ofrece **Create PR**, **Create draft PR** o **Manually create PR**.
+
+## Corrección automática
+
+```text
+/autofix-pr           # watch the branch's pull request
+/autofix-pr 412       # watch that one
+/autofix-pr stop
+```
+
+Con Auto-fix activado, Aristra Code consulta GitHub cada minuto y despierta el chat cuando fallan los checks, aparecen conflictos de merge o las personas que pueden hacer push al repositorio (o las apps) dejan comentarios de revisión nuevos. Cada vez que se despierta aparece en el chat como una línea propia, que se despliega para mostrar lo que dijo GitHub, y Aristra Code corrige y hace push. En Aristra Desktop, activa **Auto-fix CI & address comments** en el panel del pull request de tu propio pull request.
+
+<Note>
+`/pr`, el pie y Auto-fix llaman a la API de GitHub con tu inicio de sesión de `gh`. Ejecuta `gh auth login` una vez si no lo has hecho.
+</Note>

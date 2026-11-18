@@ -1,0 +1,156 @@
+---
+title: "Referencia de la CLI"
+description: "Todos los subcomandos y flags de aristra: la Aristra CLI para chats, scripts, cuentas, modelos, extensiones, configuración y soporte."
+---
+
+La Aristra CLI es el comando `aristra`: Aristra Code en tu terminal. Cada subcomando muestra su uso con `--help`; unos pocos lo muestran como un error de uso (código 2). Para los comandos que escribes dentro de un chat, consulta [Comandos](/es/code/reference/commands).
+
+```text
+aristra [options] [prompt]          Aristra Code in this folder
+aristra run [options] [prompt]      one turn, non-interactive (also: aristra -p or --print, as the first argument)
+aristra <command> ...
+```
+
+Todo lo que no es un subcomando es un prompt: `aristra fix the build` inicia un chat con "fix the build".
+
+## Opciones globales
+
+| Opción | Hace |
+|---|---|
+| `--remote <host>` | Ejecutar en otra máquina por SSH, antes o después del comando. Consulta [Máquinas remotas](/es/code/remote-machines) para ver los comandos que se quedan en esta computadora |
+| `-v`, `--version` | Mostrar la versión |
+| `-h`, `--help` | Mostrar los subcomandos |
+| `--help-agent` | Mostrar las opciones interactivas |
+
+Los subcomandos salen con `0` si tienen éxito, `1` si fallan (con el mensaje en stderr) y `2` si hay un error de uso. `aristra run` añade `3` y `130`; consulta [Modo no interactivo](/es/code/non-interactive). `aristra serve` sale con el código propio del runtime (`3`: ya hay un runtime en ejecución para este directorio personal). `aristra` sale con `130` cuando abandonas las pantallas de la primera ejecución, como con "No, exit".
+
+## Iniciar un chat
+
+```text
+aristra [options] [prompt...]
+aristra resume [id]
+aristra attach <id>
+```
+
+| Opción | Hace |
+|---|---|
+| `-c`, `--continue` | Continuar el chat más reciente de esta carpeta |
+| `-r`, `--resume <id>` | Continuar ese chat |
+| `-m`, `--model <id>` | El modelo para un chat nuevo |
+| `--source <id>` | De dónde viene el modelo: `aristra`, `chatgpt`, `openai`, `anthropic`, `gemini`, `ollama`, `lmstudio`, `custom` y otros |
+| `--agent <agent>` | Ejecutar el chat como uno de tus [agentes personalizados](/es/code/guides/subagents) |
+| `-w`, `--worktree [name]` | Trabajar en un worktree de git. Consulta [Worktrees](/es/code/guides/git) |
+| `--permission-mode <mode>` | El modo inicial: `manual` (o `default`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`, `read_only` |
+| `--dangerously-skip-permissions` | Empezar en Bypass permissions. Se rechaza para root salvo con `IS_SANDBOX=1` |
+| `--allow-dangerously-skip-permissions` | Permitir que el chat cambie a Bypass permissions más adelante |
+| `--add-dir <path>` | Otra carpeta en la que puede trabajar el chat. Se puede repetir |
+| `--plugin-dir <path>` | Cargar un plugin desde una carpeta o un `.zip` para este chat. Se puede repetir |
+| `--fullscreen` | Usar el renderizador a pantalla completa en este inicio |
+| `--folder <path>` | La carpeta en la que trabajar |
+| `--cloud` | Un [chat en la nube](/es/code/cloud-chats), que ejecuta el agente en la nube de Aristra |
+| `--incognito` | Con `--cloud`: se deja fuera de las listas de tu cuenta |
+| `--project <name>` | Con `--cloud`: iniciar el chat en ese proyecto |
+
+`aristra resume` sin id abre un selector. `aristra resume <id>` y `aristra attach <id>` abren ese chat, tanto si está inactivo como si se está ejecutando o esperando una aprobación.
+
+## Ejecuciones no interactivas
+
+`aristra run` (o `-p`) ejecuta un turno para scripts y CI. Sus opciones y su salida están en [Modo no interactivo](/es/code/non-interactive).
+
+## Chats
+
+```text
+aristra sessions [--all | --cloud] [--limit <n>] [--json]
+aristra sessions export <id> [--format md|json]
+aristra sessions delete <id> [--yes]
+aristra sessions import <id> [--folder <path>] [--source <id> --model <id>]
+aristra sessions connect-folder <id> [--folder <path>]
+aristra sessions download <id> [<key>]
+```
+
+| Forma | Hace |
+|---|---|
+| `sessions` | Los chats de esta carpeta, del más reciente al más antiguo, de todas las superficies. `--all` para todas las carpetas, `--cloud` para los chats en la nube de tu cuenta |
+| `sessions export <id>` | Escribir el chat en `~/.aristra/exports/` |
+| `sessions delete <id>` | Eliminar el chat y sus archivos. `--yes` omite la pregunta |
+| `sessions import <id>` | Copiar un chat en la nube en un chat nuevo de esta computadora |
+| `sessions connect-folder <id>` | Darle a un chat en la nube una carpeta de esta computadora |
+| `sessions download <id>` | Descargar los archivos que creó el agente de un chat en la nube |
+
+## Tu cuenta
+
+| Comando | Hace |
+|---|---|
+| `aristra login [--device-code \| --browser]` | Iniciar sesión, en un navegador o con un código (el código es lo predeterminado por SSH o sin navegador). Mientras espera el inicio de sesión en el navegador, pulsa c para usar un código |
+| `aristra logout` | Cerrar sesión y quitar esta computadora de tu cuenta |
+| `aristra setup-token [--name <name>]` | Mostrar un token para CI que ejecuta modelos con tu saldo de Aristra durante un año. Consulta [En CI](/es/code/non-interactive) |
+| `aristra status [--json]` | Tu cuenta, el runtime y los orígenes de modelos |
+
+## Modelos y claves
+
+| Comando | Hace |
+|---|---|
+| `aristra models [--source <id>] [--json]` | Los modelos que ofrece cada origen, con quién paga y, en los modelos locales, si caben |
+| `aristra keys add <provider>` | Añadir una clave de un proveedor, o la clave de una herramienta: `brave` para la búsqueda web, `e2b` para el sandbox (se pide oculta o se pasa por stdin) |
+| `aristra keys add custom [--url <address>] [--wire chat_completions\|responses\|anthropic] [--name <name>] [--model <id>]... [--no-key]` | Un servidor propio compatible con una API de OpenAI o de Anthropic |
+| `aristra keys list` | Qué claves están configuradas, nunca las claves en sí |
+| `aristra keys remove <provider>` | Eliminar una clave |
+
+## Extensiones
+
+| Comando | Hace |
+|---|---|
+| `aristra mcp add [-s scope] <name> [--env K=V]... [--secret K=V]... [--cwd <folder>] [--writable <folder>]... [--sandbox] -- <command> [args]` | Añadir un servidor MCP que se ejecuta como programa; `-s` es `local` (predeterminado), `project` o `user`. `--secret` guarda el valor en tu almacén de credenciales, y `--sandbox` lo ejecuta en el sandbox, con red, escribiendo solo en su propia carpeta (`--cwd`, o el proyecto), en las carpetas `--writable` y en las cachés de los lanzadores de paquetes |
+| `aristra mcp add [-s scope] <name> --url <url> [--header K=V]... [--client-id <id>] [--client-secret <secret>]` | Añadir un servidor MCP en una dirección |
+| `aristra mcp add-json [-s scope] <name> <json> [--client-secret <secret>]` | Añadir uno desde JSON |
+| `aristra mcp add-from-claude-desktop [-s scope] [name...]` | Traer los servidores de programa (stdio) de Claude Desktop (macOS) |
+| `aristra mcp list [--json]`, `get <name>`, `test <name>`, `remove [-s scope] <name>` | Listar, inspeccionar, probar o eliminar servidores |
+| `aristra mcp reset-project-choices` | Olvidar tus aprobaciones de los servidores del `.mcp.json` de este proyecto |
+| `aristra mcp trust <name>`, `untrust <name>` | Permitir que las herramientas de un servidor se ejecuten sin preguntar (las de un servidor local o de proyecto, solo en este proyecto), o dejar de permitirlo |
+| `aristra mcp login <name> [--device-code]`, `logout <name>` | Iniciar sesión en un servidor con OAuth |
+| `aristra hooks list [--json]`, `approve <event> <command>`, `revoke <event> <command>` | Tus hooks y su aprobación |
+| `aristra hooks test <event> [--tool <name> --input <json> \| --prompt <text>]` | Ejecutar los hooks de un evento con un ejemplo |
+| `aristra plugin install <plugin> [-s scope] [--config KEY=VALUE]` | Instalar un plugin |
+| `aristra plugin uninstall`, `enable`, `disable`, `update`, `list`, `prune` | Gestionar los plugins |
+| `aristra plugin configure <plugin>` | Las opciones de un plugin |
+| `aristra plugin validate <path>` | Comprobar un plugin o un marketplace |
+| `aristra plugin marketplace add <source>`, `list`, `remove <name>`, `update [name]` | Gestionar los marketplaces |
+
+Consulta [Servidores MCP](/es/code/extend/mcp), [Hooks](/es/code/extend/hooks) y [Plugins](/es/code/extend/plugins).
+
+## Configuración
+
+| Comando | Hace |
+|---|---|
+| `aristra config get [key] [--json]` | La configuración en vigor y de dónde sale cada ajuste |
+| `aristra config set <key> <value> [--project \| --local]` | Cambiar un ajuste, en tu archivo o en el del proyecto |
+| `aristra config edit [--project \| --local]` | Abrir un archivo de configuración en tu editor |
+| `aristra import <claude-code\|codex>` | Traer desde Claude Code o Codex tus instrucciones, servidores MCP, reglas de permisos, modo predeterminado, hooks, skills, agentes y comandos. Muestra antes una vista previa. `--yes=<digest>` aplica los elementos marcados (los tuyos, no las skills), `--only <id>` elige elementos, incluidas las skills y los de la propia carpeta, `--dry-run` muestra el resultado y `--json` lo imprime como JSON |
+
+## Soporte
+
+| Comando | Hace |
+|---|---|
+| `aristra doctor [--json]` | Revisar tu configuración e indicar cómo corregir cada problema |
+| `aristra logs [-n <lines>] [-f]` | El registro del runtime |
+| `aristra diagnostics export [--no-logs]` | Escribir un paquete de soporte, sin secretos, en `~/.aristra/diagnostics/` |
+
+## El runtime
+
+| Comando | Hace |
+|---|---|
+| `aristra runtime status [--json]` | Si el runtime se está ejecutando y qué contiene. No inicia uno |
+| `aristra runtime stop [--now]` | Detenerlo cuando no haya nada en ejecución; `--now` también detiene los turnos en curso |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (o `--every hour --at <minute>`, o `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | Las tareas programadas guardadas en esta computadora. `add` también acepta `--name`, `--folder`, `--source`, `--model`, `--mode` y `--skip-missed`. Consulta [Tareas programadas](/es/code/guides/background) |
+| `aristra service install`, `uninstall [--now]`, `status [--json]` | El servicio en segundo plano. Consulta [Trabajo en segundo plano](/es/code/guides/background) |
+| `aristra serve` | Ejecutar tú mismo el runtime (`--socket` o `--stdio`); las superficies lo inician por ti |
+| `aristra acp` | Servir a un editor mediante el Agent Client Protocol. Consulta [Editores](/es/code/editors) |
+
+## Instalación
+
+| Comando | Hace |
+|---|---|
+| `aristra update [--check]` | Actualizar a la versión más reciente de tu canal |
+| `aristra install [latest\|stable\|<version>]` | Cambiar de canal o de versión (predeterminado: `latest`) |
+
+Consulta [Instalación](/es/code/setup).

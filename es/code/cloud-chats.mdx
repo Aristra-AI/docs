@@ -1,0 +1,100 @@
+---
+title: "Chats en la nube"
+description: "Chats que ejecuta el agente en la nube de Aristra y que se guardan en tu cuenta, iniciados desde la terminal o Aristra Desktop, y que opcionalmente trabajan en una carpeta de tu computadora."
+---
+
+Un chat en la nube vive en tu cuenta de Aristra y se ejecuta en los servidores de Aristra, con el mismo agente que en el sitio web y en tu teléfono. Aristra Code muestra, abre, inicia y continúa los chats en la nube junto a los chats de tu computadora.
+
+Para tener una máquina propia en la nube, con un disco que conserva tus archivos y herramientas entre chats, consulta [Computadora en la nube](/es/surfaces/cloud-computer).
+
+Los chats en la nube se pagan con tu [saldo](/es/account/credits): primero el crédito inicial de $1 de una cuenta nueva, después el uso mensual de tu plan y luego las recargas. Cuando se acaba el saldo, un mensaje nuevo lo indica; los chats en tu computadora siguen funcionando con tu propio modelo.
+
+Usa un chat en la nube cuando quieras la conversación en tu cuenta (también en la web y en tu teléfono), las herramientas del agente en la nube (su navegador, su sandbox, tus cuentas conectadas, los documentos de Craft) o un chat que siga adelante mientras tu computadora duerme. Usa un chat en tu computadora para trabajar en una carpeta con cualquier modelo y con el sandbox de tu computadora.
+
+| | En tu computadora | En la nube |
+|---|---|---|
+| Se ejecuta en | El Aristra Runtime de aquí | El agente en la nube de Aristra |
+| Se guarda en | `~/.aristra` en esta computadora | Tu cuenta de Aristra |
+| Modelos | Cualquier origen que configures | Los modelos de Aristra, facturados como en el sitio web |
+| Archivos | La carpeta del chat, en el sandbox de esta computadora | Una carpeta de esta computadora si conectas una; si no, el propio sandbox del agente en la nube |
+| Modos | Manual, Accept edits, Plan, Auto, Read only, Don't ask (y Bypass permissions si lo permites) | Manual o Auto, como en el sitio web |
+
+## Iniciar uno
+
+```sh
+aristra --cloud                                        # a new cloud chat
+aristra --cloud "draft the launch email"               # with a first message
+aristra --cloud --folder ~/code/site "update the docs" # working in a folder on this computer
+aristra --cloud --incognito                            # incognito
+aristra --cloud --project "Q4 launch"                  # in a project
+```
+
+En Aristra Desktop, elige una carpeta e **In the cloud** debajo del cuadro de mensaje de un chat nuevo de Code, o inicia un chat en la pestaña Chat.
+
+Un chat en la nube usa los modelos de Aristra: indica uno con `--source aristra -m <model>` (`aristra models --source aristra` los muestra). Si no indicas ninguno, usa tu modelo predeterminado cuando es un modelo de Aristra y, si no, el modelo predeterminado de Aristra.
+
+## Mostrar, abrir y continuar
+
+```sh
+aristra sessions --cloud                  # your account's chats, newest first
+aristra resume <id>                       # open one
+aristra run -r <id> "next step, please"   # one more turn from a script
+```
+
+Abrir un chat en la nube lee su transcripción desde tu cuenta, con sus pasos, archivos y documentos. Una ejecución que ya está en marcha se sigue en directo. Esc cancela la ejecución. `/rename` y `aristra sessions delete <id>` le cambian el nombre y lo eliminan en tu cuenta. Un chat iniciado o eliminado en el sitio web aparece o desaparece en menos de dos minutos.
+
+## Una carpeta de tu computadora
+
+Un chat en la nube puede trabajar en una carpeta de tu computadora: el agente en la nube lee, busca y cambia archivos allí a través de tu computadora, y nada fuera de esa carpeta. No puede ejecutar comandos en ella.
+
+```sh
+aristra --cloud --folder ~/code/site                        # start one in a folder
+aristra sessions connect-folder <id> --folder ~/code/site   # give an existing cloud chat a folder here
+```
+
+- Las llamadas a la carpeta se ejecutan con las reglas de esta computadora: dentro de la carpeta, con sus reglas de denegación y con los archivos secretos excluidos, y cada cambio se escribe solo tal como se mostró y se aprobó. Las aprobaciones aparecen en la terminal, en Aristra Desktop y en el sitio web; gana la primera respuesta.
+- Para esto, tu computadora mantiene una conexión saliente con Aristra. Nada escucha en tu computadora.
+- Mientras tu computadora duerme, las llamadas del chat a la carpeta esperan o fallan, y el agente en la nube lo indica.
+- Cada carpeta tiene además un nivel para los chats dirigidos desde el sitio web o tu teléfono: **Off** (el predeterminado), **Read only** o **Read and edit**. Configúralo en **Use from other devices**, en el menú de la carpeta en Aristra Desktop. Read only y Read and edit vienen con un plan.
+
+## Incógnito
+
+`aristra --cloud --incognito` inicia un chat que tu cuenta deja fuera de sus listas y de su memoria. No se guarda nada de él en tu computadora una vez que lo dejas. No tiene carpeta ni proyecto, y la cuenta lo elimina 30 días después de su última actividad.
+
+## Proyectos
+
+`aristra --cloud --project <name>` inicia el chat en ese proyecto de tu espacio de trabajo personal, así que aparece bajo el proyecto en el sitio web, con las instrucciones y la memoria del proyecto. Con `--folder`, el proyecto recuerda la carpeta; la carpeta principal del proyecto es donde empiezan sus chats nuevos en Aristra Desktop. Los proyectos se crean en el sitio web.
+
+## Modos y preguntas
+
+Un chat en la nube está en el modo **Manual** (el agente pregunta antes de cada paso que tu configuración no permite) o en el modo **Auto** (el revisor de Aristra decide esos pasos). Usa el modo elegido para él o, si no, el predeterminado de tu cuenta según la configuración del sitio web. Shift+Tab o `/mode` lo cambian, y la elección se guarda en el chat.
+
+Cuando el agente en la nube te pregunta algo a mitad de una ejecución (un paso que aprobar, una pregunta con opciones, un formulario), la ejecución se pausa y la pregunta llega como una aprobación a todas las superficies. Una solicitud a un sitio externo se puede permitir durante el resto del chat. Las preguntas con opciones son más fáciles de responder en Aristra Desktop o en el sitio web.
+
+## Adjuntos
+
+Un archivo que adjuntas a un chat en la nube se guarda con el chat en tu cuenta, tanto su texto como el propio archivo, hasta que eliminas el chat. Un chat de incógnito no guarda ninguno. Aristra lee PDF, Word, Excel, PowerPoint, archivos de Office antiguos, OpenDocument, RTF y EPUB, y lee con OCR hasta 100 páginas escaneadas de un PDF sin cargo. Un mensaje puede llevar hasta 5 archivos, 50 MB en total.
+
+- Un PDF de 10 páginas o menos va entero al modelo cuando el modelo acepta PDF, así que también ve las páginas tal como se ven.
+- Un texto de hasta 2,000 líneas y 100,000 caracteres va entero en el mensaje. Un archivo más largo entra con su principio, y el agente lee el resto cuando lo necesita.
+- En los turnos siguientes, el agente sigue teniendo los archivos adjuntados antes en el chat: puede volver a leer cualquiera de ellos o mirar las páginas de un PDF como imágenes.
+
+Un archivo adjuntado en un chat en tu computadora se queda en tu computadora, con el chat (consulta [Chats](/es/code/guides/chats)).
+
+## Archivos que creó el agente en la nube
+
+```sh
+aristra sessions download <id>          # every file the chat's agent made
+aristra sessions download <id> <key>    # one, by the key its step names
+```
+
+Los archivos se guardan en `~/.aristra/attachments/` y se muestran sus rutas.
+
+## Copiar un chat en la nube a tu computadora
+
+```sh
+aristra sessions import <id>
+aristra sessions import <id> --folder ~/code/site --source anthropic --model claude-sonnet-5-5
+```
+
+Esto copia un chat en la nube en un chat nuevo de tu computadora, para continuar con cualquier modelo en una carpeta. El chat en la nube se queda como estaba. La copia va en un solo sentido: lo que hagas en la copia nunca se envía de vuelta al chat en la nube.

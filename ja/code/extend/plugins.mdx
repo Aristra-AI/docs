@@ -1,0 +1,101 @@
+---
+title: "プラグイン"
+description: "スキル、コマンド、エージェント、フック、MCP サーバー、言語サーバーをまとめたプラグインを、Claude Code 形式のマーケットプレイスからインストールします。"
+---
+
+プラグインは、スキル、コマンド、エージェント、フック、MCP サーバー、言語サーバー、ワークフローを、1 つのインストール単位にまとめたものです。Aristra Code は Claude Code のプラグイン形式を使うため、Claude Code 用に書かれたプラグインはここでも動き、Claude Code のマーケットプレイスもそのまま使えます。出力スタイル、テーマ、チャネル、モニターは読み込まれません。また、Claude Code のツール（`Bash`、`Edit`）を指定したフックのマッチャーは、Aristra Code のツール（`shell`、`edit_file`）には一致しません。
+
+## プラグインをインストールする
+
+<Tabs>
+  <Tab title="ターミナル">
+    ```sh
+    aristra plugin install <plugin>                  # from your marketplaces
+    aristra plugin install <plugin>@<marketplace>    # from one marketplace
+    aristra plugin install <plugin> -s project       # for everyone in this project
+    aristra plugin list
+    ```
+
+    チャットでは、`/plugin` でプラグインマネージャーが開き、`/reload-plugins` で新しいチャットを始めずに変更を反映できます。
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Settings › **Plugins** を開くと、マーケットプレイスの閲覧、プラグインのインストール、有効化、無効化、設定ができます。
+  </Tab>
+</Tabs>
+
+プラグインの各部分には、プラグインの名前が付きます。スキルとコマンドは `/plugin-name:skill-name`、エージェントとワークフローも同様です。そのため、複数のプラグインを共存させられます。
+
+### スコープ
+
+| スコープ | 記録される場所 | 使える人 |
+|---|---|---|
+| `user`（既定） | `~/.aristra/settings.json` | 自分。すべてのフォルダーで使えます |
+| `project` | `.aristra/settings.json` | プロジェクトで作業する全員。各自がフォルダーを信頼し、プラグインをインストールしたあとで使えます（方法は `aristra plugin list` で案内されます） |
+| `local` | `.aristra/settings.local.json` | 自分。このプロジェクトで使えます |
+
+設定は `enabledPlugins` です。プロジェクトのプラグインは、フォルダーを信頼したあとでだけ有効になります。
+
+## マーケットプレイス
+
+マーケットプレイスはプラグインのカタログです。`.claude-plugin/marketplace.json` を含む git リポジトリ、URL、ファイル、フォルダーのいずれかです。
+
+```sh
+aristra plugin marketplace add anthropics/claude-plugins-official
+aristra plugin marketplace add https://example.com/marketplace.json
+aristra plugin marketplace list
+aristra plugin marketplace update
+aristra plugin marketplace remove <name>
+```
+
+Anthropic の公式マーケットプレイスは、Aristra Code を初めて対話的に起動したときに追加されます。`ARISTRA_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL=1` でこれを止められます。プロジェクトは、`extraKnownMarketplaces` でチームにマーケットプレイスを提案できます。
+
+## プラグインを管理する
+
+| コマンド | 動作 |
+|---|---|
+| `aristra plugin enable <plugin>`、`disable <plugin>` | プラグインを削除せずにオンまたはオフにします（すべてなら `disable -a`） |
+| `aristra plugin update <plugin>` | 最新のバージョンに更新します |
+| `aristra plugin uninstall <plugin>` | 削除します（`--keep-data` でデータフォルダーを残します） |
+| `aristra plugin prune` | すでに削除したプラグインのためにインストールされた依存関係を削除します |
+| `aristra plugin configure <plugin>` | プラグインが宣言しているオプションを表示または設定します |
+| `aristra plugin validate <path>` | 作成中のプラグインやマーケットプレイスを検証します |
+
+Anthropic のマーケットプレイスのプラグインはバックグラウンドで更新され、更新があると Aristra Code が知らせます。他のマーケットプレイスでは、`/plugin` で自動更新をオンにするか、その `extraKnownMarketplaces` のエントリで `autoUpdate: true` にします。`ARISTRA_DISABLE_AUTOUPDATER=1` で更新をオフにできます。オプションはインストール時に `--config KEY=VALUE` で設定することもできます。
+
+### インストールせずにプラグインを試す
+
+```sh
+aristra --plugin-dir ./my-plugin
+aristra run --plugin-dir ./my-plugin.zip "..."
+```
+
+を使うと、1 つのチャットに限り、フォルダーか `.zip` からプラグインを読み込みます。
+
+## プラグインが持ち込めるもの
+
+| 部分 | なるもの |
+|---|---|
+| `skills/`、`commands/` | [スキル](/ja/code/extend/skills)とコマンド。`/plugin-name:name` として使います |
+| `agents/` | [カスタムエージェント](/ja/code/guides/subagents)。`plugin-name:agent-name` として使います。プラグインのエージェントは `permissionMode`、`hooks`、`mcpServers` を設定できません |
+| `hooks/hooks.json` | [フック](/ja/code/extend/hooks) |
+| `.mcp.json` | [MCP サーバー](/ja/code/extend/mcp) |
+| 言語サーバー | コードインテリジェンス。Aristra Code はこれを通じて定義への移動、参照の検索、診断の読み取りができます |
+| `workflows/` | [ワークフロー](/ja/code/guides/subagents) |
+| `bin/` | Aristra Code が実行するコマンドの `PATH` の末尾に追加されるプログラム |
+| `settings.json` | `agent` と `subagentStatusLine` の設定 |
+
+<Warning>
+プラグインは、フック、MCP サーバー、プログラムといったコードをコンピューター上で実行します。インストールすることがそれらの実行への同意になるため、プラグインのフックは 1 つずつ承認を求めることはありません。プラグインは信頼できるマーケットプレイスからだけインストールしてください。
+</Warning>
+
+## 組織向け
+
+[管理ポリシー](/ja/code/configure/managed-policy)でプラグインを制御できます。
+
+| キー | 動作 |
+|---|---|
+| `strictKnownMarketplaces` | 追加できるマーケットプレイスをこれらに限定します |
+| `blockedMarketplaces` | 追加できないマーケットプレイス |
+| `enabledPlugins` | 全員に対してオンまたはオフにするプラグイン。管理された値が優先されます |
+| `pluginTrustMessage` | プラグインをインストールするときに表示される、組織からのメッセージ |
+| `disableSideloadFlags` | `--plugin-dir` を拒否します |

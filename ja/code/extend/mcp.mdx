@@ -1,0 +1,187 @@
+---
+title: "MCP サーバー"
+description: "Model Context Protocol サーバーで Aristra Code にツールを追加します。自分用、プロジェクト用、リポジトリの全員用に追加する方法、プロジェクトのサーバーの承認、信頼、OAuth でのサインイン、サーバーのサンドボックス化について説明します。"
+---
+
+[Model Context Protocol](https://modelcontextprotocol.io) サーバーは、Aristra Code にツールを追加します。データベース、課題管理ツール、デザインツール、社内 API などです。Aristra Code は、コンピューター上のチャットのために MCP サーバーを実行します。クラウドチャットでは、クラウドエージェントのツール、Aristra アカウントのコネクター、ウェブサイトの Connectors ページで追加したアドレスの MCP サーバーが使われます。`aristra mcp` で追加したサーバーは、クラウドチャットでは使われません。
+
+## サーバーを追加する
+
+コンピューター上でプログラムとして動くサーバー：
+
+```sh
+aristra mcp add fs --cwd ~/notes -- npx -y @modelcontextprotocol/server-filesystem ~/notes
+aristra mcp add db --secret DATABASE_URL=postgres://... -- uvx mcp-server-postgres
+```
+
+アドレスで接続するサーバー：
+
+```sh
+aristra mcp add sentry --url https://mcp.sentry.dev/mcp
+aristra mcp add internal --url https://tools.example.com/mcp --header Authorization="Bearer ..."
+```
+
+プログラムとその引数は `--` のあとに書きます。追加したら、次のコマンドを使えます。
+
+```sh
+aristra mcp test fs        # start it and list its tools
+aristra mcp list           # every server here, its scope and its state
+aristra mcp get fs         # one server's details
+aristra mcp trust fs       # let its tools run without asking, in this project
+```
+
+## スコープ
+
+サーバーは 3 つのスコープのいずれかに保存されます。追加や削除のときに、`-s`（`--scope`）でスコープを選びます。
+
+| スコープ | 使われる場所 | 共有 | 保存先 |
+|---|---|---|---|
+| `local`（既定） | このプロジェクトのみ | なし | 自分の設定の、プロジェクトの下 |
+| `project` | このプロジェクト | あり。リポジトリを通じて共有 | フォルダーの `.mcp.json` |
+| `user` | 自分のすべてのプロジェクト | なし | 自分の設定の `mcp.servers` の下 |
+
+```sh
+aristra mcp add -s user github -- npx -y @modelcontextprotocol/server-github
+aristra mcp add -s project docs --url https://docs.example.com/mcp
+aristra mcp remove -s local fs
+```
+
+プロジェクトとはリポジトリのルートのことなので、サブフォルダーやワークツリーで追加した local のサーバーは、リポジトリ全体で使えます。同じ名前が複数のスコープにある場合は、local、project、user、プラグインの順に優先されます。プログラムとして動く local または project のサーバーは、プロジェクト内で実行されます。
+
+## プロジェクトの .mcp.json
+
+リポジトリは、`.mcp.json` で独自のサーバーを持ち込めます。Claude Code が読むのと同じファイルです。
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"] },
+    "docs": { "type": "http", "url": "https://docs.example.com/mcp", "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" } }
+  }
+}
+```
+
+このファイルは、チャットのフォルダーとその上位のすべてのフォルダーから読み込まれ、近いほうのファイルが優先されます。
+
+**プロジェクトのサーバーは、承認するまで実行されません**。フォルダーで `aristra` を起動すると、新しいサーバーごとに、使うか、このプロジェクトで今後追加されるものも含めてすべて使うか、使わずに続けるかを尋ねます。複数ある場合は、チェックを付ける一覧で表示されます。Aristra Desktop のフォルダーのチャットでも、入力欄の上で同じことを尋ねます。あとから `/mcp` で承認または拒否することもできます。
+
+回答はリポジトリではなく、自分の設定に保存されます。`aristra mcp reset-project-choices` で回答を消去すると、もう一度尋ねられます。
+
+<Note>
+リポジトリが自分自身のサーバーを承認することはできません。フォルダーの `.aristra` の設定にある承認は、フォルダーを信頼したあとでだけ有効になり、拒否はどこにあっても有効です。誰も見ていない実行（`aristra run`、スケジュールタスク）では確認できないため、承認待ちのサーバーは使いますが、拒否されたサーバーは決して使いません。
+</Note>
+
+`.mcp.json` はリポジトリを持つ全員と共有されるため、シークレットは書きません。`${VAR}` と書き、変数は自分の環境で設定してください。プロジェクトのサーバーを信頼しても、その信頼はこのプロジェクトにだけ適用されます。
+
+## /mcp 画面
+
+チャットで `/mcp` を実行すると、チャットから見えるサーバーがスコープごとに、それぞれの状態とともに一覧表示されます。1 つ選ぶと詳細が表示され、次の操作ができます。
+
+- まだ承認していないプロジェクトのサーバーを、承認または拒否する
+- アドレスで接続するサーバーの、認証、再認証、サインインの消去
+- 再接続する
+- このプロジェクトに限り、無効化または有効化する
+- ツールを表示する
+
+`/mcp reconnect`、`/mcp enable`、`/mcp disable` は、指定したサーバー、またはすべてのサーバーに対して同じ操作を行います。
+
+### JSON または Claude Desktop から追加する
+
+```sh
+aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop whose name is free here (macOS)
+```
+
+`aristra import claude-code` と `aristra import codex` でも、それらのツールのサーバーを先にプレビューを表示したうえで取り込めます。
+
+## サーバーの保存場所
+
+user のサーバーは自分の設定の `mcp.servers` の下に、local のサーバーは同じファイルのプロジェクトの下に保存され、シークレットは含まれません。`--secret`、`--header`、`--client-secret` で指定した値は、Aristra の認証情報ストアに保存されます。project のサーバーは、フォルダーの `.mcp.json` に保存されます。
+
+```json ~/.aristra/settings.json
+{
+  "mcp": {
+    "servers": {
+      "fs": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/notes"],
+        "cwd": "/Users/me/notes"
+      },
+      "sentry": { "url": "https://mcp.sentry.dev/mcp" }
+    }
+  },
+  "permissions": { "trustedMcpServers": ["fs"] }
+}
+```
+
+| フィールド | 対象 | 意味 |
+|---|---|---|
+| `type` | 両方 | `stdio` または `http`。SSE と WebSocket のサーバーには対応していません |
+| `command`、`args` | プログラム | プログラムとその引数 |
+| `env` | プログラム | シークレットではない環境変数 |
+| `cwd` | プログラム | 実行するフォルダー。そのフォルダーには書き込めます |
+| `writable` | プログラム | 書き込んでよい他のフォルダー |
+| `sandbox` | プログラム | `true` にするとサンドボックスで実行します（既定は `false`） |
+| `url` | アドレス | サーバーのアドレス |
+| `headers` | アドレス | シークレットではないヘッダー |
+| `headersHelper` | アドレス | 接続のたびに、その JSON 出力でヘッダーを追加するコマンド |
+| `oauth` | アドレス | 必要とするサーバー向けの `clientId`、`scopes`、`callbackPort`、`authServerMetadataUrl` |
+| `alwaysLoad` | 両方 | `true` にすると、ツールをツール検索の裏に置かず、常にモデルのツール一覧に含めます |
+| `timeout` | 両方 | 1 回の呼び出しにかけてよい秒数 |
+| `enabled` | 両方 | `false` にすると、エントリを残したまま起動しません |
+| `toolCosts`、`spendLimit`、`costUnit` | 両方 | ツールの費用、そのサーバーに対するチャットの支出上限、単位（既定は `credits`）。費用のかかる呼び出しの承認には費用が表示され、上限を超える呼び出しは常に確認を求めます |
+
+`command`、`args`、`env`、`url`、`headers` の `${VAR}` と `${VAR:-default}` は、ログインシェルの環境から読み込まれます。アドレスで接続するサーバーでは、よく知られた認証情報を持つ変数（クラウドのキー、パッケージレジストリのトークン、`ANTHROPIC_API_KEY` など）は空として読み込まれ、`ARISTRA_TOKEN` が埋め込まれることはありません。
+
+<Note>
+リポジトリの `.aristra/settings.json` で MCP サーバーを追加することはできません。リポジトリのサーバーは `.mcp.json` に書き、承認すると使われます。エージェントが `.mcp.json` を変更するときは、必ず先に確認を求めます。
+</Note>
+
+## 信頼
+
+MCP サーバーは自分が書いていないコードで、そのツールは何でもできます。
+
+- **サーバーを信頼するまで**は、ルールで許可されていない限り、そのツールは実行のたびに確認を求めます（Auto モードではレビュアーが判断します）。
+- `aristra mcp trust <name>` で**サーバーを信頼すると**、`mcp__<name>` を許可するルールと同じように、そのツールは確認なしで実行されます。拒否ルールや確認ルールは引き続き優先され、Read only では、サーバーが読み取り専用と示していないツールは拒否されます。
+- **信頼は、信頼したサーバーとそのスコープに属します**。自分のサーバーやプラグインのサーバーはどこでも信頼され、local または project のサーバーはそのプロジェクトでのみ信頼されます。リポジトリの `.mcp.json` や実行時の `--mcp-config` など、別のスコープにある同じ名前のサーバーに、その信頼が適用されることはありません。
+
+ルールも使えます。`permissions.allow`、`ask`、`deny` に、サーバーのすべてのツールなら `mcp__github`、1 つのツールなら `mcp__github__create_issue` のように書きます。[権限](/ja/code/configure/permissions)を参照してください。
+
+## サンドボックス
+
+プログラムとして動くサーバーは、自分と同じアクセス権で起動します。`"sandbox": true`（`aristra mcp add --sandbox`）にすると、ネットワークを許可した状態でサンドボックス内で実行されます。プライベートなフォルダー（`~/.ssh`、`~/.aws` などの認証情報）と Aristra のデータ以外はすべて読めますが、書き込めるのは自身のフォルダー（`cwd`）、`writable` のフォルダー、パッケージのキャッシュ、自身の一時フォルダーだけです。
+
+`npx`、`bunx`、`uvx`、`pipx` でサーバーを起動する前に、そのパッケージが既知のマルウェアの OSV データベースと照合され、悪意があると知られているパッケージは拒否されます。
+
+## OAuth でサインインする
+
+サインインが必要なサーバーは、`aristra mcp list` に「sign-in needed」と表示されます。
+
+```sh
+aristra mcp login sentry                 # in a browser on this computer
+aristra mcp login sentry --device-code   # with a code, when the server offers it
+aristra mcp logout sentry
+```
+
+トークンは認証情報ストアに保存され、期限が切れる前に更新されます。特定の OAuth スコープが必要なサーバーには、`aristra mcp add-json` の `oauth.scopes` で指定します。
+
+## リソース、プロンプト、質問
+
+- **リソース**：サーバーがリソースを提供している場合、Aristra Code はその一覧を表示して読めます。
+- **プロンプト**はコマンドになります：`/mcp__<server>__<prompt> <arguments>`。
+- **質問**：サーバーは、ツールの実行中に、フォームや開くべきリンクとして何かを尋ねることがあります。他の承認と同じように尋ねられます。
+
+## 時間のかかる呼び出しと多数のツール
+
+- サーバーから何も送られてこない状態が 30 分（プログラム）または 5 分（アドレス）続くと、`timeout` で別の値を指定していない限り、呼び出しは失敗します。自分のチャットでは、2 分経っても実行中の呼び出しはバックグラウンドに移り、終了すると結果がチャットに届きます。サブエージェントや誰も見ていない実行では、ターンが完了を待ちます。
+- MCP のツールはツール検索の裏に置かれます。モデルは、毎ターン数百ものツール定義を受け取る代わりに、必要なツールを探します。`mcp.toolSearch: false` にすると、代わりにモデルのツール一覧に含まれます。その場合、Aristra Code 自体のツールも含めた一覧全体が 128 個以内に収まるよう削られます。
+- チャットのサーバーはチャットを開いたときに接続されるため、最初のメッセージまでに準備が整います。サーバーのツールが変わると、Aristra Code は必要ならターンの途中でも一覧を更新します。
+- プログラムとして動くサーバーは SIGINT で停止され（Docker 内のサーバーはこれでシャットダウンします）、100 ミリ秒後に SIGTERM、さらに 400 ミリ秒後に SIGKILL が送られます。
+
+## プラグインのサーバー
+
+[プラグイン](/ja/code/extend/plugins)は、その `.mcp.json` やマニフェストの `mcpServers` で MCP サーバーを持ち込めます。それらは `plugin:<plugin>:<server>` という名前になり、ルールで許可されていない限り（`mcp__plugin_<plugin>_<server>`）、ツールは呼び出しのたびに確認を求めます。
+
+## 組織向け
+
+管理ポリシーで、名前、コマンド、アドレスによってサーバーを許可または拒否できます。[管理ポリシー](/ja/code/configure/managed-policy)を参照してください。

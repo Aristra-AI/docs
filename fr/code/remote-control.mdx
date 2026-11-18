@@ -1,0 +1,83 @@
+---
+title: "Remote Control"
+description: "Poursuivez un chat de votre ordinateur depuis votre téléphone ou app.aristralabs.com, ou démarrez-en un depuis là. Le travail s'exécute sur votre ordinateur."
+---
+
+Remote Control partage avec votre compte Aristra un chat qui s'exécute sur votre ordinateur : vous pouvez ainsi le lire, envoyer des messages et répondre aux demandes d'approbation depuis votre téléphone ou app.aristralabs.com. Le code et les commandes restent sur votre ordinateur ; seule la conversation circule.
+
+<Note>
+Remote Control est différent d'un [chat cloud](/fr/code/cloud-chats), qui s'exécute sur les serveurs d'Aristra. Avec Remote Control, c'est votre ordinateur qui fait le travail.
+</Note>
+
+Remote Control est inclus avec un [forfait](/fr/account/plans), parce que le chat partagé est conservé dans votre compte. Sans forfait, le terminal et Aristra Desktop vous le signalent quand vous l'activez.
+
+## L'activer
+
+<Tabs>
+  <Tab title="Terminal">
+    Dans un chat, lancez :
+
+    ```text
+    /remote-control
+    ```
+
+    Lancez-la dans un chat sur cet ordinateur après votre premier message ; un chat cloud est déjà sur le web. Aristra Code affiche le lien du chat. `/rc` est la forme courte, et `/remote-control off` arrête le partage.
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Faites un clic droit sur un chat qui s'exécute sur ce Mac et choisissez **Continue on phone and web**. Une icône de téléphone signale les chats partagés dans la barre latérale. Choisissez **Stop sharing to phone and web** pour arrêter.
+  </Tab>
+</Tabs>
+
+Remote Control nécessite que cet ordinateur soit connecté avec une clé d'appareil. Si ce n'est pas le cas, le menu vous le signale : reconnectez-vous sur cet ordinateur.
+
+## Ce que vous pouvez faire depuis votre téléphone et le web
+
+- Lire le chat pendant son exécution, étapes comprises.
+- Envoyer des messages. Un message envoyé pendant qu'une réponse s'exécute attend et s'exécute après elle, comme un message mis en file d'attente avec ⌘Enter dans Aristra Desktop.
+- Arrêter une réponse en cours.
+- Approuver ou refuser des étapes. En autoriser une depuis un autre appareil nécessite une nouvelle vérification de connexion sur cet appareil ; les réponses « don't ask again » ne sont pas proposées ; une question qui demande un secret, comme une clé, ne reçoit de réponse que sur votre ordinateur ; et une réponse donnée sur votre ordinateur l'emporte.
+- Changer le mode et le modèle du chat, parmi ceux que propose votre ordinateur. Un mode moins strict demande d'abord une nouvelle vérification de connexion.
+- Joindre des fichiers à un message.
+
+## Quand votre ordinateur est absent
+
+Un chat partagé reste partagé quand le terminal se ferme ou que le runtime s'arrête. Ce que vous envoyez entre-temps depuis votre téléphone ou le web attend, marqué comme en attente, et s'exécute quand votre ordinateur revient. La transcription du chat reste dans votre compte jusqu'à ce que vous la supprimiez, même après la fin du partage.
+
+## Démarrer un chat sur votre ordinateur depuis le web ou un téléphone
+
+Vous pouvez aussi démarrer un nouveau chat sur l'un de vos ordinateurs sans être devant. Sur app.aristralabs.com, choisissez **Runs on Aristra Cloud** au-dessus d'un nouveau chat et sélectionnez l'ordinateur. Sur sa page, choisissez un dossier et tapez votre message. Le chat s'exécute sur cet ordinateur, avec ses fichiers, son shell et ses outils, sur les modèles d'Aristra payés depuis votre solde, et il est enregistré dans votre compte comme tout chat partagé. Il nécessite un forfait, et un ordinateur connecté avec une clé d'appareil.
+
+Rien ne peut démarrer tant que vous ne l'autorisez pas **sur l'ordinateur lui-même**. C'est désactivé par défaut, et le site web ne peut jamais l'activer.
+
+<Tabs>
+  <Tab title="Aristra Desktop">
+    Ouvrez **Settings › General › From the web and phone** et activez **Start chats on this Mac from the web and phone**. Activez ensuite chaque dossier dans lequel un chat peut démarrer.
+  </Tab>
+  <Tab title="Terminal">
+    ```text
+    /remote-control computer on
+    /remote-control folder on
+    ```
+
+    La première commande l'active pour cet ordinateur. La seconde autorise le dossier dans lequel vous êtes. `/remote-control computer` affiche ce qui est autorisé, et `off` à la place de `on` annule l'une ou l'autre.
+  </Tab>
+</Tabs>
+
+| Règle | Ce qu'elle signifie |
+|---|---|
+| **Un dossier doit d'abord être de confiance** | Ouvrez un chat dans le dossier sur l'ordinateur et faites-lui confiance. Un dossier auquel vous ne faites pas confiance ne peut pas être autorisé |
+| **Certains dossiers ne sont jamais autorisés** | Votre dossier personnel lui-même, un dossier caché qu'il contient, et la racine du disque |
+| **Le site web désigne un dossier, jamais un chemin** | Il voit le nom du dossier. Le chemin reste sur votre ordinateur |
+| **L'ordinateur vérifie chaque démarrage** | L'interrupteur, le dossier, la confiance et le mode sont revérifiés sur l'ordinateur à chaque fois |
+| **Pas de contournement depuis un autre appareil** | Vous choisissez Manual, Accept edits, Plan ou Auto, ou vous gardez le mode par défaut de l'ordinateur |
+| **L'ordinateur doit être en ligne** | Un démarrage nécessite que l'ordinateur soit allumé et connecté. Les messages que vous envoyez ensuite l'attendent, comme pour tout chat partagé |
+
+Les demandes d'approbation attendent dans le chat, sur le web et sur l'ordinateur ; la première réponse l'emporte. L'ordinateur affiche une notification quand un chat démarre depuis un autre appareil.
+
+## Un ordinateur toujours joignable
+
+Un [ordinateur cloud](/fr/surfaces/cloud-computer) est un ordinateur à vous dans le cloud d'Aristra. Vous y démarrez des chats depuis le web et votre téléphone, et il se réveille pour vos messages : il n'est donc jamais absent.
+
+## Comment il se connecte
+
+Votre ordinateur maintient une connexion HTTPS sortante vers Aristra, authentifiée par son jeton d'appareil et sa clé d'appareil. Rien n'écoute sur votre ordinateur, et chaque requête venant de votre téléphone ou du web s'exécute au plus une fois.

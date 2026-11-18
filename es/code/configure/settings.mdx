@@ -1,0 +1,48 @@
+---
+title: "Configuración"
+description: "Dónde vive la configuración de Aristra Code, cómo se combinan las capas, qué claves no puede cambiar un repositorio y cómo leerlas y cambiarlas."
+---
+
+La configuración son archivos JSON que lee el Aristra Runtime, así que la terminal, Aristra Desktop y todas las demás superficies usan la misma configuración. Nunca contienen un secreto: las claves y los tokens van al [almacén de credenciales](/es/code/security).
+
+## Los archivos
+
+| Ámbito | Archivo | Compartido |
+|---|---|---|
+| La tuya | `~/.aristra/settings.json` | No: tuya, para todas las carpetas |
+| La del proyecto | `<folder>/.aristra/settings.json` | Sí: haz commit para compartirla con tu equipo |
+| La del proyecto, solo tuya | `<folder>/.aristra/settings.local.json` | No: queda fuera de git |
+| Política gestionada | La define un administrador; consulta [Política gestionada](/es/code/configure/managed-policy) | Se impone en la computadora |
+
+Las capas posteriores ganan: la tuya, luego la del proyecto, luego el archivo local del proyecto, luego el `--settings` de una ejecución de script y luego la política gestionada, que tiene prioridad sobre todo. Los objetos se combinan clave por clave, las listas de todas las capas se unen (sin repeticiones) y los demás valores se sustituyen por los de una capa posterior.
+
+Las reglas de permisos también se suman entre archivos, y una denegación en cualquier lugar gana. Consulta [Permisos](/es/code/configure/permissions).
+
+## Lo que un repositorio no puede cambiar
+
+Los archivos de un proyecto solo cuentan una vez que [confías en la carpeta](/es/code/configure/permissions). Hasta entonces, solo se leen sus reglas de denegación y de pregunta.
+
+Algunas claves solo se leen de tu propio archivo, sea la carpeta de confianza o no, así que un repositorio no puede cambiarlas: `projects`, `mcp`, `review`, `credentials`, `auxiliary` y `model.fallback`. Los hooks se leen de tu archivo y del `settings.json` de un proyecto de confianza, nunca de `settings.local.json`. `runtime`, `approvals`, `telemetry`, `web` y `permissions.trustedMcpServers` solo se leen de tu archivo y de una política gestionada. El `settings.json` de un proyecto no puede fijar `autoMode` ni las claves de las preguntas de Auto y Bypass (`settings.local.json` sí puede), ninguno de los dos archivos del proyecto puede fijar `pluginConfigs`, y un proyecto solo puede desactivar los flujos de trabajo.
+
+## Leer y cambiar la configuración
+
+```sh
+aristra config get                              # every setting in effect here
+aristra config get <key>                        # one value, and the file it comes from
+aristra config get permissions --json
+aristra config set permissions.defaultMode auto # in your own file
+aristra config set permissions.allow '["shell(npm test *)"]' --project   # in the project's file
+aristra config edit                             # your file in your editor
+```
+
+En un chat, `/config` muestra tu configuración en vigor y el archivo del que sale cada ajuste. También puedes pedirle a Aristra Code que cambie un ajuste: la skill integrada `/update-config` lo hace.
+
+La configuración se aplica de inmediato: el runtime vuelve a leer un archivo siempre que cambia. Después de editar a mano `runtime`, `approvals` o `credentials.store`, ejecuta `aristra runtime stop` para que se apliquen. Una sección que no encaja se ignora con una advertencia que la nombra, y el resto se sigue aplicando. `aristra doctor`, `/config` y `aristra config get` muestran las advertencias.
+
+## Comprobar un archivo de configuración
+
+`aristra doctor`, `/config` y `aristra config get` comprueban tus archivos de configuración y nombran cualquier sección que no encaje. Está previsto un JSON Schema para editores en `https://aristralabs.com/schemas/aristra-settings.json`; todavía no está publicado, así que una línea `$schema` que apunte allí no funciona hoy.
+
+## Todos los ajustes
+
+La [referencia de configuración](/es/code/reference/settings) muestra cada clave, su valor predeterminado y lo que hace.

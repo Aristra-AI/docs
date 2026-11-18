@@ -1,0 +1,117 @@
+---
+title: "Politique gérée"
+description: "Pour les administrateurs : imposez des règles, désactivez des modes, autorisez ou bloquez des serveurs MCP et fixez n'importe quel paramètre sur chaque ordinateur, via un profil de configuration ou des fichiers de paramètres gérés."
+---
+
+Un administrateur peut définir une politique que suit chaque chat sur un ordinateur, dans le terminal, dans Aristra Desktop et sur toutes les autres surfaces : des règles que personne ne peut outrepasser, le mode Auto désactivé, des serveurs MCP autorisés ou bloqués, la télémétrie désactivée. Elle utilise les mêmes clés que les paramètres gérés de Claude Code.
+
+## D'où vient la politique
+
+Aristra Code lit la première source qui contient une politique :
+
+| Ordre | Source | Où |
+|---|---|---|
+| 1 | Un profil de configuration macOS (MDM) pour l'utilisateur, domaine `com.aristralabs.aristra` | `/Library/Managed Preferences/<user>/com.aristralabs.aristra.plist` |
+| 2 | Le même profil pour l'ordinateur | `/Library/Managed Preferences/com.aristralabs.aristra.plist` |
+| 3 | Les fichiers de paramètres gérés : `managed-settings.json`, puis chaque `managed-settings.d/*.json` fusionné par-dessus dans l'ordre des noms | macOS : `/Library/Application Support/Aristra/`. Linux : `/etc/aristra/` |
+
+Les préférences propres d'un utilisateur ne sont jamais lues pour la politique, et aucune surface ne peut écrire la politique. Les fichiers sont relus quand ils changent. Les fichiers d'instructions (`AGENTS.md`, `rules/*.md`) placés à côté des paramètres gérés s'appliquent aussi à chaque chat.
+
+## Un exemple
+
+```json /Library/Application Support/Aristra/managed-settings.json
+{
+  "permissions": {
+    "deny": ["shell(git push:*)", "read(~/.aws/**)", "web_fetch(domain:pastebin.com)"],
+    "ask": ["shell(npm publish:*)"],
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
+  "telemetry": { "usage": false, "errors": false },
+  "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
+  "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
+}
+```
+
+Les valeurs de la politique l'emportent sur les paramètres de chaque utilisateur et de chaque dossier.
+
+## Règles
+
+- **Les règles de refus** refusent un appel avant toute autre chose : aucune règle d'autorisation, réponse de session, mode (Bypass compris) ou relecteur ne les outrepasse. Leurs chemins ferment aussi le bac à sable aux commandes.
+- **Les règles de demande** vous soumettent l'appel, Bypass compris (en mode Auto, c'est le relecteur qui décide).
+- **Les règles d'autorisation** comptent comme celles de l'utilisateur, dans tous les dossiers.
+- **`permissions.allowManagedPermissionRulesOnly: true`** fait des règles de la politique les seules qui comptent. Les demandes d'approbation ne proposent alors que Yes et No.
+
+## Modes
+
+- **`permissions.disableAutoMode: "disable"`** désactive le mode Auto partout. Un chat déjà en Auto vous soumet les étapes à partir de son tour suivant, avec un avis.
+- **`permissions.disableBypassPermissionsMode: "disable"`** désactive le mode Bypass permissions et interdit `aristra run --dangerously-skip-sandbox`.
+
+## Bac à sable
+
+N'importe quel paramètre du bac à sable peut être fixé, par exemple `sandbox.allowUnsandboxedCommands: false` pour que les commandes s'exécutent toujours dans le bac à sable. Avec le bac à sable activé, un dépôt ne peut alors pas le désactiver, seuls vos propres paramètres, `--settings` et la politique peuvent en exclure des commandes, et les commandes que vous lancez avec `!` s'y exécutent aussi. Deux clés n'existent que dans une politique :
+
+| Clé | Effet |
+|---|---|
+| `sandbox.network.allowManagedDomainsOnly` | Seuls les hôtes de la politique comptent, et rien n'est demandé |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | Seuls les chemins `allowRead` de la politique comptent |
+
+## Serveurs MCP
+
+| Clé | Signification |
+|---|---|
+| `deniedMcpServers` | Les serveurs qui ne peuvent jamais s'exécuter. L'emporte toujours |
+| `allowedMcpServers` | Quand elle est présente, seuls les serveurs correspondants peuvent s'exécuter. Une liste vide n'en autorise aucun |
+
+| Entrée | Correspond à |
+|---|---|
+| `{"serverName": "github"}` | Un serveur par son nom, de n'importe quelle source (paramètres, `.mcp.json`, plugins) |
+| `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | Un serveur de type programme par sa commande et ses arguments exacts |
+| `{"serverUrl": "https://mcp.company.example/*"}` | Un serveur par son adresse, `*` correspondant à n'importe quoi |
+
+Quand la liste d'autorisation contient des entrées de commande (ou d'adresse), un serveur de type programme (ou adresse) doit correspondre à l'une d'elles ; son nom seul ne suffit pas.
+
+Un serveur que la politique exclut est désactivé, et `aristra mcp list` affiche « Your organization's policy does not allow this MCP server. »
+
+## Hooks, plugins et workflows
+
+| Clé | Effet |
+|---|---|
+| `hooks` | Des hooks qui s'exécutent pour tout le monde, sans que chaque utilisateur ait à les approuver |
+| `allowManagedHooksOnly` | Seuls les hooks de la politique, et ceux des plugins qu'elle active, s'exécutent |
+| `disableAllHooks` | Aucun hook ne s'exécute |
+| `enabledPlugins` | Des plugins activés ou désactivés pour tout le monde ; une valeur gérée l'emporte |
+| `strictKnownMarketplaces` (ou `allowedMarketplaces`) | Seules ces marketplaces de plugins peuvent être ajoutées |
+| `blockedMarketplaces` | Des marketplaces qui ne peuvent jamais être ajoutées |
+| `pluginTrustMessage` | Votre message, affiché quand quelqu'un installe un plugin |
+| `disableSideloadFlags` | Refuser `--plugin-dir` |
+| `disableWorkflows` | Désactiver les workflows |
+
+Un dossier `agents/` à côté des paramètres gérés ajoute des agents personnalisés pour tout le monde, qui remplacent les agents des utilisateurs portant le même nom.
+
+## Tout autre paramètre
+
+La plupart des paramètres peuvent être fixés de la même façon : `telemetry.usage`, `telemetry.errors`, `approvals.timeoutMinutes`, `memory.enabled`, etc. Les paramètres lus uniquement dans le fichier propre à chaque utilisateur (`review`, `credentials`, `auxiliary`, `mcp`, `model.fallback`, `runtime.notifications`, `runtime.maxRunningTurns`) ne peuvent pas être fixés par une politique. Aristra Desktop affiche la télémétrie, les workflows, l'interrupteur du bac à sable et la recherche gratuite de repli comme définis par votre organisation quand la politique les fixe.
+
+## La vérifier
+
+```sh
+aristra doctor        # says where the policy comes from
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
+```
+
+## Essayer une politique
+
+Sur un ordinateur qui n'en a pas, faites pointer Aristra Code vers un dossier de politique à vous (arrêtez d'abord le runtime, puisqu'il lit la variable à son démarrage) :
+
+```sh
+mkdir -p ~/aristra-policy
+cat > ~/aristra-policy/managed-settings.json <<'EOF'
+{ "permissions": { "deny": ["shell(git push *)"], "disableAutoMode": "disable" } }
+EOF
+aristra runtime stop
+ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
+```
+
+Pour les paramètres et les instructions, `ARISTRA_MANAGED_SETTINGS_DIR` n'est lu qu'en l'absence de politique définie par un administrateur : il ne peut donc jamais la remplacer.

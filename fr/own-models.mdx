@@ -1,0 +1,201 @@
+---
+title: "Utiliser votre propre modèle"
+description: "Faites fonctionner Aristra avec votre forfait ChatGPT, votre propre clé de fournisseur, ou un modèle sur votre ordinateur avec Ollama, LM Studio ou un autre serveur : où chaque option fonctionne, et la configuration pas à pas dans Aristra Desktop et le terminal."
+---
+
+Les modèles d'Aristra sont prêts dès que vous vous connectez, payés depuis votre solde. Vous pouvez aussi apporter votre propre modèle : votre **forfait ChatGPT**, une **clé API** d'un fournisseur ou un **modèle sur votre ordinateur**. Un modèle à vous ne coûte rien sur Aristra, et vous vous connectez quand même à Aristra, qui conserve votre mémoire et vos paramètres.
+
+## Où fonctionne votre propre modèle
+
+Un modèle à vous fonctionne dans les chats sur votre ordinateur, où Aristra l'appelle directement.
+
+| Où vous discutez | Modèles |
+|---|---|
+| Le site web et votre téléphone | Les modèles d'Aristra |
+| Aristra Desktop, onglet **Chat** | Les modèles d'Aristra. Un chat à côté d'un document conservé sur ce Mac, réglé sur **On this Mac**, peut aussi utiliser les vôtres |
+| Aristra Desktop, onglet **Code** | Les modèles d'Aristra, et les vôtres dans un chat avec un dossier réglé sur **On this Mac** |
+| Le terminal et les éditeurs ([Aristra Code](/fr/surfaces/aristra-code)) | Les modèles d'Aristra et les vôtres, dans les chats sur votre ordinateur. Un chat cloud (`aristra --cloud`) n'utilise que ceux d'Aristra |
+| Votre [ordinateur cloud](/fr/surfaces/cloud-computer) | Les modèles d'Aristra, ou votre forfait ChatGPT |
+
+Aristra Desktop est pour Mac. Le terminal fonctionne sous macOS, Linux et Windows via WSL2 ; consultez le [démarrage rapide d'Aristra Code](/fr/code/quickstart) pour l'installer.
+
+## Le configurer
+
+<Tabs>
+  <Tab title="Forfait ChatGPT">
+    Votre abonnement ChatGPT fournit le modèle, et Aristra mène le chat avec ses propres outils et approbations.
+
+    **Dans Aristra Desktop**
+
+    1. Ouvrez **Aristra › Settings…** (⌘,) et choisissez **Models**.
+    2. Sous **Accounts**, sur **ChatGPT plan**, choisissez **Sign in with ChatGPT**. Votre navigateur ouvre la page d'OpenAI.
+    3. Saisissez le code qu'affiche Settings (**Copy** le copie). Le code est valable 15 minutes.
+    4. La ligne affiche ensuite votre adresse e-mail et votre forfait. Choisissez un modèle ChatGPT dans le menu des modèles d'un chat sur ce Mac.
+
+    **Dans le terminal**
+
+    1. Lancez `/model` dans un chat.
+    2. Sous **ChatGPT plan**, choisissez **Sign in with your ChatGPT plan (a code you enter in a browser)**.
+    3. Le terminal affiche la page d'OpenAI (`https://auth.openai.com/codex/device`) et un code. Ouvrez la page sur n'importe quel appareil, connectez-vous à ChatGPT et saisissez le code.
+    4. De retour dans `/model`, choisissez un modèle ChatGPT.
+
+    Une connexion Codex CLI sur le même ordinateur n'est pas réutilisée. Pour vous déconnecter du forfait, choisissez **Sign out** sur la ligne dans Aristra Desktop, ou lancez `aristra logout chatgpt` dans un terminal (`/logout chatgpt` dans un chat). Aristra reste connecté.
+  </Tab>
+
+  <Tab title="Votre propre clé">
+    Votre fournisseur vous facture les appels au modèle. Aristra accepte les clés d'OpenAI, Anthropic, Google Gemini, OpenRouter, Fireworks AI, DeepSeek, xAI, Kimi (Moonshot), Z.AI (GLM) et MiniMax.
+
+    **Dans Aristra Desktop**
+
+    1. Ouvrez **Settings › Models**.
+    2. Sous **API keys**, ouvrez **Add a provider** et choisissez **Add key** sur le fournisseur.
+    3. Collez la clé et choisissez **Save**.
+    4. Choisissez l'un de ses modèles dans le menu des modèles d'un chat sur ce Mac.
+
+    **Dans le terminal**
+
+    1. Lancez `aristra keys add` avec la source du fournisseur (`openai`, `anthropic`, `gemini`, `openrouter`, `fireworks`, `deepseek`, `xai`, `moonshot`, `zai` ou `minimax`), par exemple :
+
+       ```sh
+       aristra keys add anthropic
+       ```
+
+    2. Collez la clé quand on vous la demande. Elle ne s'affiche pas pendant la saisie.
+    3. Le terminal affiche **Saved the Anthropic key**. Vérifiez ses modèles avec `aristra models --source anthropic`.
+    4. Dans un chat, lancez `/model` et choisissez un modèle sous ce fournisseur.
+
+    Les clés vont dans le magasin d'identifiants d'Aristra sur votre ordinateur, jamais dans un fichier de paramètres, et ne sont envoyées qu'à leur propre fournisseur. `aristra keys list` indique celles qui sont définies, et `aristra keys remove <source>` en supprime une.
+  </Tab>
+
+  <Tab title="Ollama">
+    Un modèle dans [Ollama](https://ollama.com) s'exécute sur votre ordinateur, et personne ne paie ses appels.
+
+    **Avant de commencer**
+
+    - Choisissez un modèle capable d'**appeler des outils** : Aristra travaille avec des outils, donc un modèle qui n'en a pas échoue.
+    - Aristra a besoin d'une fenêtre de contexte d'au moins **16 384 tokens**. Celle d'Ollama par défaut est souvent plus petite.
+
+    **Installer Ollama et un modèle**
+
+    1. Installez Ollama depuis [ollama.com/download](https://ollama.com/download) et démarrez-le : ouvrez l'app Ollama, ou lancez `ollama serve`.
+    2. Téléchargez un modèle capable d'appeler des outils, par exemple :
+
+       ```sh
+       ollama pull qwen3:8b
+       ```
+
+    3. Donnez-lui au moins 16K de contexte : dans les réglages de l'app Ollama, réglez **Context length** sur 16k ou plus. Ou démarrez Ollama avec :
+
+       ```sh
+       OLLAMA_CONTEXT_LENGTH=16384 ollama serve
+       ```
+
+    **Dans Aristra Desktop**
+
+    1. Ouvrez **Settings › Models**. Sous **On this Mac**, **Ollama** affiche **Connected** et le nombre de modèles installés. S'il affiche **Not running**, démarrez Ollama (ou téléchargez un modèle, si aucun n'est installé) et choisissez **Check again**.
+    2. Dans l'onglet **Code**, démarrez un nouveau chat, choisissez un **Folder** et réglez **Where it runs** sur **On this Mac**.
+    3. Dans le menu des modèles, choisissez votre modèle sous **Ollama**. Il indique **Fits**, **Tight fit** ou **Too big** selon la mémoire de ce Mac.
+
+    Pour en faire le modèle par défaut, choisissez-le dans **Settings › Models › Default model**. Si Ollama ne tourne pas quand vous démarrez un chat, le chat démarre sur la première source prête : vérifiez donc le menu des modèles.
+
+    **Dans le terminal**
+
+    1. Vérifiez qu'Aristra le trouve :
+
+       ```sh
+       aristra models --source ollama
+       ```
+
+       La liste affiche vos modèles sous **Ollama (ollama): runs on this computer**. Chacun porte la mention **fits this computer**, **tight on memory** ou **too big for this computer**, avec la mémoire dont il a besoin pour une fenêtre de 16K. Choisissez-en un qui tient.
+    2. Dans un chat, lancez `/model` et choisissez le modèle sous **Ollama**. Il devient le modèle par défaut des nouveaux chats, et le pied de page indique **this computer** comme payeur. Pour un seul chat, démarrez avec `aristra --source ollama -m qwen3:8b`.
+
+    Le premier message peut prendre un moment : Aristra attend qu'Ollama charge le modèle.
+
+    **Ollama à une autre adresse**
+
+    Aristra utilise `OLLAMA_HOST` comme le fait Ollama, sinon `localhost:11434`. Dans le terminal, définissez-la avant de lancer `aristra`. Si Aristra tourne déjà, lancez `aristra runtime stop`, puis relancez `aristra`.
+  </Tab>
+
+  <Tab title="LM Studio">
+    Un modèle dans [LM Studio](https://lmstudio.ai) s'exécute sur votre ordinateur, et personne ne paie ses appels. Comme avec Ollama, choisissez un modèle capable d'**appeler des outils**, avec au moins **16 384 tokens** de contexte.
+
+    **Installer LM Studio et un modèle**
+
+    1. Installez LM Studio depuis [lmstudio.ai](https://lmstudio.ai) et téléchargez un modèle capable d'appeler des outils.
+    2. Chargez le modèle avec une **longueur de contexte de 16 384 ou plus**. Aristra vérifie la fenêtre d'un modèle chargé ; un modèle qu'il charge à la première utilisation prend les réglages propres de LM Studio.
+    3. Démarrez le serveur de LM Studio sur son port habituel, 1234 : depuis l'app, ou avec `lms server start`. Aristra le cherche uniquement à `localhost:1234`.
+
+    **Dans Aristra Desktop**
+
+    1. Ouvrez **Settings › Models**. Sous **On this Mac**, **LM Studio** affiche **Connected**. S'il affiche **Not running**, démarrez le serveur et choisissez **Check again**.
+    2. Dans l'onglet **Code**, démarrez un chat avec un **Folder** et **Where it runs** réglé sur **On this Mac**, puis choisissez le modèle sous **LM Studio**.
+
+    **Dans le terminal**
+
+    1. Vérifiez qu'Aristra le trouve : `aristra models --source lmstudio`.
+    2. Dans un chat, lancez `/model` et choisissez le modèle sous **LM Studio**. Pour un seul chat, démarrez avec `aristra --source lmstudio -m <model>`.
+
+    LM Studio 0.4 ou plus récent indique aussi à Aristra la taille et la fenêtre de chaque modèle, pour les indications de taille et la vérification de la fenêtre.
+  </Tab>
+
+  <Tab title="Un autre serveur">
+    Tout serveur qui parle Chat Completions, Responses ou Messages d'Anthropic : vLLM, le serveur de llama.cpp, MLX, une passerelle d'entreprise ou un proxy. Vous pouvez en configurer un à la fois.
+
+    **Dans Aristra Desktop**
+
+    1. Ouvrez **Settings › Models**. Sous **On this Mac**, sur **Custom endpoint**, choisissez **Set up**.
+    2. Renseignez un **Name**, l'API qu'il parle (**Chat Completions**, **Responses** ou **Anthropic Messages**), la **Base URL** et, si besoin, la clé API et les identifiants des modèles.
+    3. Choisissez **Save**. La ligne affiche le nom et **Connected**.
+    4. Choisissez son modèle dans le menu des modèles d'un chat sur ce Mac.
+
+    **Dans le terminal**
+
+    1. Ajoutez-le, par exemple pour un serveur sur cet ordinateur sans clé :
+
+       ```sh
+       aristra keys add custom --url http://localhost:8000/v1 --wire chat_completions --name "My server" --model qwen3-coder --no-key
+       ```
+
+       Ou lancez `aristra keys add custom` et répondez à chaque question : l'adresse, l'API qu'il parle (`chat_completions`, `responses` ou `anthropic`), les noms de ses modèles, un nom et sa clé. Une option que vous omettez vous est demandée ; appuyez sur Enter pour sa valeur par défaut.
+    2. Le terminal affiche **Saved** avec le nom et l'adresse. Vérifiez ses modèles avec `aristra models --source custom`.
+    3. Dans un chat, lancez `/model` et choisissez le modèle sous le nom de votre serveur.
+
+    **L'adresse**
+
+    - Incluez le chemin de l'API, généralement `/v1`, pour Chat Completions et Responses. Pour Anthropic Messages, omettez `/v1`.
+    - Utilisez `https://`. Le simple `http://` ne fonctionne que pour `localhost`, `127.0.0.1` ou `::1` : un serveur sur une autre machine nécessite donc `https://`.
+    - Les noms de modèles que vous indiquez servent quand la liste des modèles du serveur est illisible, et toujours pour Anthropic Messages.
+    - Le payeur est **this computer** quand l'adresse est sur votre ordinateur ou votre réseau, sinon **your key**.
+
+    `aristra keys remove custom` supprime le serveur.
+  </Tab>
+</Tabs>
+
+<Note>
+La connexion avec un abonnement Claude n'est pas proposée : utilisez les modèles Claude via Aristra ou avec votre propre clé Anthropic.
+</Note>
+
+## Si un modèle local ne fonctionne pas
+
+<AccordionGroup>
+  <Accordion title="Ollama is not running on this computer">
+    Démarrez Ollama (l'app, ou `ollama serve`), puis réessayez ; dans Aristra Desktop, choisissez **Check again**. Pour LM Studio, démarrez son serveur. Si Ollama tourne à une autre adresse, définissez `OLLAMA_HOST` et redémarrez Aristra (`aristra runtime stop`).
+  </Accordion>
+  <Accordion title="No models are installed in Ollama yet">
+    Téléchargez-en un avec `ollama pull`, puis choisissez **Check again** dans Aristra Desktop ou relancez `/model`.
+  </Accordion>
+  <Accordion title="La fenêtre de contexte est trop petite">
+    Le chat s'arrête et indique que la fenêtre du modèle fait moins de 16 384 tokens. Dans Ollama, réglez **Context length** sur 16k ou plus dans les réglages de l'app, ou démarrez-le avec `OLLAMA_CONTEXT_LENGTH=16384`. Dans LM Studio, rechargez le modèle avec une longueur de contexte de 16k ou plus.
+  </Accordion>
+  <Accordion title="Le serveur renvoie une erreur au premier message">
+    Souvent, le modèle ne sait pas appeler d'outils. Choisissez un modèle qui le sait, et consultez le journal du serveur lui-même.
+  </Accordion>
+  <Accordion title="Use an https:// address, or http:// for a server on this computer">
+    Un serveur personnalisé sur une autre machine nécessite `https://`. Sur cet ordinateur, utilisez `localhost` ou `127.0.0.1` dans l'adresse.
+  </Accordion>
+  <Accordion title="Le chat s'exécute sur un autre modèle">
+    Dans Aristra Desktop, un chat dont la source par défaut n'est pas prête démarre sur la première qui l'est. Démarrez le serveur local, choisissez **Check again** et choisissez le modèle dans le menu des modèles. Un chat dans le cloud utilise toujours les modèles d'Aristra.
+  </Accordion>
+</AccordionGroup>
+
+Pour tous les détails (modèles de repli, modèles annexes, estimation de la taille, consommation), consultez [Modèles](/fr/code/configure/models).

@@ -1,0 +1,132 @@
+---
+title: "模型"
+description: "选择Aristra Code运行所用的模型以及由谁付费：从你的Aristra余额中扣费的Aristra模型、你的ChatGPT套餐、你自己的服务商密钥、你电脑上的模型，或自定义端点。回退模型和用量。"
+---
+
+每个对话都运行在来自某个**来源**的模型上，每个来源都有一个**付费方**。Aristra Code会在一轮运行之前，在页脚、`/model`、`aristra status`和`aristra models`中显示由谁付费。
+
+| 付费方 | 显示为 | 来源 |
+|---|---|---|
+| Aristra | 你的Aristra余额，按各模型服务商的价格 | `aristra` |
+| 你的ChatGPT套餐 | your plan | `chatgpt` |
+| 你，使用你自己的密钥 | your key | 你添加的服务商密钥、自定义端点 |
+| 无人付费 | this computer（在Aristra Desktop中为**This Mac**） | Ollama、LM Studio、你电脑或网络上的自定义端点 |
+
+无论来源是什么，每个对话都需要登录Aristra：你的账户会在各设备之间保存你的记忆和设置。每个来源的分步设置见[使用你自己的模型](/zh/own-models)。
+
+## 来源
+
+<AccordionGroup>
+  <Accordion title="Aristra">
+    Aristra的模型，从你的余额中扣费：先用新账户的$1初始额度，然后是套餐的每月用量，最后是充值。每个套餐都可以使用所有模型，每个模型都会列出它的上下文窗口和推理级别，价格更高的模型消耗余额更快。参见[你的余额与充值](/zh/account/credits)。每个模型的价格见[Models and prices](https://app.aristralabs.com/models)。你的文件和命令留在你的电脑上；模型读取的内容会随模型调用发送出去。还有哪些内容会离开你的电脑，参见[安全](/zh/code/security)。
+
+    每个模型都有完整的窗口。有些服务商对长提示词收费更高，Aristra也一样，但只针对那一次请求：Claude Haiku 5.5超过100K token时，GPT-5.4及更高版本（mini或nano除外）超过272K时，Gemini 3.1 Pro超过200K时。
+  </Accordion>
+  <Accordion title="你的ChatGPT套餐">
+    由你的ChatGPT订阅提供模型；Aristra Code用它自己的工具和审批运行这一轮。从`/model`登录：选择**Sign in with your ChatGPT plan**，打开它显示的页面并输入验证码。`/usage`会显示该套餐的5小时和每周限额。`aristra logout chatgpt`（或`/logout chatgpt`）会退出该套餐的登录，并保留Aristra登录。
+  </Accordion>
+  <Accordion title="你自己的服务商密钥">
+    ```sh
+    aristra keys add openai        # asks for the key, hidden
+    aristra keys list              # which are set, never the key itself
+    aristra keys remove openai
+    ```
+
+    | 来源 | 服务商 |
+    |---|---|
+    | `openai` | OpenAI |
+    | `anthropic` | Anthropic |
+    | `gemini` | Google Gemini |
+    | `openrouter` | OpenRouter |
+    | `fireworks` | Fireworks AI |
+    | `deepseek` | DeepSeek |
+    | `xai` | xAI |
+    | `moonshot` | Kimi（Moonshot） |
+    | `zai` | Z.AI（GLM） |
+    | `minimax` | MiniMax |
+
+    密钥保存在Aristra的凭据存储中，绝不会写入设置文件。对话会在下一轮使用更改后的密钥。
+  </Accordion>
+  <Accordion title="你电脑上的模型">
+    Ollama和LM Studio不需要密钥。在它们的服务器响应之前，终端会提示它没有运行，Aristra Desktop的设置会显示**Not running**（Ollama没有模型时也是如此），模型菜单中也不会列出它们。
+
+    - **Ollama**：在`OLLAMA_HOST`指定的位置查找（与Ollama自己读取该变量的方式相同），否则在`localhost:11434`查找。请在运行时启动之前设置`OLLAMA_HOST`；修改之后，运行`aristra runtime stop`。
+    - **LM Studio**：只在`localhost:1234`查找。
+    - **工具**：Aristra Code通过工具工作，所以请选择能够调用工具的模型。不能调用工具的模型会以其服务器的错误失败。
+    - **上下文窗口**：至少16,384个token。Ollama默认给的通常更少；这时这一轮会停止，并说明如何调大它（Ollama应用中的Context length，或`OLLAMA_CONTEXT_LENGTH=16384`）。LM Studio会在模型加载后检查；请以16K或更大的上下文加载它。在Ollama上的每一轮之前，Aristra会等待模型加载。
+    - **适配**：`aristra models`会说明每个模型是**fits this computer**、**tight on memory**还是**too big for this computer**（`/model`中为**fits**、**tight on memory**、**too big for this computer**，并显示内存；Aristra Desktop中为**Fits**、**Tight fit**、**Too big**）。估算值是模型加上它在16K或更大窗口下的工作内存，与你电脑的总内存相比：不超过75%为fits，不超过90%为tight。这只是建议；任何模型仍然都可以选择。
+    - **在哪里使用**：本地模型在这台电脑上的对话中运行。云端对话使用Aristra的模型。在Aristra Desktop中，设置了文件夹并设为**On this Mac**的Code对话可以使用它们。
+    - **限制**：对于不接受图片的模型，图片会被排除；本地模型没有推理级别，所以`/effort`不适用。
+    - `aristra doctor`会向每个本地服务器请求5秒，并把有响应的列为就绪。没有响应的本地服务器，只有当它是你默认模型（终端的默认模型）的来源时，才会被标记为`fix`。
+  </Accordion>
+  <Accordion title="自定义端点">
+    任何支持Chat Completions、Responses或Anthropic Messages的服务器都可以：vLLM、llama.cpp的服务器、公司网关、代理。一次只能设置一个。
+
+    - **Aristra Desktop**：在**Settings › Models**中的**On this Mac**下，选择**Custom endpoint › Set up**：填写名称、API、**Base URL**，需要时再填写密钥和模型ID。
+    - **终端**：`aristra keys add custom`会询问地址、它支持的API、它的模型、一个名称和一个密钥。或者用`--url`、`--wire chat_completions|responses|anthropic`、`--name`和`--model`（每个模型重复一次）给出，对于不需要密钥的服务器加上`--no-key`。`aristra keys remove custom`会删除该端点。
+
+    对于Chat Completions和Responses，地址要包含API的路径，通常是`/v1`；对于Anthropic Messages，请不要加`/v1`。地址必须是`https://`；`http://`只适用于`localhost`、`127.0.0.1`或`::1`。模型来自服务器的列表；当无法读取该列表时，会使用你提供的名称，对于Anthropic Messages则总是使用这些名称。
+
+    它保存在`~/.aristra/sources.json`中，它的密钥保存在凭据存储中，并与地址绑定：新地址需要重新提供密钥。当它的地址位于你的电脑或网络中时，付费方为“this computer”，否则为“your key”。Aristra假定它的窗口为128K，并且不做检查；如果服务器表示对话太长，会先进行总结再重试。
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+不支持用Claude订阅登录：请通过Aristra或你自己的Anthropic密钥使用Claude模型。Google模型可以通过API密钥或你的Aristra套餐使用。
+</Note>
+
+## 选择模型
+
+- 对话中的`/model`会列出每个来源、由谁付费以及它的模型。选择一个会切换当前对话，并把它设为新对话的默认模型。
+- `/effort [level|auto]`设置模型的思考强度：`low`、`medium`、`high`，部分模型还有`xhigh`或`max`。本地模型和自定义端点没有级别。
+- `aristra -m <model> --source <source>`为一个对话选择模型。单独使用`--source`会选择该来源的默认模型。
+- 在Aristra Desktop中，输入框下方的模型菜单为新对话选择模型，**Settings › Models › Default model**设置那里新对话的默认模型。Aristra Desktop有自己的默认模型，与终端的不同。
+
+默认模型保存在你的设置中：
+
+```json ~/.aristra/settings.json
+{ "model": { "source": "anthropic", "model": "claude-sonnet-5-5", "effort": "high" } }
+```
+
+## 模型调用失败时
+
+服务器错误、过载或连接断开，会在任何文字流式输出之前重试，最多10次（`ARISTRA_MAX_RETRIES`，最多15次），状态行会说明这一点；如果有可用的回退模型，连续三次过载后会交给它。没有回退模型时，如果每次等待不超过一分钟，就会等待速率限制解除。之后会发生什么取决于失败类型：
+
+| 失败 | 接下来 |
+|---|---|
+| 过载、网络 | 重试，然后使用你回退列表中的下一个模型 |
+| 速率限制 | 使用列表中的下一个模型；否则这一轮失败，并说明限制何时重置 |
+| 已退出登录、余额用完 | 使用列表中来自其他来源的下一个模型 |
+| 上下文太长 | 总结后重试 |
+| 请求被拒绝、其他错误 | 使用你回退列表中的下一个模型 |
+| 模型拒绝回答 | 这一轮失败。一个模型拒绝回答的内容，绝不会再去问另一个模型 |
+
+回退列表是你自己设置中的`model.fallback`：
+
+```json ~/.aristra/settings.json
+{
+  "model": {
+    "source": "anthropic", "model": "claude-sonnet-5-5",
+    "fallback": [
+      { "source": "openrouter", "model": "anthropic/claude-sonnet-5-5" },
+      { "source": "aristra", "model": "gemini-3.8-flash" }
+    ]
+  }
+}
+```
+
+**付费方绝不会悄悄改变**。一轮只会自行切换到由同一付费方付费的模型。切换到另一个付费方之前会先询问你，脚本则从不切换付费方。回退列表只从你自己的设置中读取，所以仓库无法把你的对话转移到你的其他密钥上。
+
+## 用于对话周边工作的模型
+
+标题、长对话的摘要和记忆兜底也会调用模型。它们依次使用：
+
+1. 你自己设置的模型：来自设置中的`auxiliary.title`、`auxiliary.summary`和`auxiliary.memory`，每一项都是`{"source": ..., "model": ...}`，来自你自己的某个来源（不能是`aristra`）（`auxiliary.title: "off"`会保留你消息的开头几个字作为标题）。
+2. 使用Aristra的模型时，Aristra的后台模型：一个更便宜、更快的模型，用于标题和记忆兜底。摘要使用对话自己的模型。
+3. 对话自己的模型。
+
+使用本地模型时，标题会等到这一轮结束后再生成。辅助模型失败绝不会导致对话失败。Auto模式的审核模型有它自己的模型；参见[权限](/zh/code/configure/permissions)。
+
+## 用量
+
+`/usage`会显示这个对话按模型划分的token用量以及由谁付费、上下文已用多少，以及你登录的每个套餐：你以美元计的Aristra余额及其续期时间，以及你的ChatGPT套餐的限额。它还会显示过去一天和一周内哪些内容占用了你的用量。`aristra run --usage-file <path>`会写出一次脚本运行的用量。

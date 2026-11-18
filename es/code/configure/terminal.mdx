@@ -1,0 +1,82 @@
+---
+title: "Configuración de la terminal"
+description: "Prepara tu terminal para Aristra Code: líneas nuevas, atajos de teclado, tu propia línea de estado, el renderizador a pantalla completa y los ajustes de visualización."
+---
+
+## Líneas nuevas
+
+Shift+Enter añade una línea nueva en Ghostty, kitty y WezTerm sin configurar nada. En las demás, ejecuta:
+
+```text
+/terminal-setup
+```
+
+Añade un atajo Shift+Enter en VS Code, Cursor o Windsurf (después de hacer una copia de seguridad de sus atajos), o activa "Use Option as Meta key" en Terminal de Apple para que Option+Enter añada una línea. Alt+Enter, Ctrl+J y `\` seguido de Enter funcionan en todas partes.
+
+## Atajos de teclado
+
+`~/.aristra/keybindings.json` cambia las teclas de Aristra Code, con la misma forma que el archivo de Claude Code. `/keybindings` lo crea con todos los atajos y lo abre; los cambios se aplican un momento después de guardar.
+
+```json ~/.aristra/keybindings.json
+{
+  "bindings": [
+    { "context": "Chat", "bindings": { "meta+s": "chat:stash", "ctrl+s": null } },
+    { "context": "Global", "bindings": { "ctrl+f": "history:search" } }
+  ]
+}
+```
+
+Escribe las teclas como `ctrl+`, `shift+` y `meta+` (o `alt+`, `option+`) delante de una letra o de un nombre como `enter`, `escape`, `tab`, `up` o `pageup`. Dos teclas separadas por un espacio forman un acorde. Asignar una tecla a `null` la desactiva. Ctrl+C, Ctrl+D, Ctrl+M, Ctrl+[, Ctrl+I y Ctrl+H no se pueden reasignar (para una terminal, las cuatro últimas son Enter, Esc, Tab y Backspace).
+
+| Contexto | Cuándo | Acciones (teclas predeterminadas) |
+|---|---|---|
+| `Global` | Siempre | `app:interrupt` (Ctrl+C), `app:exit` (Ctrl+D), `app:redraw` (Ctrl+L), `app:toggleTodos` (Ctrl+T), `app:toggleTranscript` (Ctrl+O), `history:search` (Ctrl+R), `abovePrompt:focus` (Ctrl+X Tab), `app:diffFileListUp` (Ctrl+Up, Alt+Up), `app:diffFileListDown` (Ctrl+Down, Alt+Down) |
+| `Chat` | El compositor | `chat:cancel` (Esc), `chat:cycleMode` (Shift+Tab), `chat:modelPicker` (Alt+P), `chat:submit` (Enter), `history:previous` (Up), `history:next` (Down), `chat:externalEditor` (Ctrl+G, Ctrl+X Ctrl+E), `chat:stash` (Ctrl+S), `chat:imagePaste` (Ctrl+V) |
+| `HistorySearch` | La búsqueda de Ctrl+R | `historySearch:next` (Ctrl+R), `historySearch:accept` (Esc, Tab), `historySearch:execute` (Enter), `historySearch:cancel` (Ctrl+C, fija) |
+| `Task` | Se está ejecutando un comando | `task:background` (Ctrl+B) |
+| `Confirmation` | Una aprobación | `confirm:yes` (Enter), `confirm:no` (Esc), `confirm:previous` (Up), `confirm:next` (Down), `confirm:nextField` (Tab), `confirm:cycleMode` (Shift+Tab), `confirm:toggleExplanation` (Ctrl+E) |
+| `Scroll` | La transcripción a pantalla completa | `scroll:pageUp` (PgUp), `scroll:pageDown` (PgDn), `scroll:top` (Ctrl+Home), `scroll:bottom` (Ctrl+End) |
+| `DiffPanel` | El panel de diff a pantalla completa | `app:cycleDiffBase` (Ctrl+X B) |
+| `Pane` | El panel de diff cuando tiene las teclas | `pane:grow` (Ctrl+X Left, Ctrl+X Up), `pane:shrink` (Ctrl+X Right, Ctrl+X Down), `pane:close` (Ctrl+X X) |
+
+Las teclas de edición de línea (Ctrl+A, Ctrl+E, Ctrl+K, Ctrl+U, Ctrl+W, Ctrl+Y) siguen a readline y no están en el archivo.
+
+## Tu propia línea de estado
+
+`statusLine` ejecuta un comando y muestra su salida debajo del compositor:
+
+```json ~/.aristra/settings.json
+{
+  "statusLine": { "type": "command", "command": "~/bin/status.sh", "padding": 1, "refreshInterval": 10 }
+}
+```
+
+El comando lee el chat como JSON por stdin (`session_id`, `cwd`, `permission_mode`, `session_name`, `model`, `workspace`, `version`, `context_window`, `effort` y más), se vuelve a ejecutar cuando cambia el chat y cada `refreshInterval` segundos, y tiene 5 segundos para responder. Sus colores se conservan.
+
+`subagentStatusLine` (`{"type": "command", "command": …}`) hace lo mismo con las filas de agentes de `/tasks`. Lee el mismo JSON más `columns` y `tasks`, e imprime una línea `{"id", "content"}` por fila; `""` oculta una fila.
+
+## Pantalla completa
+
+```text
+/tui fullscreen      # saved in your settings
+/tui default         # back to the classic renderer
+```
+
+`aristra --fullscreen` lo usa para un solo inicio. La pantalla completa dibuja en toda la pantalla con una transcripción desplazable, selección con el mouse, la pantalla de la transcripción (Ctrl+O) y el panel de diff (`/diff`). Consulta [Terminal](/es/code/terminal).
+
+## Ajustes de visualización
+
+| Ajuste | Predeterminado | Hace |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` para el renderizador a pantalla completa |
+| `copyOnSelect` | `true` | A pantalla completa, copiar una selección al soltar |
+| `promptSuggestionEnabled` | `true` | Sugerir tu siguiente mensaje después de una respuesta |
+| `awaySummaryEnabled` | `true` | Dejar un resumen en un chat al que vuelves |
+| `spinnerTipsEnabled` | `true` | Mostrar consejos mientras trabaja Aristra Code |
+| `prStatusFooterEnabled` | `true` | Mostrar el pull request de la rama en el pie |
+| `terminalProgressBarEnabled` | `true` | Mostrar una barra de progreso en la pestaña de la terminal mientras se ejecuta un paso (en Ghostty 1.2 y posteriores, iTerm2 3.6.6 y posteriores, y ConEmu) |
+| `permissionExplainerEnabled` | `true` | Ctrl+E explica un comando en su aprobación (solo se lee de tu propio `~/.aristra/settings.json`) |
+| `copyFullResponse` | `false` | `/copy` toma la respuesta completa sin preguntar qué bloque de código |
+| `prUrlTemplate` | ninguno | Dónde se abre el enlace al pull request del pie, con `{host}`, `{owner}`, `{repo}`, `{number}` y `{url}` |
+
+Las variables de entorno de la terminal (`ARISTRA_NO_NOTIFY`, `ARISTRA_DISABLE_MOUSE`, `ARISTRA_SCROLL_SPEED` y otras) aparecen en [Variables de entorno](/es/code/reference/environment).

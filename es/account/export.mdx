@@ -1,0 +1,41 @@
+---
+title: "Dispositivos, descargas y exportación"
+description: "Consulta las computadoras de tu cuenta y cierra su sesión, descarga Aristra Desktop y la Aristra CLI, y obtén una copia de los datos de tu cuenta."
+---
+
+## Dispositivos
+
+**Devices** muestra todas las computadoras con la sesión iniciada en tu cuenta: Aristra Desktop, la Aristra CLI y una computadora en la nube. Cada una indica si está en línea y cuándo se vio por última vez.
+
+**Sign out** quita una computadora de tu cuenta. Sus chats y archivos se quedan en ella; tiene que volver a iniciar sesión para usar tu cuenta.
+
+## Descargas
+
+**Downloads** tiene Aristra Desktop para Mac y el comando que instala la Aristra CLI:
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+```
+
+Ambos son gratis y funcionan con un modelo propio. Consulta [Instalar Aristra Code](/es/code/setup).
+
+## Exportación
+
+**Import and export** te da los datos de tu cuenta en un solo archivo zip. No necesita plan, así que siempre puedes llevarte lo que creaste, también cuando termina un plan.
+
+| En el archivo | |
+|---|---|
+| `chats/` | Todos los chats guardados en tu cuenta, cada uno como un archivo Markdown, con una lista de todos ellos |
+| `memory/` | Lo que Aristra recuerda de ti y de tu trabajo, como archivo legible y como datos |
+| `files/files.csv` | La lista de tus archivos: nombre, tipo, tamaño y fecha, y el chat al que se adjuntó cada archivo |
+| `usage.csv` | Un año de filas de uso |
+| `README.txt` | Qué hay en el archivo y qué no |
+
+Un archivo contiene como máximo 5,000 chats (los más recientes), 20,000 recuerdos, 20,000 archivos y 50,000 filas de uso, y `README.txt` indica cuándo se dejó algo fuera. Puedes exportar hasta 6 veces por hora.
+
+Se guarda en otro lugar:
+
+- **Tus archivos en sí** se descargan desde **Files**.
+- **Los documentos de Craft** se exportan desde el menú de cada documento, como Markdown, Word o PDF.
+- **Los chats en una computadora** que no compartiste viven en esa computadora, en `~/.aristra`. Nunca llegaron a tu cuenta.
+- **Los chats y la memoria de una computadora en la nube** se exportan desde su propia página. Consulta [Computadora en la nube](/es/surfaces/cloud-computer).

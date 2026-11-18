@@ -1,0 +1,75 @@
+---
+title: "Aristra Code概览"
+sidebarTitle: "概览"
+description: "Aristra Code是Aristra的编程智能体。它读取你的代码、编辑文件、运行命令并使用git，可在你的终端、Aristra Desktop、编辑器中以及从手机上使用。"
+---
+
+Aristra Code在你电脑上的某个文件夹中工作。用平常的话告诉它你想完成什么：它会读取所需的代码，跨文件进行修改，运行你的测试和命令，并在做任何你没有允许的事情之前先询问你。它会在不同对话之间记住你项目的指令，能够使用git和拉取请求，并使用你选择的模型运行。
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+第一次运行时，它会让你登录Aristra，询问新对话默认使用哪个模型，并询问你是否信任这个文件夹。然后你就可以输入你想做的事。[快速入门](/zh/code/quickstart)会带你完成第一个真实任务。
+
+## 在哪里运行
+
+终端、Aristra Desktop和你的编辑器都与你电脑上的同一个智能体（Aristra Runtime）通信，所以在其中一处开始的对话也会显示在其他几处，而且其中任何一处都可以批准它的下一步。开通套餐后，Remote Control可以把对话共享到你的手机和网页版。
+
+<CardGroup cols={2}>
+  <Card title="终端" icon="terminal" href="/zh/code/terminal">
+    `aristra`命令：终端中的完整应用，包含所有命令和快捷键。
+  </Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/zh/code/desktop">
+    Mac应用的Code标签页：按文件夹分组的对话，对话旁边还有终端、浏览器、改动和拉取请求。
+  </Card>
+  <Card title="编辑器" icon="code" href="/zh/code/editors">
+    在Zed以及其他支持Agent Client Protocol的编辑器中使用Aristra Code。
+  </Card>
+  <Card title="手机和网页版" icon="mobile" href="/zh/code/remote-control">
+    Remote Control：在手机或app.aristralabs.com上继续对话，而工作仍留在你的电脑上。
+  </Card>
+</CardGroup>
+
+## 你可以做什么
+
+<AccordionGroup>
+  <Accordion title="构建功能和修复bug">
+    描述你想要的改动，或者粘贴错误信息。Aristra Code会找到相关代码，规划改动，编辑文件，并运行你的测试直到通过。
+
+    ```sh
+    aristra "the date parser fails on leap years: find why, fix it, and run the tests"
+    ```
+  </Accordion>
+  <Accordion title="使用git和拉取请求">
+    它会编写提交，在你要求时在自己的git工作树中工作，用`/pr`显示当前拉取请求的检查和审查，还可以用`/autofix-pr`盯住一个拉取请求，修复检查和审查者报告的问题。参见[Git与拉取请求](/zh/code/guides/git)。
+  </Accordion>
+  <Accordion title="让工作在后台继续">
+    长时间运行的命令会转到后台，结束时通知对话。`/loop`会重复一段提示词，定时任务按时间表运行，`/goal`会让它一直工作，直到你设定的条件成立。参见[后台工作](/zh/code/guides/background)。
+  </Accordion>
+  <Accordion title="连接你的工具">
+    添加MCP服务器，使用你Aristra账户的连接器，为重复性工作编写技能，用钩子在事件发生时运行你自己的命令，以及安装把这些全部打包在一起的插件。参见[扩展](/zh/code/extend/mcp)。
+  </Accordion>
+  <Accordion title="编写脚本">
+    `aristra run`和`aristra -p`不启动应用，只运行一轮，用于脚本和CI，并支持JSON输出。参见[非交互模式](/zh/code/non-interactive)。
+  </Accordion>
+</AccordionGroup>
+
+## 你的模型，你的规则
+
+- **模型**：使用Aristra的模型（从你的Aristra余额中扣费，按服务商自己的价格）、你的ChatGPT套餐、你自己的服务商密钥（OpenAI、Anthropic、Gemini、OpenRouter等），或在你电脑上运行的模型。每个对话都会标明由谁付费。参见[模型](/zh/code/configure/models)。
+- **在你的电脑上免费**：搭配你自己的模型时，Aristra Code不收取任何费用。每个账户都有账户记忆，在每台设备上可用。套餐会增加Aristra托管的其他内容：Aristra模型的每月用量、Remote Control、连接器和云电脑。没有套餐时，云端对话和Aristra的模型从你的余额中扣费，起始有$1初始额度，云电脑则使用充值运行。参见[你的账户与Aristra One](/zh/account/overview)。
+- **权限**：对话以Manual模式开始：读取、搜索和只读命令会自动运行，修改则会先询问。Accept edits、Plan和Auto只需按一下Shift+Tab。参见[权限](/zh/code/configure/permissions)。
+- **沙箱**：默认关闭。用`/sandbox`开启后，命令会在操作系统沙箱中运行，限制它们可以写入和访问的范围。参见[沙箱](/zh/code/configure/sandbox)。
+- **指令**：仓库中的`AGENTS.md`文件告诉Aristra Code你的项目是怎样运作的，其他编程智能体读取的也是这个文件。参见[记忆与指令](/zh/code/guides/memory)。
+
+## 后续步骤
+
+<CardGroup cols={2}>
+  <Card title="快速入门" icon="play" href="/zh/code/quickstart">安装、登录并完成第一个任务。</Card>
+  <Card title="工作原理" icon="diagram-project" href="/zh/code/how-it-works">运行时、各个使用端，以及你的数据保存在哪里。</Card>
+  <Card title="命令" icon="slash" href="/zh/code/reference/commands">你可以在对话中输入的所有命令。</Card>
+  <Card title="CLI参考" icon="rectangle-terminal" href="/zh/code/reference/cli">所有`aristra`子命令和参数。</Card>
+</CardGroup>

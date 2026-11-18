@@ -1,0 +1,147 @@
+---
+title: "终端"
+description: "在终端中使用Aristra Code：界面、快捷键、审批、引导正在运行的一轮、回到之前的消息，以及全屏渲染器。"
+---
+
+不带子命令的`aristra`会在当前文件夹中打开Aristra Code。
+
+```sh
+aristra                          # a new chat in this folder
+aristra "add a --verbose flag"   # a new chat that starts with this prompt
+aristra -c                       # this folder's newest chat
+aristra -r <id>                  # that chat
+aristra resume                   # pick an earlier chat
+aristra attach <id>              # a chat that may be running elsewhere
+aristra --fullscreen             # draw on the whole screen
+aristra --folder ~/code/api      # work in another folder
+aristra --cloud "plan the launch"   # a chat run by Aristra's cloud agent
+```
+
+所有选项都在[CLI参考](/zh/code/reference/cli)中。
+
+## 界面
+
+```text
+aristra · gemini-3.8-flash · Aristra balance · /Users/you/code/my-project · Manual  the header
+
+› Find why the date parser fails on leap years and fix it.                          your message
+● Searched for 1 pattern, read 2 files                                              reads and searches, one line
+● Edit src/date.ts                                                                  an edit, with its diff
+  npm test                                                                          a command, with its output
+The parser treated 1900 as a leap year. ...                                         the reply
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ ›                                                                            │  the composer
+╰──────────────────────────────────────────────────────────────────────────────╯
+ ⠋ Working 12 s · esc to interrupt                              ████░░░░░░ 41% of the window
+ Manual · asks before changes the rules do not allow (shift+tab)    gemini-3.8-flash · Aristra balance
+```
+
+- **步骤**：每个工具调用显示为一行，说明它做了什么。连续的读取和搜索会折叠为一行。编辑会显示它的diff，命令会显示其输出的开头部分；**Ctrl+O**可以打开最新一步的完整输出。
+- **任务列表**会在智能体维护任务列表时显示在输入框上方。**Ctrl+T**可以隐藏和显示它。
+- **状态行**显示智能体正在做什么、后台正在运行什么（`/tasks`会列出）、其他对话中有多少审批在等待，以及模型的上下文已用多少（60%时为黄色，80%时为红色；接近上限时会显示距离自动压缩还剩多少）。`/usage`会显示已使用的token。
+- **页脚**显示模式、当前分支打开的拉取请求（`PR #412`，按审查状态着色）、模型以及由谁付费。
+- **建议**：几轮回复之后，空的输入框可能会以灰色显示建议的下一条消息：按Tab采用，按Enter发送，直接输入则忽略它。
+
+## 快捷键
+
+| 按键 | 作用 |
+|---|---|
+| Enter | 发送。在一轮运行期间，把你的消息加入这一轮的下一步 |
+| Shift+Enter、Alt+Enter、Ctrl+J，或`\`后按Enter | 换行（如果Shift+Enter在你的终端中不起作用，请运行`/terminal-setup`） |
+| Esc | 停止正在运行的一轮。在空输入框上按两次：回到之前的某条消息 |
+| Shift+Tab | 循环切换模式：Manual、Accept edits、Plan、Auto（如果你用bypass参数启动，Plan之后还有Bypass Permissions；在云端对话中为Manual和Auto） |
+| 行首的`!` | Shell模式：自己运行命令 |
+| `@` | 提及文件或文件夹；按Tab补全 |
+| `/` | 命令和你的技能 |
+| Ctrl+V | 附加剪贴板中的图片 |
+| Ctrl+O | 最新一步的完整输出 |
+| Alt+P | 选择模型 |
+| Ctrl+L | 清屏 |
+| Ctrl+X然后Tab | 在全屏模式下打开diff面板时，把按键交给它（按Esc交还） |
+| Ctrl+Up、Ctrl+Down（或Alt+Up、Alt+Down） | 在全屏模式下，在diff面板的文件之间移动 |
+| Ctrl+T | 隐藏或显示任务列表 |
+| 命令运行时按Ctrl+B | 把它转到后台（在tmux中按两次Ctrl+B） |
+| Ctrl+R | 搜索你之前的提示词 |
+| Ctrl+G | 在你的编辑器中编辑草稿 |
+| Ctrl+S | 暂存草稿；在空输入框上再按一次可以恢复 |
+| Up、Down | 之前的提示词，先显示这个文件夹的 |
+| Ctrl+C | 清空输入框；在空输入框上按两次即可退出 |
+
+你可以在`~/.aristra/keybindings.json`中重新绑定按键（`/keybindings`会打开它）。参见[终端设置](/zh/code/configure/terminal)。
+
+## 在一轮运行期间发送消息
+
+Aristra Code在每个对话中一次只运行一轮。在一轮运行期间：
+
+- **Enter用于引导**。你的消息会在下一步加入正在运行的这一轮。用它可以在不停止的情况下纠正方向。
+- **`/queue <message>`会等待**，在当前这一轮结束后作为新的一轮发送。
+- **Esc用于停止**这一轮。正在运行的命令和钩子会连同它们启动的所有内容一起停止，等待中的审批会被取消，然后Aristra Code会询问你接下来要做什么。
+
+## 审批
+
+当某一步需要你的答复时，它会显示在输入框上方：这是哪一类步骤、它具体会做什么（命令、diff、地址），以及可选的答复。
+
+| 答复 | 含义 |
+|---|---|
+| Yes | 运行这一步 |
+| Yes, and don't ask again for `rule` | 运行它，并把规则保存到文件夹的`.aristra/settings.local.json`中。对于命令，你可以先编辑规则 |
+| Yes, and switch to accept edits | 运行它，并让对话在剩余时间内无需询问即可编辑文件 |
+| Yes, allow reading from `X/` | 运行它，并让对话读取该文件夹 |
+| No | 不运行它，并停止这一轮。在Yes或No上按Tab可以添加备注；选择No时，模型会把备注当作原因，然后继续 |
+
+按数字键，或移动选择后按Enter。在命令上按**Ctrl+E**会解释它：它做什么、为什么做，以及它的风险。
+
+**Plan模式的审批**会显示计划，并询问是否继续：使用Auto模式继续（如果Auto关闭，则自动接受编辑），手动批准编辑，或者选择“Tell Aristra what to change”继续规划。按Shift+Tab会带着你输入的内容批准。**Ctrl+G**会在你的编辑器中打开计划。
+
+审批会显示在每个打开的使用端中，以最先给出的答复为准。如果无人回复，30分钟后会被拒绝（`approvals.timeoutMinutes`）。
+
+## 选择模型
+
+`/model`会列出每个模型来源以及由谁为它付费。尚未就绪的来源会说明如何设置。选择一个模型会切换当前对话，并把它设为新对话的默认模型。`/effort`设置模型的思考强度。参见[模型](/zh/code/configure/models)。
+
+## 恢复对话
+
+`/resume`（或`aristra resume`）会列出来自每个使用端的对话：终端、Aristra Desktop、脚本和编辑器。输入即可搜索，Tab在这个文件夹和所有文件夹之间切换，Right预览，Enter打开。仍在运行的对话在你打开时会继续运行。
+
+## 回到之前的消息
+
+`/rewind`，或在空输入框上按两次Esc，会列出你的消息以及每一轮所做的改动。选择一条，然后：
+
+| 选项 | 作用 |
+|---|---|
+| Restore code and conversation | 以下两项都执行 |
+| Restore conversation | 这条消息及之后的所有内容都会离开对话，这条消息会回到输入框中，让你编辑后重新发送 |
+| Restore code | 智能体用其文件工具修改过的文件，会恢复到这条消息之前的状态 |
+
+由命令或你自己做出的改动不会被撤销。参见[对话](/zh/code/guides/chats)。
+
+## 自己运行命令
+
+在输入框开头输入`!`，然后按Enter，就会以你的身份在对话的文件夹中、在沙箱之外运行命令。如果沙箱已开启且命令不得离开沙箱（在你的设置或团队的[策略](/zh/code/configure/managed-policy)中设置了`sandbox.allowUnsandboxedCommands: false`），它会改为在沙箱中运行，除非它是被排除的命令。在一轮运行期间，它会等到这一轮结束。命令及其输出会显示为一个步骤，智能体会在你发送下一条消息时读取它们。在开头按Esc或Backspace即可退出shell模式。
+
+## 附件
+
+- 较长的粘贴内容会完整保留，并以一个简短的占位符显示。
+- 拖到终端中的文件会作为附件，而不是被输入为文字。如果模型接受图片，图片会发送给模型。
+- `@path`会把一个文件连同你的话一起交给智能体；`@app.py#L10-20`则只给出其中的部分行。`.env`这类凭据文件会被排除。
+
+## 退出
+
+`/exit`（或`/quit`）、在空输入框上按Ctrl+D，或者按两次Ctrl+C。如果还有工作在运行，Aristra Code会询问你是停止它、把它转到后台然后退出，还是留下。后台工作会在运行时中继续运行，`aristra resume <id>`可以让你回到它。
+
+## 通知和回顾
+
+如果你有一段时间没有操作终端，当有审批在等待或一轮已经结束时，Aristra Code会通过终端通知你（在iTerm2、kitty、Ghostty和Apple的终端应用中）。`ARISTRA_NO_NOTIFY=1`会关闭这项功能。
+
+当你回到一个离开过的对话时，里面会有一行回顾在等你，包括目标、当前任务和下一步。`/recap`会立即生成一条；`awaySummaryEnabled: false`会关闭回顾。
+
+## 全屏
+
+全屏渲染器会占满整个屏幕，上方是可以滚动的对话记录，底部是输入框，支持鼠标选择，还有一个用于显示diff的侧面板。用`/tui fullscreen`开启（会保存在你的设置中），或者用`--fullscreen`只在一次启动中开启；`/tui default`可以恢复默认渲染器。
+
+在全屏模式下：
+- PgUp和PgDn每次滚动半屏；Ctrl+Home和Ctrl+End跳到顶部和末尾。鼠标滚轮也可以滚动。
+- 拖动即可选择；松开鼠标时会复制所选内容（`copyOnSelect: false`可以关闭此行为）。按住Shift（在iTerm2和Mac上的VS Code中为Option，在Apple的终端应用中为Fn）可以使用终端自身的选择功能。
+- **Ctrl+O**会打开对话记录界面：显示每一步及其完整输出，可以用`/`搜索。
+- **`/diff`**：在对话记录旁边显示已修改的文件。参见[Git与拉取请求](/zh/code/guides/git)。

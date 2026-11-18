@@ -1,0 +1,61 @@
+---
+title: "Memoria"
+description: "Qué recuerda Aristra de ti, cómo aprende de tus chats cada noche, el interruptor Memory y los chats de incógnito, y cómo leer, cambiar, importar y eliminar tu memoria."
+---
+
+Aristra recuerda lo que le cuentas sobre ti, cómo te gusta que trabaje y en qué estás trabajando, para que no tengas que repetirlo. Tu memoria se guarda en tu cuenta, así que llega a tus chats en la web, en tu teléfono, en Aristra Desktop y en la terminal. Todas las cuentas la tienen, con o sin plan, y no cuesta nada: un chat que usa tu memoria solo paga sus propios tokens.
+
+## Tu perfil
+
+Tu nombre, tu ocupación y la nota **About you** de la página **Profile** de tu cuenta abren todos los chats, diga lo que diga el interruptor Memory, salvo un chat de incógnito mientras Memory está desactivado. En un chat con otras personas, solo se usan tu nombre y tu ocupación. Los escribiste tú, así que son un ajuste, no algo que Aristra aprendió.
+
+## Qué guarda Aristra mientras chateas
+
+Cuando le cuentas a Aristra algo que vale la pena conservar (una corrección, una preferencia duradera, un dato sobre ti, una decisión o "recuerda esto"), lo guarda en ese momento y lo indica en el chat. Actualiza u olvida un recuerdo cuando lo corriges o se lo pides. Nunca guarda secretos como claves o contraseñas, solo guarda datos sensibles cuando se lo pides y no guarda lo que una página web o un archivo le dijo que conservara. Los chats con otras personas no escriben memoria.
+
+También puedes pedírselo: "recuerda que prefiero respuestas cortas", "olvida dónde trabajo".
+
+## Aprender de tus chats anteriores
+
+Cada noche, Aristra lee los chats de tu cuenta desde la última vez que los revisó y conserva lo que importará más adelante: un dato sobre ti, cómo te gustan las respuestas, una decisión o un plan. Conserva como máximo 15 recuerdos nuevos o actualizados por noche. Cada uno cita lo que dijiste e indica el chat del que salió, y uno más reciente puede sustituir a un recuerdo anterior que haya cambiado.
+
+También reescribe el resumen sobre ti que abre todos los chats, con aquello en lo que estás trabajando, los asuntos pendientes y las decisiones y temas recientes.
+
+- La primera noche, lee los últimos 30 días.
+- Necesita que **Memory** y **Search and reference past chats** estén activados, y no lee nada mientras alguno de los dos esté desactivado. Cuando ambos vuelven a estar activados, también lee los chats de ese periodo.
+- Nunca lee chats de incógnito, chats con otras personas, los chats propios de las tareas programadas, chats eliminados ni chats que iniciaste con Memory desactivado. Los chats guardados solo en tu computadora no están en tu cuenta, así que tampoco los lee.
+- Los chats van al servicio de lotes de Anthropic para leerse. Aristra elimina allí el lote de cada noche en cuanto se guardan sus resultados; Anthropic nunca conserva uno más de 29 días. No te cuesta nada.
+
+## Desactivar la memoria
+
+Tu cuenta tiene dos interruptores, en **Personalization** en el sitio web y en **Settings › Memory** en Aristra Desktop:
+
+- **Memory**: mientras está desactivado, no se usa ni se guarda nada. Cuando vuelve a estar activado, Aristra puede aprender de los chats que sigan en tu historial.
+- **Search and reference past chats**: mientras Memory está activado, permite que Aristra busque en tus chats anteriores y los traiga cuando ayuden. Con Memory desactivado aparece desactivado, como en ChatGPT, y vuelve a quedar como estaba cuando activas Memory.
+
+Un chat registra el interruptor Memory cuando empieza. Desactivar Memory llega a todos los chats a la vez; volver a activarlo llega a los chats que inicies después.
+
+## Chats de incógnito
+
+Aristra nunca aprende de un chat de incógnito, y este no guarda nada en tu memoria. En la web y en la pestaña Chat de Aristra Desktop, puede seguir usando lo que Aristra ya recuerda. En la terminal, `aristra --cloud --incognito` inicia un chat de incógnito en Aristra Cloud, que funciona igual. Un chat que [Aristra Code](/es/code/guides/memory) ejecuta en tu computadora no tiene modo incógnito. Consulta [Chats](/es/chats).
+
+## Leer y cambiar tu memoria
+
+Abre **Memory** en la barra lateral del sitio web (en Aristra Desktop, **Settings › Memory › See and edit your memory**):
+
+| Pestaña | Qué hay |
+|---|---|
+| **Summary** | El resumen sobre ti que abre todos los chats. Puedes editarlo |
+| **Memories** | Todo lo que Aristra recuerda. **Learned from your chats**, arriba, muestra lo que aprendió cada noche, cada recuerdo enlazado a su chat y con **Forget** |
+| **Pages** | Tus recuerdos agrupados por proyecto, repositorio, carpeta y tema |
+| **Profile** | Tu perfil |
+
+## Importar
+
+**Import** en la página Memory trae lo que otro asistente recuerda de ti. Te da un prompt para pegar en ChatGPT, Claude u otro asistente; pega o sube lo que responda. Hasta 500 recuerdos al día, contando lo que Aristra guardó ese día. Los recuerdos importados llegan al resumen la noche siguiente.
+
+En Aristra Desktop, **Settings › Memory** también puede importar lo que Codex y Claude Code recuerdan en tu Mac, y guardar una copia de tu memoria como archivos en `~/Aristra/memory`.
+
+## La memoria en Aristra Code
+
+Aristra Code usa la misma memoria de la cuenta y, además, guarda notas sobre cada repositorio y lee tus archivos `AGENTS.md`. Consulta [Instrucciones y memoria](/es/code/guides/memory).

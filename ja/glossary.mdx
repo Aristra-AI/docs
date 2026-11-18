@@ -1,0 +1,130 @@
+---
+title: "用語集"
+description: "このドキュメントで使う用語の意味。Aristra Code、サーフェス、チャット、ランタイム、モード、ルール、サンドボックス、スキル、フックなど。"
+---
+
+## A
+
+**AGENTS.md**：コーディングエージェント向けの指示を書いた Markdown ファイルで、リポジトリに置きます。Aristra Code はすべてのチャットの開始時にこのファイルを読みます。組織のものから作業中のフォルダーのものまで、階層的に読み込みます。[指示とメモリ](/ja/code/guides/memory)を参照してください。
+
+**承認（Approval）**：Aristra Code が実行前に確認を求めるステップで、開いているすべてのサーフェスに表示されます。最初の回答が採用されます。[権限](/ja/code/configure/permissions)を参照してください。
+
+**Aristra CLI**：`aristra` コマンド。ターミナルで使う Aristra Code です。[CLI リファレンス](/ja/code/reference/cli)を参照してください。
+
+**Aristra Code**：コンピューター上のフォルダーで作業する Aristra で、Aristra のサーフェスの 1 つです。ターミナル、Aristra Desktop の Code タブ、エディターで使え、Remote Control を通じてスマートフォンやウェブからも使えます。[Aristra Code](/ja/surfaces/aristra-code) を参照してください。
+
+**Aristra Cloud**：Aristra がホストするものすべて。Aristra のモデル、クラウドエージェント、クラウドコンピューター、Remote Control と共有チャット、アカウントのメモリ（すべてのアカウントにあります）、ストレージ、Craft、コネクター、チャネル、クラウドのスケジュールタスクです。[プランと料金](/ja/account/plans)を参照してください。
+
+**Aristra Desktop**：Mac 用の Aristra アプリ。Aristra Cloud のチャット用の Chat タブと、Aristra Code 用の Code タブがあります。[Aristra Desktop](/ja/surfaces/desktop) を参照してください。
+
+**Aristra One**：Aristra アカウントのプラン（Free、Plus、Pro、Max）と、それに付随するもの。アカウントのページに表示される残高、使用量、デバイスです。[アカウントと Aristra One](/ja/account/overview) を参照してください。
+
+**Aristra Runtime**：コンピューター上のバックグラウンドプロセスで、すべてのサーフェスのために Aristra Code を実行します。チャット、ターン、承認、ツール、モデル、設定を扱います。[しくみ](/ja/code/how-it-works)を参照してください。
+
+**Auto モード（Auto mode）**：本来なら確認を求めるステップを、レビュアーモデルが判断する[モード](/ja/glossary)です。[権限](/ja/code/configure/permissions)を参照してください。
+
+## B
+
+**残高（Balance）**：Aristra のモデル、ホスト型ツール、クラウドコンピューターの支払いに使われるもので、単位は米ドルです。最初に 1 回限りの $1 のスタータークレジット（クラウドコンピューターには使えません）、次にプランの毎月の利用枠、その次にチャージした残高が使われます。[残高とチャージ](/ja/account/credits)を参照してください。
+
+**バックグラウンドタスク（Background task）**：チャットを続けている間に実行される作業。時間のかかるコマンド、エージェント、ワークフローなどです。`/tasks` で一覧を表示します。[バックグラウンド処理](/ja/code/guides/background)を参照してください。
+
+## C
+
+**チャット（Chat）**：Aristra との 1 つの会話で、モデルと履歴を持ちます。Aristra Code のチャットには、フォルダーとモードもあります。Aristra はどのサーフェスでも「チャット」という言葉を使います。[チャット](/ja/chats)を参照してください。
+
+**チェックポイント（Checkpoint）**：自分の各メッセージの時点に作られる復元ポイント。`/rewind` でその時点に戻ります。[チャット](/ja/code/guides/chats)を参照してください。
+
+**クラウドコンピューター（Cloud computer）**：Aristra Cloud にある自分専用の Linux マシンで、ファイルとツールを保持するディスクがあります。残高で動き、プランの利用枠かチャージした残高が使われます。[クラウドコンピューター](/ja/surfaces/cloud-computer)を参照してください。
+
+**クラウドチャット（Cloud chat）**：Aristra のクラウドエージェントが実行し、アカウントに保存されるチャット。コンピューター上のチャットと対になるものです。[クラウドチャット](/ja/code/cloud-chats)を参照してください。
+
+**コマンド（Command）**：チャットで `/` に続けて入力するもの。`/model` や `/compact` などです。[コマンド](/ja/code/reference/commands)を参照してください。`aristra mcp add` のような `aristra` のサブコマンドや、エージェントが実行するシェルコマンドとは別のものです。
+
+**圧縮（Compaction）**：長いチャットの古い部分を要約して、モデルのコンテキストに収まるようにすること。[コンテキスト](/ja/code/guides/context)を参照してください。
+
+**コネクター（Connector）**：Aristra アカウントに接続したアプリ（Gmail、GitHub、Slack など）。クラウドチャットと Aristra Code から使えます。
+
+**コンテキスト（Context）**：1 つのターンでモデルが読むものすべて。`/context` で、何がコンテキストを占めているかを確認できます。
+
+**Craft**：Aristra と一緒に、または自分で書くドキュメント。コメント、バージョン、公開リンクに対応しています。プランがあればアカウントに、なければ Aristra Desktop で Mac に保存されます。[Craft](/ja/craft) を参照してください。
+
+## D
+
+**デバイスキー（Device key）**：このコンピューターのサインインをそのコンピューターに結び付けるキー。Mac では Secure Enclave に保存されます。[セキュリティ](/ja/code/security)を参照してください。
+
+## F
+
+**ファイル（Files）**：アカウントに保存されるファイル。自分で追加したもの、チャットに添付したもの、Aristra が作成したものです。ウェブサイトと Aristra Desktop の **Files** に表示され、アカウントのストレージの使用量に含まれます。[ファイル](/ja/files)を参照してください。
+
+**フォルダー（Folder）**：チャットが作業する場所。チャットのファイルはそこで読まれて変更され、コマンドもそこで実行されます。
+
+## H
+
+**フック（Hook）**：イベントに応じて実行される自分のコマンド、または Aristra が POST するウェブアドレス。ツールの実行前などに動きます。[フック](/ja/code/extend/hooks)を参照してください。
+
+**シークレットチャット（Incognito chat）**：履歴に残らず、Aristra が学習に使うこともないチャット。[チャット](/ja/chats)を参照してください。
+
+## M
+
+**MCP サーバー（MCP server）**：Model Context Protocol を通じて Aristra Code にツールを追加するプログラムまたはアドレス。[MCP サーバー](/ja/code/extend/mcp)を参照してください。
+
+**モード（Mode）**：確認なしでどこまで実行するかの設定。Manual、Accept edits、Plan、Auto、Don't ask、Bypass permissions、Read only があります。Shift+Tab で切り替えます。[権限](/ja/code/configure/permissions)を参照してください。
+
+**管理ポリシー（Managed policy）**：管理者がすべてのコンピューターに強制する設定。[管理ポリシー](/ja/code/configure/managed-policy)を参照してください。
+
+**メモリ（Memory）**：Aristra があなたについて覚えていることで、アカウントに保存されます。会話中に保存され、毎晩チャットから学習されます。すべてのアカウントで使え、スイッチでオフにできます。[メモリ](/ja/memory)を参照してください。
+
+## N
+
+**非対話モード（Non-interactive mode）**：`aristra run` または `aristra -p` を使って、スクリプトや CI から 1 つのターンを実行すること。[非対話モード](/ja/code/non-interactive)を参照してください。
+
+## P
+
+**支払い元（Payer）**：モデルの呼び出しを誰が支払うか。Aristra の残高、ChatGPT のプラン、自分のキーのいずれかで、コンピューター上のモデルなら誰も支払いません。[モデル](/ja/code/configure/models)を参照してください。
+
+**プラン（Plan）**：Plus、Pro、Max のいずれか。月額のサブスクリプションで、Aristra がホストするその他の機能（Remote Control と共有チャット、Craft、コネクター、クラウドのスケジュールタスク、チャネル。メモリはすべてのアカウントに含まれます）が使えるようになり、プランの料金と同額の Aristra のモデルの利用枠が毎月付きます。[プランと料金](/ja/account/plans)を参照してください。
+
+**プランモード（Plan mode）**：Aristra Code が何かを変更する前に、調査して計画を書くモード。
+
+**プラグイン（Plugin）**：スキル、コマンド、エージェント、フック、MCP サーバー、言語サーバーをまとめて 1 つとしてインストールするもの。[プラグイン](/ja/code/extend/plugins)を参照してください。
+
+**プロジェクト（Project）**：1 つの作業のチャット、ファイル、指示、メモリをまとめて保持するもの。各 Mac にメインフォルダーを設定できます。[プロジェクト](/ja/projects)を参照してください。
+
+## R
+
+**Remote Control**：コンピューター上で実行中のチャットを、スマートフォンやウェブから続けること。[Remote Control](/ja/code/remote-control) を参照してください。
+
+**ルール（Rule）**：ツールの呼び出しを許可、確認、拒否する権限の設定。`shell(npm test:*)` などです。拒否は許可より優先されます。
+
+## S
+
+**サンドボックス（Sandbox）**：オンにしたとき（`/sandbox`。既定はオフ）にコマンドが実行される、オペレーティングシステムの境界。コマンドが書き込める場所と、接続できるホストを決めます。[サンドボックス](/ja/code/configure/sandbox)を参照してください。
+
+**スケジュールタスク（Scheduled task）**：決まった時刻に、またクラウドではアプリで何かが起きたときにも、Aristra が実行するプロンプト。自分のコンピューター上ではプランは不要で（Aristra のモデルを使うタスクの料金は残高から支払われます）、そのコンピューターで Aristra が動いている間に実行されます。Aristra のクラウドではプランが必要です。[スケジュールタスク](/ja/scheduled-tasks)と[バックグラウンド処理](/ja/code/guides/background)を参照してください。
+
+**スキル（Skill）**：ある種類のタスクのための指示を書いた `SKILL.md` ファイル。Aristra Code が適切なときに使うか、`/name` で実行します。[スキル](/ja/code/extend/skills)を参照してください。
+
+**ソース（Source）**：チャットのモデルの提供元。`aristra`、`chatgpt`、プロバイダーキー、ローカルサーバー、カスタムエンドポイントのいずれかです。
+
+**スタータークレジット（Starter credit）**：新規アカウントにメールアドレスごとに 1 回だけ付与される $1。Aristra のモデルとホスト型ツールの支払いに使え、クラウドコンピューターには使えません。[残高とチャージ](/ja/account/credits)を参照してください。
+
+**ステアリング（Steering）**：ターンの実行中にメッセージを送り、次のステップでそのターンに反映させること。
+
+**サブエージェント（Subagent）**：Aristra Code が独自のタスクを与えて起動するエージェント。独自のコンテキストで動き、結果を報告します。[サブエージェントとワークフロー](/ja/code/guides/subagents)を参照してください。
+
+**サーフェス（Surface）**：Aristra を使う場所。ウェブとスマートフォン、Aristra Desktop、Aristra Code（ターミナル、Desktop の Code タブ、エディター）、Telegram、クラウドコンピューターです。どれも同じアカウントを共有します。[Aristra とは](/ja)を参照してください。
+
+## T
+
+**ツール（Tool）**：Aristra Code が実行できる操作。ファイルを読む、編集する、コマンドを実行する、ページを取得する、MCP サーバーを呼び出すなどです。[ツール](/ja/code/reference/tools)を参照してください。
+
+**チャージ（Top-up）**：残高に追加するお金で、$10 から $500 までの任意の金額です（新規アカウントは、$5 以上の支払いが確定するまで、合計 $100 までしか追加できません）。プランの毎月の利用枠のあとに使われ、有効期間は 12 か月です。[残高とチャージ](/ja/account/credits)を参照してください。
+
+**信頼（Trust）**：フォルダー自体の設定、スキル、フックを有効にしてよいという回答。フォルダーで最初のチャットを始める前に確認されます。
+
+**ターン（Turn）**：自分からの 1 つのメッセージと、Aristra Code が返信するまでに行うことすべて。
+
+## W
+
+**ワークツリー（Worktree）**：リポジトリを独自のブランチで別に git チェックアウトしたもの。これにより、チャットはフォルダーに触れずに作業できます。[Git とプルリクエスト](/ja/code/guides/git)を参照してください。

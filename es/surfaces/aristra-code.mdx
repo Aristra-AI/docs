@@ -1,0 +1,29 @@
+---
+title: "Aristra Code"
+description: "Aristra trabajando en carpetas de tu computadora: lee tu código, edita archivos, ejecuta comandos y trabaja con git, en tu terminal, en la pestaña Code de Aristra Desktop y en tu editor."
+---
+
+Aristra Code es Aristra trabajando en una carpeta de tu computadora. Dile lo que quieres hacer: lee el código que necesita, hace los cambios en los archivos, ejecuta tus pruebas y comandos, y pregunta antes de hacer cualquier cosa que no hayas permitido. Es gratis con un modelo propio, y tus chats con él se guardan en tu computadora, salvo que ejecutes uno en la nube desde Aristra Desktop.
+
+## Dónde lo usas
+
+| | |
+|---|---|
+| [La terminal](/es/code/terminal) | El comando `aristra`: la app completa en tu terminal, en un Mac o en Linux |
+| [La pestaña Code de Aristra Desktop](/es/code/desktop) | Tus carpetas con sus chats, con una terminal, un navegador, los cambios y el pull request junto al chat |
+| [Tu editor](/es/code/editors) | Zed y otros editores compatibles con el Agent Client Protocol |
+| [Teléfono y web](/es/code/remote-control) | Con un plan, Remote Control continúa un chat desde tu teléfono o el sitio web mientras el trabajo se queda en tu computadora |
+| [Scripts y CI](/es/code/non-interactive) | `aristra run` ejecuta un turno sin app, para scripts y CI |
+| [Otra máquina](/es/code/remote-machines) | `aristra --remote <host>` trabaja en una máquina a la que llegas por SSH |
+
+Todos hablan con el mismo agente de tu computadora, el Aristra Runtime, así que un chat iniciado en uno aparece en los demás.
+
+## Primeros pasos
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Aristra Desktop incluye Aristra Code, así que no necesitas la CLI además de la app. El [inicio rápido de Aristra Code](/es/code/quickstart) te guía por una primera tarea real, y la pestaña **Aristra Code** de esta documentación cubre todo lo demás: [permisos](/es/code/configure/permissions), [modelos](/es/code/configure/models), [git](/es/code/guides/git), [servidores MCP](/es/code/extend/mcp), [skills](/es/code/extend/skills), [hooks](/es/code/extend/hooks) y la [referencia de comandos](/es/code/reference/commands).

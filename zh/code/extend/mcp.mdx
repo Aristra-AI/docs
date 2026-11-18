@@ -1,0 +1,187 @@
+---
+title: "MCP服务器"
+description: "用Model Context Protocol服务器为Aristra Code提供更多工具：为你自己、某个项目或仓库中的所有人添加服务器，批准项目的服务器，信任，用OAuth登录，以及在沙箱中运行服务器。"
+---
+
+[Model Context Protocol](https://modelcontextprotocol.io)服务器为Aristra Code提供更多工具：数据库、问题跟踪器、设计工具、内部API。Aristra Code会为你电脑上的对话运行它们。云端对话使用云端智能体的工具、你Aristra账户中的连接器，以及你在网站Connectors页面上通过地址添加的MCP服务器。你用`aristra mcp`添加的服务器不会在云端对话中使用。
+
+## 添加服务器
+
+作为程序在你电脑上运行的服务器：
+
+```sh
+aristra mcp add fs --cwd ~/notes -- npx -y @modelcontextprotocol/server-filesystem ~/notes
+aristra mcp add db --secret DATABASE_URL=postgres://... -- uvx mcp-server-postgres
+```
+
+位于某个地址的服务器：
+
+```sh
+aristra mcp add sentry --url https://mcp.sentry.dev/mcp
+aristra mcp add internal --url https://tools.example.com/mcp --header Authorization="Bearer ..."
+```
+
+程序及其参数写在`--`之后。然后：
+
+```sh
+aristra mcp test fs        # start it and list its tools
+aristra mcp list           # every server here, its scope and its state
+aristra mcp get fs         # one server's details
+aristra mcp trust fs       # let its tools run without asking, in this project
+```
+
+## 作用域
+
+服务器保存在三种作用域之一中。添加或删除服务器时，用`-s`（`--scope`）选择作用域。
+
+| 作用域 | 使用范围 | 是否共享 | 保存位置 |
+|---|---|---|---|
+| `local`（默认） | 仅这个项目 | 否 | 你的设置中，项目之下 |
+| `project` | 这个项目 | 是，通过仓库共享 | 文件夹中的`.mcp.json` |
+| `user` | 你的所有项目 | 否 | 你的设置中，`mcp.servers`之下 |
+
+```sh
+aristra mcp add -s user github -- npx -y @modelcontextprotocol/server-github
+aristra mcp add -s project docs --url https://docs.example.com/mcp
+aristra mcp remove -s local fs
+```
+
+项目指的是仓库的根目录，所以在子文件夹或工作树中添加的local服务器，在整个仓库中都可用。当同一个名称出现在多个作用域中时，local优先于project，project优先于你自己的（user），它们都优先于插件提供的服务器。作为程序运行的local或project服务器会在项目中运行。
+
+## 项目的.mcp.json
+
+仓库可以在`.mcp.json`中带上它自己的服务器，Claude Code读取的也是这个文件：
+
+```json .mcp.json
+{
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"] },
+    "docs": { "type": "http", "url": "https://docs.example.com/mcp", "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" } }
+  }
+}
+```
+
+它会从对话所在的文件夹及其上方的每个文件夹中读取；离得越近的文件优先。
+
+**项目服务器只有在你批准后才会运行**。当你在该文件夹中启动`aristra`时，它会逐个询问每个新服务器：使用它、使用它以及这个项目中以后的所有服务器，或者不使用它继续。多个服务器会以可勾选的列表形式出现。在Aristra Desktop中，文件夹中的对话会在输入框上方询问同样的问题，之后也可以用`/mcp`批准或拒绝某个服务器。
+
+你的答复保存在你自己的设置中，绝不会保存在仓库中。`aristra mcp reset-project-choices`会清除它们，这样你会被重新询问。
+
+<Note>
+仓库不能批准它自己的服务器。只有当你信任该文件夹后，文件夹`.aristra`设置中的批准才算数，而拒绝无论来自哪里都算数。无人监视的运行（`aristra run`、定时任务）无法询问，所以它会使用仍在等待批准的服务器，但绝不会使用已被拒绝的服务器。
+</Note>
+
+`.mcp.json`会与拥有该仓库的所有人共享，所以它不包含机密信息：写成`${VAR}`，然后在你的环境中设置该变量。信任项目服务器只适用于这个项目。
+
+## /mcp界面
+
+在对话中，`/mcp`会列出它能看到的服务器，按作用域分组，每个服务器都显示其状态。选择一个可以查看详情，并且：
+
+- 对于尚未批准的项目服务器，批准或拒绝它；
+- 对于位于某个地址的服务器，进行身份验证、重新验证或清除其登录；
+- 重新连接；
+- 仅在这个项目中禁用或启用它；
+- 查看它的工具。
+
+`/mcp reconnect`、`/mcp enable`和`/mcp disable`可以对你指定的服务器或全部服务器执行同样的操作。
+
+### 从JSON或Claude Desktop添加
+
+```sh
+aristra mcp add-json -s user github '{"type":"stdio","command":"npx","args":["-y","@modelcontextprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":"${GITHUB_TOKEN}"}}'
+aristra mcp add-from-claude-desktop            # every stdio server from Claude Desktop whose name is free here (macOS)
+```
+
+`aristra import claude-code`和`aristra import codex`也会迁移这些工具的服务器，并先显示预览。
+
+## 服务器保存在哪里
+
+user服务器保存在你自己的设置中的`mcp.servers`下，local服务器保存在同一个文件中对应项目之下，二者都绝不包含机密信息：通过`--secret`、`--header`和`--client-secret`提供的值会保存到Aristra的凭据存储中。project服务器保存在文件夹的`.mcp.json`中。
+
+```json ~/.aristra/settings.json
+{
+  "mcp": {
+    "servers": {
+      "fs": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/notes"],
+        "cwd": "/Users/me/notes"
+      },
+      "sentry": { "url": "https://mcp.sentry.dev/mcp" }
+    }
+  },
+  "permissions": { "trustedMcpServers": ["fs"] }
+}
+```
+
+| 字段 | 适用于 | 含义 |
+|---|---|---|
+| `type` | 两者 | `stdio`或`http`。不支持SSE和WebSocket服务器 |
+| `command`, `args` | 程序 | 程序及其参数 |
+| `env` | 程序 | 非机密的环境变量 |
+| `cwd` | 程序 | 它运行的文件夹，它可以写入该文件夹 |
+| `writable` | 程序 | 它可以写入的其他文件夹 |
+| `sandbox` | 程序 | 设为`true`会在沙箱中运行它（默认为`false`） |
+| `url` | 地址 | 服务器的地址 |
+| `headers` | 地址 | 非机密的请求头 |
+| `headersHelper` | 地址 | 一条命令，每次连接时用它的JSON输出添加请求头 |
+| `oauth` | 地址 | `clientId`、`scopes`、`callbackPort`、`authServerMetadataUrl`，用于需要这些参数的服务器 |
+| `alwaysLoad` | 两者 | 设为`true`会让它的工具始终出现在模型的工具列表中，而不是放在工具搜索之后 |
+| `timeout` | 两者 | 一次调用可以花费的秒数 |
+| `enabled` | 两者 | 设为`false`会保留该条目但不启动它 |
+| `toolCosts`, `spendLimit`, `costUnit` | 两者 | 它的工具的费用、一个对话在它上面的支出上限，以及单位（默认为`credits`）。有费用的调用在审批时会显示费用，超过上限的调用总是会询问 |
+
+`command`、`args`、`env`、`url`和`headers`中的`${VAR}`和`${VAR:-default}`会从你登录shell的环境中读取。对于位于某个地址的服务器，保存常见凭据的变量（云服务密钥、软件包仓库令牌、`ANTHROPIC_API_KEY`等）会被读取为空，`ARISTRA_TOKEN`绝不会被填入。
+
+<Note>
+仓库的`.aristra/settings.json`不能添加MCP服务器：仓库的服务器就是它的`.mcp.json`，在你批准后才会使用。当智能体修改`.mcp.json`时，它总是会先询问你。
+</Note>
+
+## 信任
+
+MCP服务器是不由你编写的代码，它的工具可以做任何事情：
+
+- **在你信任某个服务器之前**，它的每个工具在运行前都会询问，除非有规则允许它（在Auto模式下，由审核模型决定）。
+- **一旦你用`aristra mcp trust <name>`信任了某个服务器**，它的工具会无需询问即可运行，效果与允许`mcp__<name>`的规则相同。拒绝或询问规则仍然优先，在Read only模式下，服务器未标记为只读的工具会被拒绝。
+- **信任属于你所信任的服务器，并限定在它的作用域内**。你自己的服务器或插件的服务器在所有地方都受信任；local或project服务器只在它的项目中受信任。来自其他作用域的同名服务器，例如仓库`.mcp.json`中的服务器或某次运行的`--mcp-config`中的服务器，永远不会获得这份信任。
+
+规则同样适用：在`permissions.allow`、`ask`或`deny`中，用`mcp__github`表示某个服务器的所有工具，或者用`mcp__github__create_issue`表示其中一个工具。参见[权限](/zh/code/configure/permissions)。
+
+## 沙箱
+
+作为程序运行的服务器启动时拥有你的访问权限。设置`"sandbox": true`（`aristra mcp add --sandbox`）后，它会在沙箱中运行，并允许访问网络：它可以读取除你的私有文件夹（`~/.ssh`、`~/.aws`和其他凭据）以及Aristra的数据之外的所有内容，并且只能写入它自己的文件夹（`cwd`）、`writable`中的文件夹、软件包缓存以及它自己的临时文件夹。
+
+在通过`npx`、`bunx`、`uvx`或`pipx`启动服务器之前，会对照OSV已知恶意软件数据库检查它的软件包，已知的恶意软件包会被拒绝。
+
+## 用OAuth登录
+
+需要登录的服务器会在`aristra mcp list`中显示“sign-in needed”：
+
+```sh
+aristra mcp login sentry                 # in a browser on this computer
+aristra mcp login sentry --device-code   # with a code, when the server offers it
+aristra mcp logout sentry
+```
+
+令牌会保存到凭据存储中，并在过期前刷新。需要特定OAuth作用域的服务器，可以通过`aristra mcp add-json`在`oauth.scopes`中获得。
+
+## 资源、提示词和提问
+
+- **资源**：当服务器提供资源时，Aristra Code可以列出并读取它们。
+- **提示词**会成为命令：`/mcp__<server>__<prompt> <arguments>`。
+- **提问**：服务器可能会在它的工具运行时向你提问，形式可以是表单或需要打开的链接。它会像任何审批一样被询问。
+
+## 长时间调用和大量工具
+
+- 如果服务器在30分钟（程序）或5分钟（地址）内没有发送任何内容，调用就会失败，除非它的`timeout`另有设置。在你自己的对话中，运行超过两分钟的调用会转到后台，结束时结果会到达对话。在子智能体或无人监视的运行中，这一轮会等待它。
+- MCP工具放在工具搜索之后：模型会找到它需要的工具，而不是每一轮都接收数百个工具定义。`mcp.toolSearch: false`会把它们直接放入模型的工具列表中，并进行裁剪，使整个列表（包括Aristra Code自己的工具）保持在128个以内。
+- 对话的服务器会在对话打开时连接，所以在你发送第一条消息时它们就已准备就绪。当服务器的工具发生变化时，Aristra Code会重新列出它们，必要时在一轮中途进行。
+- 作为程序运行的服务器会先用SIGINT停止（在Docker中运行的服务器会因此关闭），100毫秒后发送SIGTERM，再过400毫秒发送SIGKILL。
+
+## 来自插件的服务器
+
+[插件](/zh/code/extend/plugins)可以在它的`.mcp.json`或其清单的`mcpServers`中带上MCP服务器。它们被命名为`plugin:<plugin>:<server>`，它们的工具在每次调用前都会询问，除非有规则允许（`mcp__plugin_<plugin>_<server>`）。
+
+## 面向组织
+
+托管策略可以按名称、命令或地址允许或拒绝服务器。参见[托管策略](/zh/code/configure/managed-policy)。

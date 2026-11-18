@@ -1,0 +1,48 @@
+---
+title: "设置"
+description: "Aristra Code的设置保存在哪里、各层如何合并、哪些键仓库无法修改，以及如何读取和修改设置。"
+---
+
+设置是由Aristra Runtime读取的JSON文件，所以终端、Aristra Desktop和其他每个使用端都使用同一套设置。设置文件中绝不包含机密信息：密钥和令牌保存在[凭据存储](/zh/code/security)中。
+
+## 设置文件
+
+| 作用域 | 文件 | 是否共享 |
+|---|---|---|
+| 你自己的 | `~/.aristra/settings.json` | 否：属于你，适用于所有文件夹 |
+| 项目 | `<folder>/.aristra/settings.json` | 是：提交它即可与团队共享 |
+| 项目中你自己的 | `<folder>/.aristra/settings.local.json` | 否：不纳入git |
+| 托管策略 | 由管理员设置；参见[托管策略](/zh/code/configure/managed-policy) | 在电脑上强制执行 |
+
+越靠后的层级优先：先是你自己的，然后是项目的，然后是项目的local文件，然后是脚本运行的`--settings`，最后是覆盖一切的托管策略。对象按键逐一合并，各层的列表会被合并（不重复），其他值则被靠后的层级替换。
+
+权限规则也会在各文件之间累加，任何地方的拒绝规则都优先。参见[权限](/zh/code/configure/permissions)。
+
+## 仓库无法修改的内容
+
+只有在你[信任该文件夹](/zh/code/configure/permissions)之后，项目的文件才会生效。在此之前，只会读取其中的拒绝和询问规则。
+
+有些键只从你自己的文件中读取，无论文件夹是否受信任，所以仓库无法修改它们：`projects`、`mcp`、`review`、`credentials`、`auxiliary`和`model.fallback`。钩子从你的文件和受信任项目的`settings.json`中读取，绝不从`settings.local.json`中读取。`runtime`、`approvals`、`telemetry`、`web`和`permissions.trustedMcpServers`只从你的文件和托管策略中读取。项目的`settings.json`不能设置`autoMode`以及Auto和Bypass提示相关的键（`settings.local.json`可以），两个项目文件都不能设置`pluginConfigs`，项目也只能关闭工作流。
+
+## 读取和修改设置
+
+```sh
+aristra config get                              # every setting in effect here
+aristra config get <key>                        # one value, and the file it comes from
+aristra config get permissions --json
+aristra config set permissions.defaultMode auto # in your own file
+aristra config set permissions.allow '["shell(npm test *)"]' --project   # in the project's file
+aristra config edit                             # your file in your editor
+```
+
+在对话中，`/config`会显示当前生效的设置以及每项设置来自哪个文件。你也可以让Aristra Code修改某项设置：内置的`/update-config`技能会完成这件事。
+
+设置会立即生效：每当文件发生变化，运行时都会重新读取它。手动编辑`runtime`、`approvals`或`credentials.store`之后，请运行`aristra runtime stop`让它们生效。不符合格式的部分会被忽略，并给出一条注明该部分的警告，其余部分仍然生效。`aristra doctor`、`/config`和`aristra config get`会显示这些警告。
+
+## 检查设置文件
+
+`aristra doctor`、`/config`和`aristra config get`会检查你的设置文件，并指出任何不符合格式的部分。面向编辑器的JSON Schema计划发布在`https://aristralabs.com/schemas/aristra-settings.json`；它尚未发布，所以目前指向那里的`$schema`行还不起作用。
+
+## 所有设置
+
+[设置参考](/zh/code/reference/settings)列出了每个键、它的默认值以及它的作用。

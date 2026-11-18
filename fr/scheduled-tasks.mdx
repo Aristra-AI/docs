@@ -1,0 +1,43 @@
+---
+title: "Tâches planifiées"
+description: "Le travail qu'Aristra exécute pour vous dans le cloud, selon un calendrier ou quand quelque chose se produit dans vos apps, même quand votre ordinateur est éteint : en créer une, où vont les résultats, les approbations, les exécutions silencieuses et les échecs. Avec un forfait."
+---
+
+Une tâche planifiée est un travail qu'Aristra exécute pour vous dans le cloud, à heures fixes ou quand quelque chose se produit, pendant que votre ordinateur est éteint : un résumé matinal de votre boîte de réception, un rapport hebdomadaire, une réponse rédigée à l'arrivée d'un e-mail. Les tâches planifiées dans le cloud sont incluses avec un [forfait](/fr/account/plans), et chaque exécution est payée depuis votre solde comme un chat.
+
+Les tâches peuvent aussi s'exécuter sur votre propre ordinateur, dans un dossier, sans forfait (une tâche sur l'un des modèles d'Aristra est payée depuis votre solde) : consultez [Travail en arrière-plan](/fr/code/guides/background). Et un [ordinateur cloud](/fr/surfaces/cloud-computer) peut avoir ses propres tâches.
+
+## Créer une tâche
+
+- **Sur le site web :** **Scheduled tasks** dans la barre latérale, puis **New task** : **On a schedule** ou **When something happens**.
+- **Dans un chat :** demandez-le simplement (« tous les jours de semaine à 8 h, résume mes e-mails non lus »). Aristra crée la tâche et l'affiche dans le chat, où vous pouvez la modifier ou l'annuler.
+- **Dans Aristra Desktop :** le formulaire de tâche, avec **In the cloud** sélectionné.
+
+Une tâche planifiée a un titre, un calendrier (une fois, toutes les heures, tous les jours, en semaine ou toutes les semaines, dans votre fuseau horaire) et un prompt. Sous **Advanced settings** :
+
+| Option | Ce qu'elle fait |
+|---|---|
+| **Project context** | Le projet dont la tâche utilise les fichiers, les instructions et la mémoire. Sans projet, elle ne connaît que votre profil |
+| **Connectors** | Les apps connectées qu'elle peut utiliser |
+| **Updates** | Où vont les résultats : **Dashboard** (les notifications du site web), **Email** ou **Telegram** |
+| **Run limit** | S'exécuter jusqu'à ce que vous l'arrêtiez, ou un certain nombre de fois |
+| **Runs on** | Avec un ordinateur cloud : l'agent cloud d'Aristra, ou votre ordinateur cloud |
+| **Auto-retry on failure** | Combien de fois une exécution échouée est retentée |
+| **Validation criteria** | Affiché une fois Auto-retry activé : ce que chaque tentative doit satisfaire |
+
+## Quand quelque chose se produit
+
+Une tâche peut démarrer quand quelque chose se produit dans une app connectée (un nouvel e-mail dans Gmail, un message dans Slack, un paiement dans Stripe, une nouvelle issue dans GitHub, et plus encore), ou quand une autre tâche se termine. Elle exécute alors Aristra avec votre prompt, ou une liste fixe d'actions dans l'app, sans IA. Connectez d'abord l'app ; consultez [Connecteurs](/fr/connectors).
+
+## Exécutions
+
+- Chaque tâche a un chat, et chaque exécution y est ajoutée. **Open in chat**, sur une exécution de l'onglet **History**, l'ouvre.
+- Une exécution travaille seule, en mode Auto. Une étape qui nécessite votre approbation attend sur sa carte dans le chat de la tâche, et vous êtes prévenu.
+- Une exécution qui n'a rien de nouveau à signaler le dit discrètement : elle est conservée, et rien ne vous est envoyé.
+- Une exécution peut démarrer jusqu'à environ deux minutes après son heure.
+
+## Quand une exécution échoue
+
+Avant chaque exécution, Aristra vérifie votre forfait, puis votre solde. Une exécution qui n'a pas pu démarrer ou qui a échoué vous prévient, là où vont les mises à jour de la tâche, avec la raison.
+
+Après trois échecs consécutifs, la tâche s'arrête, et le troisième avis l'indique. Quand votre forfait ou votre solde en était la cause, elle est mise en pause et redémarre d'elle-même : quand vous renouvelez, ou quand de l'argent est ajouté (une recharge, ou le mois suivant de votre forfait). Tout autre échec la désactive ; réactivez-la sous **Scheduled tasks** une fois la cause corrigée.

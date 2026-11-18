@@ -1,0 +1,102 @@
+---
+title: "Sécurité et confidentialité"
+description: "Ce qui quitte votre ordinateur, le fonctionnement de la connexion et des secrets, le confinement d'Aristra Code, les journaux, et comment désactiver la télémétrie."
+---
+
+## Ce qui quitte votre ordinateur
+
+Un chat sur votre ordinateur est conservé dans `~/.aristra`. Ce qui sort, et vers qui :
+
+| Quoi | Où cela va | Quand |
+|---|---|---|
+| L'appel au modèle : la conversation et les outils proposés | La source du chat : Aristra, OpenAI (votre forfait ChatGPT), le fournisseur de votre clé, votre endpoint personnalisé. Rien pour un modèle sur votre ordinateur | À chaque appel au modèle |
+| Votre profil : votre nom, votre profession et votre note **About you** | Lu depuis Aristra | Pendant les tours d'un chat, au plus toutes les dix minutes |
+| La mémoire de votre compte pour ce dossier | Lue depuis Aristra, étiquetée avec le remote du dépôt et le nom du dossier, jamais son chemin | Pendant les tours des chats avec la mémoire activée |
+| Ce qu'Aristra Code enregistre en mémoire, et les notes sur un dépôt | Aristra | Au moment de l'enregistrement |
+| Une recherche web | La recherche d'Aristra, ou Brave avec votre propre clé | Quand il cherche |
+| Les mots de la recherche, quand la recherche d'Aristra n'est pas disponible | La recherche publique gratuite d'Exa, Parallel, Firecrawl ou Keenable | Sauf si `web.keylessFallback` vaut `false` |
+| L'appel d'un connecteur | Aristra, qui l'exécute | Quand un chat utilise une app connectée à votre compte |
+| Les appels à un serveur MCP que vous avez ajouté | Ce serveur | Quand un chat l'utilise |
+| Les fichiers de votre dossier, quand des commandes s'exécutent dans un bac à sable cloud | Le bac à sable d'Aristra ou E2B | Uniquement si vous en choisissez un |
+| Une page web | Récupérée directement depuis votre ordinateur | Quand il en lit une |
+| Une étape que vérifie le relecteur du mode Auto | Le relecteur d'Aristra, ou votre propre modèle | En mode Auto, pour ce qui vous serait autrement demandé |
+| Les événements d'utilisation sans contenu et les rapports d'erreurs | Aristra | Sauf si vous les désactivez |
+| Un chat partagé, ou les appels d'un chat cloud à un dossier de cet ordinateur | Aristra | Uniquement quand vous partagez un chat ou connectez un dossier |
+| Les fichiers qu'Aristra Code vous envoie | Aristra | Quand il envoie un fichier sur votre téléphone ou le web |
+| L'état des pull requests, `/pr` et Auto-fix | GitHub ou GitLab, avec votre propre connexion `gh` ou `glab` | Sur une branche avec une pull request |
+| Les catalogues de plugins et les plugins | Les marketplaces que vous ajoutez (celle d'Anthropic depuis GitHub par défaut) | Quand vous ajoutez ou mettez à jour une marketplace ou installez un plugin |
+
+Les appels aux modèles d'Aristra passent par les serveurs d'Aristra jusqu'au fournisseur du modèle et sont comptabilisés sur votre compte ; rien de la conversation n'est stocké par cet appel.
+
+### Avec et sans forfait
+
+Une fois connecté, ce qu'Aristra retient de vous est conservé dans votre compte Aristra, avec ou sans forfait : cela vous suit donc sur le web, sur votre téléphone et sur vos autres ordinateurs.
+
+| | Avec un forfait | Sans forfait |
+|---|---|---|
+| La transcription d'un chat | Sur cet ordinateur. Jamais envoyée | Pareil |
+| Un chat que vous partagez sur le web | Ses tours sont enregistrés dans votre compte sous forme de chat, et peuvent être retrouvés par **Search and reference past chats** | Non disponible |
+| Ce qu'Aristra retient de vous | La mémoire de votre compte : lue à chaque tour et écrite par les outils de mémoire, elle quitte donc cet ordinateur | Pareil |
+| Les notes sur un dépôt | Des fichiers sur cet ordinateur, copiés dans un seul sens vers votre compte | Pareil |
+| Les fichiers | Sur cet ordinateur, sauf si vous enregistrez une copie dans votre compte | Pareil |
+
+Déconnecté, Aristra ne garde aucun souvenir de vous. Un ordinateur qui conservait la mémoire dans des fichiers avant que la mémoire soit incluse avec chaque compte envoie ces notes à votre compte une seule fois, la première fois qu'il démarre un chat en étant connecté.
+
+## La connexion
+
+`aristra login` (ou le premier lancement) ajoute cet ordinateur comme appareil de votre compte Aristra, dans votre navigateur ou avec un code à saisir sur n'importe quel appareil (par SSH, ou avec `--device-code`). Cela crée :
+
+- **Un appareil** sur votre compte, que la liste des appareils du site web affiche et peut révoquer.
+- **Une clé d'appareil.** Sur un Mac, elle est créée dans la Secure Enclave et ne peut donc pas être copiée hors de la puce ; sous Linux, c'est une clé logicielle dans le magasin d'identifiants. Chaque renouvellement de la connexion est signé avec elle : un jeton volé est donc inutilisable ailleurs. Un Mac sans Secure Enclave (un Mac Intel sans puce T2, une machine virtuelle) se connecte sans clé d'appareil.
+- **Des jetons** : un jeton d'accès valable 15 minutes, et un jeton d'actualisation valable 30 jours, conservés dans le magasin d'identifiants.
+
+`aristra logout` vous déconnecte ici et révoque l'appareil. Déconnecter l'appareil depuis le site web le révoque aussi.
+
+## Où sont conservés les secrets
+
+Les clés de fournisseur, les secrets MCP et toutes les connexions sont conservés dans le magasin d'identifiants d'Aristra, jamais dans un fichier de paramètres. **Les surfaces peuvent écrire un secret mais jamais le relire.** Le magasin est scellé avec une clé de votre trousseau ; une commande que vous approuvez s'exécute avec vos propres droits d'accès et pourrait donc l'atteindre. Ajoutez `"deny": ["read(~/.aristra/**)"]` à vos autorisations pour en tenir à l'écart les outils de l'agent et les commandes dans le bac à sable.
+
+| Magasin | Où |
+|---|---|
+| Trousseau macOS | `~/.aristra/credentials.enc`, scellé avec une clé aléatoire conservée dans votre trousseau de session |
+| Trousseau de clés Linux | Le même fichier scellé, avec la clé dans Secret Service |
+| Fichier | `~/.aristra/credentials.json` (lisible par vous seul), là où aucun trousseau ne répond (sous Linux, aussi quand `secret-tool` n'est pas installé). `ARISTRA_CREDENTIALS_STORE` remplace `credentials.store` |
+
+`credentials.store` (`auto`, `keychain`, `file`) fait le choix ; `aristra doctor` indique celui qui est utilisé.
+
+## Comment Aristra Code est confiné
+
+| Menace | Ce qui l'arrête |
+|---|---|
+| Une page web, un fichier ou une sortie d'outil demande à l'agent de faire quelque chose de nuisible | Les vérifications d'autorisation et le bac à sable. Le contenu extérieur parvient au modèle marqué comme non fiable. Le relecteur du mode Auto ne voit jamais les résultats d'outils |
+| Une commande tente d'accéder au réseau ou d'écrire en dehors du dossier | Les approbations pour toute commande qui fait plus que lire et, une fois activé, le [bac à sable](/fr/code/configure/sandbox) : le réseau uniquement via son proxy vers les hôtes que vous autorisez, l'écriture uniquement dans les dossiers du chat |
+| Un serveur MCP malveillant | Son paquet est d'abord vérifié parmi les logiciels malveillants connus, ses outils vous sont soumis tant que vous ne lui faites pas confiance, et `"sandbox": true` l'exécute dans un bac à sable |
+| Les paramètres d'un dépôt tentent de tout autoriser | Les règles, le mode et les paramètres de bac à sable d'un dossier ne comptent qu'une fois que vous lui faites confiance, et les serveurs de son `.mcp.json` vous sont soumis avant de démarrer. Le relecteur, l'emplacement des secrets et les modèles annexes ne viennent que de vos propres paramètres |
+| L'agent modifie les paramètres ou les fichiers d'agent d'un dépôt | Les modifications de `.aristra`, `.claude`, `.git`, `.vscode`, `.idea`, des fichiers de démarrage du shell et de `.mcp.json` ne s'exécutent jamais sur la seule base d'une règle : elles vous sont soumises dans tous les modes, et en Auto c'est le relecteur qui en décide |
+| Un secret fuite dans un journal | Les valeurs qui ressemblent à des secrets sont masquées dans les résultats d'outils, les événements, les journaux et les exports |
+| Un ordinateur portable volé | Les secrets sont scellés avec une clé de votre trousseau de session, et la connexion est liée à la clé d'appareil. Révoquez l'appareil sur le site web |
+
+<Tip>
+Les lectures sont ouvertes par défaut dans le bac à sable. Fermez les dossiers d'identifiants avec des règles de refus : `"deny": ["read(~/.ssh/**)", "read(~/.aws/**)"]`.
+</Tip>
+
+Seul votre utilisateur peut parler au runtime : il écoute sur un socket privé vérifié par rapport à votre compte utilisateur, jamais sur le réseau.
+
+## Journaux
+
+Le runtime écrit son journal dans `~/.aristra/logs/runtime.log`, avec les secrets masqués, conservé sept jours. `aristra logs` le lit, `aristra logs -f` le suit, et `ARISTRA_LOG_LEVEL` règle son niveau de détail.
+
+`aristra diagnostics export` écrit un paquet de diagnostic pour le support dans `~/.aristra/diagnostics/` : les versions, les vérifications, votre propre fichier de paramètres, la taille des tables (sans messages) et les journaux, de nouveau masqués et sans adresses e-mail. Il n'envoie rien ; examinez son contenu avant de le partager.
+
+## Télémétrie
+
+Aristra Code envoie des événements d'utilisation et des rapports d'erreurs sans contenu. Aucun prompt, réponse, code, commande, contenu de fichier, nom de fichier ou de dossier, chemin, URL, nom de serveur MCP ou message d'erreur n'est jamais envoyé : chaque valeur est une catégorie, un nombre, une durée, une heure ou un identifiant tiré d'une liste fixe, comme un nom de modèle. Rien n'est envoyé tant que vous êtes déconnecté, et les événements qui ne peuvent pas être envoyés sont abandonnés, jamais écrits sur le disque.
+
+| Désactiver | Événements d'utilisation | Rapports d'erreurs |
+|---|---|---|
+| Paramètres | `telemetry.usage: false` | `telemetry.errors: false` |
+| Environnement | `ARISTRA_DISABLE_TELEMETRY=1` | `ARISTRA_DISABLE_ERROR_REPORTING=1` |
+| Les deux | `ARISTRA_DISABLE_NONESSENTIAL_TRAFFIC=1` | |
+| Aristra Desktop | Settings › General › Privacy › **Share usage data** | **Send error reports** |
+
+Les variables d'environnement sont lues au démarrage du runtime : lancez `aristra runtime stop` après les avoir définies. `aristra doctor` indique si chacune est activée.

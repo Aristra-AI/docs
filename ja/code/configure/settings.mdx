@@ -1,0 +1,48 @@
+---
+title: "設定"
+description: "Aristra Code の設定の保存場所、階層の組み合わせ方、リポジトリが変更できないキー、設定の読み方と変え方を説明します。"
+---
+
+設定は Aristra Runtime が読み込む JSON ファイルなので、ターミナル、Aristra Desktop、その他のすべてのサーフェスで同じ設定が使われます。設定にシークレットが含まれることはありません。キーとトークンは[認証情報ストア](/ja/code/security)に保存されます。
+
+## ファイル
+
+| スコープ | ファイル | 共有 |
+|---|---|---|
+| 自分 | `~/.aristra/settings.json` | なし。自分用で、すべてのフォルダーに適用されます |
+| プロジェクト | `<folder>/.aristra/settings.json` | あり。コミットするとチームと共有できます |
+| プロジェクト（自分用） | `<folder>/.aristra/settings.local.json` | なし。git から除外されます |
+| 管理ポリシー | 管理者が設定します。[管理ポリシー](/ja/code/configure/managed-policy)を参照してください | コンピューター上で強制されます |
+
+あとの階層ほど優先されます。自分の設定、プロジェクトの設定、プロジェクトのローカルファイル、スクリプト実行時の `--settings`、管理ポリシーの順で、管理ポリシーはすべてを上書きします。オブジェクトはキーごとにマージされ、リストはすべての階層のものが（重複なしで）結合され、その他の値はあとの階層で置き換えられます。
+
+権限のルールもファイルをまたいで合算され、どこかに拒否があればそれが優先されます。[権限](/ja/code/configure/permissions)を参照してください。
+
+## リポジトリが変更できないもの
+
+プロジェクトのファイルは、[フォルダーを信頼](/ja/code/configure/permissions)したあとでだけ有効になります。それまでは、拒否ルールと確認ルールだけが読み込まれます。
+
+一部のキーは、フォルダーを信頼したかどうかにかかわらず自分のファイルからしか読み込まれないため、リポジトリが変更することはできません。`projects`、`mcp`、`review`、`credentials`、`auxiliary`、`model.fallback` です。フックは自分のファイルと信頼したプロジェクトの `settings.json` から読み込まれ、`settings.local.json` からは読み込まれません。`runtime`、`approvals`、`telemetry`、`web`、`permissions.trustedMcpServers` は、自分のファイルと管理ポリシーからしか読み込まれません。プロジェクトの `settings.json` では `autoMode` と、Auto と Bypass の確認に関するキーを設定できません（`settings.local.json` では設定できます）。どちらのプロジェクトファイルでも `pluginConfigs` は設定できず、プロジェクトがワークフローに対してできるのはオフにすることだけです。
+
+## 設定を読む、変更する
+
+```sh
+aristra config get                              # every setting in effect here
+aristra config get <key>                        # one value, and the file it comes from
+aristra config get permissions --json
+aristra config set permissions.defaultMode auto # in your own file
+aristra config set permissions.allow '["shell(npm test *)"]' --project   # in the project's file
+aristra config edit                             # your file in your editor
+```
+
+チャットでは、`/config` で有効な設定と、それぞれがどのファイルから来ているかを確認できます。Aristra Code に設定の変更を頼むこともできます。組み込みの `/update-config` スキルが変更を行います。
+
+設定はすぐに反映されます。ランタイムは、ファイルが変わるたびに読み直します。`runtime`、`approvals`、`credentials.store` を手で編集したあとは、反映させるために `aristra runtime stop` を実行してください。合わないセクションは、その名前を示す警告とともに無視され、残りは引き続き適用されます。警告は `aristra doctor`、`/config`、`aristra config get` で確認できます。
+
+## 設定ファイルを検証する
+
+`aristra doctor`、`/config`、`aristra config get` は設定ファイルを検証し、合わないセクションがあればその名前を示します。エディター向けの JSON Schema を `https://aristralabs.com/schemas/aristra-settings.json` で提供する予定ですが、まだ公開されていません。そのため、現時点ではそこを指す `$schema` の行は機能しません。
+
+## すべての設定
+
+[設定リファレンス](/ja/code/reference/settings)に、すべてのキー、その既定値、動作が記載されています。

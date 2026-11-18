@@ -1,0 +1,101 @@
+---
+title: "插件"
+description: "从Claude Code格式的插件市场安装插件，插件打包了技能、命令、智能体、钩子、MCP服务器和语言服务器。"
+---
+
+插件把技能、命令、智能体、钩子、MCP服务器、语言服务器和工作流打包成一个可以安装的整体。Aristra Code使用Claude Code的插件格式，所以为Claude Code编写的插件在这里也能使用，Claude Code的插件市场也可以直接使用。插件的输出样式、主题、渠道和监视器不会被加载，指向Claude Code工具（`Bash`、`Edit`）的钩子匹配器也不会匹配Aristra Code的工具（`shell`、`edit_file`）。
+
+## 安装插件
+
+<Tabs>
+  <Tab title="终端">
+    ```sh
+    aristra plugin install <plugin>                  # from your marketplaces
+    aristra plugin install <plugin>@<marketplace>    # from one marketplace
+    aristra plugin install <plugin> -s project       # for everyone in this project
+    aristra plugin list
+    ```
+
+    在对话中，`/plugin`会打开插件管理器，`/reload-plugins`可以在不开始新对话的情况下让改动生效。
+  </Tab>
+  <Tab title="Aristra Desktop">
+    打开Settings › **Plugins**，可以浏览插件市场，安装、启用、禁用和配置插件。
+  </Tab>
+</Tabs>
+
+插件的各个部分以插件名命名：它的技能和命令为`/plugin-name:skill-name`，它的智能体和工作流也是如此，这样多个插件可以共存。
+
+### 作用域
+
+| 作用域 | 记录位置 | 谁可以使用 |
+|---|---|---|
+| `user`（默认） | `~/.aristra/settings.json` | 你，在所有文件夹中 |
+| `project` | `.aristra/settings.json` | 在项目中工作的所有人，前提是他们信任该项目并且也安装了它（`aristra plugin list`会告诉他们怎么做） |
+| `local` | `.aristra/settings.local.json` | 你，在这个项目中 |
+
+对应的设置是`enabledPlugins`。只有在你信任该文件夹后，项目的插件才会生效。
+
+## 插件市场
+
+插件市场是一个插件目录：一个git仓库、一个URL、一个文件或一个包含`.claude-plugin/marketplace.json`的文件夹。
+
+```sh
+aristra plugin marketplace add anthropics/claude-plugins-official
+aristra plugin marketplace add https://example.com/marketplace.json
+aristra plugin marketplace list
+aristra plugin marketplace update
+aristra plugin marketplace remove <name>
+```
+
+第一次以交互方式启动Aristra Code时，会添加Anthropic的官方插件市场。`ARISTRA_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL=1`可以阻止这一行为。项目可以在`extraKnownMarketplaces`中为团队推荐插件市场。
+
+## 管理插件
+
+| 命令 | 作用 |
+|---|---|
+| `aristra plugin enable <plugin>`, `disable <plugin>` | 开启或关闭插件，而不删除它（`disable -a`作用于全部插件） |
+| `aristra plugin update <plugin>` | 更新到最新版本 |
+| `aristra plugin uninstall <plugin>` | 删除它（`--keep-data`会保留它的数据文件夹） |
+| `aristra plugin prune` | 删除为你已删除的插件安装的依赖项 |
+| `aristra plugin configure <plugin>` | 显示或设置插件声明的选项 |
+| `aristra plugin validate <path>` | 检查你正在编写的插件或插件市场 |
+
+来自Anthropic插件市场的插件会在后台更新，更新后Aristra Code会告诉你。对于其他插件市场，请在`/plugin`中开启自动更新，或者在它的`extraKnownMarketplaces`条目中设置`autoUpdate: true`。`ARISTRA_DISABLE_AUTOUPDATER=1`会关闭更新。选项也可以在安装时设置：`--config KEY=VALUE`。
+
+### 不安装就试用插件
+
+```sh
+aristra --plugin-dir ./my-plugin
+aristra run --plugin-dir ./my-plugin.zip "..."
+```
+
+这会为一个对话从文件夹或`.zip`加载插件。
+
+## 插件可以带来什么
+
+| 部分 | 成为 |
+|---|---|
+| `skills/`, `commands/` | [技能](/zh/code/extend/skills)和命令，名称为`/plugin-name:name` |
+| `agents/` | [自定义智能体](/zh/code/guides/subagents)，名称为`plugin-name:agent-name`。插件的智能体不能设置`permissionMode`、`hooks`或`mcpServers` |
+| `hooks/hooks.json` | [钩子](/zh/code/extend/hooks) |
+| `.mcp.json` | [MCP服务器](/zh/code/extend/mcp) |
+| 语言服务器 | 代码智能：Aristra Code可以通过它们跳转到定义、查找引用和读取诊断信息 |
+| `workflows/` | [工作流](/zh/code/guides/subagents) |
+| `bin/` | 添加到Aristra Code所运行命令的`PATH`末尾的程序 |
+| `settings.json` | 它的`agent`和`subagentStatusLine`设置 |
+
+<Warning>
+插件会在你的电脑上运行代码：它的钩子、MCP服务器和程序。安装插件就表示你同意它们运行，所以插件的钩子不会逐个请求批准。请只从你信任的插件市场安装插件。
+</Warning>
+
+## 面向组织
+
+[托管策略](/zh/code/configure/managed-policy)可以控制插件：
+
+| 键 | 作用 |
+|---|---|
+| `strictKnownMarketplaces` | 只能添加这些插件市场 |
+| `blockedMarketplaces` | 永远不能添加的插件市场 |
+| `enabledPlugins` | 为所有人开启或关闭的插件；托管的值优先 |
+| `pluginTrustMessage` | 你所在组织的说明文字，在有人安装插件时显示 |
+| `disableSideloadFlags` | 拒绝`--plugin-dir` |

@@ -1,0 +1,59 @@
+---
+title: "Editores"
+description: "Usa Aristra Code dentro de Zed y otros editores mediante el Agent Client Protocol, y ábrelo desde enlaces."
+---
+
+## Zed y otros editores ACP
+
+`aristra acp` sirve a un editor mediante el [Agent Client Protocol](https://agentclientprotocol.com). El editor lo inicia por ti.
+
+En Zed, añade Aristra como servidor de agentes en tu configuración:
+
+```json
+{
+  "agent_servers": {
+    "Aristra": { "type": "custom", "command": "aristra", "args": ["acp"] }
+  }
+}
+```
+
+Después, inicia un hilo de Aristra desde el panel del agente de Zed. Si esta computadora todavía no tiene la sesión iniciada en Aristra, Zed te pide que inicies sesión, lo que abre la página de inicio de sesión de Aristra en tu navegador.
+
+Un hilo del editor es un chat normal de Aristra Code en esta computadora: `aristra sessions` lo muestra (ejecútalo en esa carpeta o añade `--all`), Aristra Desktop lo muestra, y sus aprobaciones se pueden responder desde cualquier superficie.
+
+| En el editor | Qué pasa |
+|---|---|
+| Un hilo nuevo | Un chat nuevo en la carpeta del editor, con tu modelo y tu modo predeterminados. La carpeta se considera de confianza para ese chat sin preguntar |
+| El menú de modos | Manual, Accept edits, Plan, Auto (salvo que tu configuración desactive Auto) y Read only. Un modo elegido en otro lugar también llega al editor |
+| Tu prompt | Un turno. Los archivos y las imágenes enlazados se adjuntan; los recursos pegados se citan |
+| El hilo | La respuesta y el razonamiento llegan en streaming; cada paso aparece como una llamada a una herramienta con su comando, su diff y su salida |
+| Una solicitud de permiso | Cada aprobación, con Yes, una respuesta que permite más (para este chat o guardada como regla) y No. Una pregunta muestra sus opciones |
+| Detener | Detiene el turno |
+| Abrir un hilo antiguo | Reproduce el historial del chat |
+
+Aristra Code usa sus propias herramientas (y su propio sandbox, cuando lo activas), no el sistema de archivos ni la terminal del editor, y sus propios servidores MCP de tu configuración, no los del editor.
+
+<Tip>
+Para mantener los chats de un editor separados de los tuyos (de una cuenta de prueba, por ejemplo), añade `"env": {"ARISTRA_HOME": "/path/to/home"}` al servidor de agentes.
+</Tip>
+
+## Abrir tu editor desde Aristra Desktop
+
+El botón **Open in** de Aristra Desktop abre la carpeta de un chat en VS Code, Cursor, Zed, Windsurf o Xcode (Xcode abre el proyecto de la carpeta), según cuál tengas instalado. En **Review**, cada archivo cambiado se abre en su primer cambio en VS Code, Cursor, Zed o Windsurf.
+
+## Enlaces que abren una terminal
+
+Un enlace `aristra-cli://open` abre una terminal con Aristra Code en una carpeta y un prompt esperando en el compositor:
+
+```text
+aristra-cli://open?cwd=/Users/you/code/site&q=Review%20the%20open%20issues
+aristra-cli://open?repo=acme/site&q=Fix%20the%20failing%20build
+```
+
+| Parámetro | Significa |
+|---|---|
+| `cwd` | La carpeta, como ruta absoluta |
+| `repo` | En lugar de `cwd`, un `owner/repo` de GitHub: el clon en el que lo usaste por última vez o, si no, tu carpeta personal |
+| `q` | El prompt, de hasta 5,000 caracteres. Se coloca en el compositor y nunca se envía hasta que pulsas Enter |
+
+La pregunta de confianza de la carpeta se hace como en cualquier carpeta. En un Mac o en Linux, Aristra Code registra el manejador de enlaces cuando lo ejecutas de forma interactiva (de nuevo si falta o apunta a una copia antigua); pon `disableDeepLinkRegistration` en `"disable"` para desactivarlo.

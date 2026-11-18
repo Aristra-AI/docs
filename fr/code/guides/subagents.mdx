@@ -1,0 +1,80 @@
+---
+title: "Sous-agents et workflows"
+description: "Confiez du travail à des sous-agents qui s'exécutent dans leur propre contexte, écrivez des agents personnalisés, dupliquez un chat, envoyez des messages à d'autres chats et exécutez de nombreux agents avec les workflows."
+---
+
+## Sous-agents
+
+Aristra Code peut confier une partie d'une tâche à un sous-agent : un agent avec son propre contexte qui travaille en arrière-plan et rend compte. Utilisez-le pour tenir une grosse recherche à l'écart du chat principal, ou pour mener plusieurs investigations en même temps. Demandez-le (« examine ces trois modules en parallèle »), ou laissez Aristra Code décider.
+
+| Type intégré | Pour |
+|---|---|
+| `general-purpose` | N'importe quelle tâche, avec tous les outils qu'un agent en arrière-plan peut utiliser |
+| `Explore` | La recherche en lecture seule dans une base de code |
+| `Plan` | La planification en lecture seule : conçoit une approche et identifie les fichiers concernés |
+
+Chaque sous-agent travaille dans le dossier du chat, avec son mode et son modèle (sauf si l'appel en désigne un autre), et peut lancer ses propres sous-agents jusqu'à trois niveaux de profondeur. Jusqu'à 20 s'exécutent en même temps dans un chat, en comptant les agents de ses agents. Ses demandes d'approbation sont posées dans votre chat, celui en haut de la chaîne, en nommant l'agent.
+
+**Ce que vous voyez.** La ligne d'état compte les agents en cours (« 2 local agents »), et `/tasks` les liste avec quelques mots sur ce que fait chacun. Enter en ouvre un, et ce que vous y tapez est envoyé à cet agent. Quand l'un d'eux se termine, le chat reçoit une ligne avec son résumé, et Aristra Code lit le résultat et continue.
+
+## Dupliquer un chat
+
+```text
+/fork write the migration for the new schema
+```
+
+Un fork est un sous-agent qui démarre avec tout le contexte de ce chat : il n'a donc besoin d'aucun briefing. Il fait la seule chose que vous demandez et rend compte pendant que vous continuez à travailler ici. Pour continuer vous-même dans une copie du chat, utilisez plutôt `/branch`.
+
+## Agents personnalisés
+
+Un fichier Markdown dans `~/.aristra/agents/` (tous les dossiers) ou dans `.aristra/agents/` d'un projet (une fois que vous lui faites confiance) ajoute un type d'agent, dans le même format que celui de Claude Code :
+
+```markdown .aristra/agents/migration-reviewer.md
+---
+name: migration-reviewer
+description: Reviews database migrations for locking, data loss and rollback safety
+tools: read_file, grep, glob, shell
+model: sonnet
+---
+
+You review database migrations. For each migration, check ...
+```
+
+| Champ | Signification |
+|---|---|
+| `name`, `description` | Le nom de l'agent, et ce à quoi il sert (montré au modèle). Un fichier sans l'un ou l'autre est ignoré |
+| `tools`, `disallowedTools` | Les outils qu'il peut utiliser. `mcp__server` désigne les outils d'un serveur |
+| `model` | `inherit`, `sonnet`, `opus`, `haiku`, `fable` (ces quatre uniquement quand le chat est sur un modèle Claude) ou un identifiant de modèle |
+| `effort` | L'intensité de son raisonnement |
+| `permissionMode` | Le mode dans lequel il s'exécute, sauf si votre chat est en `acceptEdits`, `auto`, `bypassPermissions` ou `plan`, qu'il conserve |
+| `maxTurns` | Une limite au nombre de ses échanges avec le modèle |
+| `isolation` | `worktree` pour lui donner son propre worktree git |
+| `skills`, `hooks`, `mcpServers`, `memory` | Les skills qu'il charge, les hooks actifs pendant son exécution, ses propres serveurs MCP, et un dossier de mémoire à lui |
+| `initialPrompt` | Placé avant votre premier message quand un chat entier s'exécute en tant que cet agent |
+| `color` | Sa couleur dans les listes : red, blue, green, yellow, purple, orange, pink ou cyan |
+| `omitClaudeMd` | `true` exclut les fichiers d'instructions du dossier |
+
+Le corps du fichier est son prompt système. L'agent d'un projet remplace le vôtre du même nom, et celui de votre organisation remplace les deux.
+
+### Exécuter un chat entier en tant qu'agent
+
+`aristra --agent migration-reviewer` démarre un chat qui fonctionne avec le prompt, les outils et le modèle de l'agent. Dans Aristra Desktop, le menu **+** d'un nouveau chat Code liste vos agents sous la forme **Run as …**. Le paramètre `agent` en fait un l'agent par défaut des nouveaux chats.
+
+## Worktrees
+
+Un sous-agent avec `isolation: worktree` reçoit son propre worktree git sous `.aristra/worktrees/agent-<id>` : des agents parallèles ne modifient donc jamais les mêmes fichiers. Quand il se termine, un worktree qu'il n'a pas modifié est supprimé ; un worktree modifié est conservé, et son chemin et sa branche accompagnent son rapport.
+
+## Messages entre chats
+
+Aristra Code peut envoyer un message à un sous-agent, et à vos autres chats Aristra sur cet ordinateur qui sont ouverts ou en train de travailler, par leur nom. Demandez « dis au chat qui travaille sur l'API que le schéma a changé ». Le message arrive dans ce chat, marqué comme venant d'un autre chat. Un chat dans un autre mode d'autorisation que celui de l'expéditeur n'accepte pas le message, et l'expéditeur en est informé.
+
+## Workflows
+
+Pour les travaux très ramifiés (« relis chaque package », « étudie ce sujet sous plusieurs angles »), demandez un workflow. Aristra Code écrit un court script qui exécute de nombreux agents dans un ordre fixe : en parallèle, par phases, ou en pipeline. Une exécution demande d'abord votre accord, en montrant sa description et ses phases (Ctrl+E affiche le script), sauf si une règle l'autorise (`workflow(<name>)` pour un workflow enregistré) ou si votre mode ne demande pas. En mode Auto, c'est le relecteur qui décide.
+
+- Une exécution se déroule en arrière-plan, avec jusqu'à 16 agents à la fois, ou le nombre de cœurs de votre processeur moins deux quand c'est moins.
+- `/workflows` affiche les phases et les agents de chaque exécution au fur et à mesure, avec des touches pour arrêter, mettre en pause, relancer ou passer un agent, et **s** pour enregistrer le script comme workflow nommé.
+- Les workflows enregistrés se trouvent dans `~/.aristra/workflows/` ou dans `.aristra/workflows/` d'un projet, et s'exécutent avec `/<name> args`.
+- Aristra Code fournit `/deep-research <question>` : il cherche sur le web sous plusieurs angles, fait vérifier chaque affirmation par des sceptiques et rédige un rapport avec ses sources.
+
+`disableWorkflows: true` (ou `enableWorkflows: false`) dans vos paramètres, ou `ARISTRA_DISABLE_WORKFLOWS=1`, désactive les workflows.

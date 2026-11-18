@@ -1,0 +1,133 @@
+---
+title: "Bac à sable"
+description: "Le bac à sable, désactivé par défaut : l'activer avec /sandbox ou dans Settings, et comment il confine les commandes sous macOS et Linux : ce qu'elles peuvent lire, écrire et joindre, la demande réseau, localhost, votre propre proxy, et l'exécution d'une commande hors du bac à sable."
+---
+
+Le bac à sable est désactivé par défaut : les commandes qu'Aristra Code exécute sur votre ordinateur s'exécutent avec vos propres droits d'accès, et les [vérifications d'autorisation](/fr/code/configure/permissions) décident lesquelles s'exécutent sans demander et lesquelles vous sont d'abord soumises.
+
+Activez-le, et les commandes s'exécutent dans un bac à sable. Une approbation répond à la question « faut-il exécuter ceci ? » ; le bac à sable décide de ce qu'une commande peut atteindre une fois lancée. Comme une commande dans le bac à sable ne peut écrire que dans les dossiers du chat et ne joindre que les hôtes que vous autorisez, elle s'exécute sans demander (`sandbox.autoAllowBashIfSandboxed`, activé par défaut). Les règles de refus et de demande s'appliquent toujours, et certaines commandes passent quand même par les vérifications habituelles : celle qui définit une variable inconnue en préfixe, passe un argument `NAME=value`, désigne le dossier personnel d'un autre utilisateur, redirige vers `/dev/tcp` ou `/dev/udp`, ou qui à la fois supprime des fichiers et change de dossier. Les commandes `rm` risquées et les commandes trop complexes à vérifier vous sont toujours soumises.
+
+## L'activer
+
+- **Dans le terminal :** lancez `/sandbox` et choisissez un mode : **with auto-allow** (les commandes dans le bac à sable s'exécutent sans demander), **with regular permissions** (elles vous sont soumises comme sans bac à sable) ou **No sandbox**. Le choix est enregistré dans le `.aristra/settings.local.json` du dossier. `/sandbox exclude "npm run test:*"` ajoute un motif de commande qui s'exécute toujours hors du bac à sable, dans le même fichier. Quand la [politique](/fr/code/configure/managed-policy) d'une équipe définit le bac à sable, `/sandbox` le signale et ne change rien.
+- **Dans Aristra Desktop :** Settings > Permissions > **Run commands in a sandbox**, pour tous les dossiers.
+- **Dans les paramètres :** `"sandbox": {"enabled": true}`.
+
+Si le bac à sable ne peut pas démarrer (bubblewrap absent sous Linux, par exemple), les commandes s'exécutent hors du bac à sable et le chat le signale une fois. Avec `sandbox.failIfUnavailable`, un tour ne démarre pas du tout.
+
+## Ce qu'une commande peut faire
+
+| | Autorisé | Refusé |
+|---|---|---|
+| **Lecture** | Tout, sauf ce que désigne une règle de refus `read(...)` ou `sandbox.filesystem.denyRead` | Ces chemins |
+| **Écriture** | Les dossiers du chat, `$TMPDIR`, les chemins de vos règles d'autorisation `edit(...)` et `sandbox.filesystem.allowWrite` | Tout le reste |
+| **Réseau** | Via le proxy du bac à sable : les hôtes que vous autorisez passent, les autres vous sont soumis | Toute connexion directe, et `localhost` sauf si vous l'autorisez |
+
+**Jamais accessibles en écriture**, quoi que disent les règles : les fichiers de paramètres, les `.aristra/settings*.json` et les skills du dossier, les fichiers de démarrage du shell (`.bashrc`, `.zshrc` et autres), `.claude/skills`, `.claude/commands`, `.claude/agents`, `.gitconfig`, `.gitmodules`, `.ripgreprc`, `.mcp.json`, les fichiers d'un dépôt nu à la racine du dossier, `.vscode`, `.idea`, `.git/hooks`, et `.git/config` sauf si `sandbox.filesystem.allowGitConfig` est activé. Le reste de `.git` reste accessible en écriture : git fonctionne donc. Une commande ne peut pas non plus renommer ces éléments ni les dossiers qui les contiennent.
+
+## Comment une commande s'exécute
+
+- **Dans l'environnement de votre shell.** Aristra Code lit votre `.zshrc` (ou `.bashrc`) une fois et conserve ses fonctions, ses alias, son `PATH` et ses variables : `nvm`, `pyenv`, les outils de Homebrew et vos alias fonctionnent donc, même quand c'est Aristra Desktop qui a démarré le runtime.
+- **`$TMPDIR` persiste entre les commandes** : un fichier qu'une commande y laisse est disponible pour la suivante. Sous macOS, `/tmp` lui-même n'est pas accessible en écriture ; Aristra Code utilise `$TMPDIR`.
+- **Délais d'expiration.** Une commande dispose de 2 minutes par défaut (le modèle peut demander jusqu'à 10). Une commande encore en cours à son délai d'expiration passe en arrière-plan au lieu d'être arrêtée, et l'agent reçoit sa sortie jusque-là. Consultez [Travail en arrière-plan](/fr/code/guides/background).
+- **Arrêt.** Une commande arrêtée (Esc, `/tasks`, la suppression de son chat, l'arrêt du runtime) se termine avec tout ce qu'elle a lancé : SIGTERM, puis SIGKILL au bout de 2 secondes. Si le runtime lui-même plante, ce que ses commandes ont lancé se termine quand même.
+
+## Le réseau
+
+Une commande dans le bac à sable n'accède au réseau que via le proxy du bac à sable, qui tourne sur votre ordinateur. Son environnement y oriente les outils courants (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, git via ssh, et d'autres). Pour chaque hôte :
+
+1. Un hôte que désignent vos règles de refus `web_fetch(domain:...)` est refusé.
+2. Un hôte présent dans `sandbox.network.allowedDomains` ou dans vos règles d'autorisation `web_fetch(domain:...)` passe. `*.example.com` couvre les sous-domaines.
+3. Tout autre hôte vous est soumis, sur l'étape de la commande :
+
+   > **Network request outside of sandbox**
+   > Host: registry.npmjs.org
+   > Do you want to allow this connection?
+   > 1. Yes
+   > 2. Yes, and don't ask again for registry.npmjs.org
+   > 3. No, and tell Aristra what to do differently (esc)
+
+**Yes** laisse passer cette connexion ; une connexion ultérieure vous sera de nouveau soumise. **Yes, and don't ask again** enregistre `web_fetch(domain:registry.npmjs.org)` dans le `.aristra/settings.local.json` du dossier. **No** refuse la connexion ; la commande voit l'échec.
+
+Le proxy refuse les noms qui se résolvent vers votre propre ordinateur, vers des adresses link-local ou vers des adresses de métadonnées cloud. Il ne déchiffre jamais le trafic. Les scripts et les tâches planifiées refusent les hôtes qu'aucune règle ne couvre au lieu de demander.
+
+Quand le bac à sable refuse une connexion, le résultat de la commande se termine par ce qu'il a refusé, que l'agent lit :
+
+```text
+<sandbox_violations>
+deny network-outbound example.org:443 (user denied)
+</sandbox_violations>
+```
+
+## Laisser une commande utiliser localhost
+
+Un serveur de développement, un serveur de fixtures de test ou une base de données locale doit écouter sur un port, ce que le bac à sable refuse par défaut :
+
+```sh
+aristra config set sandbox.network.allowLocalBinding true
+```
+
+Cela permet aux commandes d'écouter sur `localhost` et de s'y connecter, et rien au-delà. Sous Linux, ce paramètre n'a aucun effet : chaque commande a son propre réseau, elle peut donc écouter sur son propre `localhost` et le joindre, mais pas un serveur sur le `localhost` de votre ordinateur ni un serveur lancé par une autre commande.
+
+## Utiliser votre propre proxy
+
+Si votre réseau passe par le proxy de filtrage de votre organisation :
+
+```sh
+aristra config set sandbox.network.httpProxyPort 8080
+```
+
+Le trafic HTTP et HTTPS des commandes va alors vers `localhost:8080`, et c'est ce proxy qui décide de ce qu'elles peuvent joindre. `sandbox.network.socksProxyPort` fait de même pour SOCKS.
+
+## Exécuter une commande hors du bac à sable
+
+Certaines commandes ont besoin de ce que le bac à sable refuse : écrire en dehors du dossier, un outil qui ignore les paramètres de proxy, un service sur un socket Unix (macOS). Aristra Code peut alors demander à exécuter une commande hors du bac à sable, avec sa raison. Elle passe par les vérifications ordinaires d'une commande hors du bac à sable : en Manual, elle vous est soumise sauf si elle ne fait que lire ou si une règle l'autorise, Auto envoie au relecteur ce qui vous serait soumis, et Read only la refuse.
+
+- `sandbox.allowUnsandboxedCommands: false` désactive cette possibilité.
+- `sandbox.excludedCommands` liste des commandes qui s'exécutent toujours hors du bac à sable (`docker:*`, `make`), en passant toujours par les vérifications. C'est une commodité, pas une frontière de sécurité.
+- `aristra run --dangerously-skip-sandbox` exécute toutes les commandes d'une exécution de script hors du bac à sable. Utilisez-le uniquement là où la machine elle-même est la frontière : un runner de CI, un conteneur, une VM jetable.
+
+## macOS
+
+Le bac à sable est Seatbelt, qui refuse tout par défaut.
+
+- **Le trousseau n'est pas accessible** depuis le bac à sable. Le gestionnaire d'identifiants git basé sur le trousseau ne peut pas lire les identifiants enregistrés : un push ou un fetch qui en a besoin demande donc à s'exécuter hors du bac à sable.
+- **Vérification des certificats par le système.** `pip` 24.2 et versions ultérieures, ainsi que les outils Go comme `gh`, vérifient les certificats via un service système de macOS que le bac à sable ferme : ils échouent donc à l'intérieur avec une erreur de certificat ou de réseau. Aristra Code ne voit que cette erreur, pas sa cause : s'il ne demande pas de lui-même à exécuter la commande hors du bac à sable, dites-le-lui. `sandbox.enableWeakerNetworkIsolation: true` ouvre plutôt ce service pour toutes les commandes, ce qui ouvre aussi une issue à travers lui.
+
+## Linux
+
+Le bac à sable est bubblewrap (`bwrap`) : tout le système de fichiers en lecture seule sauf les chemins accessibles en écriture, son propre espace de noms réseau, et le réseau relayé vers le proxy. Quand il ne peut pas démarrer, les commandes s'exécutent hors du bac à sable et le chat en indique la raison une fois (avec `sandbox.failIfUnavailable`, le tour ne démarre pas), et `aristra doctor` l'affiche sous Sandbox :
+
+| Problème | Solution |
+|---|---|
+| bubblewrap n'est pas installé | `sudo apt-get install bubblewrap` ou `sudo dnf install bubblewrap` |
+| Le système bloque les espaces de noms utilisateur dont bubblewrap a besoin (Ubuntu 24.04 et versions ultérieures) | Autorisez-les pour bubblewrap avec un profil AppArmor |
+| Dans un conteneur, bubblewrap ne peut pas monter `/proc` | Quand le conteneur est votre frontière, définissez `sandbox.enableWeakerNestedSandbox: true` |
+
+## Serveurs MCP
+
+Les serveurs MCP qui s'exécutent comme des programmes démarrent hors du bac à sable ; celui dont l'entrée indique `"sandbox": true` obtient son propre bac à sable. Consultez [Serveurs MCP](/fr/code/extend/mcp).
+
+## Paramètres
+
+Les paramètres du bac à sable proviennent de vos propres paramètres, de ceux d'un dossier de confiance et d'une politique gérée. Les listes sont réunies entre eux.
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `sandbox.enabled` | `false` | Les commandes s'exécutent dans le bac à sable (`/sandbox`) |
+| `sandbox.failIfUnavailable` | `false` | Avec `enabled` : un tour ne démarre pas quand le bac à sable ne peut pas démarrer, au lieu d'exécuter les commandes hors du bac à sable |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | Une commande dans le bac à sable s'exécute sans demander, sauf si une règle de refus ou de demande la couvre |
+| `sandbox.allowUnsandboxedCommands` | `true` | Si Aristra Code peut demander à exécuter une commande hors du bac à sable |
+| `sandbox.excludedCommands` | `[]` | Les commandes qui s'exécutent toujours hors du bac à sable, en passant par les vérifications |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | D'autres chemins à ouvrir ou à fermer |
+| `sandbox.filesystem.allowGitConfig` | `false` | Permettre aux commandes d'écrire dans `.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | Les hôtes que les commandes joignent sans demander |
+| `sandbox.network.allowLocalBinding` | `false` | Permettre aux commandes d'écouter sur `localhost` et de le joindre |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | aucun | Envoyer plutôt le trafic des commandes vers votre propre proxy |
+| `sandbox.network.allowUnixSockets` | `[]` | Les sockets Unix auxquels une commande peut se connecter (macOS) |
+| `sandbox.ignoreViolations` | `{}` | Les refus à ne pas signaler à l'agent |
+| `sandbox.enableWeakerNestedSandbox` | `false` | Dans un conteneur qui ne peut pas monter `/proc` (Linux) |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Ouvrir le service de certificats de macOS pour les outils Go comme `gh` derrière un proxy doté de sa propre autorité de certification |
+| `sandbox.network.allowAllUnixSockets` | `false` | Permettre aux commandes de se connecter à n'importe quel socket Unix |
+
+Les politiques gérées disposent aussi de `sandbox.filesystem.allowManagedReadPathsOnly` et `sandbox.network.allowManagedDomainsOnly`. Consultez [Politique gérée](/fr/code/configure/managed-policy).

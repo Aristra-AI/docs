@@ -1,0 +1,63 @@
+---
+title: "Aristra Desktop"
+description: "Aristra的Mac应用：Chat标签页用于你在Aristra Cloud中的对话，Code标签页用于Aristra Code，还有Files、Craft、快速输入、听写和你的账户。"
+---
+
+Aristra Desktop是Aristra的Mac应用（支持Apple芯片和Intel）。从你账户的**Downloads**页面下载，然后在浏览器中或用验证码登录。它的侧边栏有两个标签页：
+
+- **Chat**：不带文件夹的[对话](/zh/chats)，以及Files和Craft。这些对话在Aristra Cloud中运行（保存在这台Mac上的文档旁边的对话则在这台Mac上运行），并保存在你的账户中，所以它们与网站和手机上的是同一批对话。它们从你的[余额](/zh/account/credits)中扣费：先用新账户的初始额度，然后是套餐的每月用量，最后是充值。
+- **Code**：[Aristra Code](/zh/code/desktop)。你的文件夹及其对话，以及写代码时在对话旁边用到的一切。
+
+用侧边栏顶部的切换开关，或用<strong>⌥⌘←</strong>和<strong>⌥⌘→</strong>在两者之间切换。当另一个标签页中有对话在等你（琥珀色）或正在工作（绿色），或者Code标签页有你尚未查看的定时运行（强调色）时，那个标签页会显示一个圆点。从搜索、通知或程序坞打开任何对话时，都会切换到它所在的标签页。
+
+Aristra Desktop内置了Aristra Code，所以你不需要另外安装Aristra CLI。两者使用同一个运行时和同一个`~/.aristra`文件夹：在终端中开始的对话会显示在Code标签页中，反之亦然。
+
+## 开始对话
+
+Chat标签页中的新对话在云端运行，所以你需要先登录。新建对话时：
+
+- **Project**：一个[项目](/zh/projects)，对话会使用它的指令和记忆。
+- **Incognito**（新对话右上角的幽灵图标）：不会进入你的历史记录或记忆的对话，这台Mac上也不会保留它的任何内容。参见[无痕对话](/zh/chats)。
+- **麦克风**按钮：听写最长10分钟，替你输入成文字，费用从你的余额中扣除。
+
+**Quick entry**（在任何地方按<strong>⌥Space</strong>，或选择**Aristra › Quick Entry**）会打开一个小输入框：输入内容并按Enter，就能在不打开窗口的情况下开始对话。
+
+## Files和Craft
+
+**Files**列出这台Mac上的对话共享、生成或修改过的文件；登录后，还会列出你账户中的文件。参见[文件](/zh/files)。
+
+**Craft**保存你的文档，可以与Aristra一起写，也可以自己写。没有套餐时，它们保存在这台Mac上；有套餐时，保存在你的账户中。参见[Craft](/zh/craft)。
+
+## 查找你说过的话
+
+按<strong>⌘K</strong>并输入。在名称匹配的对话和命令下方，**In messages**会列出这台Mac上任何包含你所输入文字的对话内容。选择一项即可打开它所在的对话。搜索在这台Mac上运行，覆盖这台Mac上的对话。在网站上，Chats页面可以按标题查找云端对话。
+
+## 你的套餐和账户
+
+**Settings › Aristra One**、账户菜单（左下角你的名字）中的**Aristra One**，或<strong>⌘K</strong>中的**Aristra One**，都会在浏览器的新标签页中打开你在app.aristralabs.com上的账户页面：套餐、你的余额、每日支出、你的设备、云电脑和导出。**Settings › Billing**显示你的套餐、各个套餐和充值，**Settings › Usage**显示你的余额和支出，均以美元计；没有生效中的套餐时，**See plans**会在网站上打开套餐页面。付款总是在浏览器中的Stripe页面上完成。参见[套餐](/zh/account/plans)。
+
+## 记忆
+
+**Settings › Memory**中有你账户的Memory开关、**See and edit your memory**（在网站上）、**Import from Codex and Claude Code**，以及**Memory folder**，它会把你的记忆以文件形式在`~/Aristra/memory`中保留一份副本。参见[记忆](/zh/memory)。
+
+## 键盘快捷键
+
+| 按键 | 操作 |
+|---|---|
+| ⌘N | 新建对话 |
+| ⌥⌘← / ⌥⌘→ | Chat / Code |
+| ⌘K | 搜索对话、对话中的消息以及命令 |
+| ⌘B | 显示或隐藏侧边栏 |
+| ⌘J | Terminal |
+| ⌥⌘B | Review |
+| ⇧⌘B | Browser |
+| ⌘, | Settings |
+| ⌥Space | 快速输入，可在任何地方使用（可配置） |
+| ⌘W | 关闭对话窗口 |
+| Return（或⌘Return） | 发送，取决于Settings › General中的设置 |
+| ⇧Return | 换行 |
+| ↑ | 在空输入框中调出你的上一条提示词 |
+| Esc | 在Aristra工作时停止它 |
+| ⌘-click | 以另一种方式打开链接 |
+
+在Code标签页中，还有更多快捷键可以打开对话旁边的面板。参见[Aristra Desktop的Code标签页](/zh/code/desktop)。

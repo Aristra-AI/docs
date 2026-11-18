@@ -1,0 +1,80 @@
+---
+title: "Chats"
+description: "Inicia, reanuda, ramifica, bifurca, exporta y elimina chats, vuelve a un mensaje anterior con los puntos de control y descubre qué pasa cuando un turno te necesita y no hay nadie."
+---
+
+Un chat es una conversación con Aristra Code: una carpeta, un modelo, un modo y su historial. Todas las superficies de tu computadora ven los mismos chats.
+
+## Buscar y reanudar chats
+
+| Quieres | Haz esto |
+|---|---|
+| Un chat nuevo en esta carpeta | `aristra`, o `/new` en un chat |
+| El chat más reciente de esta carpeta | `aristra -c` |
+| Un chat por su id | `aristra resume <id>`, o `aristra attach <id>` |
+| Un selector | `aristra resume`, o `/resume` |
+| Una lista | `aristra sessions` (esta carpeta), `--all` (todas las carpetas), `--json` |
+
+Un chat conserva la carpeta en la que empezó, salvo que lo muevas a un [worktree](/es/code/guides/git). Su id se muestra cuando sales de un chat, con `aristra sessions` y en el resultado de `aristra run --output json`.
+
+Pueden ejecutarse varios chats a la vez. Cada uno ejecuta un turno a la vez: un mensaje enviado mientras se ejecuta un turno se une a él en su siguiente paso (Enter) o espera a que termine (`/queue`).
+
+## Ramas, bifurcaciones y preguntas al margen
+
+| Comando | Hace |
+|---|---|
+| `/branch [name]` | Copiar este chat tal como está en un chat nuevo y seguir en la copia. El original se queda como estaba |
+| `/fork <directive>` | Iniciar un agente en segundo plano con todo el contexto de este chat para que cumpla la instrucción e informe, mientras sigues trabajando aquí |
+| `/btw <question>` | Hacer una pregunta rápida al margen sobre el chat sin interrumpir un turno en curso. La respuesta aparece encima del compositor y nunca se añade al chat |
+
+## Puntos de control
+
+Cada turno de un chat con carpeta empieza con un punto de control: antes de que Aristra Code cambie por primera vez un archivo con sus herramientas de archivos en un turno, se hace una copia de seguridad del archivo. Un chat conserva sus 100 puntos de control más recientes.
+
+Vuelve a antes de uno de tus mensajes con `/rewind` (o Esc dos veces con el compositor vacío) en la terminal, o con **Restore to here** en el mensaje en Aristra Desktop:
+
+- **Restore code** restaura los archivos que el agente cambió con sus herramientas de archivos desde entonces.
+- **Restore conversation** elimina el mensaje y todos los posteriores, en todas las superficies, y devuelve el mensaje al compositor para editarlo. El modelo ve lo que veía entonces, y el chat recupera el modo que tenía entonces. Un chat que se resumió después de ese mensaje no puede volver a él.
+- **Restore code and conversation** hace ambas cosas.
+
+Las opciones de código solo aparecen cuando el agente cambió archivos después de ese mensaje.
+
+<Note>
+Los puntos de control registran los cambios hechos por las herramientas de archivos de Aristra Code. Los cambios hechos por los comandos que ejecutó (`npm run format`, una migración), o por ti, no se deshacen. Usa git para esos.
+</Note>
+
+## Títulos
+
+Un modelo escribe el título de un chat mientras se ejecuta el primer turno, o lo fijas con `/rename <title>`. `auxiliary.title` en tu configuración elige el modelo que escribe los títulos, o `"off"` para conservar las primeras palabras de tu mensaje.
+
+## Exportar y eliminar
+
+```sh
+aristra sessions export <id>                 # Markdown, in ~/.aristra/exports/
+aristra sessions export <id> --format json
+aristra sessions delete <id>                 # asks first; --yes to skip
+```
+
+En un chat, `/export` y `/export json` lo guardan, y `/copy` copia la respuesta más reciente (`/copy 2`, la anterior). Cuando la respuesta tiene bloques de código, pregunta cuál copiar, salvo que `copyFullResponse` esté activado. Eliminar un chat elimina su historial y sus archivos.
+
+## Dónde se guardan los chats
+
+Los chats de tu computadora se guardan en `~/.aristra/runtime.sqlite`, y los archivos que pertenecen a un chat (adjuntos, salidas largas de comandos, puntos de control), en `~/.aristra/attachments/<chat>/`, legibles solo por ti. El historial de un chat no se guarda en ningún otro lugar, salvo que lo compartas con [Remote Control](/es/code/remote-control) o sea un [chat en la nube](/es/code/cloud-chats). Aun así, cada turno envía la conversación al proveedor del modelo del chat (a través de Aristra cuando el chat usa los modelos de Aristra); consulta [Seguridad](/es/code/security).
+
+## Cuando un turno te necesita y no hay nadie
+
+Una aprobación espera 30 minutos (`approvals.timeoutMinutes`); una en un chat compartido con tu teléfono, o iniciado por una tarea programada, espera 2 horas. Cuando termina la espera, el paso se rechaza, se le dice al modelo que nadie respondió y el turno sigue sin él. Si no hay nadie conectado, Aristra muestra una notificación en tu computadora.
+
+En el [modo no interactivo](/es/code/non-interactive), nadie puede responder: lo que preguntaría se rechaza de inmediato.
+
+## Cuando una respuesta se corta
+
+Si la respuesta del modelo llega a su límite de salida, Aristra Code le pide que continúe donde se quedó, hasta tres veces, antes de terminar el turno con un aviso.
+
+## Si Aristra se detiene a mitad de un turno
+
+Aristra Code guarda a medida que avanza. Si el runtime se detuvo o tu computadora se reinició durante un turno, el turno se marca como interrumpido con un aviso, y cada paso que quedó sin terminar se marca para que el modelo lo compruebe antes de repetirlo. Envía un mensaje para continuar.
+
+## Chats de otros agentes
+
+Aristra Desktop puede traer tus sesiones de Claude Code y Codex, y `aristra import claude-code` (o `codex`) trae tu configuración. Cada sesión importada se convierte en un chat que continúa en Aristra Code en su carpeta.

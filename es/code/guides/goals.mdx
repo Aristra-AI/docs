@@ -1,0 +1,38 @@
+---
+title: "Objetivos"
+description: "Fija una condición con /goal y Aristra Code seguirá trabajando hasta que se cumpla: que pasen las pruebas, que la compilación esté en verde, que la página se renderice."
+---
+
+Un objetivo es una condición que Aristra Code comprueba antes de detenerse. Cuando un turno estaría a punto de terminar, un modelo pequeño lee el chat y decide si el objetivo se cumple. Si no se cumple, el turno continúa, con el motivo. Si se cumple, el objetivo se borra y el chat indica que se alcanzó, con cuánto tardó, cuántos turnos y cuántos tokens hicieron falta.
+
+```text
+/goal all tests in packages/api pass and the linter is clean
+/goal                # show the current goal
+/goal clear          # remove it
+```
+
+Un objetivo tiene hasta 4,000 caracteres. `/goal` solo funciona en una carpeta de confianza, y no mientras `disableAllHooks` esté definido.
+
+En Aristra Desktop, elige **Goal** en el menú `/` de un chat.
+
+## Escribir un buen objetivo
+
+Un objetivo funciona mejor cuando es algo que Aristra Code puede comprobar ejecutando algo, no una cuestión de opinión:
+
+| Bueno | Difícil de comprobar |
+|---|---|
+| `npm test` pasa sin pruebas omitidas | El código está limpio |
+| La compilación tiene éxito y el bundle pesa menos de 200 KB | La app es rápida |
+| `/health` devuelve 200 en el servidor local | La API funciona |
+
+Dale a Aristra Code el comando que lo comprueba, en el objetivo o en tu `AGENTS.md`, para que cada turno pueda verificar en lugar de adivinar.
+
+## Cómo termina
+
+- **Cumplido:** el objetivo se borra, y el chat lo indica.
+- **No cumplido:** el turno continúa con el motivo que dio la comprobación.
+- **Imposible:** si la comprobación decide que el objetivo no se puede alcanzar, el objetivo se borra y el turno termina, con el porqué.
+- **No cumplido 8 veces seguidas** sin ninguna llamada a herramientas entre medias: el turno termina de todos modos, y el objetivo se mantiene.
+- **La comprobación falló** (sin respuesta en 30 segundos, o sin un modelo configurado para ella): el turno termina, y el objetivo se mantiene.
+
+Mientras siga en curso trabajo en segundo plano en el chat, la comprobación lo espera. Esc detiene el turno como siempre; el objetivo se mantiene hasta que lo borras, se cumple o la comprobación lo considera imposible.

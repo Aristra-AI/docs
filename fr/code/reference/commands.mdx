@@ -1,0 +1,110 @@
+---
+title: "Commandes"
+description: "Toutes les commandes que vous pouvez taper dans Aristra Code dans le terminal, de /help à /remote-control."
+---
+
+Dans le terminal, tapez `/` au début de la zone de saisie pour ouvrir le menu des commandes : les commandes et vos [skills](/fr/code/extend/skills), filtrés au fil de la saisie. Up et Down choisissent, Tab complète, Enter exécute (une commande qui nécessite un argument attend que vous en tapiez un), et Esc ferme le menu et efface la zone de saisie. Une commande inconnue n'est pas envoyée. Pour envoyer un message qui commence par `/`, commencez-le par une espace.
+
+Le menu `/` d'Aristra Desktop a sa propre liste courte ; consultez [L'onglet Code de Desktop](/fr/code/desktop). Pour les sous-commandes et les options d'`aristra`, consultez la [référence du CLI](/fr/code/reference/cli).
+
+## Le chat
+
+| Commande | Effet |
+|---|---|
+| `/new` (ou `/clear`, `/reset`) | Démarrer un nouveau chat dans ce dossier |
+| `/resume` | Revenir à un chat précédent |
+| `/search <words>` | Chercher des mots dans les messages de tous les chats de cet ordinateur. `/search #2` ouvre le chat du deuxième résultat |
+| `/rename <title>` | Renommer ce chat |
+| `/branch [name]` | Copier ce chat tel qu'il est dans un nouveau chat et continuer dans la copie |
+| `/fork <directive>` | Lancer un agent en arrière-plan avec tout le contexte de ce chat pour exécuter la directive et rendre compte |
+| `/btw <question>` | Poser une question annexe sans interrompre le tour en cours ; la réponse n'est pas ajoutée au chat |
+| `/queue <message>` | Envoyer ceci une fois le tour en cours terminé |
+| `/rewind` (ou `/checkpoint`) | Restaurer le code et/ou la conversation à l'état d'avant l'un de vos messages |
+| `/export [md\|json]` | Enregistrer ce chat dans un fichier de `~/.aristra/exports/` |
+| `/copy [N]` | Copier la réponse la plus récente (ou la N-ième plus récente) dans le presse-papiers |
+| `/files [words \| find WORDS \| open N \| save PATH \| update N]` | Les fichiers que vos chats ont partagés, produits ou modifiés, les fichiers que vous avez joints et, une fois connecté, les fichiers de votre compte, du plus récent au plus ancien ; des mots cherchent dans les noms, les dossiers et les titres de chats, `find WORDS` cherche dans le contenu des fichiers (avec la page d'un PDF), `open N` en ouvre un dans son app (un fichier de votre compte est d'abord téléchargé), `save PATH` enregistre dans votre compte une copie d'un fichier d'ici, et `update N [replace\|keep-both]` remplace la copie d'un fichier enregistré après sa modification |
+| `/recap` | Un récapitulatif d'une ligne du chat, tout de suite |
+| `/exit` (`/quit`) | Quitter ; un tour en cours peut continuer |
+
+## Contexte et mémoire
+
+| Commande | Effet |
+|---|---|
+| `/context [all]` | Ce qui remplit le contexte du modèle, sous forme de grille, avec des suggestions |
+| `/compact [instructions]` | Résumer la conversation jusqu'ici, en conservant ce que disent les instructions |
+| `/autocompact [auto\|<tokens>]` | Fixer le taux de remplissage du contexte avant son résumé, pour ce modèle |
+| `/memory` | Modifier vos fichiers d'instructions (`AGENTS.md`), ou ouvrir les notes du dépôt |
+| `/init` | Rédiger le `AGENTS.md` de ce dossier à partir du code |
+| `/goal [<condition> \| clear]` | Fixer une condition qu'Aristra Code vérifie avant de s'arrêter. Consultez [Objectifs](/fr/code/guides/goals) |
+
+## Modèle et autorisations
+
+| Commande | Effet |
+|---|---|
+| `/model` | Choisir le modèle, avec qui le paie |
+| `/effort [level\|auto]` | L'intensité de la réflexion du modèle : `low`, `medium`, `high` et, sur certains modèles, `xhigh` ou `max` |
+| `/mode [mode]` | Définir le mode d'autorisation : `manual` (ou `default`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` (si vous avez lancé `aristra` avec `--dangerously-skip-permissions` ou `--allow-dangerously-skip-permissions`), `read_only`. Sans mode, le suivant. Un chat cloud a `manual` et `auto` |
+| `/permissions` | Les règles par source, les dossiers du chat, et les étapes récemment bloquées par le mode Auto |
+| `/sandbox [exclude <pattern>]` | Exécuter les commandes dans le [bac à sable](/fr/code/configure/sandbox) (désactivé par défaut) : avec autorisation automatique, avec les autorisations habituelles, ou pas du tout. `exclude` ajoute une commande qui s'exécute toujours hors du bac à sable |
+| `/add-dir <path>` | Permettre à ce chat de travailler dans un autre dossier |
+| `/retry` | Laisser les étapes que le relecteur du mode Auto vient de bloquer s'exécuter une fois, telles quelles |
+| `/folder` | Le dossier de ce chat, et si vous lui faites confiance |
+
+## Git et pull requests
+
+| Commande | Effet |
+|---|---|
+| `/diff` | Les modifications non commitées et les modifications de chaque tour. En plein écran, un panneau des diffs à côté du chat |
+| `/pr [number]` | La pull request de la branche : statut, vérifications, fichiers, revue et fusion |
+| `/create-pr [--draft]` | Commiter, pousser et ouvrir une pull request |
+| `/commit [guidance]` | Commiter les modifications avec un message dans le style du dépôt |
+| `/autofix-pr [number\|stop]` | Surveiller la pull request et corriger les vérifications en échec, les conflits et les commentaires de revue |
+
+Consultez [Git et pull requests](/fr/code/guides/git).
+
+## Travail en arrière-plan
+
+| Commande | Effet |
+|---|---|
+| `/tasks` (ou `/bashes`) | Tout ce qui tourne en arrière-plan : agents, workflows, commandes. Arrêtez-en un avec x |
+| `/schedule [pause\|resume\|run\|remove N]` (ou `/scheduled`) | Les [tâches planifiées](/fr/code/guides/background) enregistrées sur cet ordinateur, numérotées ; modifiez-en une par son numéro. Pour en créer une, demandez-le simplement |
+| `/workflows` | Les workflows en cours et terminés : leurs phases et leurs agents |
+
+Consultez [Travail en arrière-plan](/fr/code/guides/background).
+
+## Extensions
+
+| Commande | Effet |
+|---|---|
+| `/mcp [reconnect\|enable\|disable [<server>\|all]]` | Gérer les serveurs MCP : approuver ceux d'un projet, se connecter, reconnecter, en désactiver un pour ce projet, voir les outils |
+| `/hooks` | Vos hooks par événement, et ceux qui attendent encore une approbation |
+| `/plugin [subcommand]` (ou `/plugins`, `/marketplace`) | Gérer les plugins et les marketplaces |
+| `/reload-plugins` | Relire vos plugins et activer les modifications dans ce chat |
+| `/<skill> [args]` | Exécuter l'un de vos skills ou de vos workflows enregistrés (ceux d'un plugin sous la forme `/<plugin>:<name>`) |
+| `/mcp__<server>__<prompt> [args]` | Exécuter le prompt d'un serveur MCP |
+
+## Votre compte et votre configuration
+
+| Commande | Effet |
+|---|---|
+| `/help` | Toutes les commandes, vos skills et les raccourcis |
+| `/status` | Votre compte et son forfait, le runtime et les sources de modèles |
+| `/usage` | Les tokens utilisés par ce chat et qui les a payés, votre solde Aristra en dollars et les limites de vos forfaits, et ce qui contribue à votre consommation. Sans forfait Aristra, ce qui paie quoi |
+| `/config` | Vos paramètres en vigueur, et le fichier d'où vient chacun |
+| `/login [code]`, `/logout` | Se connecter à Aristra (`code` : avec un code, sur un autre appareil), ou se déconnecter sur cet ordinateur |
+| `/remote-control [off]` (ou `/rc`) | Poursuivre ce chat sur votre téléphone et le web. Inclus avec un forfait. Consultez [Remote Control](/fr/code/remote-control) |
+| `/remote-control computer [on\|off]` | Permettre au web et à votre téléphone de démarrer des chats sur cet ordinateur. Désactivé par défaut |
+| `/remote-control folder [on\|off]` | Autoriser les chats venant du web et de votre téléphone à démarrer dans le dossier où vous êtes |
+| `/release-notes` | Ce qui a changé dans chaque version |
+
+## Le terminal
+
+| Commande | Effet |
+|---|---|
+| `/tui [default\|fullscreen]` | Choisir le rendu : le rendu classique, ou le plein écran |
+| `/keybindings` | Ouvrir votre fichier de raccourcis clavier |
+| `/terminal-setup` | Configurer une touche pour les nouvelles lignes dans votre terminal (Shift+Enter ou Option+Enter) |
+
+## Skills intégrés
+
+Ces commandes s'exécutent comme des [skills](/fr/code/extend/skills) : `/init`, `/code-review` (ou `/review`), `/simplify`, `/security-review`, `/update-config`, `/fewer-permission-prompts`, `/debug`, `/verify`, `/commit`, `/create-pr` et `/loop` (ou `/proactive`), ainsi que `workflow-authoring`, la référence qu'Aristra Code lit quand il écrit un workflow. `/deep-research <question>` exécute le [workflow](/fr/code/guides/subagents) intégré d'Aristra Code.

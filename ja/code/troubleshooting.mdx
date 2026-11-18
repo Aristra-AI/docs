@@ -1,0 +1,160 @@
+---
+title: "トラブルシューティング"
+description: "サインイン、ランタイム、モデル、サンドボックス、承認、MCP サーバー、フック、ターミナルに関するよくある問題を解決します。"
+---
+
+## まず試すこと
+
+```sh
+aristra doctor          # checks everything and says how to fix each problem
+aristra status          # your account, the runtime, the model sources
+aristra logs -n 200     # the runtime's log; -f follows it
+```
+
+`aristra doctor` は、バージョン、アカウント、モデルのソース、サンドボックス、認証情報ストア、MCP サーバー、設定ファイル、git、管理ポリシー、テレメトリー、インストール、ターミナルを確認します。各行には `ok` か `fix` と、何をすればよいかが表示されます。
+
+サポートを受ける場合は、`aristra diagnostics export` で、シークレットとメールアドレスを取り除き、メッセージを含まないバンドルを `~/.aristra/diagnostics/` に書き出します。何も送信されないので、共有する前に中身を確認してください。チャットでは、`/debug` スキルがログを読んでくれます。
+
+## サインイン
+
+<AccordionGroup>
+  <Accordion title="チャットを始めると「Sign in first」と表示される">
+    自分のキーやローカルモデルを使うチャットも含め、すべてのチャットで Aristra へのサインインが必要です。`aristra login` を実行するか、チャットで `/login` を実行してください。
+  </Accordion>
+  <Accordion title="ブラウザーが開かない、または別のマシンにいる">
+    ブラウザーでのサインインを待っている間に `c` を押すと（チャットでは `/login code` と入力すると）、コードに切り替わります。10 分以内に、任意のデバイスで app.aristralabs.com/desktop/device を開いてコードを入力します。`aristra login --device-code` では最初からコードを使います。SSH 経由ではコードが既定です。WSL では `BROWSER=wslview` を設定してください。
+  </Accordion>
+  <Accordion title="勝手にサインアウトされた">
+    デバイスが（ウェブサイトのデバイスの一覧から）取り消されたか、30 日間使わなかったためにサインインの期限が切れています。`aristra status` には「revoked」または「signed out」と表示されます。もう一度サインインしてください。
+  </Accordion>
+</AccordionGroup>
+
+## ランタイム
+
+<AccordionGroup>
+  <Accordion title="起動しない">
+    エラーに理由が表示されます。よくある原因は次のとおりです。
+
+    - **`~/.aristra` を他のユーザーが開ける**。`chmod 700 ~/.aristra` を実行します。
+    - **別のユーザーが所有している**（`sudo aristra ...` を実行したあと）。削除するか、所有者を修正します。
+    - **新しいランタイムが書き込んだストア**。`aristra update` で更新します。
+  </Accordion>
+  <Accordion title="何度も停止する">
+    クラッシュしたランタイムはすぐに再起動しますが、2 分間に最大 3 回までです。それを超えると、ターミナルに失敗したことと理由が表示されます。`aristra logs` を確認してください。ランタイムがログを書けるようになる前に出力した内容は `~/.aristra/logs/stderr.log` にあります。`aristra diagnostics export` を使うには、ランタイムが起動する必要があります。
+  </Accordion>
+  <Accordion title="設定や環境変数が無視されているように見える">
+    設定ファイルはすぐに反映されます。環境変数（テレメトリー、プロキシ、管理設定のフォルダー）はランタイムの起動時に読み込まれます。`aristra runtime stop` を実行してから、もう一度コマンドを実行してください。
+  </Accordion>
+</AccordionGroup>
+
+## モデル
+
+<AccordionGroup>
+  <Accordion title="「No model source is ready」">
+    Aristra にサインインするか、`/model` から ChatGPT のプランにサインインするか、`aristra keys add <provider>` でキーを追加してください。
+  </Accordion>
+  <Accordion title="残高を使い切った、またはプランの上限を超えた">
+    ターンにその旨と、上限がリセットされる時刻が表示されます。`/usage` でドル建ての残高と上限を確認でき、`/model` で別のソースに切り替えられます。`model.fallback` のリストを設定しておけば、これを自動で行えます。別の支払い元が支払う場合は先に確認を求めます。残高を追加するには、$10 から[チャージ](/ja/account/credits)してください。
+  </Accordion>
+  <Accordion title="「This needs an Aristra plan」">
+    自分のコンピューター上の Aristra は、自分のモデルを使えば無料です。Aristra がホストするその他の機能（Remote Control と共有チャット、コネクター、Craft）は[プラン](/ja/account/plans)に含まれます。アカウントのメモリはすべてのアカウントに含まれます。プランがない場合、クラウドのチャットは[残高](/ja/account/credits)から支払われ（新規アカウントには $1 が付きます）、クラウドコンピューターはチャージした残高で動きます。`/status` でプランを確認できます。プランの一覧はアカウントの Billing にあります。
+  </Accordion>
+  <Accordion title="「Every plan for this launch is taken」">
+    Aristra One の提供開始直後は、プランを段階的に公開しています。料金は発生しておらず、アカウントも変わっていません。あとで Billing からもう一度試してください。
+  </Accordion>
+  <Accordion title="ウェブ検索で残高を使い切ったと表示される">
+    コンピューターからの Aristra の検索は、1 回 $0.0075 が残高から支払われます。[チャージ](/ja/account/credits)するか、コンピューターに自分の Brave キーを設定するか、無料の公開検索へのフォールバック（`web.keylessFallback`）をオンのままにしてください。フォールバックは、残高を使い切ったときに使われます。
+  </Accordion>
+  <Accordion title="「Web search is set to your own Brave key」">
+    このコンピューターに自分の Brave キーを設定していて、現在それを読み取れません。Aristra は、指示がない限り、残高から支払う検索に切り替えません。**Settings › Tools & keys** でキーを追加し直すか（または `aristra keys add brave`）、そこでキーを削除して（`aristra keys remove brave`）Aristra で検索してください。
+  </Accordion>
+  <Accordion title="ローカルモデルが 16K 未満のウィンドウで失敗する">
+    Ollama は、既定では短いコンテキストでモデルを実行します。Ollama アプリで Context length を大きくするか、`OLLAMA_CONTEXT_LENGTH=16384` 以上を設定して Ollama を再起動してください。
+  </Accordion>
+</AccordionGroup>
+
+## コマンドとサンドボックス
+
+<AccordionGroup>
+  <Accordion title="コマンドがホストに接続できない">
+    コマンドは、サンドボックスのプロキシを経由してネットワークに接続します。許可していないホストへの接続では確認を求められ、拒否したホストへの接続は、出力のあとに `<sandbox_violations>` が付いて失敗します。`sandbox.network.allowedDomains` か `web_fetch(domain:...)` の許可ルールで、事前にホストを許可してください。プロキシの設定を無視するツール（`ping`、一部のデータベースクライアント）は、サンドボックスからネットワークに接続できません。外での実行を承認するか、`sandbox.excludedCommands` に追加してください。
+  </Accordion>
+  <Accordion title="macOS で pip install や gh が証明書エラーで失敗する">
+    これらのツールは、サンドボックスが閉じている macOS のサービスを通じて証明書を確認します。Aristra Code にサンドボックスの外で実行させるか（自分から求めない場合は頼んでください）、`sandbox.enableWeakerNetworkIsolation: true` を設定してください。[サンドボックス](/ja/code/configure/sandbox)を参照してください。
+  </Accordion>
+  <Accordion title="開発サーバーがポートで待ち受けられない">
+    localhost を許可します：`aristra config set sandbox.network.allowLocalBinding true`。
+  </Accordion>
+  <Accordion title="書き込めるはずのファイルにコマンドが書き込めない">
+    コマンドが書き込めるのは、チャットのフォルダー、`$TMPDIR`、ルールで開いたパスだけで、設定ファイル、`.git/hooks`、`.git/config`、シェルの起動ファイルなど、保護対象の一覧にあるものには書き込めません。Aristra Code は、承認を得れば、ファイルツールでそれらを変更できます。
+  </Accordion>
+  <Accordion title="Linux で、オンにしたサンドボックスが起動しない">
+    その場合、コマンドはサンドボックスの外で実行される（チャットにそのことが表示されます）か、`sandbox.failIfUnavailable` ではターンが始まりません。`aristra doctor` の Sandbox の下に原因が表示されます。bubblewrap をインストールするか、bubblewrap にユーザー名前空間を許可するか（Ubuntu 24.04 以降）、コンテナー内では `sandbox.enableWeakerNestedSandbox: true` を設定してください。
+  </Accordion>
+</AccordionGroup>
+
+## 承認
+
+<AccordionGroup>
+  <Accordion title="承認が消えた">
+    別のサーフェスが先に回答したか、30 分でタイムアウトして拒否されました。
+  </Accordion>
+  <Accordion title="スクリプトの実行がステータス 3 で終了する">
+    何かが承認を求めましたが、回答できる人がいませんでした。その実行で許可する（`--allow "shell(npm test *)"`）、モードを選ぶ（`--permission-mode auto`）、または設定にルールを追加してください。拒否されたものは `result.permissionDenials` に一覧表示されます。
+  </Accordion>
+  <Accordion title="Auto モードで何度も確認を求められる">
+    レビュアーは、3 ステップ連続、またはチャット内で 20 ステップをブロックすると一時停止します。1 つを承認すると再びオンになります。`/retry` で、ブロックされたステップを 1 回だけ実行させられます。
+  </Accordion>
+</AccordionGroup>
+
+## チャット
+
+<AccordionGroup>
+  <Accordion title="「Another Aristra runtime is running this session」">
+    そのチャットでターンが実行中です。別のランタイム（`aristra run --no-daemon`、リモートのセッション）で実行されている可能性があります。終わるまで待ってください。停止したランタイムが残したロックは 60 秒で期限切れになります。
+  </Accordion>
+  <Accordion title="ターンが勝手に中断された">
+    実行中にランタイムが停止しました。チャットに「Aristra stopped while this was running」と表示され、入力欄に「Continue from where you left off.」が提案されます。Enter キーを押して送信するか（Aristra Desktop では Tab キーで入力欄に入れられます）、別の内容を入力してください。
+  </Accordion>
+  <Accordion title="チャットが一覧にない">
+    `aristra sessions` はこのフォルダーのチャット、`--all` はすべてのフォルダーのチャット、`--cloud` はアカウントのチャットを一覧表示します。シークレットチャットは一覧に表示されません。
+  </Accordion>
+</AccordionGroup>
+
+## MCP サーバー、スキル、フック
+
+<AccordionGroup>
+  <Accordion title="MCP サーバーが接続されない">
+    `aristra mcp test <name>` を実行すると、サーバーを起動して理由を表示します。プログラムが `PATH` にない、`--sandbox` でサンドボックスが拒否する場所に書き込もうとしている（`--cwd` か `--writable` を指定してください）、パッケージがマルウェアとして検出された、サインインが必要（`aristra mcp login <name>`）、まだ承認していないプロジェクトのサーバーである、などです。ポリシーでブロックされたサーバーは、`aristra mcp list` に理由が表示されます。
+  </Accordion>
+  <Accordion title="MCP のツールが毎回確認を求める">
+    サーバーが信頼されていません。`aristra mcp trust <name>` を実行してください。
+  </Accordion>
+  <Accordion title="フォルダーのスキル、フック、ルールが無視される">
+    フォルダーが信頼されていません。`/folder` で確認できます。
+  </Accordion>
+  <Accordion title="フックが実行されない">
+    フックは承認したあとでだけ実行されます。`aristra hooks list` を実行してから、`aristra hooks approve <event> <command>` を実行してください。`settings.local.json` のフックは実行されません。また、`disableAllHooks` やチームのポリシーでフックがオフになっていることもあります。理由は `aristra hooks list` に表示されます。
+  </Accordion>
+</AccordionGroup>
+
+## ターミナル
+
+<AccordionGroup>
+  <Accordion title="Shift+Enter で改行されずに送信される">
+    `/terminal-setup` を実行するか、Alt+Enter か Ctrl+J を使ってください。
+  </Accordion>
+  <Accordion title="通知が届かない">
+    ターミナルの通知は、iTerm2、kitty、Ghostty では通知として、Apple のターミナルではベルで届きます。それ以外のターミナルには届きません。ターミナルの通知設定と、`ARISTRA_NO_NOTIFY` が設定されていないことを確認してください。Aristra Desktop は独自に通知を送ります。
+  </Accordion>
+</AccordionGroup>
+
+## やり直す
+
+```sh
+aristra runtime stop --now
+mv ~/.aristra ~/.aristra.bak     # keeps your chats, settings and secrets aside
+aristra                          # a fresh start: sign in again
+```
+
+実際の環境に触れずに何かを試すには、別のホームを使います：`ARISTRA_HOME=~/aristra-scratch aristra`。

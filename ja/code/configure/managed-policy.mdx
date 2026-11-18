@@ -1,0 +1,117 @@
+---
+title: "管理ポリシー"
+description: "管理者向け。構成プロファイルまたは管理設定ファイルを使って、すべてのコンピューターでルールを強制し、モードをオフにし、MCP サーバーを許可またはブロックし、任意の設定を固定します。"
+---
+
+管理者は、コンピューター上のすべてのチャットが、ターミナル、Aristra Desktop、その他のすべてのサーフェスで従うポリシーを設定できます。誰も上書きできないルール、Auto モードのオフ、MCP サーバーの許可やブロック、テレメトリーのオフなどです。Claude Code の管理設定と同じキーを使います。
+
+## ポリシーの出どころ
+
+Aristra Code は、ポリシーを持つ最初のソースを読み込みます。
+
+| 順番 | ソース | 場所 |
+|---|---|---|
+| 1 | ユーザー向けの macOS 構成プロファイル（MDM）。ドメインは `com.aristralabs.aristra` | `/Library/Managed Preferences/<user>/com.aristralabs.aristra.plist` |
+| 2 | コンピューター向けの同じプロファイル | `/Library/Managed Preferences/com.aristralabs.aristra.plist` |
+| 3 | 管理設定ファイル。`managed-settings.json` に、`managed-settings.d/*.json` を名前順に重ねてマージします | macOS：`/Library/Application Support/Aristra/`。Linux：`/etc/aristra/` |
+
+ユーザー自身の環境設定がポリシーとして読み込まれることはなく、どのサーフェスもポリシーを書き込めません。ファイルは変更されると読み直されます。管理設定と同じ場所に置いた指示ファイル（`AGENTS.md`、`rules/*.md`）も、すべてのチャットに適用されます。
+
+## 例
+
+```json /Library/Application Support/Aristra/managed-settings.json
+{
+  "permissions": {
+    "deny": ["shell(git push:*)", "read(~/.aws/**)", "web_fetch(domain:pastebin.com)"],
+    "ask": ["shell(npm publish:*)"],
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": { "allowUnsandboxedCommands": false, "filesystem": { "denyRead": ["~/.aws"] } },
+  "telemetry": { "usage": false, "errors": false },
+  "deniedMcpServers": [{ "serverName": "filesystem" }, { "serverUrl": "https://*.untrusted.example/*" }],
+  "allowedMcpServers": [{ "serverCommand": ["npx", "-y", "@company/mcp-tools"] }, { "serverUrl": "https://mcp.company.example/*" }]
+}
+```
+
+ポリシーの値は、すべてのユーザーとフォルダーの設定より優先されます。
+
+## ルール
+
+- **拒否ルール**は、何よりも先に呼び出しを拒否します。許可ルール、セッション中の回答、モード（Bypass を含む）、レビュアーのいずれも、これを上書きできません。そのパスは、サンドボックスでもコマンドに対して閉じられます。
+- **確認ルール**は、Bypass を含めて確認を求めます（Auto モードではレビュアーが判断します）。
+- **許可ルール**は、すべてのフォルダーで、ユーザーのルールと同じように扱われます。
+- **`permissions.allowManagedPermissionRulesOnly: true`** にすると、ポリシーのルールだけが有効になります。その場合、承認には Yes と No だけが表示されます。
+
+## モード
+
+- **`permissions.disableAutoMode: "disable"`** は、すべての場所で Auto モードをオフにします。すでに Auto のチャットは、次のターンから通知とともに確認を求めるようになります。
+- **`permissions.disableBypassPermissionsMode: "disable"`** は、Bypass permissions モードをオフにし、`aristra run --dangerously-skip-sandbox` を禁止します。
+
+## サンドボックス
+
+サンドボックスの設定はどれも固定できます。たとえば `sandbox.allowUnsandboxedCommands: false` にすると、コマンドは常にサンドボックス内で実行されます。サンドボックスがオンの場合、リポジトリはそれをオフにできなくなり、コマンドをサンドボックスから除外できるのは自分の設定、`--settings`、ポリシーだけになり、`!` で実行するコマンドもサンドボックス内で実行されます。ポリシーにしかないキーが 2 つあります。
+
+| キー | 動作 |
+|---|---|
+| `sandbox.network.allowManagedDomainsOnly` | ポリシーのホストだけが有効になり、何も確認しません |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | ポリシーの `allowRead` のパスだけが有効になります |
+
+## MCP サーバー
+
+| キー | 意味 |
+|---|---|
+| `deniedMcpServers` | 決して実行できないサーバー。常に優先されます |
+| `allowedMcpServers` | 指定した場合、一致するサーバーだけが実行できます。空のリストでは何も許可しません |
+
+| エントリ | 一致するもの |
+|---|---|
+| `{"serverName": "github"}` | 名前によるサーバー。出どころ（設定、`.mcp.json`、プラグイン）は問いません |
+| `{"serverCommand": ["npx", "-y", "@company/mcp-tools"]}` | 正確なコマンドと引数によるプログラムのサーバー |
+| `{"serverUrl": "https://mcp.company.example/*"}` | アドレスによるサーバー。`*` は何にでも一致します |
+
+許可リストにコマンド（またはアドレス）のエントリがある場合、プログラム（またはアドレス）のサーバーはそのいずれかに一致する必要があり、名前だけでは不十分です。
+
+ポリシーで除外されたサーバーは無効になり、`aristra mcp list` に「Your organization's policy does not allow this MCP server.」と表示されます。
+
+## フック、プラグイン、ワークフロー
+
+| キー | 動作 |
+|---|---|
+| `hooks` | 各ユーザーの承認なしに、全員に対して実行されるフック |
+| `allowManagedHooksOnly` | ポリシーのフックと、ポリシーがオンにしたプラグインのフックだけを実行します |
+| `disableAllHooks` | フックを一切実行しません |
+| `enabledPlugins` | 全員に対してオンまたはオフにするプラグイン。管理された値が優先されます |
+| `strictKnownMarketplaces`（または `allowedMarketplaces`） | 追加できるプラグインのマーケットプレイスをこれらに限定します |
+| `blockedMarketplaces` | 追加できないマーケットプレイス |
+| `pluginTrustMessage` | プラグインをインストールするときに表示される、組織からのメッセージ |
+| `disableSideloadFlags` | `--plugin-dir` を拒否します |
+| `disableWorkflows` | ワークフローをオフにします |
+
+管理設定と同じ場所に `agents/` フォルダーを置くと、全員にカスタムエージェントが追加され、同じ名前のユーザーのエージェントより優先されます。
+
+## その他の設定
+
+ほとんどの設定は同じ方法で固定できます。`telemetry.usage`、`telemetry.errors`、`approvals.timeoutMinutes`、`memory.enabled` などです。各ユーザー自身のファイルからしか読み込まれない設定（`review`、`credentials`、`auxiliary`、`mcp`、`model.fallback`、`runtime.notifications`、`runtime.maxRunningTurns`）は、ポリシーで固定できません。ポリシーでテレメトリー、ワークフロー、サンドボックスのスイッチ、無料の検索へのフォールバックを固定すると、Aristra Desktop ではそれらが組織によって設定されていると表示されます。
+
+## 確認する
+
+```sh
+aristra doctor        # says where the policy comes from
+aristra config get <key>    # the value in effect, with "(from managed)" when the policy set it
+```
+
+## ポリシーを試す
+
+ポリシーのないコンピューターでは、自分で用意したポリシーのフォルダーを Aristra Code に指定できます（ランタイムは起動時に変数を読み込むため、先にランタイムを停止してください）。
+
+```sh
+mkdir -p ~/aristra-policy
+cat > ~/aristra-policy/managed-settings.json <<'EOF'
+{ "permissions": { "deny": ["shell(git push *)"], "disableAutoMode": "disable" } }
+EOF
+aristra runtime stop
+ARISTRA_MANAGED_SETTINGS_DIR=~/aristra-policy aristra doctor
+```
+
+設定と指示について、`ARISTRA_MANAGED_SETTINGS_DIR` が読み込まれるのは管理者のポリシーが存在しない場合だけなので、管理者のポリシーを置き換えることはできません。

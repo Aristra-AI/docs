@@ -1,0 +1,95 @@
+---
+title: "Travail en arrière-plan"
+description: "Faites avancer le travail pendant que vous faites autre chose : les commandes en arrière-plan, les moniteurs, /loop et les prompts planifiés, les tâches planifiées, le service en arrière-plan et les notifications."
+---
+
+## Commandes en arrière-plan
+
+Une longue commande ne bloque pas le chat :
+
+- **À son délai d'expiration** (2 minutes par défaut, jusqu'à 10 si le modèle le demande), une commande encore en cours passe en arrière-plan au lieu d'être arrêtée, et Aristra Code reçoit sa sortie jusque-là.
+- **Ctrl+B** (deux fois dans tmux) pendant qu'une commande tourne l'envoie vous-même en arrière-plan.
+- **Les serveurs de développement et les watchers** démarrent en arrière-plan quand Aristra Code le demande.
+
+Les commandes en arrière-plan continuent de tourner entre les tours. Quand l'une d'elles se termine, le chat en est informé, et Aristra Code lit sa sortie. Elles s'arrêtent avec leur chat et avec le runtime, et arrêter l'une d'elles met fin à tout ce qu'elle a lancé.
+
+Aristra Code exécute un serveur comme une commande en arrière-plan à part entière. Une commande qui se termine par `&` en devient une. Une commande qui met une partie d'elle-même en arrière-plan avec `&`, `nohup`, `disown` ou `setsid` est renvoyée pour être découpée, puisque ce qu'elle laisse tourner s'arrêterait avec elle.
+
+```text
+/tasks
+```
+
+liste tout ce qui tourne en arrière-plan : les commandes, les moniteurs, les [agents](/fr/code/guides/subagents) et les workflows. Enter ouvre un agent (ce que vous y tapez lui est envoyé) ou un workflow, et x arrête n'importe lequel d'entre eux. La ligne d'état les compte (« 1 shell », « 2 local agents »). Dans Aristra Desktop, ils sont listés au-dessus de la zone de message, chacun avec sa sortie et un bouton Stop.
+
+## Moniteurs
+
+Un moniteur est une commande en arrière-plan dont les lignes de sortie arrivent dans le chat sous forme d'événements : une ligne de journal qui correspond à une erreur, un déploiement qui change d'état, une suite de tests qui se termine. Aristra Code en lance un quand vous lui demandez de surveiller quelque chose (« préviens-moi si le build échoue »). Chaque moniteur tourne 5 minutes par défaut et 30 au plus, puis s'arrête avec un avis ; Aristra Code peut le relancer pour une surveillance plus longue. Les moniteurs apparaissent dans `/tasks`.
+
+## Répéter un prompt : /loop
+
+```text
+/loop 5m check the deploy and tell me when it's done
+/loop 30m /code-review
+/loop check CI until it passes        # no interval: Aristra Code picks when to look again
+```
+
+`/loop` exécute un prompt ou une commande à intervalles réguliers. Sans intervalle, Aristra Code règle lui-même son rythme et se réveille quand il y a quelque chose à vérifier.
+
+Vous pouvez aussi demander un calendrier en toutes lettres (« toutes les 10 minutes, vérifie le déploiement », « rappelle-moi à 14 h 30 de vérifier le déploiement »). Aristra Code planifie le prompt dans ce chat :
+
+- Un prompt planifié ne s'exécute que lorsque le chat est inactif, jamais au milieu d'une réponse.
+- Chaque chat peut en avoir jusqu'à 50. Un prompt récurrent s'arrête au bout de 7 jours.
+- Ils vivent dans l'Aristra Code en cours d'exécution : ils s'arrêtent quand le runtime s'arrête. Pour un travail qui doit continuer après le chat, Aristra Code enregistre plutôt une tâche planifiée, et vous demande d'abord votre accord.
+
+## Tâches planifiées
+
+Une tâche planifiée exécute un prompt dans un dossier à heures fixes (une fois, toutes les heures, tous les jours, en semaine ou toutes les semaines, à l'heure de votre ordinateur) : un résumé matinal des pull requests ouvertes, une vérification hebdomadaire des dépendances. Les tâches sont enregistrées sur votre ordinateur, s'y exécutent et sont gratuites. Chaque exécution est un chat à part (ou un nouveau message dans le chat d'où vient la tâche, si vous l'avez demandé), listé dans l'**Inbox** de l'onglet Code avec des points pour les non lus, et ses demandes d'approbation attendent 2 heures.
+
+Il y a trois façons d'en créer une :
+
+- **Demandez-le dans un chat** : « tous les jours de semaine à 9 h, vérifie le build et dis-moi ce qui échoue ». Aristra Code vous montre la tâche avant de l'enregistrer : son calendrier, son prompt, le dossier, le modèle et le mode d'autorisation. Il demande dans tous les modes d'autorisation, parce qu'une tâche continue de s'exécuter après le chat. La tâche reprend le dossier, le modèle et le mode du chat ; Aristra Code ne peut pas en choisir d'autres.
+- **Dans Aristra Desktop** : Chats & tasks, **New** › **Scheduled task**, ou ⌘K › **New scheduled task**.
+- **Dans un terminal** :
+
+```sh
+aristra tasks add "Check the build and report what fails" --every weekday --at 09:00
+aristra tasks add "Summarize last week's commits" --every monday --at 08:30 --name "Weekly notes"
+aristra tasks add "Remind me to send the report" --once "2026-03-01 08:00"
+aristra tasks                      # list them, with each one's next run and last run
+aristra tasks pause <id>           # also: resume, run (once, now), remove
+```
+
+Dans l'app de terminal, `/schedule` les liste et `/schedule pause|resume|run|remove <number>` en modifie une.
+
+Ce qu'une exécution peut faire et ne peut pas faire :
+
+- Chaque exécution est un nouveau chat qui n'a pas vu le chat dans lequel la tâche a été créée : le prompt doit donc se suffire à lui-même, sauf si vous avez demandé que les exécutions reviennent dans ce chat (ou choisi un chat sous **Each run** dans Aristra Desktop). Chaque exécution est alors un nouveau message dans ce chat.
+- Une exécution ne peut pas vous poser de question, et elle ne peut pas planifier de tâches.
+- Une exécution qui n'a rien de nouveau à signaler le dit discrètement : elle est conservée dans la liste de la tâche, déjà lue, et vous ne recevez pas de notification. Une exécution qui a échoué vous prévient toujours, avec la raison (par exemple, plus de solde). Après trois exécutions échouées d'affilée, la tâche est mise en pause ; reprenez-la une fois la cause corrigée.
+- Les exécutions manquées pendant que l'ordinateur était en veille ou éteint sont rattrapées par une seule exécution à son retour, ou ignorées si vous l'avez choisi pour la tâche.
+
+Les tâches planifiées s'exécutent à l'heure, toutes fenêtres fermées, quand le service en arrière-plan est activé. Sans lui, une tâche s'exécute la prochaine fois qu'Aristra Code tourne. Une exécution en retard de plus de deux minutes compte comme manquée : une exécution la rattrape, ou elle est ignorée si vous l'avez choisi. Les tâches s'exécutent tant que cet ordinateur est connecté à Aristra. Aristra vous le signale une fois, la première fois que vous avez une tâche alors que le service est désactivé.
+
+Avec un [forfait](/fr/account/plans), une tâche peut plutôt s'exécuter dans le cloud d'Aristra, avec votre ordinateur éteint. Consultez [Tâches planifiées](/fr/scheduled-tasks).
+
+## Le service en arrière-plan
+
+```sh
+aristra service install     # keep Aristra Code running, now and at every login
+aristra service status
+aristra service uninstall
+```
+
+Sous macOS, c'est un agent launchd ; sous Linux, une unité utilisateur systemd. Il suit les mises à jour. Dans Aristra Desktop, Settings › General › **Keep Aristra running in the background** installe le même service. Sur un serveur Linux où personne n'est connecté, lancez `loginctl enable-linger $USER`.
+
+Sans le service, le runtime démarre quand une surface en a besoin et s'arrête après 10 minutes sans rien de connecté ni rien en cours (`runtime.idleExitMinutes`). Un tour, une commande en arrière-plan ou une approbation en attente le maintient en marche.
+
+## Notifications
+
+| Surface connectée | Qui notifie |
+|---|---|
+| Le terminal | Le terminal, dans iTerm2, kitty et Ghostty, et avec la sonnerie dans le Terminal d'Apple. `ARISTRA_NO_NOTIFY=1` le désactive |
+| Aristra Desktop | L'app |
+| Aucune | Aristra Code, avec une notification système. `runtime.notifications: false` la désactive |
+
+Vous êtes notifié quand une approbation attend, quand une exécution planifiée se termine, et quand une modification arrive depuis votre téléphone ou le web. Aristra Code peut aussi vous envoyer lui-même une notification, par exemple quand une longue tâche se termine pendant votre absence. Il n'en envoie pas pendant que vous êtes devant votre ordinateur à utiliser Aristra.

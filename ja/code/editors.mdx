@@ -1,0 +1,59 @@
+---
+title: "エディター"
+description: "Agent Client Protocol を通じて、Zed などのエディターの中で Aristra Code を使います。リンクから開くこともできます。"
+---
+
+## Zed とその他の ACP 対応エディター
+
+`aristra acp` は、[Agent Client Protocol](https://agentclientprotocol.com) でエディターに機能を提供します。起動はエディターが行います。
+
+Zed では、設定に Aristra をエージェントサーバーとして追加します。
+
+```json
+{
+  "agent_servers": {
+    "Aristra": { "type": "custom", "command": "aristra", "args": ["acp"] }
+  }
+}
+```
+
+次に、Zed のエージェントパネルから Aristra のスレッドを始めます。このコンピューターがまだ Aristra にサインインしていない場合は、Zed からサインインを求められ、ブラウザーで Aristra のサインインページが開きます。
+
+エディターのスレッドは、このコンピューター上の通常の Aristra Code のチャットです。`aristra sessions` で一覧表示でき（そのフォルダーで実行するか、`--all` を付けます）、Aristra Desktop にも表示され、承認にはどのサーフェスからでも応答できます。
+
+| エディターでの操作 | 起きること |
+|---|---|
+| 新しいスレッド | エディターのフォルダーで、既定のモデルとモードを使う新しいチャットが始まります。フォルダーは、確認なしでそのチャットについて信頼されます |
+| モードメニュー | Manual、Accept edits、Plan、Auto（設定で Auto をオフにしていない場合）、Read only。他の場所で選んだモードもエディターに反映されます |
+| プロンプト | 1 つのターンになります。リンクしたファイルと画像は添付され、貼り付けたリソースは引用されます |
+| スレッド | 返信と推論がストリーミング表示されます。各ステップは、コマンド、差分、出力を含むツールの呼び出しとして表示されます |
+| 権限のリクエスト | 各承認で、Yes、より広く許可する回答（このチャットについて、またはルールとして保存）、No が表示されます。質問の場合は選択肢が表示されます |
+| 停止 | ターンを停止します |
+| 古いスレッドを開く | チャットの履歴を再生します |
+
+Aristra Code は、エディターのファイルシステムやターミナルではなく独自のツール（オンにした場合は独自のサンドボックスも）を使い、エディターの MCP サーバーではなく、設定にある独自の MCP サーバーを使います。
+
+<Tip>
+エディターのチャットを自分のチャットと分けておきたい場合（テスト用のアカウントなど）は、エージェントサーバーに `"env": {"ARISTRA_HOME": "/path/to/home"}` を追加します。
+</Tip>
+
+## Aristra Desktop からエディターを開く
+
+Aristra Desktop の **Open in** ボタンを使うと、チャットのフォルダーを VS Code、Cursor、Zed、Windsurf、Xcode のうちインストールされているもので開けます（Xcode ではフォルダーのプロジェクトが開きます）。**Review** では、変更された各ファイルを、最初の変更箇所で VS Code、Cursor、Zed、Windsurf に開けます。
+
+## ターミナルを開くリンク
+
+`aristra-cli://open` リンクを開くと、フォルダーで Aristra Code が起動したターミナルが開き、入力欄にプロンプトが入った状態になります。
+
+```text
+aristra-cli://open?cwd=/Users/you/code/site&q=Review%20the%20open%20issues
+aristra-cli://open?repo=acme/site&q=Fix%20the%20failing%20build
+```
+
+| パラメーター | 意味 |
+|---|---|
+| `cwd` | フォルダー。絶対パスで指定します |
+| `repo` | `cwd` の代わりに指定する GitHub の `owner/repo`。最後に使ったクローンが開き、なければホームフォルダーが開きます |
+| `q` | プロンプト。最大 5,000 文字です。入力欄に入れられ、Enter キーを押すまで送信されません |
+
+フォルダーを信頼するかどうかの確認は、他のフォルダーと同じように行われます。Mac と Linux では、Aristra Code を対話的に実行したときにリンクハンドラーが登録されます（ハンドラーがない場合や古いコピーを指している場合は再登録されます）。オフにするには、`disableDeepLinkRegistration` を `"disable"` に設定します。

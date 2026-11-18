@@ -1,0 +1,45 @@
+---
+title: "Uso y precios"
+description: "Consulta en qué se fue tu dinero, por modelo y por herramienta, cuánto cuesta en dólares cada modelo y cada herramienta alojada, y elige la búsqueda web que usa Aristra."
+---
+
+**Usage**, en `app.aristralabs.com/account/usage`, muestra en qué se fue tu dinero. En la Aristra CLI, `/usage` muestra tu saldo y el chat en el que estás, y Aristra Desktop tiene **Settings › Usage**.
+
+## Qué muestra la página
+
+| | |
+|---|---|
+| **Spent** | El total del periodo (7, 30 o 90 días), y cuánto salió de tu uso mensual, de tu saldo de recargas y del crédito inicial |
+| **Spending over time** | Una columna por día, dividida en modelos, herramientas y la computadora en la nube. Señala un día para ver sus cifras, o abre **Show as a table** |
+| **By model** | Cada modelo: solicitudes, tokens de entrada, tokens leídos de la caché y escritos en ella, tokens de salida y costo |
+| **Tools and cloud** | Cada herramienta alojada y tu computadora en la nube: cuánto usaste y el costo. Una búsqueda gratuita indica Free |
+| **Recent tool calls** | Las últimas llamadas, con lo que costó cada una |
+| **Download CSV** | Todas las filas de uso del periodo, con su costo exacto en dólares estadounidenses |
+
+Los totales se redondean al centavo. Un cargo individual de menos de un centavo aparece como `<$0.01` en un total y con cuatro decimales en su propia línea ($0.0053), así que nada que te haya costado dinero aparece como $0.00.
+
+## Precios de los modelos
+
+Cada modelo se cobra al precio de su propio proveedor: Aristra no le añade nada. El precio de cada modelo por un millón de tokens de entrada y de salida está en [Models and prices](https://app.aristralabs.com/models). La entrada leída de la caché cuesta menos. Algunos modelos cuestan más con un prompt muy largo, solo en esa llamada; la página indica a partir de cuántos tokens.
+
+## Precios de las herramientas
+
+| Herramienta | Precio |
+|---|---|
+| Búsqueda web (Brave; también búsqueda de noticias, imágenes y videos) | Sin cargo en los chats en la web y en tu teléfono; $0.0075 por búsqueda desde Aristra Desktop, la CLI o una computadora en la nube |
+| Comandos de shell en el sandbox y el navegador en la nube | $0.003 por minuto. Ejecutar código con la herramienta de código de Aristra es gratis |
+| Lectura de una página web | $0.01 por página |
+| Generación de imágenes | 1.5 veces el precio del propio modelo de imágenes |
+| Transcripción | $0.001 por minuto de audio |
+| Lectura de una página de documento | $0.006 por página, $0.015 con visión |
+| Computadora en la nube | De $0.0122 a $0.0881 por hora despierta, según el tamaño |
+| Disco de la computadora en la nube | $0.18 al mes por cada GB, despierta o dormida |
+| Llamada a un conector | Todavía no se cobra |
+
+La lista actualizada está en la página Usage. Las herramientas que se ejecutan en tu propia computadora (archivos, el shell, git, tus servidores MCP) no cuestan nada, y tampoco tu memoria: guardarla, importarla y buscar en ella, y que Aristra aprenda de tus chats. Un chat que usa la memoria solo paga sus propios tokens. Una búsqueda o una lectura de página que falla no cuesta nada; un comando del sandbox se cobra por el tiempo que se ejecutó, aunque falle.
+
+## La búsqueda que usa Aristra
+
+Aristra busca en la web con Brave. Una búsqueda en un chat en la web o en tu teléfono no cuesta nada; una búsqueda desde Aristra Desktop, la CLI o una computadora en la nube cuesta $0.0075, de tu saldo. Cuando allí se agota tu saldo, las búsquedas pasan a la búsqueda pública gratuita de Exa, Parallel, Firecrawl o Keenable, enviando solo las palabras de búsqueda, salvo que lo desactives (`web.keylessFallback`).
+
+En tu propia computadora también puedes configurar **tu propia clave de Brave** (Aristra Desktop: **Settings › Tools & keys**). Tu clave pasa entonces siempre por delante y no cuesta nada en Aristra. Si esa clave no se puede leer, Aristra lo indica: no cambia sin avisar a una búsqueda pagada con tu saldo. Elimina la clave en Settings para volver a la búsqueda de Aristra.

@@ -1,0 +1,96 @@
+---
+title: "Ordinateur cloud"
+description: "Votre propre ordinateur dans Aristra Cloud, avec un forfait ou avec des recharges : un vrai shell, des fichiers qui restent, des outils que vous installez. Il se met en veille quand il est inactif et se réveille pour votre message. Le temps d'activité et son disque sont payés depuis votre solde."
+---
+
+Un ordinateur cloud est votre propre machine Linux dans le cloud d'Aristra, qui exécute le même agent Aristra Code que votre terminal et Aristra Desktop. Les chats qui s'y trouvent fonctionnent comme les chats sur votre Mac : un vrai shell, des fichiers qui persistent, des outils que vous installez, de longues tâches laissées en cours. Il est toujours joignable depuis le web et votre téléphone, et depuis Telegram avec un forfait, parce qu'il se réveille quand vous lui envoyez quelque chose.
+
+<Note>
+Un ordinateur cloud est différent d'un [chat cloud](/fr/code/cloud-chats). Un chat cloud s'exécute sur l'agent cloud partagé d'Aristra et ne conserve rien d'un chat à l'autre, à part votre compte. Un ordinateur cloud est une machine à vous, avec un disque qui conserve vos fichiers et les outils installés.
+</Note>
+
+## En créer un
+
+Un ordinateur cloud fonctionne sur votre solde : avec un [forfait](/fr/account/plans), ou avec des [recharges](/fr/account/credits) sans forfait. Avec un forfait, n'importe quel solde supérieur à zéro suffit pour en créer un. Sans forfait, il vous faut au moins $2 provenant de recharges ; le crédit de bienvenue ne compte pas. Votre forfait fixe la plus grande taille et le plus grand disque possibles ; sans forfait, jusqu'à Large avec un disque de 100 Go.
+
+1. Ouvrez **Cloud computer** dans votre compte, à `app.aristralabs.com/account/computer`. C'est le seul endroit où le créer, l'utiliser et le gérer.
+2. Choisissez une taille, un disque et l'endroit où il conserve ses données (voir plus bas), puis choisissez **Create cloud computer**.
+3. Il est prêt en une minute environ, et la page affiche chaque étape. Démarrez un chat dessus depuis sa page, ou depuis **Where it runs** sur un nouveau chat.
+
+| Taille | Machine | Pendant l'activité | Disponible |
+|---|---|---|---|
+| Small | 2 CPU partagés, 1 Go de mémoire | $0.0122 l'heure | Tous les forfaits, et avec des recharges |
+| Medium (par défaut) | 4 CPU partagés, 2 Go de mémoire | $0.0243 l'heure | Tous les forfaits, et avec des recharges |
+| Large | 8 CPU partagés, 4 Go de mémoire | $0.0487 l'heure | Tous les forfaits, et avec des recharges |
+| Extra large | 8 CPU partagés, 8 Go de mémoire | $0.0881 l'heure | Max |
+
+Medium suffit pour la plupart des travaux d'agent. Small convient aux messages, aux scripts et aux tâches planifiées ; les builds et un navigateur demandent Large. Une nouvelle taille prend effet immédiatement s'il est actif : l'ordinateur redémarre en quelques secondes avec tout ce qui se trouve sur son disque. S'il est en veille, il se réveille avec la nouvelle taille.
+
+**Le disque** se choisit à la création, à partir de 5 Go (10 Go si vous ne changez rien), par paliers de 5 Go, et peut grandir jusqu'à la limite de votre forfait : 25 Go avec Plus, 100 Go avec Pro et Max, et 100 Go avec des recharges. Il ne rétrécit jamais. Il coûte $0.18 par mois et par Go, que l'ordinateur soit actif ou en veille, parce qu'il conserve vos données.
+
+Les appels de modèles et les outils sont facturés comme partout ailleurs dans Aristra.
+
+## Où il conserve ses données
+
+Vous choisissez à la création, et vous pouvez changer sur sa page. Un changement s'applique aux nouveaux messages.
+
+| | Saved to your account (par défaut) | Kept on the computer only |
+|---|---|---|
+| Chats | Sur l'ordinateur, et chaque tour est aussi enregistré dans votre compte | Sur l'ordinateur uniquement |
+| Mémoire | La mémoire de votre compte, partagée avec votre Mac et le site web | Sa propre mémoire, dans des fichiers sur son disque |
+| Fichiers, Craft et connecteurs de votre compte | Vos fichiers ; Craft et les connecteurs avec un forfait | Non utilisés ; les outils que vous y installez fonctionnent |
+| Sur le web et le téléphone | Votre liste de chats les affiche, même pendant sa veille | Lus depuis l'ordinateur quand vous les ouvrez, ce qui le réveille |
+| Prompts qu'il planifie lui-même | Conservés sur l'ordinateur ; réponses enregistrées dans votre compte | Conservés sur l'ordinateur ; les réponses y restent |
+| Tâches planifiées depuis le site web | La tâche est dans votre compte ; le chat que démarre chaque exécution y est aussi enregistré | La tâche est dans votre compte ; le chat que démarre chaque exécution reste sur l'ordinateur |
+| Ses propres tâches planifiées, sur sa page | Conservées sur l'ordinateur ; le chat que démarre chaque exécution est enregistré dans votre compte | Conservées sur l'ordinateur ; le chat que démarre chaque exécution y reste |
+| Telegram | Chaque chat Telegram a un chat sur l'ordinateur, enregistré dans votre compte | Chaque chat Telegram a un chat sur l'ordinateur, conservé uniquement là |
+| Si vous le supprimez | Les chats et la mémoire restent dans votre compte | Tout ce qu'il contient disparaît |
+
+Avec **Kept on the computer only**, Aristra transmet vos messages et ses réponses sans rien en conserver : ni messages enregistrés, ni titres, ni entrées de recherche. Un message n'attend sur les serveurs d'Aristra que jusqu'à ce que l'ordinateur le récupère, et une réponse au plus une heure après sa fin, pour qu'une page ouverte puisse se mettre à jour. Son disque est la seule copie : utilisez donc **Export chats and memory** sur sa page avant de le supprimer.
+
+Dans les deux modes, les serveurs d'Aristra gèrent votre connexion, votre solde, les appels aux modèles d'Aristra (comptabilisés pour la facturation, leur contenu n'étant pas conservé), la recherche web et les autres outils intégrés, Telegram, ainsi que le démarrage et l'arrêt de l'ordinateur. Une tâche planifiée que vous créez sur le site web vit dans votre compte, parce que c'est le site web qui l'exécute.
+
+Quand vous passez à **Kept on the computer only**, la page propose de supprimer les copies de ses chats déjà présentes dans votre compte. Quand vous revenez en arrière, elle propose d'importer les chats qui se trouvent sur l'ordinateur.
+
+## Veille et réveil
+
+- **Il se met en veille après deux minutes d'inactivité** : aucune réponse en cours, aucune approbation en attente, aucune commande en arrière-plan, rien de votre part. Tout ce qu'il ne peut pas vérifier compte comme une activité : il ne se met donc jamais en veille au milieu d'un travail.
+- **Il se réveille quand vous lui envoyez quelque chose** : un message depuis le web, votre téléphone ou Telegram, ou une approbation. Un message envoyé pendant sa veille attend et reçoit une réponse une fois l'ordinateur réveillé, généralement en quelques secondes. Small, Medium et Large gardent en mémoire ce qui tournait pendant la veille ; Extra large s'éteint à la place et redémarre à neuf, ce qui rend son réveil un peu plus long. Vos fichiers et vos chats sont sur son disque dans tous les cas.
+- **Les prompts planifiés s'exécutent quand même à l'heure.** L'ordinateur les conserve sur son disque et n'indique à Aristra que l'heure du prochain, pour qu'Aristra puisse le démarrer juste avant. Aristra ne sait jamais ce que disent les prompts.
+- Pendant sa veille, vous ne payez que son disque.
+- S'il s'arrête pour une autre raison (un plantage, une maintenance de son hôte), il redémarre de lui-même, ou bien son prochain prompt planifié ou votre prochain message le démarre.
+
+## L'utiliser de partout
+
+- **Le web et votre téléphone :** sur un nouveau chat, **Where it runs** liste Aristra Cloud, votre ordinateur cloud et vos autres ordinateurs ; choisissez l'ordinateur cloud pour ouvrir sa page dans votre compte, et envoyez-y un message. Avec **Saved to your account**, le chat s'ouvre sur la page de chat habituelle ; sinon, sur la page propre à l'ordinateur cloud.
+- **Telegram** (avec un forfait) : activez **Telegram messages go to this computer** sur sa page. Votre chat privé avec Aristra s'exécute alors dessus. Envoyez `/new` pour y démarrer un nouveau chat.
+- **Les tâches planifiées** (avec un forfait) : une tâche réglée pour s'exécuter sur votre ordinateur cloud y démarre un chat avec son prompt à chaque exécution, en le réveillant s'il est en veille. L'historique de la tâche indique que chaque exécution a démarré ; la réponse se trouve dans le chat.
+- **Ses propres tâches planifiées :** sous **Scheduled tasks** sur sa page, donnez-lui un prompt à exécuter tous les jours, en semaine, un jour par semaine, toutes les heures ou une seule fois, à des heures de votre propre fuseau horaire. L'ordinateur les conserve, se réveille pour chacune et l'exécute dans un nouveau chat, que **Read it** ouvre. Elles ne nécessitent pas de forfait : chaque exécution est payée depuis votre solde, comme ses chats. Consulter la liste pendant sa veille le réveille un instant.
+- **Aristra Desktop :** les chats d'un ordinateur cloud qui enregistre dans votre compte apparaissent dans l'onglet Code sous **On other devices**. Pour y démarrer un chat, utilisez sa page sur le web.
+
+## Son propre modèle
+
+Par défaut, un ordinateur cloud utilise les modèles d'Aristra, payés depuis votre solde. Il peut aussi fonctionner avec **votre forfait ChatGPT** :
+
+1. Sur la page de l'ordinateur cloud, sous **Your own model**, choisissez **Set up…**.
+2. L'ordinateur lance sa propre connexion et la page affiche un code. Ouvrez la page d'OpenAI et saisissez le code.
+3. L'ordinateur termine lui-même la connexion et la conserve sur son propre disque.
+
+Les serveurs d'Aristra transmettent le code et ne voient jamais la connexion. Les modèles d'Aristra restent disponibles sur votre solde.
+
+## Le payer
+
+- **Pendant l'activité**, le temps d'exécution est facturé à la seconde sur la consommation mensuelle de votre forfait si vous en avez un, puis sur votre solde rechargé.
+- **Le disque** est facturé que l'ordinateur soit actif ou en veille.
+- Quand votre solde est bas, vous recevez un e-mail (au plus une fois par jour).
+- **Avec un forfait, à solde nul, il se met en veille.** Rien de ce qu'il contient n'est supprimé tant que vous avez un forfait. Il se réveille de lui-même pour votre prochain message une fois votre solde rétabli, par une [recharge](/fr/account/credits) ou le renouvellement mensuel de votre forfait. Le coût du disque pour cette période est prélevé sur le prochain argent qui arrive.
+- **Sans forfait, quand votre solde rechargé est épuisé**, il est arrêté, et son disque est conservé 30 jours. Vous recevez un e-mail une semaine avant la suppression du disque. Rechargez pendant cette période pour le faire revenir avec tout ce qu'il contient, ou exportez d'abord ses données.
+- **Quand votre forfait prend fin**, il continue de fonctionner sur votre solde rechargé, et un Extra large passe à Large. Quand il ne reste plus rien, il est arrêté et son disque est conservé 30 jours de la même façon ; renouvelez ou rechargez pendant cette période pour le faire revenir.
+- **Si vous passez à un forfait avec une limite plus basse**, sa taille descend à la plus grande taille de ce forfait lors de votre renouvellement. Son disque reste tel quel et ne peut plus grandir.
+
+## Sécurité
+
+- Chaque ordinateur cloud est une machine à part sur son propre réseau privé : il ne peut joindre ni les machines des autres utilisateurs ni les serveurs d'Aristra, sauf par l'API publique, comme votre Mac.
+- Aristra Code y tourne en tant qu'utilisateur non privilégié, sans `sudo`. Installez les outils dans votre dossier personnel (`pip install --user`, `npm install -g` ou `~/bin`).
+- Rien n'y écoute : il se connecte en sortie à votre compte en HTTPS, authentifié par sa propre clé d'appareil, comme votre Mac.
+- Il ne détient aucun identifiant d'Aristra. Il se connecte avec un jeton à usage unique lors de sa création, et avec un nouveau jeton s'il a été en veille pendant des semaines ou s'il passe sur un autre hôte.

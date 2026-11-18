@@ -1,0 +1,134 @@
+---
+title: "设置参考"
+description: "Aristra Code设置文件中的每个键，以及它的默认值和作用。"
+---
+
+设置保存在`~/.aristra/settings.json`（你自己的）、`<folder>/.aristra/settings.json`（项目的）和`<folder>/.aristra/settings.local.json`（你自己的，针对该项目）中。各层如何合并，以及哪些键仓库无法设置，参见[设置](/zh/code/configure/settings)。标记为*仅限你自己的文件*的键只从你自己的文件中读取。
+
+## 模型
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `model.source` | `aristra` | 新对话模型的来源：`aristra`、`chatgpt`、某个服务商、`ollama`、`lmstudio`、`custom` |
+| `model.model` | 套餐的默认模型 | 模型的ID |
+| `model.effort` | 模型自己的默认值 | 推理级别，适用于支持推理级别的模型 |
+| `model.fallback` | `[]` | 最多10个`{source, model, effort}`，在调用失败时按顺序尝试。*仅限你自己的文件* |
+| `autoCompactWindow` | 模型的窗口 | 上下文用到多满时开始总结：`"auto"`或100,000到1,000,000个token |
+| `modelSettings.<model>.autoCompactWindow` | 无 | 同上，针对某一个模型。`/autocompact`会写入它 |
+| `auxiliary.title`, `auxiliary.summary`, `auxiliary.memory` | 套餐的后台模型，否则为对话的模型 | 来自你自己的某个来源（不能是`aristra`）的`{source, model}`，用于标题、摘要和记忆兜底。`auxiliary.title: "off"`会保留你消息的开头几个字。*仅限你自己的文件* |
+
+## 权限
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `permissions.defaultMode` | `default` | 新对话开始时的模式：`default`（Manual）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`、`read_only` |
+| `permissions.allow`, `ask`, `deny` | `[]` | [权限规则](/zh/code/configure/permissions) |
+| `permissions.additionalDirectories` | `[]` | 对话可以工作的更多文件夹 |
+| `permissions.trustedMcpServers` | `[]` | 工具无需询问即可运行的MCP服务器。*仅限你自己的文件* |
+| `permissions.disableAutoMode` | 无 | `"disable"`会关闭Auto模式 |
+| `skipDangerousModePermissionPrompt` | `false` | 在你接受Bypass permissions警告时设置。不会从项目的`settings.json`中读取 |
+| `skipAutoPermissionPrompt` | `false` | 你已选择启用Auto模式；此时Plan模式会保留它的审核模型。不会从项目的`settings.json`中读取 |
+| `useAutoModeDuringPlan` | `true` | `false`：即使你已选择启用Auto，Plan模式也会询问你。不会从项目的`settings.json`中读取 |
+| `approvals.timeoutMinutes` | `30` | 审批在被拒绝之前等待多长时间（1到1440） |
+| `projects["<folder>"].trusted` | 无 | 某个文件夹（及其子文件夹）是否受信任。由信任问题设置。*仅限你自己的文件* |
+| `projects["<folder>"].permissions` | 无 | 针对某个文件夹的规则。*仅限你自己的文件* |
+| `projects["<folder>"].mcpServers`, `.disabledMcpServers`, `.trustedMcpServers` | 无 | 只用于该文件夹的MCP服务器、在该文件夹中关闭的服务器，或在该文件夹中受信任的服务器。*仅限你自己的文件* |
+
+## Auto模式的审核模型
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `review.enabled` | `true` | `false`：在Auto模式下，原本由审核模型决定的操作改为询问你。*仅限你自己的文件* |
+| `review.policy` | `""` | 你给审核模型的自定义指导，最多8,000个字符。*仅限你自己的文件* |
+| `review.model` | 无 | 用于使用你自己的密钥或本地模型的对话的审核模型。*仅限你自己的文件* |
+| `autoMode` | 无 | 给审核模型的`allow`、`soft_deny`和`environment`列表，与Claude Code的相同。不会从项目的`settings.json`中读取 |
+
+## 沙箱
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `sandbox.enabled` | `false` | 命令在[沙箱](/zh/code/configure/sandbox)中运行（`/sandbox`） |
+| `sandbox.failIfUnavailable` | `false` | 与`enabled`一起使用：沙箱无法启动时，这一轮不会开始，而不是在沙箱之外运行命令 |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | 沙箱中的命令无需询问即可运行，除非有规则涵盖它 |
+| `sandbox.allowUnsandboxedCommands` | `true` | Aristra Code是否可以请求在沙箱之外运行命令 |
+| `sandbox.excludedCommands` | `[]` | 总是在沙箱之外运行的命令，仍会经过检查 |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | 更多要开放或关闭的路径 |
+| `sandbox.filesystem.allowGitConfig` | `false` | 允许命令写入`.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | 命令无需询问即可访问的主机 |
+| `sandbox.network.allowLocalBinding` | `false` | 允许命令监听和访问`localhost` |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | 无 | 你自己在`localhost`上的代理，代替沙箱的代理 |
+| `sandbox.network.allowUnixSockets`, `allowAllUnixSockets` | `[]`, `false` | `allowUnixSockets`：命令可以连接的套接字路径（macOS）。`allowAllUnixSockets`：所有Unix套接字（macOS和Linux） |
+| `sandbox.ignoreViolations` | `{}` | 按命令列出的、不向智能体报告的拒绝 |
+| `sandbox.enableWeakerNestedSandbox` | `false` | 用于无法挂载`/proc`的容器内（Linux） |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | 为位于使用自有证书颁发机构的代理之后的`gh`等Go工具，开放macOS的证书服务 |
+
+## 扩展
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `mcp.servers` | `{}` | 你的[MCP服务器](/zh/code/extend/mcp)。*仅限你自己的文件* |
+| `mcp.toolSearch` | `true` | `false`会在每次请求中发送MCP工具，而不是放在工具搜索之后。*仅限你自己的文件* |
+| `enabledMcpjsonServers`, `disabledMcpjsonServers` | `[]` | 项目中已批准或已拒绝的[`.mcp.json`服务器](/zh/code/extend/mcp)。文件夹自己的批准在它受信任后才生效 |
+| `enableAllProjectMcpServers` | `false` | 批准项目`.mcp.json`中的所有服务器 |
+| `hooks` | `{}` | 你的[钩子](/zh/code/extend/hooks)，按事件组织 |
+| `disableAllHooks` | `false` | 关闭除托管策略的钩子之外的所有钩子 |
+| `allowedHttpHookUrls` | 任意 | HTTP钩子可以发往哪里（`*`为通配符；`[]`表示不允许任何地址）。所有设置文件中的列表会合并计算 |
+| `httpHookAllowedEnvVars` | 无 | HTTP钩子的请求头可以使用的变量，钩子自己的`allowedEnvVars`同样适用 |
+| `enabledPlugins` | `{}` | 开启或关闭的插件，按`plugin@marketplace`指定 |
+| `pluginConfigs` | `{}` | 每个插件的选项。只能在你自己的文件和托管策略中设置 |
+| `extraKnownMarketplaces` | `{}` | 要添加的插件市场，按名称指定，并附带它们的`source` |
+| `agent` | 无 | 新对话以哪个[自定义智能体](/zh/code/guides/subagents)身份运行 |
+| `enableWorkflows` | `true` | `false`会关闭[工作流](/zh/code/guides/subagents) |
+| `disableWorkflows` | 无 | `true`会关闭工作流 |
+| `workflowSizeGuideline` | `"medium"` | 工作流目标使用的智能体数量：`"small"`、`"medium"`、`"large"`、`"unrestricted"` |
+
+## Git
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `worktree.baseRef` | `"fresh"` | 新工作树从哪里开始：`fresh`（origin的默认分支）或`head`（当前提交） |
+| `worktree.symlinkDirectories` | 无 | 链接到新工作树而不是复制的文件夹，例如`["node_modules"]` |
+| `worktree.sparsePaths` | 无 | 新工作树只检出的路径 |
+| `includeGitInstructions` | `true` | `false`会把git指导从shell工具的说明中去掉 |
+| `prStatusFooterEnabled` | `true` | 在页脚中显示当前分支的拉取请求 |
+| `prUrlTemplate` | 无 | 让页脚中的拉取请求链接指向其他地方，可使用`{host}`、`{owner}`、`{repo}`、`{number}`和`{url}` |
+
+## 终端
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `tui` | `"default"` | 设为`"fullscreen"`使用全屏渲染器 |
+| `statusLine` | 无 | `{"type": "command", "command": "...", "padding": 1, "refreshInterval": 10}`：[你自己的状态行](/zh/code/configure/terminal) |
+| `subagentStatusLine` | 无 | `{"type": "command", "command": "..."}`：在`/tasks`中为每个正在运行的智能体显示一行 |
+| `copyOnSelect` | `true` | 在全屏模式下，松开鼠标时复制所选内容 |
+| `copyFullResponse` | `false` | `/copy`复制整条回复 |
+| `promptSuggestionEnabled` | `true` | 在回复之后建议你的下一条消息 |
+| `awaySummaryEnabled` | `true` | 在你回到的对话中留下回顾 |
+| `spinnerTipsEnabled` | `true` | 在Aristra Code工作时显示提示 |
+| `terminalProgressBarEnabled` | `true` | 在某一步运行时，在终端的标签页中显示进度条 |
+| `permissionExplainerEnabled` | `true` | 在命令的审批上按Ctrl+E解释该命令 |
+| `disableDeepLinkRegistration` | 无 | `"disable"`：不注册`aristra-cli://`链接处理程序 |
+
+## 运行时和隐私
+
+`runtime`、`approvals`、`telemetry`和`web`只从你自己的文件和托管策略中读取；项目的文件无法修改它们。`runtime.maxRunningTurns`和`runtime.notifications`只来自你自己的文件。
+
+| 键 | 默认值 | 作用 |
+|---|---|---|
+| `runtime.idleExitMinutes` | `10` | 运行时空闲多少分钟后停止（1到1440） |
+| `runtime.keepRunningAfterClientsLeave` | `true` | 所有使用端都关闭后，一轮仍继续运行 |
+| `runtime.maxRunningTurns` | 无限制 | 同时可以运行多少轮；其余的会等待 |
+| `runtime.notifications` | `true` | 当没有连接的使用端可以显示通知时，发出系统通知 |
+| `memory.enabled` | `true` | 新对话开始时开启记忆 |
+| `web.keylessFallback` | `true` | 当Aristra的搜索无法提供服务时（你的余额已用完，或服务中断），搜索会改用Exa、Parallel、Firecrawl或Keenable的免费公共搜索，只发送搜索词（这些服务可能会保留它们）。`false`会让搜索只使用你的密钥或Aristra |
+| `remoteControl.allowStart` | `false` | 允许网页版和手机在这台电脑上开始对话（需要Aristra套餐）。*仅限你自己的文件* |
+| `remoteControl.startFolders` | `[]` | 它们可以开始对话的受信任文件夹；绝不包括主文件夹、其中的隐藏文件夹或根目录。*仅限你自己的文件* |
+| `telemetry.usage` | `true` | 不含内容的使用事件 |
+| `telemetry.errors` | `true` | 错误报告 |
+| `credentials.store` | `auto` | 机密信息保存在哪里：`auto`、`keychain`、`file`。*仅限你自己的文件* |
+| `ui.theme` | `system` | Aristra Desktop的外观：`system`、`light`、`dark` |
+| `ui.notifications` | `true` | Aristra Desktop的通知 |
+
+## 仅限托管策略
+
+这些键只在[托管策略](/zh/code/configure/managed-policy)中生效：`permissions.allowManagedPermissionRulesOnly`、`permissions.disableBypassPermissionsMode`、`sandbox.network.allowManagedDomainsOnly`、`sandbox.filesystem.allowManagedReadPathsOnly`、`allowedMcpServers`、`deniedMcpServers`、`allowManagedHooksOnly`、`strictKnownMarketplaces`（或`allowedMarketplaces`）、`blockedMarketplaces`、`pluginTrustMessage`和`disableSideloadFlags`。

@@ -1,0 +1,67 @@
+---
+title: "Aristra Code的工作原理"
+sidebarTitle: "工作原理"
+description: "支撑每个使用端的Aristra Runtime、一轮会做什么，以及你的对话、设置和机密信息保存在哪里。"
+---
+
+## 一个智能体，多个使用端
+
+你输入的程序`aristra`是一个客户端。智能体本身是**Aristra Runtime**，这是你电脑上的一个后台进程，由你所有的使用端共用：终端、[Aristra Desktop](/zh/code/desktop)、[编辑器](/zh/code/editors)，以及你通过SSH访问的[远程机器](/zh/code/remote-machines)。
+
+```text
+ aristra (terminal)    Aristra Desktop    an editor (aristra acp)    aristra --remote <host>
+          \                  |                    |                         |
+           '------------ the runtime protocol on a private socket ---------'
+                                       |
+                            Aristra Runtime (one per user)
+          chats, turns, approvals, permissions, sandbox, tools, models,
+          sign-in and secrets, settings, memory, MCP servers, scheduled tasks
+                                       |
+   Out only: api.aristralabs.com, the model providers you use, model servers on
+   this computer, and the pages, MCP servers and services your chats use
+```
+
+由于它们共用一个运行时：
+
+- 在终端中开始的对话会显示在Aristra Desktop的Code标签页中，反之亦然。
+- 审批可以从任何打开的使用端回复。以最先给出的答复为准，其他使用端会看到是谁回复的。
+- 正在运行的一轮不依赖于启动它的窗口或终端。在一轮运行期间退出终端时，会询问你是否让它继续运行。
+
+运行时在某个使用端需要它时启动，空闲十分钟后自行停止。它从不在网络上监听：各个使用端通过一个只有你的用户账户才能打开的套接字访问它。
+
+## 一轮会做什么
+
+当你发送消息时，Aristra Code会循环运行，直到工作完成：
+
+1. **收集上下文**。你的消息、到目前为止的对话、你的指令文件（`AGENTS.md`和规则）、记忆，以及它可以使用的工具，都会发送给模型。
+2. **行动**。模型请求使用工具：读取文件、搜索、编辑、运行命令、获取网页、调用MCP服务器。每个请求都要经过你的[权限](/zh/code/configure/permissions)：直接运行、询问你，或被拒绝。
+3. **检查**。每个工具的结果都会返回给模型，由模型决定下一步：再调用一个工具，或者回复。
+
+你可以随时介入：发送一条消息，在下一步引导这一轮；排队一条消息，在这一轮之后发送；或者按Esc停止它。当模型的上下文快满时，长对话会被总结；参见[上下文](/zh/code/guides/context)。
+
+## 你电脑上的对话和云端对话
+
+大多数对话在你的电脑上、在你选择的文件夹中运行，并保存在这台电脑的`~/.aristra`中。有些对话则在云端运行：
+
+| | 在你的电脑上 | 在云端 |
+|---|---|---|
+| 启动方式 | `aristra`、Aristra Desktop的Code标签页 | `aristra --cloud`、网站、你的手机 |
+| 保存位置 | 这台电脑的`~/.aristra`中 | 你的Aristra账户中 |
+| 模型 | 你设置的任何来源 | Aristra的模型，从你的余额中扣费 |
+| 是否需要套餐 | 否：搭配你自己的模型时免费 | 否：从你的余额中扣费；套餐会增加每月用量。参见[套餐与定价](/zh/account/plans) |
+| 文件夹 | 它的工作文件夹 | 可选：这台电脑上的一个文件夹，它通过运行时读取和修改其中的内容 |
+
+你电脑上的对话也可以通过[Remote Control](/zh/code/remote-control)在手机和网页版上继续；工作仍然在这里运行。由Aristra云端智能体运行的对话，参见[云端对话](/zh/code/cloud-chats)。
+
+## 各种内容保存在哪里
+
+| 内容 | 位置 |
+|---|---|
+| 程序 | `~/.local/bin/aristra`，指向`~/.local/share/aristra/versions/<version>/`的链接 |
+| 你的数据：对话、设置、日志、机密信息 | `~/.aristra/`（或`ARISTRA_HOME`） |
+| 你的设置 | `~/.aristra/settings.json` |
+| 项目的设置 | `<folder>/.aristra/settings.json`和`settings.local.json` |
+| 项目的指令 | 从仓库根目录往下每个文件夹中的`AGENTS.md`（或`.aristra/AGENTS.md`）、`.aristra/rules/*.md`，以及你私有的`AGENTS.local.md`；没有`AGENTS.md`的地方则使用Claude Code的`CLAUDE.md`文件 |
+| 运行时的日志 | `~/.aristra/logs/runtime.log`（`aristra logs`） |
+
+登录令牌和服务商密钥等机密信息，会用保存在你的登录钥匙串（或你的Linux密钥环；两者都不响应时，则是一个只有你能读取的文件）中的密钥加密。你电脑的登录与一个设备密钥绑定，在带有Secure Enclave的Mac上，该密钥就保存在Secure Enclave中。参见[安全与隐私](/zh/code/security)。

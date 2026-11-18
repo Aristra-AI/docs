@@ -1,0 +1,73 @@
+---
+title: "L'onglet Code d'Aristra Desktop"
+sidebarTitle: "Aristra Desktop"
+description: "Utilisez Aristra Code dans l'onglet Code d'Aristra Desktop pour Mac : les chats regroupés par dossier, avec un terminal, un navigateur, les modifications et la pull request à côté du chat."
+---
+
+L'onglet **Code** d'[Aristra Desktop](/fr/surfaces/desktop), c'est Aristra Code sur votre Mac : vos dossiers avec leurs chats, et tout ce que vous utilisez pour coder, à côté du chat. Il utilise le même runtime et le même dossier `~/.aristra` que le terminal : un chat démarré dans l'un apparaît donc dans l'autre.
+
+## Démarrer un chat dans l'onglet Code
+
+Sous la zone de message d'un nouveau chat dans l'onglet Code :
+
+| Choix | Ce qu'il fait |
+|---|---|
+| **Folder** | Le dossier dans lequel le chat travaille. Un nouveau chat démarre dans le dernier dossier utilisé. **Add folder…** en ajoute un |
+| **Where it runs** | **On this Mac** : enregistré uniquement ici, avec n'importe quel modèle que vous avez configuré. **In the cloud**, payé depuis votre [solde](/fr/account/credits) ou par un [forfait](/fr/account/plans) : enregistré dans votre compte Aristra, également sur le web et votre téléphone, pendant que le dossier reste sur ce Mac |
+| **Project** | Un projet Aristra : ses instructions et sa mémoire. Un chat de projet s'exécute dans le cloud, dans le dossier principal du projet quand celui-ci en a un sur ce Mac |
+| **Permissions** | Pour un chat sur ce Mac : **Manual** (toujours demander avant de faire des modifications), **Accept edits**, **Plan** ou **Auto** (Aristra prend les décisions d'autorisation). Vous pouvez changer à tout moment dans le chat. Un chat dans le cloud utilise Manual ou Auto, comme sur le site web |
+| **+ menu** | Pour un chat sur ce Mac : **Work in a new worktree** (dans un dossier git) donne au chat son propre worktree et sa propre branche, pour que le dossier reste tel quel. Vos agents personnalisés apparaissent sous la forme **Run as …**, et **Share my profile** et **Permissions and tools** se trouvent aussi ici |
+
+Sous la zone, un nouveau chat affiche la branche du dossier et le nombre de fichiers modifiés ; son menu ouvre Review changes ou change de branche. L'accueil de l'onglet Code affiche vos chats récents, vos pull requests, le travail du mois et l'activité.
+
+## À côté du chat
+
+L'en-tête d'un chat Code contient les panneaux que vous utilisez pour coder. Un seul panneau latéral s'affiche à la fois, et le terminal s'ouvre sous le chat. Terminal, Review, Open in et Pull request concernent les chats sur ce Mac.
+
+| Panneau | S'ouvre avec | Ce qu'il affiche |
+|---|---|---|
+| **Terminal** | ⌘J | Un vrai shell dans le dossier du chat (celui de son worktree, pour un chat qui en a un). Chaque chat conserve ses propres shells, dans des onglets, qui continuent de tourner quand le panneau est masqué |
+| **Review** | ⌥⌘B | Les modifications du dossier : non commitées, toutes les modifications par rapport à la branche par défaut ou à une autre branche, un commit, ou les modifications du dernier tour. Chaque fichier s'ouvre dans votre éditeur à sa première modification |
+| **Browser** | ⇧⌘B, ou un lien dans une réponse | Un vrai navigateur avec des onglets. L'agent peut aussi l'utiliser, avec votre consentement site par site |
+| **Files** | L'en-tête, ou une carte de fichier dans le chat | Les fichiers du chat, avec des aperçus du texte, des PDF, des images et des fichiers Office |
+| **Pull request** | Le bouton **PR #N** de l'en-tête | La pull request du chat : statut, vérifications, fichiers, commits et conversation, avec Merge, Approve et la relance des vérifications |
+| **Open in** | Le bouton d'éditeur de l'en-tête | Le dossier dans VS Code, Cursor, Zed, Windsurf ou Xcode (ceux que vous avez installés), le Finder, ou le panneau Terminal du chat |
+
+Sur une branche sans pull request, l'en-tête propose **Create PR**, **Create draft PR** ou **Manually create PR**. Dans le panneau Pull request, sur votre propre pull request ouverte, l'interrupteur **Auto-fix CI & address comments** réveille le chat quand des vérifications échouent, que des conflits apparaissent ou que des relecteurs commentent. Consultez [Git et pull requests](/fr/code/guides/git).
+
+## Dans le chat
+
+- **Les étapes** se replient en un résumé d'une ligne qui se déplie sur chaque commande, modification et lecture. Les modifications affichent leurs diffs.
+- **Les demandes d'approbation** apparaissent dans le chat avec la commande ou le diff exact. Une demande d'approbation peut recevoir une réponse depuis n'importe quelle surface, et la première réponse l'emporte.
+- **Pendant qu'une réponse s'exécute** dans un chat sur ce Mac, Enter envoie votre message dans le tour à sa prochaine étape, et ⌘Enter (ou le bouton d'envoi) le met en file d'attente pour après. Un message avec des fichiers attend toujours dans la file. Les messages en file attendent au-dessus de la zone, où vous pouvez en envoyer un tout de suite, les réordonner ou les supprimer.
+- **Le menu /** contient Add files or photos, les choix du menu +, New Craft doc (à côté du chat) et Mention a Craft doc, ainsi que, dans un chat sur ce Mac, Context usage, Compact et Goal. (Vos skills se trouvent dans le menu `/` du terminal, et Aristra Code les utilise sur toutes les surfaces.) Tapez `!` pour exécuter vous-même une commande dans le dossier du chat.
+- **Restore to here** sur l'un de vos messages, dans un chat sur ce Mac, revient à l'état d'avant ce message : le code et la conversation, ou seulement l'un des deux.
+- **Les commandes en arrière-plan** et les agents du chat sont listés au-dessus de la zone de message pendant qu'ils tournent, chacun avec sa sortie et un bouton Stop.
+
+## Dossiers
+
+Chaque dossier de la barre latérale liste ses chats, du plus récent au plus ancien. Son menu contient **New chat here**, **Open terminal**, **Review changes**, **Use from other devices** et **Open in Finder**.
+
+- Un dossier est suivi quand vous le renommez ou le déplacez. Si Aristra ne le trouve pas, la barre latérale le signale et propose **Locate folder…**.
+- **Use from other devices** permet au site web et à votre téléphone de lire le dossier, ou de le lire et le modifier, dans les chats démarrés avec lui sur ce Mac : **Off**, **Read only** ou **Read and edit**. Chaque modification demandée depuis un autre appareil nécessite une nouvelle vérification de connexion sur cet appareil, ou votre réponse sur ce Mac. **Activity from other devices…** liste ce qu'ils ont fait. Read only et Read and edit sont inclus avec un [forfait](/fr/account/plans).
+- Les chats de code dont le dossier se trouve sur un autre Mac sont listés sous **On other devices**.
+
+## Continuer sur votre téléphone et le web
+
+Faites un clic droit sur un chat qui s'exécute sur ce Mac et choisissez **Continue on phone and web**. Le chat est enregistré dans votre compte, et vous pouvez lire et envoyer des messages depuis app.aristralabs.com ou votre téléphone pendant que le travail continue de s'exécuter ici. Consultez [Remote Control](/fr/code/remote-control). Cette option et le démarrage de chats depuis le web sont inclus avec un [forfait](/fr/account/plans).
+
+Pour démarrer un nouveau chat sur ce Mac depuis le web ou votre téléphone, activez **Settings › General › From the web and phone**, puis autorisez les dossiers dans lesquels un chat peut démarrer. Consultez [Démarrer un chat sur votre ordinateur](/fr/code/remote-control).
+
+## Tâches planifiées et Inbox
+
+Une tâche planifiée sur ce Mac exécute un prompt dans un dossier selon un calendrier (une fois, toutes les heures, tous les jours, en semaine ou toutes les semaines), dans un nouveau chat à chaque fois ou dans un seul chat. Elle ne nécessite pas de forfait ; une tâche sur l'un des modèles d'Aristra est payée depuis votre solde. Créez-en une dans le formulaire de tâche, ou demandez-le dans un chat (« tous les jours de semaine à 9 h, vérifie le build ») et approuvez la tâche qu'Aristra vous montre. Avec un [forfait](/fr/account/plans), une tâche peut plutôt s'exécuter dans le cloud, même quand ce Mac est éteint. L'**Inbox** de l'onglet Code liste chaque exécution, avec des points pour les non lues ; une exécution sans rien à signaler arrive déjà lue. Les tâches sur ce Mac s'exécutent tant qu'Aristra est ouvert, ou avec l'app fermée une fois **Keep Aristra running in the background** activé (Settings › General ; le formulaire de tâche le propose une fois). Consultez [Travail en arrière-plan](/fr/code/guides/background).
+
+## Raccourcis clavier
+
+| Touches | Action |
+|---|---|
+| ⌘J | Terminal |
+| ⌥⌘B | Review |
+| ⇧⌘B | Browser |
+
+Les autres se trouvent sur [Aristra Desktop](/fr/surfaces/desktop).

@@ -1,0 +1,59 @@
+---
+title: "Éditeurs"
+description: "Utilisez Aristra Code dans Zed et d'autres éditeurs via l'Agent Client Protocol, et ouvrez-le depuis des liens."
+---
+
+## Zed et les autres éditeurs ACP
+
+`aristra acp` sert un éditeur via l'[Agent Client Protocol](https://agentclientprotocol.com). L'éditeur le lance pour vous.
+
+Dans Zed, ajoutez Aristra comme serveur d'agent dans vos paramètres :
+
+```json
+{
+  "agent_servers": {
+    "Aristra": { "type": "custom", "command": "aristra", "args": ["acp"] }
+  }
+}
+```
+
+Démarrez ensuite un fil Aristra depuis le panneau d'agent de Zed. Si cet ordinateur n'est pas encore connecté à Aristra, Zed vous demande de vous connecter, ce qui ouvre la page de connexion d'Aristra dans votre navigateur.
+
+Un fil d'éditeur est un chat Aristra Code ordinaire sur cet ordinateur : `aristra sessions` le liste (lancez-la dans ce dossier, ou ajoutez `--all`), Aristra Desktop l'affiche, et ses demandes d'approbation peuvent recevoir une réponse depuis n'importe quelle surface.
+
+| Dans l'éditeur | Ce qui se passe |
+|---|---|
+| Un nouveau fil | Un nouveau chat dans le dossier de l'éditeur, avec votre modèle et votre mode par défaut. Le dossier est considéré comme de confiance pour ce chat, sans question |
+| Le menu des modes | Manual, Accept edits, Plan, Auto (sauf si vos paramètres désactivent Auto) et Read only. Un mode choisi ailleurs s'applique aussi dans l'éditeur |
+| Votre prompt | Un tour. Les fichiers et les images liés sont joints ; les ressources collées sont citées |
+| Le fil | La réponse et le raisonnement s'affichent au fil de l'eau ; chaque étape apparaît comme un appel d'outil avec sa commande, son diff et sa sortie |
+| Une demande d'autorisation | Chaque demande d'approbation, avec Yes, une réponse qui autorise davantage (pour ce chat, ou enregistrée comme règle) et No. Une question affiche ses options |
+| Stop | Arrête le tour |
+| Ouvrir un ancien fil | Rejoue l'historique du chat |
+
+Aristra Code utilise ses propres outils (et son propre bac à sable, quand vous l'activez), et non le système de fichiers ou le terminal de l'éditeur, ainsi que ses propres serveurs MCP tirés de vos paramètres, et non ceux de l'éditeur.
+
+<Tip>
+Pour garder les chats d'un éditeur séparés des vôtres (un compte de test, par exemple), ajoutez `"env": {"ARISTRA_HOME": "/path/to/home"}` au serveur d'agent.
+</Tip>
+
+## Ouvrir votre éditeur depuis Aristra Desktop
+
+Le bouton **Open in** d'Aristra Desktop ouvre le dossier d'un chat dans VS Code, Cursor, Zed, Windsurf ou Xcode (Xcode ouvre le projet du dossier), selon ceux que vous avez installés. Dans **Review**, chaque fichier modifié s'ouvre à sa première modification dans VS Code, Cursor, Zed ou Windsurf.
+
+## Des liens qui ouvrent un terminal
+
+Un lien `aristra-cli://open` ouvre un terminal avec Aristra Code dans un dossier et un prompt qui attend dans la zone de saisie :
+
+```text
+aristra-cli://open?cwd=/Users/you/code/site&q=Review%20the%20open%20issues
+aristra-cli://open?repo=acme/site&q=Fix%20the%20failing%20build
+```
+
+| Paramètre | Signification |
+|---|---|
+| `cwd` | Le dossier, sous forme de chemin absolu |
+| `repo` | À la place de `cwd`, un `owner/repo` GitHub : le clone dans lequel vous l'avez utilisé en dernier, sinon votre dossier personnel |
+| `q` | Le prompt, jusqu'à 5 000 caractères. Il est placé dans la zone de saisie et n'est jamais envoyé tant que vous n'appuyez pas sur Enter |
+
+La question de confiance du dossier est posée comme pour n'importe quel dossier. Sur un Mac ou sous Linux, Aristra Code enregistre le gestionnaire de liens quand vous le lancez de façon interactive (et de nouveau s'il manque ou pointe vers une ancienne copie) ; réglez `disableDeepLinkRegistration` sur `"disable"` pour désactiver ce comportement.

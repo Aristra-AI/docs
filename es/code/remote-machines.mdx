@@ -1,0 +1,39 @@
+---
+title: "Máquinas remotas"
+description: "Ejecuta Aristra Code en otra máquina por SSH, con los archivos, el sandbox y los chats de esa máquina, desde tu propia terminal."
+---
+
+```sh
+aristra --remote dev-box                       # Aristra Code, working on dev-box
+aristra --remote dev-box --folder code/api
+aristra --remote me@10.0.0.5 run "run the test suite and summarize failures" -o json
+aristra --remote dev-box login                 # sign the remote machine in, with a code
+aristra --remote dev-box sessions --all
+```
+
+`--remote <host>` acepta un destino SSH igual que `ssh` (un host, `user@host` o un alias de `~/.ssh/config`) y funciona con los comandos que usan el runtime: los chats, `run`, `sessions`, `login`, `status`, `models`, `keys`, `tasks`, `doctor` y la configuración a nivel de usuario. `logs`, `install`, `update`, `serve` y `acp` actúan sobre esta computadora, y `runtime status` y `runtime stop` solo ven allí el runtime de esta conexión. Para los cambios de `config`, `mcp`, `hooks` y `plugin` a nivel de proyecto, y para `service`, ejecuta `aristra` en esa máquina. Tu terminal se conecta con `ssh` y habla con Aristra Code en esa máquina: sus archivos, su sandbox, su configuración, sus chats y su inicio de sesión. Tu terminal es solo la pantalla. No se abre ningún puerto en ninguna de las dos máquinas, y no se copia nada entre ellas.
+
+## Configurarla
+
+1. **Instala Aristra Code en la máquina remota:**
+
+   ```sh
+   curl -fsSL https://aristralabs.com/install.sh | sh
+   ```
+
+2. **Inicia sesión en ella.** El navegador de tu computadora no puede llegar a la máquina remota, así que inicia sesión con un código:
+
+   ```sh
+   aristra --remote dev-box login
+   ```
+
+   Ve a la dirección que muestra (en app.aristralabs.com) en cualquier dispositivo y escribe el código. La máquina remota conserva su propio inicio de sesión.
+
+3. **Empieza a trabajar:** `aristra --remote dev-box`. La cabecera indica el nombre de la máquina.
+
+## Conviene saber
+
+- **La carpeta** es donde llega SSH (normalmente tu carpeta personal), salvo que `--folder` indique otra. Un `--folder` relativo parte de ahí. Indica `--folder` de forma relativa a donde llega SSH, o como la ruta absoluta de esa máquina: tu propio shell expande `~` a tu carpeta personal de aquí.
+- **Adjuntar un archivo.** Un archivo arrastrado o pegado se comprueba en tu computadora y luego se lee en la máquina remota, así que solo se adjunta cuando la misma ruta existe en ambas. Las imágenes pegadas, y los archivos que solo están en tu computadora, todavía no se pueden enviar a un chat remoto. Para usar un archivo de la máquina remota, indica su ruta en tu mensaje.
+- **La conexión lleva el chat.** Cuando se corta, se detiene el turno que se esté ejecutando allí. Para dejar trabajo ejecutándose en la máquina remota, ejecuta `aristra` allí dentro de `tmux` o `screen`.
+- `ARISTRA_SSH` indica otro programa que usar en lugar de `ssh`.

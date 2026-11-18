@@ -1,0 +1,39 @@
+---
+title: "Machines distantes"
+description: "Exécutez Aristra Code sur une autre machine par SSH, avec les fichiers, le bac à sable et les chats de cette machine, depuis votre propre terminal."
+---
+
+```sh
+aristra --remote dev-box                       # Aristra Code, working on dev-box
+aristra --remote dev-box --folder code/api
+aristra --remote me@10.0.0.5 run "run the test suite and summarize failures" -o json
+aristra --remote dev-box login                 # sign the remote machine in, with a code
+aristra --remote dev-box sessions --all
+```
+
+`--remote <host>` accepte une destination SSH comme le fait `ssh` (un hôte, `user@host` ou un alias de `~/.ssh/config`) et fonctionne avec les commandes qui utilisent le runtime : les chats, `run`, `sessions`, `login`, `status`, `models`, `keys`, `tasks`, `doctor` et les paramètres au niveau de l'utilisateur. `logs`, `install`, `update`, `serve` et `acp` agissent sur cet ordinateur, et `runtime status` et `runtime stop` ne voient là-bas que le runtime de cette connexion. Pour les modifications de `config`, `mcp`, `hooks` et `plugin` au niveau du projet, et pour `service`, lancez `aristra` sur cette machine. Votre terminal se connecte avec `ssh` et parle à Aristra Code sur cette machine : ses fichiers, son bac à sable, ses paramètres, ses chats et sa connexion. Votre terminal n'est que l'écran. Aucun port ne s'ouvre sur l'une ou l'autre machine, et rien n'est copié entre elles.
+
+## Le configurer
+
+1. **Installez Aristra Code sur la machine distante :**
+
+   ```sh
+   curl -fsSL https://aristralabs.com/install.sh | sh
+   ```
+
+2. **Connectez-la.** Le navigateur de votre ordinateur ne peut pas joindre la machine distante : connectez-vous donc avec un code :
+
+   ```sh
+   aristra --remote dev-box login
+   ```
+
+   Rendez-vous à l'adresse qu'elle affiche (sur app.aristralabs.com) depuis n'importe quel appareil et saisissez le code. La machine distante conserve sa propre connexion.
+
+3. **Commencez à travailler :** `aristra --remote dev-box`. L'en-tête indique le nom de la machine.
+
+## Bon à savoir
+
+- **Le dossier** est celui où SSH vous fait arriver (généralement votre dossier personnel), sauf si `--folder` en désigne un. Un `--folder` relatif part de là. Indiquez `--folder` relativement à l'endroit où SSH vous fait arriver, ou sous forme de chemin absolu sur cette machine : votre propre shell remplace `~` par votre dossier personnel local.
+- **Joindre un fichier.** Un fichier glissé ou collé est vérifié sur votre ordinateur puis lu sur la machine distante : il n'est donc joint que si le même chemin existe sur les deux. Les images collées, et les fichiers présents uniquement sur votre ordinateur, ne peuvent pas encore être envoyés à un chat distant. Pour utiliser un fichier de la machine distante, indiquez son chemin dans votre message.
+- **La connexion porte le chat.** Quand elle tombe, un tour qui s'exécute là-bas s'arrête. Pour laisser du travail tourner sur la machine distante, lancez plutôt `aristra` sur place dans `tmux` ou `screen`.
+- `ARISTRA_SSH` désigne un autre programme à utiliser à la place de `ssh`.

@@ -1,0 +1,42 @@
+---
+title: "Contexte"
+description: "Ce que le modèle voit à chaque tour, comment les longs chats sont résumés, et comment voir et gérer ce qui remplit le contexte du modèle avec /context, /compact et /autocompact."
+---
+
+Le contexte du modèle, c'est tout ce qu'il lit à un tour : les instructions d'Aristra Code, vos fichiers d'instructions, les outils qu'il peut utiliser, la conversation jusqu'ici et votre message. Il a une taille limite : les longs chats sont donc résumés à mesure qu'ils grandissent.
+
+## Ce que voit le modèle
+
+À chaque tour, le modèle reçoit :
+
+1. **Le prompt système**, construit une fois par chat et conservé, pour que le cache de prompts du fournisseur reste chaud d'un tour à l'autre. Sa partie fixe vient en premier et est la même dans tous les chats sur le même modèle : un nouveau chat sur ce modèle, ou un changement de mode, lit donc aussi cette partie depuis le cache. Il contient le fonctionnement d'Aristra Code, votre ordinateur et votre dossier, ce que permet le mode, vos [fichiers d'instructions](/fr/code/guides/memory) et, dans un dépôt git, un instantané de celui-ci : la branche, la branche principale, `git status` et les cinq derniers commits.
+2. **La conversation**, avec les parties les plus anciennes résumées quand le chat est long.
+3. **Le contexte de ce tour**, uniquement s'il a changé depuis le tour précédent : votre profil, la mémoire de votre compte pour ce dossier, les agents qu'il peut lancer, les notes sur le dépôt, vos skills, les instructions de vos serveurs MCP et les résultats des commandes en arrière-plan qui se sont terminées.
+4. **Votre message** et les fichiers que vous avez joints.
+
+## Voir ce qui le remplit
+
+```text
+/context
+```
+
+affiche une grille de ce qui remplit le contexte du modèle : le prompt système, les outils (hors outils MCP), les instructions de vos serveurs MCP, vos fichiers d'instructions, vos skills, les messages, l'espace réservé au résumé, et ce qui est libre. En dessous, chaque outil MCP et chaque fichier d'instructions avec sa taille, et des suggestions comme de longues sorties de commandes ou une fenêtre presque pleine. Dans le rendu plein écran, les listes sont raccourcies ; `/context all` les affiche en entier. Dans Aristra Desktop, choisissez **Context usage** dans le menu `/` d'un chat.
+
+La ligne d'état indique le taux de remplissage du contexte : jaune à 60 %, rouge à 80 %.
+
+## Le résumé (compactage)
+
+Quand un chat approche de la limite du modèle, les anciennes sorties de commandes et d'outils sont d'abord enregistrées dans un fichier et retirées du contexte. Si cela ne suffit pas, Aristra Code résume les messages les plus anciens et le modèle continue à partir du résumé. Le dernier échange reste mot pour mot (`/compact` résume tout), et jusqu'à cinq des fichiers sur lesquels il a travaillé le plus récemment sont relus. La ligne d'état affiche un compte à rebours à l'approche de ce moment.
+
+- `/compact` résume tout de suite. Ajoutez des instructions pour dire ce que le résumé doit conserver : `/compact keep the API decisions`.
+- `/autocompact <tokens>` fixe le taux de remplissage du contexte avant le résumé, pour le modèle du chat : de 100k à 1M (`500k`, `200000`), ou `auto` pour la fenêtre propre au modèle. `/autocompact` seul affiche le réglage actuel. Il est enregistré par modèle dans vos paramètres (`modelSettings.<model>.autoCompactWindow`) ; `ARISTRA_AUTO_COMPACT_WINDOW` le remplace.
+
+Toutes les surfaces affichent toujours la conversation complète ; seul le modèle travaille à partir du résumé. Vos fichiers d'instructions sont relus après un résumé.
+
+<Tip>
+Démarrer un nouveau chat pour une nouvelle tâche est le moyen le moins coûteux de garder un contexte réduit. Quand un gros chat reste inactif plus d'une heure, la ligne d'état le suggère.
+</Tip>
+
+## Qui rédige le résumé
+
+Votre modèle de résumé, si vous en avez défini un (`auxiliary.summary`), sinon le modèle du chat lui-même, qui rédige le résumé dans le chat pour réutiliser son cache de prompts. Consultez [Modèles](/fr/code/configure/models).

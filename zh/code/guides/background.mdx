@@ -1,0 +1,95 @@
+---
+title: "后台工作"
+description: "在你做其他事情时让工作继续：后台命令、监视器、/loop和定时提示词、定时任务、后台服务以及通知。"
+---
+
+## 后台命令
+
+耗时较长的命令不会拖住对话：
+
+- **到达超时时间时**（默认2分钟，如果模型要求，最长10分钟），仍在运行的命令会转到后台，而不是被停止，Aristra Code会获得它到目前为止的输出。
+- 命令运行时按**Ctrl+B**（在tmux中按两次），可以自己把它转到后台。
+- 当Aristra Code要求时，**开发服务器和文件监听程序**会在后台启动。
+
+后台命令会在各轮之间持续运行。某个命令结束时，对话会收到通知，Aristra Code会读取它的输出。它们会随对话和运行时一起停止，停止其中一个会结束它启动的所有内容。
+
+Aristra Code会把服务器作为它自己的后台命令运行。以`&`结尾的命令会成为后台命令。用`&`、`nohup`、`disown`或`setsid`把自身一部分放到后台的命令会被退回拆分，因为它留下运行的部分会随它一起结束。
+
+```text
+/tasks
+```
+
+这条命令会列出所有在后台运行的内容：命令、监视器、[智能体](/zh/code/guides/subagents)和工作流。按Enter可以打开一个智能体（你在那里输入的内容会发送给它）或一个工作流，按x可以停止其中任何一个。状态行会对它们计数（“1 shell”“2 local agents”）。在Aristra Desktop中，它们列在消息框上方，每一项都有输出和Stop按钮。
+
+## 监视器
+
+监视器是一种后台命令，它的输出行会作为事件到达对话中：匹配某个错误的日志行、部署状态的变化、测试运行结束。当你让Aristra Code盯着某件事时（“构建失败时告诉我”），它会启动一个监视器。每个监视器默认运行5分钟，最长30分钟，然后停止并发出提示；如果需要更长时间的监视，Aristra Code可以再次启动它。监视器会显示在`/tasks`中。
+
+## 重复提示词：/loop
+
+```text
+/loop 5m check the deploy and tell me when it's done
+/loop 30m /code-review
+/loop check CI until it passes        # no interval: Aristra Code picks when to look again
+```
+
+`/loop`会按间隔运行一段提示词或一条命令。不指定间隔时，Aristra Code会自行掌握节奏，在有需要检查的内容时唤醒。
+
+你也可以用平常的话要求安排时间（“每10分钟检查一次部署”“2:30提醒我检查部署”）。Aristra Code会在这个对话中安排这段提示词：
+
+- 定时提示词只在对话空闲时运行，绝不会在回复中途运行。
+- 每个对话最多可以有50个。重复执行的提示词在7天后停止。
+- 它们存在于正在运行的Aristra Code中：运行时停止时，它们也会停止。对于应该在对话之后继续进行的工作，Aristra Code会改为保存一个定时任务，并先询问你。
+
+## 定时任务
+
+定时任务会在设定的时间（一次、每小时、每天、工作日或每周，按你电脑的时间）在某个文件夹中运行一段提示词：每天早上汇总已打开的拉取请求，每周检查依赖项。任务保存在你的电脑上，在那里运行，并且免费。每次运行都是一个独立的对话（如果你要求，也可以是任务来源对话中的一条新消息），列在Code标签页的**Inbox**中，未读的带有圆点，它的审批会等待2小时。
+
+有三种方式可以创建定时任务：
+
+- **在对话中提出要求**：“每个工作日9点检查构建，告诉我哪些失败了”。Aristra Code会在保存之前展示这个任务：它的计划、提示词、文件夹、模型和权限模式。无论处于哪种权限模式，它都会询问，因为任务会在对话之后继续运行。任务会采用对话的文件夹、模型和模式；Aristra Code不能选择其他的。
+- **在Aristra Desktop中**：Chats & tasks，**New** › **Scheduled task**，或者⌘K › **New scheduled task**。
+- **在终端中**：
+
+```sh
+aristra tasks add "Check the build and report what fails" --every weekday --at 09:00
+aristra tasks add "Summarize last week's commits" --every monday --at 08:30 --name "Weekly notes"
+aristra tasks add "Remind me to send the report" --once "2026-03-01 08:00"
+aristra tasks                      # list them, with each one's next run and last run
+aristra tasks pause <id>           # also: resume, run (once, now), remove
+```
+
+在终端应用中，`/schedule`会列出它们，`/schedule pause|resume|run|remove <number>`可以修改其中一个。
+
+运行能做什么、不能做什么：
+
+- 每次运行都是一个新对话，没有看到创建任务的那个对话，所以提示词必须能独立成立，除非你要求让运行回到那个对话（或在Aristra Desktop的**Each run**下选择了一个对话）。这时每次运行都是那里的一条新消息。
+- 运行不能向你提问，也不能安排任务。
+- 没有新内容可报告的运行会安静地说明这一点：它会以已读状态保留在任务列表中，你不会收到通知。失败的运行总会通知你，并附上原因（例如余额不足）。连续三次运行失败后，任务会被暂停；原因修复后再恢复它。
+- 电脑休眠或关机期间错过的运行，会在电脑恢复后通过一次运行补上；如果你为任务选择了跳过，则会被跳过。
+
+开启后台服务后，即使所有窗口都已关闭，定时任务也会按时运行。没有后台服务时，任务会在Aristra Code下一次运行时执行。延迟超过两分钟的运行视为错过：会通过一次运行补上，或者在你选择跳过时被跳过。只有在这台电脑已登录Aristra时，任务才会运行。在你第一次有任务而后台服务处于关闭状态时，Aristra会提示你一次。
+
+开通[套餐](/zh/account/plans)后，任务也可以改为在Aristra的云端运行，即使你的电脑关机也可以。参见[定时任务](/zh/scheduled-tasks)。
+
+## 后台服务
+
+```sh
+aristra service install     # keep Aristra Code running, now and at every login
+aristra service status
+aristra service uninstall
+```
+
+在macOS上，它是一个launchd代理；在Linux上，它是一个systemd用户单元。它会随更新一起更新。在Aristra Desktop中，Settings › General › **Keep Aristra running in the background**会安装同样的服务。在没有用户登录的Linux服务器上，请运行`loginctl enable-linger $USER`。
+
+没有后台服务时，运行时会在某个使用端需要它时启动，并在没有连接也没有运行任何内容10分钟后停止（`runtime.idleExitMinutes`）。一轮、一条后台命令或一个等待中的审批都会让它保持运行。
+
+## 通知
+
+| 连接的使用端 | 由谁通知 |
+|---|---|
+| 终端 | 终端，适用于iTerm2、kitty和Ghostty；在Apple的终端应用中则使用响铃。`ARISTRA_NO_NOTIFY=1`会关闭它 |
+| Aristra Desktop | 应用 |
+| 无 | Aristra Code，通过系统通知。`runtime.notifications: false`会关闭它 |
+
+当有审批在等待、定时运行结束，以及有来自手机或网页版的改动到达时，你会收到通知。Aristra Code也可以主动给你发送通知，例如在你离开时一个长任务完成了。当你正在电脑前使用Aristra时，它不会发送通知。

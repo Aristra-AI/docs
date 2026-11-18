@@ -1,0 +1,160 @@
+---
+title: "Solución de problemas"
+description: "Soluciona problemas habituales con el inicio de sesión, el runtime, los modelos, el sandbox, las aprobaciones, los servidores MCP, los hooks y la terminal."
+---
+
+## Empieza por aquí
+
+```sh
+aristra doctor          # checks everything and says how to fix each problem
+aristra status          # your account, the runtime, the model sources
+aristra logs -n 200     # the runtime's log; -f follows it
+```
+
+`aristra doctor` revisa las versiones, tu cuenta, los orígenes de modelos, el sandbox, el almacén de credenciales, los servidores MCP, tus archivos de configuración, git, la política gestionada, la telemetría, la instalación y la terminal. Cada línea es `ok` o `fix`, con lo que hay que hacer.
+
+Para el soporte, `aristra diagnostics export` escribe un paquete en `~/.aristra/diagnostics/` sin secretos, sin direcciones de correo y sin mensajes. No se envía nada; revisa su contenido antes de compartirlo. En un chat, la skill `/debug` lee el registro por ti.
+
+## Inicio de sesión
+
+<AccordionGroup>
+  <Accordion title="&quot;Sign in first&quot; al iniciar un chat">
+    Todos los chats necesitan un inicio de sesión en Aristra, incluidos los chats con tus propias claves y con modelos locales. Ejecuta `aristra login`, o `/login` en un chat.
+  </Accordion>
+  <Accordion title="El navegador no se abre, o estoy en otra máquina">
+    Mientras espera el inicio de sesión en el navegador, pulsa `c` (o escribe `/login code` en un chat) para cambiar a un código que escribes en app.aristralabs.com/desktop/device en cualquier dispositivo, en un plazo de 10 minutos. `aristra login --device-code` empieza con el código. Por SSH, el código es lo predeterminado. En WSL, define `BROWSER=wslview`.
+  </Accordion>
+  <Accordion title="Se cerró mi sesión sola">
+    Se revocó el dispositivo (desde la lista de dispositivos del sitio web), o el inicio de sesión caducó tras 30 días sin uso: `aristra status` indica "revoked" o "signed out". Vuelve a iniciar sesión.
+  </Accordion>
+</AccordionGroup>
+
+## El runtime
+
+<AccordionGroup>
+  <Accordion title="No se inicia">
+    El error indica por qué. Causas habituales:
+
+    - **Otros usuarios pueden abrir `~/.aristra`.** Ejecuta `chmod 700 ~/.aristra`.
+    - **Pertenece a otro usuario** (después de `sudo aristra ...`). Elimínala o corrige su propietario.
+    - **Un almacén escrito por un runtime más reciente.** Actualiza: `aristra update`.
+  </Accordion>
+  <Accordion title="Se detiene una y otra vez">
+    Un runtime que falla se reinicia de inmediato, como máximo 3 veces en 2 minutos; después, la terminal indica que falló y por qué. Lee `aristra logs`; lo que imprimió el runtime antes de poder escribir en el registro está en `~/.aristra/logs/stderr.log`. `aristra diagnostics export` necesita que el runtime se inicie.
+  </Accordion>
+  <Accordion title="Parece que se ignora un ajuste o una variable de entorno">
+    Los archivos de configuración se aplican de inmediato. Las variables de entorno (telemetría, proxies, la carpeta de configuración gestionada) se leen cuando se inicia el runtime: ejecuta `aristra runtime stop` y luego vuelve a ejecutar tu comando.
+  </Accordion>
+</AccordionGroup>
+
+## Modelos
+
+<AccordionGroup>
+  <Accordion title="&quot;No model source is ready&quot;">
+    Inicia sesión en Aristra, inicia sesión en tu plan de ChatGPT desde `/model` o añade una clave con `aristra keys add <provider>`.
+  </Accordion>
+  <Accordion title="Saldo agotado, o por encima del límite de un plan">
+    El turno lo indica, junto con cuándo se restablece el límite. `/usage` muestra tu saldo en dólares y tus límites, y `/model` cambia a otro origen. Una lista `model.fallback` puede hacerlo por ti, preguntando antes de que pague otro pagador. Para añadir a tu saldo, [recarga](/es/account/credits) desde $10.
+  </Accordion>
+  <Accordion title="&quot;This needs an Aristra plan&quot;">
+    Aristra en tu computadora es gratis con un modelo propio. El resto de lo que Aristra aloja viene con un [plan](/es/account/plans): Remote Control y los chats compartidos, los conectores y Craft. La memoria de tu cuenta viene con todas las cuentas. Sin plan, los chats en la nube se pagan con tu [saldo](/es/account/credits) (una cuenta nueva empieza con $1), y una computadora en la nube funciona con recargas. `/status` muestra tu plan; los planes están en Billing, en tu cuenta.
+  </Accordion>
+  <Accordion title="&quot;Every plan for this launch is taken&quot;">
+    Los planes se abren por tandas mientras Aristra One es nuevo. No se te cobró nada y tu cuenta no ha cambiado. Vuelve a intentarlo más tarde desde Billing.
+  </Accordion>
+  <Accordion title="La búsqueda web dice que tu saldo está agotado">
+    Desde tu computadora, una búsqueda con la búsqueda de Aristra cuesta $0.0075 de tu saldo. [Recarga](/es/account/credits), configura tu propia clave de Brave en tu computadora o deja activada la búsqueda pública gratuita de respaldo (`web.keylessFallback`), que responde cuando tu saldo está agotado.
+  </Accordion>
+  <Accordion title="&quot;Web search is set to your own Brave key&quot;">
+    Configuraste una clave de Brave propia en esta computadora y ahora no se puede leer. Aristra no cambia a una búsqueda pagada con tu saldo sin que se lo digas. Vuelve a añadir la clave en **Settings › Tools & keys** (o `aristra keys add brave`), o elimínala allí (`aristra keys remove brave`) para buscar con Aristra.
+  </Accordion>
+  <Accordion title="Un modelo local falla con una ventana de menos de 16K">
+    Ollama ejecuta los modelos con un contexto corto de forma predeterminada. Aumenta Context length en la app de Ollama, o define `OLLAMA_CONTEXT_LENGTH=16384` o más y reinicia Ollama.
+  </Accordion>
+</AccordionGroup>
+
+## Comandos y sandbox
+
+<AccordionGroup>
+  <Accordion title="Un comando no llega a un host">
+    Los comandos llegan a la red a través del proxy del sandbox. Por un host que no has permitido se pregunta; uno que rechazaste falla con `<sandbox_violations>` después de la salida. Permite un host de antemano con `sandbox.network.allowedDomains` o con una regla de permitir `web_fetch(domain:...)`. Una herramienta que ignora la configuración del proxy (`ping`, algunos clientes de bases de datos) no puede llegar a la red desde el sandbox: aprueba ejecutarla fuera o inclúyela en `sandbox.excludedCommands`.
+  </Accordion>
+  <Accordion title="pip install o gh fallan con un error de certificado en macOS">
+    Estas herramientas comprueban los certificados mediante un servicio de macOS que el sandbox cierra. Deja que Aristra Code las ejecute fuera del sandbox (pídeselo si no lo hace) o define `sandbox.enableWeakerNetworkIsolation: true`. Consulta [Sandbox](/es/code/configure/sandbox).
+  </Accordion>
+  <Accordion title="Un servidor de desarrollo no puede escuchar en un puerto">
+    Permite localhost: `aristra config set sandbox.network.allowLocalBinding true`.
+  </Accordion>
+  <Accordion title="Un comando no puede escribir un archivo que debería poder escribir">
+    Los comandos solo pueden escribir en las carpetas del chat, en `$TMPDIR` y en las rutas que abren tus reglas, nunca en los archivos de configuración, `.git/hooks`, `.git/config`, los archivos de inicio del shell y el resto de la lista protegida. Aristra Code puede cambiarlos con sus herramientas de archivos, con tu aprobación.
+  </Accordion>
+  <Accordion title="En Linux, el sandbox que activaste no se inicia">
+    Los comandos se ejecutan entonces fuera de él (el chat lo indica) o, con `sandbox.failIfUnavailable`, el turno no empieza. `aristra doctor` indica la causa en Sandbox: instala bubblewrap, permite los espacios de nombres de usuario para él (Ubuntu 24.04 y posteriores) o, dentro de un contenedor, define `sandbox.enableWeakerNestedSandbox: true`.
+  </Accordion>
+</AccordionGroup>
+
+## Aprobaciones
+
+<AccordionGroup>
+  <Accordion title="Una aprobación desapareció">
+    Otra superficie la respondió antes, o se agotó su tiempo de 30 minutos y se rechazó.
+  </Accordion>
+  <Accordion title="Una ejecución de script sale con el código 3">
+    Algo pidió aprobación y nadie podía responder. Permítelo para la ejecución (`--allow "shell(npm test *)"`), elige un modo (`--permission-mode auto`) o añade reglas a tu configuración. `result.permissionDenials` muestra lo que se rechazó.
+  </Accordion>
+  <Accordion title="El modo Auto no deja de preguntar">
+    Su revisor se pausa después de bloquear 3 pasos seguidos o 20 en un chat; aprobar uno lo reactiva. `/retry` deja que los pasos bloqueados se ejecuten una vez.
+  </Accordion>
+</AccordionGroup>
+
+## Chats
+
+<AccordionGroup>
+  <Accordion title="&quot;Another Aristra runtime is running this session&quot;">
+    Hay un turno ejecutándose en ella, posiblemente en otro runtime (`aristra run --no-daemon`, una sesión remota). Espera a que termine; un bloqueo que dejó un runtime que se cayó caduca a los 60 segundos.
+  </Accordion>
+  <Accordion title="Un turno se interrumpió solo">
+    El runtime se detuvo mientras se ejecutaba. El chat indica "Aristra stopped while this was running", y el compositor ofrece "Continue from where you left off.": pulsa Enter para enviarlo (en Aristra Desktop, Tab lo lleva al compositor) o escribe otra cosa.
+  </Accordion>
+  <Accordion title="Falta un chat en la lista">
+    `aristra sessions` muestra los chats de esta carpeta, `--all` los de todas las carpetas y `--cloud` los de tu cuenta. Los chats de incógnito nunca aparecen.
+  </Accordion>
+</AccordionGroup>
+
+## Servidores MCP, skills y hooks
+
+<AccordionGroup>
+  <Accordion title="Un servidor MCP no se conecta">
+    `aristra mcp test <name>` lo inicia y muestra el motivo: el programa no está en tu `PATH`; con `--sandbox`, escribe en algún lugar que el sandbox rechaza (dale `--cwd` o `--writable`); su paquete está marcado como malware; necesita iniciar sesión (`aristra mcp login <name>`); o es un servidor de proyecto que todavía no has aprobado. Un servidor que bloquea una política muestra el motivo en `aristra mcp list`.
+  </Accordion>
+  <Accordion title="Una herramienta MCP pregunta cada vez">
+    El servidor no es de confianza: `aristra mcp trust <name>`.
+  </Accordion>
+  <Accordion title="Se ignoran las skills, los hooks o las reglas de una carpeta">
+    La carpeta no es de confianza. `/folder` lo indica.
+  </Accordion>
+  <Accordion title="Un hook no se ejecuta">
+    Los hooks solo se ejecutan después de que los apruebes: `aristra hooks list` y luego `aristra hooks approve <event> <command>`. Los hooks de `settings.local.json` nunca se ejecutan, y `disableAllHooks` o la política de un equipo pueden desactivar los hooks; `aristra hooks list` indica el motivo.
+  </Accordion>
+</AccordionGroup>
+
+## La terminal
+
+<AccordionGroup>
+  <Accordion title="Shift+Enter envía en lugar de añadir una línea">
+    Ejecuta `/terminal-setup`, o usa Alt+Enter o Ctrl+J.
+  </Accordion>
+  <Accordion title="No llegan notificaciones">
+    La terminal avisa en iTerm2, kitty y Ghostty, y con la campana en Terminal de Apple; las demás terminales no reciben ninguna. Revisa la configuración de notificaciones de tu terminal y que `ARISTRA_NO_NOTIFY` no esté definida. Aristra Desktop envía sus propias notificaciones.
+  </Accordion>
+</AccordionGroup>
+
+## Empezar de cero
+
+```sh
+aristra runtime stop --now
+mv ~/.aristra ~/.aristra.bak     # keeps your chats, settings and secrets aside
+aristra                          # a fresh start: sign in again
+```
+
+Para probar algo sin tocar tu configuración real, usa otra carpeta personal: `ARISTRA_HOME=~/aristra-scratch aristra`.

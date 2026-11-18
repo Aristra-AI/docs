@@ -1,0 +1,80 @@
+---
+title: "对话"
+description: "开始、恢复、分支、派生、导出和删除对话，用检查点回到之前的消息，以及当一轮需要你而无人在场时会发生什么。"
+---
+
+对话是与Aristra Code的一次对话：一个文件夹、一个模型、一种模式以及它的历史记录。你电脑上的每个使用端看到的都是同样的对话。
+
+## 查找和恢复对话
+
+| 你想要 | 操作 |
+|---|---|
+| 在这个文件夹中新建对话 | `aristra`，或在对话中输入`/new` |
+| 这个文件夹最新的对话 | `aristra -c` |
+| 按ID打开对话 | `aristra resume <id>`，或`aristra attach <id>` |
+| 选择器 | `aristra resume`，或`/resume` |
+| 列表 | `aristra sessions`（这个文件夹）、`--all`（所有文件夹）、`--json` |
+
+对话会保留它开始时所在的文件夹，除非你把它移到一个[工作树](/zh/code/guides/git)中。它的ID会在你离开对话时打印出来，也会出现在`aristra sessions`中，以及`aristra run --output json`的结果中。
+
+多个对话可以同时运行。每个对话一次运行一轮：在一轮运行期间发送的消息会在下一步加入它（Enter），或等待它结束（`/queue`）。
+
+## 分支、派生和附带提问
+
+| 命令 | 作用 |
+|---|---|
+| `/branch [name]` | 把这个对话按当前状态复制为一个新对话，并在副本中继续。原对话保持不变 |
+| `/fork <directive>` | 启动一个带有这个对话完整上下文的后台智能体，让它执行指令并汇报结果，同时你可以继续在这里工作 |
+| `/btw <question>` | 在不打断正在运行的一轮的情况下，就这个对话快速问一个附带问题。答案显示在输入框上方，不会加入对话 |
+
+## 检查点
+
+有文件夹的对话中，每一轮都以一个检查点开始：在一轮中Aristra Code首次用其文件工具修改某个文件之前，会先备份该文件。一个对话会保留最新的100个检查点。
+
+在终端中用`/rewind`（或在空输入框上按两次Esc），或者在Aristra Desktop中对某条消息使用**Restore to here**，可以回到你某条消息之前的状态：
+
+- **Restore code**会恢复从那时起智能体用其文件工具修改过的文件。
+- **Restore conversation**会在每个使用端中删除这条消息以及之后的所有消息，并把这条消息放回输入框中供你编辑。模型看到的是它当时看到的内容，对话也会恢复到当时的模式。如果对话在那条消息之后被总结过，就无法回到它。
+- **Restore code and conversation**两者都执行。
+
+只有当智能体在那条消息之后修改过文件时，才会显示与代码相关的选项。
+
+<Note>
+检查点跟踪的是Aristra Code的文件工具所做的改动。它运行的命令（`npm run format`、一次迁移）或你自己做出的改动不会被撤销。这些改动请使用git处理。
+</Note>
+
+## 标题
+
+对话的标题由模型在第一轮运行时撰写，或者用`/rename <title>`设置。设置中的`auxiliary.title`用于选择撰写标题的模型，设为`"off"`则保留你消息的开头几个字作为标题。
+
+## 导出和删除
+
+```sh
+aristra sessions export <id>                 # Markdown, in ~/.aristra/exports/
+aristra sessions export <id> --format json
+aristra sessions delete <id>                 # asks first; --yes to skip
+```
+
+在对话中，`/export`和`/export json`会保存它，`/copy`会复制最新的回复（`/copy 2`复制前一条）。如果回复中有代码块，它会询问要复制哪一个，除非开启了`copyFullResponse`。删除对话会删除它的历史记录和它的文件。
+
+## 对话保存在哪里
+
+你电脑上的对话保存在`~/.aristra/runtime.sqlite`中，属于某个对话的文件（附件、较长的命令输出、检查点）保存在`~/.aristra/attachments/<chat>/`下，只有你可以读取。除非你用[Remote Control](/zh/code/remote-control)共享它，或者它是[云端对话](/zh/code/cloud-chats)，否则对话的历史记录不会保存在其他任何地方。每一轮仍然会把对话发送给该对话的模型服务商（当对话使用Aristra的模型时，经由Aristra发送）；参见[安全](/zh/code/security)。
+
+## 当一轮需要你而无人在场时
+
+审批会等待30分钟（`approvals.timeoutMinutes`）；在共享到手机的对话中，或由定时任务开始的对话中，审批会等待2小时。等待结束时，该步骤会被拒绝，模型会被告知无人回复，这一轮会在没有该步骤的情况下继续。如果没有任何使用端连接着，Aristra会在你的电脑上发出通知。
+
+在[非交互模式](/zh/code/non-interactive)下，根本没有人可以回复：需要询问的操作会立即被拒绝。
+
+## 当回复被截断时
+
+如果模型的回复达到了输出上限，Aristra Code会让它从中断处继续，最多三次，之后以一条提示结束这一轮。
+
+## 如果Aristra在一轮中途停止
+
+Aristra Code会边运行边保存。如果运行时在一轮期间被停止或你的电脑重启，这一轮会被标记为已中断并附上提示，每个未完成的步骤也会被标记，让模型在重复之前先进行检查。发送一条消息即可继续。
+
+## 来自其他智能体的对话
+
+Aristra Desktop可以导入你的Claude Code和Codex会话，`aristra import claude-code`（或`codex`）可以迁移你的配置。每个导入的会话都会成为一个对话，在它的文件夹中通过Aristra Code继续。

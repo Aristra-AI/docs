@@ -1,0 +1,100 @@
+---
+title: "Chats cloud"
+description: "Des chats exécutés par l'agent cloud d'Aristra et conservés dans votre compte, démarrés depuis le terminal ou Aristra Desktop, et pouvant travailler dans un dossier de votre ordinateur."
+---
+
+Un chat cloud vit dans votre compte Aristra et s'exécute sur les serveurs d'Aristra, avec le même agent que sur le site web et votre téléphone. Aristra Code liste, ouvre, démarre et poursuit les chats cloud à côté des chats sur votre ordinateur.
+
+Pour une machine à vous dans le cloud, avec un disque qui conserve vos fichiers et vos outils d'un chat à l'autre, consultez [Ordinateur cloud](/fr/surfaces/cloud-computer).
+
+Les chats cloud sont payés depuis votre [solde](/fr/account/credits) : d'abord le crédit de bienvenue de $1 d'un nouveau compte, puis la consommation mensuelle de votre forfait, puis les recharges. Quand le solde est épuisé, un nouveau message vous le signale ; les chats sur votre ordinateur continuent de fonctionner avec votre propre modèle.
+
+Utilisez un chat cloud quand vous voulez la conversation dans votre compte (sur le web et votre téléphone aussi), les outils de l'agent cloud (son navigateur, son bac à sable, vos comptes connectés, les documents Craft), ou un chat qui continue pendant que votre ordinateur est en veille. Utilisez un chat sur votre ordinateur pour travailler dans un dossier avec n'importe quel modèle et le bac à sable de votre ordinateur.
+
+| | Sur votre ordinateur | Dans le cloud |
+|---|---|---|
+| S'exécute sur | L'Aristra Runtime, ici | L'agent cloud d'Aristra |
+| Conservé dans | `~/.aristra` sur cet ordinateur | Votre compte Aristra |
+| Modèles | Toute source que vous avez configurée | Les modèles d'Aristra, facturés comme sur le site web |
+| Fichiers | Le dossier du chat, dans le bac à sable de cet ordinateur | Un dossier de cet ordinateur quand vous en connectez un ; sinon le bac à sable propre à l'agent cloud |
+| Modes | Manual, Accept edits, Plan, Auto, Read only, Don't ask (et Bypass permissions quand vous l'autorisez) | Manual ou Auto, comme sur le site web |
+
+## En démarrer un
+
+```sh
+aristra --cloud                                        # a new cloud chat
+aristra --cloud "draft the launch email"               # with a first message
+aristra --cloud --folder ~/code/site "update the docs" # working in a folder on this computer
+aristra --cloud --incognito                            # incognito
+aristra --cloud --project "Q4 launch"                  # in a project
+```
+
+Dans Aristra Desktop, choisissez un dossier et **In the cloud** sous la zone de message d'un nouveau chat Code, ou démarrez un chat dans l'onglet Chat.
+
+Un chat cloud utilise les modèles d'Aristra : désignez-en un avec `--source aristra -m <model>` (`aristra models --source aristra` les liste). Sinon, il utilise votre modèle par défaut quand c'est un modèle d'Aristra, et le modèle par défaut d'Aristra dans le cas contraire.
+
+## Lister, ouvrir et poursuivre
+
+```sh
+aristra sessions --cloud                  # your account's chats, newest first
+aristra resume <id>                       # open one
+aristra run -r <id> "next step, please"   # one more turn from a script
+```
+
+Ouvrir un chat cloud lit sa transcription depuis votre compte, avec ses étapes, ses fichiers et ses documents. Une exécution déjà en cours est suivie en direct. Esc annule l'exécution. `/rename` et `aristra sessions delete <id>` le renomment et le suppriment dans votre compte. Un chat démarré ou supprimé sur le site web apparaît ou disparaît en moins de deux minutes.
+
+## Un dossier sur votre ordinateur
+
+Un chat cloud peut travailler dans un dossier de votre ordinateur : l'agent cloud y lit, cherche et modifie des fichiers par l'intermédiaire de votre ordinateur, et rien en dehors de ce dossier. Il ne peut pas y exécuter de commandes.
+
+```sh
+aristra --cloud --folder ~/code/site                        # start one in a folder
+aristra sessions connect-folder <id> --folder ~/code/site   # give an existing cloud chat a folder here
+```
+
+- Les appels au dossier s'exécutent selon les règles de cet ordinateur : à l'intérieur du dossier, avec ses règles de refus et ses fichiers secrets tenus à l'écart, et chaque modification écrite uniquement telle qu'elle a été montrée et approuvée. Les demandes d'approbation apparaissent dans le terminal, dans Aristra Desktop et sur le site web ; la première réponse l'emporte.
+- Votre ordinateur maintient pour cela une connexion sortante vers Aristra. Rien n'écoute sur votre ordinateur.
+- Pendant que votre ordinateur est en veille, les appels du chat au dossier attendent ou échouent, et l'agent cloud le signale.
+- Chaque dossier a aussi un niveau pour les chats pilotés depuis le site web ou votre téléphone : **Off** (par défaut), **Read only** ou **Read and edit**. Réglez-le sous **Use from other devices** dans le menu du dossier dans Aristra Desktop. Read only et Read and edit sont inclus avec un forfait.
+
+## Incognito
+
+`aristra --cloud --incognito` démarre un chat que votre compte tient à l'écart de ses listes et de sa mémoire. Rien n'en est conservé sur votre ordinateur une fois que vous l'avez quitté. Il n'a ni dossier ni projet, et le compte le supprime 30 jours après sa dernière activité.
+
+## Projets
+
+`aristra --cloud --project <name>` démarre le chat dans ce projet de votre espace de travail personnel : il apparaît donc sous le projet sur le site web, avec les instructions et la mémoire du projet. Avec `--folder`, le projet retient le dossier ; le dossier principal du projet est celui où ses nouveaux chats démarrent dans Aristra Desktop. Les projets se créent sur le site web.
+
+## Modes et questions
+
+Un chat cloud est en mode **Manual** (l'agent demande avant chaque étape que vos paramètres n'autorisent pas) ou en mode **Auto** (le relecteur d'Aristra décide de ces étapes). Il utilise le mode choisi pour lui, sinon le mode par défaut de votre compte défini dans les paramètres du site web. Shift+Tab ou `/mode` change de mode, et le choix est conservé sur le chat.
+
+Quand l'agent cloud vous pose une question en cours d'exécution (une étape à approuver, une question à options, un formulaire), l'exécution se met en pause et la question arrive comme une demande d'approbation sur toutes les surfaces. Une requête vers un site extérieur peut être autorisée pour le reste du chat. Les questions à options sont plus faciles à traiter dans Aristra Desktop ou sur le site web.
+
+## Pièces jointes
+
+Un fichier que vous joignez à un chat cloud est conservé avec le chat dans votre compte, son texte et le fichier lui-même, jusqu'à ce que vous supprimiez le chat. Un chat incognito n'en conserve aucun. Aristra lit les PDF, Word, Excel, PowerPoint, les anciens fichiers Office, OpenDocument, RTF et EPUB, et lit gratuitement jusqu'à 100 pages numérisées d'un PDF par OCR. Un message peut contenir jusqu'à 5 fichiers, 50 Mo au total.
+
+- Un PDF de 10 pages ou moins est envoyé en entier au modèle quand celui-ci accepte les PDF : il voit donc aussi l'apparence des pages.
+- Un texte de jusqu'à 2 000 lignes et 100 000 caractères est inséré en entier dans le message. Un fichier plus long est inséré par son début, et l'agent lit le reste quand il en a besoin.
+- Aux tours suivants, l'agent dispose toujours des fichiers joints plus tôt dans le chat : il peut relire n'importe lequel d'entre eux, ou regarder les pages d'un PDF sous forme d'images.
+
+Un fichier joint dans un chat sur votre ordinateur reste sur votre ordinateur, avec le chat (consultez [Chats](/fr/code/guides/chats)).
+
+## Les fichiers produits par l'agent cloud
+
+```sh
+aristra sessions download <id>          # every file the chat's agent made
+aristra sessions download <id> <key>    # one, by the key its step names
+```
+
+Les fichiers sont enregistrés sous `~/.aristra/attachments/` et leurs chemins sont affichés.
+
+## Copier un chat cloud sur votre ordinateur
+
+```sh
+aristra sessions import <id>
+aristra sessions import <id> --folder ~/code/site --source anthropic --model claude-sonnet-5-5
+```
+
+Cette commande copie un chat cloud dans un nouveau chat sur votre ordinateur, pour le poursuivre avec n'importe quel modèle dans un dossier. Le chat cloud reste tel quel. La copie va dans un seul sens : ce que vous faites dans la copie n'est jamais renvoyé au chat cloud.

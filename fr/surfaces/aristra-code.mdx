@@ -1,0 +1,29 @@
+---
+title: "Aristra Code"
+description: "Aristra qui travaille dans des dossiers de votre ordinateur : il lit votre code, modifie des fichiers, exécute des commandes et travaille avec git, dans votre terminal, l'onglet Code d'Aristra Desktop et votre éditeur."
+---
+
+Aristra Code, c'est Aristra qui travaille dans un dossier de votre ordinateur. Dites-lui ce que vous voulez faire : il lit le code dont il a besoin, apporte les modifications dans les fichiers, exécute vos tests et vos commandes, et vous demande avant de faire quoi que ce soit que vous n'avez pas autorisé. Il est gratuit avec un modèle à vous, et vos chats avec lui sont conservés sur votre ordinateur, sauf si vous en exécutez un dans le cloud depuis Aristra Desktop.
+
+## Où l'utiliser
+
+| | |
+|---|---|
+| [Le terminal](/fr/code/terminal) | La commande `aristra` : l'app complète dans votre terminal, sur un Mac ou sous Linux |
+| [L'onglet Code d'Aristra Desktop](/fr/code/desktop) | Vos dossiers avec leurs chats, avec un terminal, un navigateur, les modifications et la pull request à côté du chat |
+| [Votre éditeur](/fr/code/editors) | Zed et les autres éditeurs qui parlent l'Agent Client Protocol |
+| [Téléphone et web](/fr/code/remote-control) | Avec un forfait, Remote Control poursuit un chat depuis votre téléphone ou le site web pendant que le travail reste sur votre ordinateur |
+| [Scripts et CI](/fr/code/non-interactive) | `aristra run` exécute un tour sans app, pour les scripts et la CI |
+| [Une autre machine](/fr/code/remote-machines) | `aristra --remote <host>` travaille sur une machine que vous joignez par SSH |
+
+Ils parlent tous au même agent sur votre ordinateur, l'Aristra Runtime : un chat démarré dans l'un apparaît donc dans les autres.
+
+## Premiers pas
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+Aristra Desktop inclut Aristra Code : vous n'avez donc pas besoin du CLI à côté. Le [démarrage rapide d'Aristra Code](/fr/code/quickstart) vous guide dans une première vraie tâche, et l'onglet **Aristra Code** de cette documentation couvre tout le reste : les [autorisations](/fr/code/configure/permissions), les [modèles](/fr/code/configure/models), [git](/fr/code/guides/git), les [serveurs MCP](/fr/code/extend/mcp), les [skills](/fr/code/extend/skills), les [hooks](/fr/code/extend/hooks) et la [référence des commandes](/fr/code/reference/commands).

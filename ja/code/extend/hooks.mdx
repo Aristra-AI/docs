@@ -1,0 +1,101 @@
+---
+title: "フック"
+description: "Aristra Code のイベントで自分のコマンドを実行します。ツールの前後、メッセージの送信時、ターンの終了時などです。設定、イベント、ペイロード、応答、承認について説明します。"
+---
+
+フックは、Aristra Code がイベントに応じて実行する自分のコマンドです。ツールの実行前、実行後、メッセージを送ったとき、ターンが終わるときなどに実行されます。コマンドをチームのルールと照合する、編集後にファイルを整形する、エージェントが行ったことを記録する、プロンプトにコンテキストを追加するといった用途に使います。フックは Claude Code の形式を使い、イベント、標準入力、応答も同じです。ツール名は Aristra Code のものなので、Claude Code のツール（`Bash`、`Edit`、`Write`）を指定したマッチャーには、Aristra Code の名前（`shell`、`edit_file`、`write_file`）を使う必要があります。`aristra import claude-code` はこれを自動で変更します。`if` のルールではどちらの名前も使えます。
+
+## フックを宣言する
+
+フックは、自分の設定（`~/.aristra/settings.json`）、信頼したフォルダーの `.aristra/settings.json`、[プラグイン](/ja/code/extend/plugins)の `hooks/hooks.json`、[カスタムエージェント](/ja/code/guides/subagents)の `hooks`（そのエージェントの実行中に有効）、[管理ポリシー](/ja/code/configure/managed-policy)から読み込まれます。`.aristra/settings.local.json` のフックは実行されません。設定では次のように書きます。
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell|write_file",
+        "hooks": [
+          { "type": "command", "command": "~/.aristra/hooks/check.sh", "timeout": 10, "onFailure": "block" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      { "matcher": "edit_file|write_file", "hooks": [{ "type": "command", "command": "npx prettier --write \"$ARISTRA_PROJECT_DIR\"" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "~/.aristra/hooks/add-ticket-context.sh" }] }
+    ]
+  }
+}
+```
+
+| フィールド | 意味 |
+|---|---|
+| `matcher` | フックを適用する対象。ツールのイベントと `PermissionDenied` ではツール名、エージェントの種類、通知の種類、圧縮のきっかけ、コマンド名（`UserPromptExpansion`）、開始元（`SessionStart`）、エラー（`StopFailure`）です。その他のイベントでは無視されます。名前、`\|` でつないだ複数の名前、または正規表現を指定します。省略するとすべてに一致します |
+| `type` | `command` または `http`。後者では、イベントが JSON として `url` に POST され、2xx の本文がフックの応答として読まれます（送信先は `allowedHttpHookUrls` で制限され、`headers` には `allowedEnvVars` にある `$VAR` だけを使えます）。`SessionStart` では実行されず、このコンピューター以外のプライベートネットワークのアドレスには送信されません |
+| `if` | 呼び出しが一致する必要のある権限のルール。`Bash(git *)` など |
+| `once` | チャット内で 1 回だけ実行します |
+| `async` | バックグラウンドで実行し、ブロックしません（`asyncRewake` では、終了コード 2 がチャットで伝えられます） |
+| `command` | シェルを通じて実行します |
+| `args` | シェルを使わず、`command` をこれらの引数を付けたプログラムとして実行します |
+| `timeout` | 秒数。既定は 60、最大 300 です（`SessionEnd` では 10）。タイムアウトに達したときや、ターンを停止したときは、フックとそれが起動したものがすべて停止されます |
+| `onFailure` | `"block"`：クラッシュした、タイムアウトした、読み取れない JSON を出力したフックは、スキップされる代わりに、そのイベントでブロックできる場合はブロックします |
+
+## フックを承認する
+
+フックは、自分の完全なアクセス権で、サンドボックスの外で自分のコードを実行します。そのため、そのイベントと正確なコマンドを一度承認してからでないと実行されません。承認するまではスキップされ、チャットにそのことが表示されます。
+
+```sh
+aristra hooks list                                     # every hook, approved or not
+aristra hooks approve PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks revoke PreToolUse ~/.aristra/hooks/check.sh
+aristra hooks test PreToolUse --tool shell --input '{"command": "git push --force"}'
+aristra hooks test UserPromptSubmit --prompt "deploy to production"
+```
+
+フックのコマンドを変更すると、承認が必要な新しいフックになります。チャットで `/hooks` を実行すると、フックと、まだ承認が必要なものが一覧表示されます。Aristra Desktop の Settings には、Approve と Revoke とともに一覧表示されます。
+
+プラグインのフックと管理ポリシーのフックは、1 つずつ確認を求めません。プラグインのインストールや組織のポリシーが同意になります。`disableAllHooks: true` にすると、組織のフック以外のすべてのフックがオフになります（ポリシーで設定した場合は組織のフックもオフになります）。ポリシーの `allowManagedHooksOnly: true` では、ポリシーのフックと、ポリシーがオンにしたプラグインのフックだけが実行されます。
+
+## イベント
+
+| イベント | タイミング | ペイロードに追加されるもの |
+|---|---|---|
+| `SessionStart` | Aristra の起動後、チャットの最初のターン。`source` は、新しいチャットなら `startup`、以前のチャットなら `resume` です。サブエージェントのチャットでは発生しません | `source` |
+| `UserPromptSubmit` | メッセージを送ったとき。モデルがそれを見る前 | `prompt` |
+| `UserPromptExpansion` | スキルやプロンプトのコマンドを入力したとき。それが使われる前 | `expansion_type`、`command_name`、`command_args`、`command_source`、`prompt` |
+| `PreToolUse` | ツールの呼び出しの前。権限の確認より前 | `tool_name`、`tool_input`、`tool_use_id` |
+| `PermissionRequest` | ツールの呼び出しが確認を求めようとしているとき（確認する相手がいない場合は拒否されようとしているとき） | `tool_name`、`tool_input`、`tool_use_id`、`permission_suggestions` |
+| `PostToolUse` | ツールの呼び出しが実行されたあと | `tool_name`、`tool_input`、`tool_use_id`、`tool_response`、`duration_ms`、`mcp_server` |
+| `PostToolUseFailure` | ツールの呼び出しが実行中に失敗したとき | `tool_name`、`tool_input`、`tool_use_id`、`error`、`is_interrupt`、`duration_ms` |
+| `PostToolBatch` | 1 つの返信の呼び出しがすべて完了したとき | `tool_calls` |
+| `Notification` | 承認が 6 秒間待機したとき、または返信が 1 分間あなたを待ったとき | `message`、`notification_type` |
+| `PermissionDenied` | Auto モードのレビュアーがツールの呼び出しを拒否したとき。`hookSpecificOutput.retry: true` を返すフックは、モデルに再試行させます | `tool_name`、`tool_input`、`tool_use_id`、`reason` |
+| `Stop` | ターンが終わろうとしているとき | `stop_hook_active`、`last_assistant_message`、`background_tasks`、`session_crons` |
+| `SubagentStart` | エージェントが起動しようとしているとき | `agent_id`、`agent_type` |
+| `SubagentStop` | エージェントのターンが終わろうとしているとき | `Stop` と同じものに加え、`agent_id`、`agent_type`、`agent_transcript_path`（常に空） |
+| `StopFailure` | モデルのエラーでターンが終わったとき | `error`、`error_details`、`last_assistant_message` |
+| `PreCompact` | 古いメッセージが要約される前 | `trigger`（`auto` または `manual`）、`custom_instructions` |
+| `PostCompact` | 要約されたあと | `trigger`、`compact_summary` |
+| `SessionEnd` | チャットが削除されたとき、または Aristra が停止しようとしているとき | `reason` |
+
+すべてのペイロードには、`hook_event_name`、`session_id`、`transcript_path`（常に空）、`cwd`、`permission_mode` があり、ターン中は `prompt_id` と `turn_id`、サブエージェントのチャットでは `agent_id` と `agent_type`、チャットで設定していれば `effort` もあります。ペイロードは JSON としてフックの標準入力に渡されます。フックは、自分の環境に `ARISTRA_PROJECT_DIR`（と `CLAUDE_PROJECT_DIR`）、つまりチャットのフォルダーを加えた環境で実行されます。
+
+## 応答
+
+| フックの動作 | 意味 |
+|---|---|
+| 終了コード 0 で終了し、何も出力しない | 続行します |
+| 終了コード 2 で終了する | ツールの呼び出し、プロンプト、またはイベントの対象をブロックし、標準エラー出力を理由とします。`PostToolUse` からの場合は、標準エラー出力が結果とともにモデルに渡されます。`Stop` からの場合は、標準エラー出力をモデルに渡してターンを続けます |
+| `{"decision": "block", "reason": "..."}` を出力する | その理由でブロックします |
+| `hookSpecificOutput.permissionDecision` に `"deny"`、`"ask"`、`"allow"` を出力する | 呼び出しを拒否する、確認を求めるようにする、または確認を省略します（拒否ルール、確認ルール、安全性のチェックは引き続き適用され、常にあなたの確認が必要なステップは確認を求めます） |
+| `PermissionRequest` から `hookSpecificOutput.decision: {"behavior": "allow" \| "deny", ...}` を出力する | あなたの代わりに承認に回答します |
+| `PreToolUse` から `hookSpecificOutput.updatedInput` を出力する | 代わりにこれらの引数でツールを実行します |
+| `additionalContext` を出力する（`UserPromptSubmit`、`UserPromptExpansion`、`SessionStart` ではプレーンテキストも可） | モデル向けに追加されます |
+| `systemMessage` を出力する | チャットに表示されます |
+| `continue: false` と `stopReason` を出力する | 停止します。呼び出しやプロンプトは拒否されるか、ターンが終わります |
+| `PostToolUse` から `hookSpecificOutput.updatedToolOutput`（MCP のツールでは `updatedMCPToolOutput`）を出力する | モデルはツールの出力の代わりにこれを読みます |
+| `PreCompact` からテキストを出力する | 要約の指示に追加されます |
+
+1 つのイベントのフックは並行して実行されます。1 つでもブロックがあればそれが優先され（deny、ask、allow の順に優先）、すべてのコンテキストが反映され、最後に変更された入力が使われます。Stop フックと `/goal` の確認を合わせて、モデルがツールを呼び出さないままターンを最大 8 回連続で続けさせられます（`ARISTRA_STOP_HOOK_BLOCK_CAP` で変更できます）。`stop_hook_active` が true のときは、フックは成功を返すようにしてください。

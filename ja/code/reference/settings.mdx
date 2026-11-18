@@ -1,0 +1,134 @@
+---
+title: "設定リファレンス"
+description: "Aristra Code の設定ファイルのすべてのキーと、その既定値、動作。"
+---
+
+設定は、`~/.aristra/settings.json`（自分用）、`<folder>/.aristra/settings.json`（プロジェクト用）、`<folder>/.aristra/settings.local.json`（プロジェクトでの自分用）に保存されます。階層の組み合わせ方と、リポジトリが設定できないキーについては[設定](/ja/code/configure/settings)を参照してください。*自分のファイルのみ*と記載したキーは、自分のファイルからしか読み込まれません。
+
+## モデル
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `model.source` | `aristra` | 新しいチャットのモデルの提供元。`aristra`、`chatgpt`、プロバイダー、`ollama`、`lmstudio`、`custom` |
+| `model.model` | プランの既定 | モデルの ID |
+| `model.effort` | モデル自体の既定 | 推論のレベル（対応するモデルの場合） |
+| `model.fallback` | `[]` | 呼び出しが失敗したときに順に試す、最大 10 個の `{source, model, effort}`。*自分のファイルのみ* |
+| `autoCompactWindow` | モデルのウィンドウ | 要約を始めるまでにコンテキストをどこまで使うか。`"auto"`、または 100,000 から 1,000,000 トークン |
+| `modelSettings.<model>.autoCompactWindow` | なし | 上と同じ設定を 1 つのモデルに対して行います。`/autocompact` が書き込みます |
+| `auxiliary.title`、`auxiliary.summary`、`auxiliary.memory` | プランのバックグラウンドモデル、なければチャットのモデル | タイトル、要約、メモリの補完に使う、自分のソース（`aristra` 以外）の `{source, model}`。`auxiliary.title: "off"` にすると最初の語句がタイトルになります。*自分のファイルのみ* |
+
+## 権限
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `permissions.defaultMode` | `default` | 新しいチャットが始まるモード。`default`（Manual）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`、`read_only` |
+| `permissions.allow`、`ask`、`deny` | `[]` | [権限のルール](/ja/code/configure/permissions) |
+| `permissions.additionalDirectories` | `[]` | チャットが作業してよい追加のフォルダー |
+| `permissions.trustedMcpServers` | `[]` | ツールを確認なしで実行できる MCP サーバー。*自分のファイルのみ* |
+| `permissions.disableAutoMode` | なし | `"disable"` で Auto モードをオフにします |
+| `skipDangerousModePermissionPrompt` | `false` | Bypass permissions の警告を承諾すると設定されます。プロジェクトの `settings.json` からは読み込まれません |
+| `skipAutoPermissionPrompt` | `false` | Auto モードを使うことに同意した状態。プランモードでもレビュアーが使われます。プロジェクトの `settings.json` からは読み込まれません |
+| `useAutoModeDuringPlan` | `true` | `false`：Auto に同意していても、プランモードでは確認を求めます。プロジェクトの `settings.json` からは読み込まれません |
+| `approvals.timeoutMinutes` | `30` | 承認が拒否されるまで待機する時間（1 から 1440） |
+| `projects["<folder>"].trusted` | なし | フォルダー（とそのサブフォルダー）を信頼しているかどうか。信頼の確認で設定されます。*自分のファイルのみ* |
+| `projects["<folder>"].permissions` | なし | 1 つのフォルダーのルール。*自分のファイルのみ* |
+| `projects["<folder>"].mcpServers`、`.disabledMcpServers`、`.trustedMcpServers` | なし | そのフォルダーだけで使う、そこでオフにする、またはそこで信頼する MCP サーバー。*自分のファイルのみ* |
+
+## Auto モードのレビュアー
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `review.enabled` | `true` | `false`：Auto モードで、レビュアーが判断するものについて代わりにあなたに確認を求めます。*自分のファイルのみ* |
+| `review.policy` | `""` | レビュアーへの独自の指示。最大 8,000 文字です。*自分のファイルのみ* |
+| `review.model` | なし | 自分のキーやローカルモデルを使うチャットでレビューするモデル。*自分のファイルのみ* |
+| `autoMode` | なし | レビュアー用の `allow`、`soft_deny`、`environment` のリスト。Claude Code と同じです。プロジェクトの `settings.json` からは読み込まれません |
+
+## サンドボックス
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `sandbox.enabled` | `false` | コマンドを[サンドボックス](/ja/code/configure/sandbox)内で実行します（`/sandbox`） |
+| `sandbox.failIfUnavailable` | `false` | `enabled` と一緒に使うと、サンドボックスを起動できないときに、コマンドを外で実行する代わりにターンを始めません |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | ルールの対象でない限り、サンドボックス内のコマンドを確認なしで実行します |
+| `sandbox.allowUnsandboxedCommands` | `true` | Aristra Code がサンドボックスの外でのコマンドの実行を求めてよいかどうか |
+| `sandbox.excludedCommands` | `[]` | 常にサンドボックスの外で、チェックを経て実行するコマンド |
+| `sandbox.filesystem.allowWrite`、`denyWrite`、`denyRead`、`allowRead` | `[]` | 追加で開く、または閉じるパス |
+| `sandbox.filesystem.allowGitConfig` | `false` | コマンドが `.git/config` に書き込めるようにします |
+| `sandbox.network.allowedDomains` | `[]` | コマンドが確認なしで接続できるホスト |
+| `sandbox.network.allowLocalBinding` | `false` | コマンドが `localhost` で待ち受けたり接続したりできるようにします |
+| `sandbox.network.httpProxyPort`、`socksProxyPort` | なし | サンドボックスのプロキシの代わりに使う、`localhost` 上の独自のプロキシ |
+| `sandbox.network.allowUnixSockets`、`allowAllUnixSockets` | `[]`、`false` | `allowUnixSockets`：コマンドが接続してよいソケットのパス（macOS）。`allowAllUnixSockets`：すべての Unix ソケット（macOS と Linux） |
+| `sandbox.ignoreViolations` | `{}` | コマンドごとの、報告しない拒否 |
+| `sandbox.enableWeakerNestedSandbox` | `false` | `/proc` をマウントできないコンテナー内で使います（Linux） |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | 独自の認証局を持つプロキシの背後で `gh` などの Go のツールを使うために、macOS の証明書サービスを開きます |
+
+## 拡張機能
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `mcp.servers` | `{}` | 自分の [MCP サーバー](/ja/code/extend/mcp)。*自分のファイルのみ* |
+| `mcp.toolSearch` | `true` | `false` にすると、MCP のツールをツール検索の裏に置かず、すべてのリクエストで送ります。*自分のファイルのみ* |
+| `enabledMcpjsonServers`、`disabledMcpjsonServers` | `[]` | 承認または拒否したプロジェクトの [`.mcp.json` のサーバー](/ja/code/extend/mcp)。フォルダー自体の承認は、フォルダーを信頼したあとで有効になります |
+| `enableAllProjectMcpServers` | `false` | プロジェクトの `.mcp.json` のすべてのサーバーを承認します |
+| `hooks` | `{}` | イベントごとの自分の[フック](/ja/code/extend/hooks) |
+| `disableAllHooks` | `false` | 管理ポリシーのフック以外のすべてのフックをオフにします |
+| `allowedHttpHookUrls` | すべて | HTTP フックの送信先（`*` はワイルドカード。`[]` では何も許可しません）。すべての設定ファイルのリストが合わせて有効になります |
+| `httpHookAllowedEnvVars` | なし | フック自体の `allowedEnvVars` に加えて、HTTP フックのヘッダーで使える変数 |
+| `enabledPlugins` | `{}` | `plugin@marketplace` ごとの、オンまたはオフにするプラグイン |
+| `pluginConfigs` | `{}` | 各プラグインのオプション。自分のファイルと管理ポリシーのみ |
+| `extraKnownMarketplaces` | `{}` | 追加するマーケットプレイス。名前ごとに `source` とともに指定します |
+| `agent` | なし | 新しいチャットを実行する[カスタムエージェント](/ja/code/guides/subagents) |
+| `enableWorkflows` | `true` | `false` で[ワークフロー](/ja/code/guides/subagents)をオフにします |
+| `disableWorkflows` | なし | `true` でワークフローをオフにします |
+| `workflowSizeGuideline` | `"medium"` | ワークフローが目安とするエージェントの数。`"small"`、`"medium"`、`"large"`、`"unrestricted"` |
+
+## Git
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `worktree.baseRef` | `"fresh"` | 新しいワークツリーの開始点。`fresh`（origin の既定のブランチ）または `head`（現在のコミット） |
+| `worktree.symlinkDirectories` | なし | コピーする代わりに、新しいワークツリーにリンクするフォルダー。`["node_modules"]` など |
+| `worktree.sparsePaths` | なし | 新しいワークツリーでそれだけをチェックアウトするパス |
+| `includeGitInstructions` | `true` | `false` にすると、シェルツールの指示から git に関する指示を除きます |
+| `prStatusFooterEnabled` | `true` | フッターにブランチのプルリクエストを表示します |
+| `prUrlTemplate` | なし | フッターのプルリクエストのリンク先を変更します。`{host}`、`{owner}`、`{repo}`、`{number}`、`{url}` を使えます |
+
+## ターミナル
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` でフルスクリーンレンダラーを使います |
+| `statusLine` | なし | `{"type": "command", "command": "...", "padding": 1, "refreshInterval": 10}`：[独自のステータス行](/ja/code/configure/terminal) |
+| `subagentStatusLine` | なし | `{"type": "command", "command": "..."}`：`/tasks` で実行中の各エージェントに表示する行 |
+| `copyOnSelect` | `true` | フルスクリーンで、選択を離したときにコピーします |
+| `copyFullResponse` | `false` | `/copy` で返信全体をコピーします |
+| `promptSuggestionEnabled` | `true` | 返信のあとに、次のメッセージの候補を表示します |
+| `awaySummaryEnabled` | `true` | 戻ってきたチャットに要約を残します |
+| `spinnerTipsEnabled` | `true` | Aristra Code の作業中にヒントを表示します |
+| `terminalProgressBarEnabled` | `true` | ステップの実行中、ターミナルのタブに進行状況バーを表示します |
+| `permissionExplainerEnabled` | `true` | 承認で Ctrl+E を押すと、コマンドを説明します |
+| `disableDeepLinkRegistration` | なし | `"disable"`：`aristra-cli://` のリンクハンドラーを登録しません |
+
+## ランタイムとプライバシー
+
+`runtime`、`approvals`、`telemetry`、`web` は、自分のファイルと管理ポリシーからしか読み込まれず、プロジェクトのファイルでは変更できません。`runtime.maxRunningTurns` と `runtime.notifications` は、自分のファイルからしか読み込まれません。
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `runtime.idleExitMinutes` | `10` | ランタイムが停止するまでのアイドル時間（分。1 から 1440） |
+| `runtime.keepRunningAfterClientsLeave` | `true` | すべてのサーフェスを閉じたあとも、ターンの実行を続けます |
+| `runtime.maxRunningTurns` | 制限なし | 同時に実行できるターンの数。それ以外は待機します |
+| `runtime.notifications` | `true` | 接続しているサーフェスが通知を表示できないときに、通知を表示します |
+| `memory.enabled` | `true` | 新しいチャットをメモリがオンの状態で始めます |
+| `web.keylessFallback` | `true` | Aristra の検索を使えない場合（残高を使い切った、またはサービスが停止している）に、検索を Exa、Parallel、Firecrawl、Keenable のいずれかの無料の公開検索に送ります。送信されるのは検索語だけです（それらのサービスは検索語を保持することがあります）。`false` にすると、自分のキーか Aristra の検索だけを使います |
+| `remoteControl.allowStart` | `false` | ウェブとスマートフォンからこのコンピューターでチャットを始められるようにします（Aristra のプランが必要）。*自分のファイルのみ* |
+| `remoteControl.startFolders` | `[]` | チャットを始めてよい信頼済みのフォルダー。ホームフォルダー、その中の隠しフォルダー、ルートは指定できません。*自分のファイルのみ* |
+| `telemetry.usage` | `true` | 内容を含まない利用イベント |
+| `telemetry.errors` | `true` | エラーレポート |
+| `credentials.store` | `auto` | シークレットの保存先。`auto`、`keychain`、`file`。*自分のファイルのみ* |
+| `ui.theme` | `system` | Aristra Desktop の外観。`system`、`light`、`dark` |
+| `ui.notifications` | `true` | Aristra Desktop の通知 |
+
+## 管理ポリシー専用
+
+次のキーは、[管理ポリシー](/ja/code/configure/managed-policy)の中でだけ有効です。`permissions.allowManagedPermissionRulesOnly`、`permissions.disableBypassPermissionsMode`、`sandbox.network.allowManagedDomainsOnly`、`sandbox.filesystem.allowManagedReadPathsOnly`、`allowedMcpServers`、`deniedMcpServers`、`allowManagedHooksOnly`、`strictKnownMarketplaces`（または `allowedMarketplaces`）、`blockedMarketplaces`、`pluginTrustMessage`、`disableSideloadFlags` です。

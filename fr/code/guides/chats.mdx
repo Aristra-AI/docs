@@ -1,0 +1,80 @@
+---
+title: "Chats"
+description: "Démarrez, reprenez, ramifiez, dupliquez, exportez et supprimez des chats, revenez à un message précédent grâce aux points de contrôle, et découvrez ce qui se passe quand un tour a besoin de vous et que personne n'est là."
+---
+
+Un chat est une conversation avec Aristra Code : un dossier, un modèle, un mode et son historique. Toutes les surfaces de votre ordinateur voient les mêmes chats.
+
+## Retrouver et reprendre des chats
+
+| Vous voulez | Faites ceci |
+|---|---|
+| Un nouveau chat dans ce dossier | `aristra`, ou `/new` dans un chat |
+| Le chat le plus récent de ce dossier | `aristra -c` |
+| Un chat par son identifiant | `aristra resume <id>`, ou `aristra attach <id>` |
+| Un sélecteur | `aristra resume`, ou `/resume` |
+| Une liste | `aristra sessions` (ce dossier), `--all` (tous les dossiers), `--json` |
+
+Un chat garde le dossier dans lequel il a démarré, sauf si vous le déplacez dans un [worktree](/fr/code/guides/git). Son identifiant est affiché quand vous quittez un chat, par `aristra sessions`, et dans le résultat de `aristra run --output json`.
+
+Plusieurs chats peuvent s'exécuter en même temps. Chacun exécute un seul tour à la fois : un message envoyé pendant qu'un tour s'exécute le rejoint à sa prochaine étape (Enter) ou attend sa fin (`/queue`).
+
+## Branches, duplications et questions annexes
+
+| Commande | Effet |
+|---|---|
+| `/branch [name]` | Copier ce chat tel qu'il est dans un nouveau chat et continuer dans la copie. L'original reste tel quel |
+| `/fork <directive>` | Lancer un agent en arrière-plan avec tout le contexte de ce chat pour exécuter la directive et rendre compte, pendant que vous continuez à travailler ici |
+| `/btw <question>` | Poser une petite question annexe sur le chat sans interrompre un tour en cours. La réponse s'affiche au-dessus de la zone de saisie et n'est jamais ajoutée au chat |
+
+## Points de contrôle
+
+Chaque tour d'un chat avec un dossier commence par un point de contrôle : avant qu'Aristra Code ne modifie un fichier pour la première fois avec ses outils de fichiers au cours d'un tour, le fichier est sauvegardé. Un chat conserve ses 100 points de contrôle les plus récents.
+
+Revenez à l'état d'avant l'un de vos messages avec `/rewind` (ou Esc deux fois sur une zone de saisie vide) dans le terminal, ou avec **Restore to here** sur le message dans Aristra Desktop :
+
+- **Restore code** rétablit les fichiers que l'agent a modifiés avec ses outils de fichiers depuis ce moment.
+- **Restore conversation** supprime le message et tous les messages suivants, sur toutes les surfaces, et remet le message dans la zone de saisie pour que vous le modifiiez. Le modèle voit ce qu'il voyait alors, et le chat retrouve le mode qu'il avait à ce moment-là. Un chat qui a été résumé après ce message ne peut pas y revenir.
+- **Restore code and conversation** fait les deux.
+
+Les options de code n'apparaissent que si l'agent a modifié des fichiers après ce message.
+
+<Note>
+Les points de contrôle suivent les modifications faites par les outils de fichiers d'Aristra Code. Les modifications faites par des commandes qu'il a exécutées (`npm run format`, une migration), ou par vous, ne sont pas annulées. Utilisez git pour celles-ci.
+</Note>
+
+## Titres
+
+Le titre d'un chat est rédigé par un modèle pendant le premier tour, ou défini avec `/rename <title>`. `auxiliary.title` dans vos paramètres choisit le modèle qui rédige les titres, ou `"off"` pour garder les premiers mots de votre message.
+
+## Exporter et supprimer
+
+```sh
+aristra sessions export <id>                 # Markdown, in ~/.aristra/exports/
+aristra sessions export <id> --format json
+aristra sessions delete <id>                 # asks first; --yes to skip
+```
+
+Dans un chat, `/export` et `/export json` l'enregistrent, et `/copy` copie la réponse la plus récente (`/copy 2` celle d'avant). Quand la réponse contient des blocs de code, il demande lequel copier, sauf si `copyFullResponse` est activé. Supprimer un chat supprime son historique et ses fichiers.
+
+## Où les chats sont conservés
+
+Les chats sur votre ordinateur sont conservés dans `~/.aristra/runtime.sqlite`, et les fichiers qui appartiennent à un chat (pièces jointes, longues sorties de commandes, points de contrôle) sous `~/.aristra/attachments/<chat>/`, lisibles par vous seul. L'historique d'un chat n'est stocké nulle part ailleurs, sauf si vous le partagez avec [Remote Control](/fr/code/remote-control) ou s'il s'agit d'un [chat cloud](/fr/code/cloud-chats). Chaque tour envoie tout de même la conversation au fournisseur du modèle du chat (via Aristra quand le chat utilise les modèles d'Aristra) ; consultez [Sécurité](/fr/code/security).
+
+## Quand un tour a besoin de vous et que personne n'est là
+
+Une demande d'approbation attend 30 minutes (`approvals.timeoutMinutes`) ; dans un chat partagé avec votre téléphone, ou démarré par une tâche planifiée, elle attend 2 heures. À la fin de l'attente, l'étape est refusée, le modèle apprend que personne n'a répondu, et le tour continue sans elle. Quand personne n'est connecté au chat, Aristra affiche une notification sur votre ordinateur.
+
+En [mode non interactif](/fr/code/non-interactive), personne ne peut répondre : ce qui demanderait votre accord est refusé immédiatement.
+
+## Quand une réponse est coupée
+
+Si la réponse du modèle atteint sa limite de sortie, Aristra Code lui demande de reprendre là où il s'est arrêté, jusqu'à trois fois, avant de terminer le tour avec un avis.
+
+## Si Aristra s'arrête en plein tour
+
+Aristra Code enregistre au fur et à mesure. Si le runtime a été arrêté ou si votre ordinateur a redémarré pendant un tour, le tour est marqué comme interrompu avec un avis, et chaque étape inachevée est signalée pour que le modèle vérifie avant de la répéter. Envoyez un message pour continuer.
+
+## Les chats d'autres agents
+
+Aristra Desktop peut récupérer vos sessions Claude Code et Codex, et `aristra import claude-code` (ou `codex`) récupère votre configuration. Chaque session importée devient un chat qui se poursuit avec Aristra Code dans son dossier.

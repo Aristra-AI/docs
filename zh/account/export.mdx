@@ -1,0 +1,41 @@
+---
+title: "设备、下载与导出"
+description: "查看你账户中的电脑并让它们退出登录，下载Aristra Desktop和Aristra CLI，以及获取你账户数据的副本。"
+---
+
+## 设备
+
+**Devices**列出登录了你账户的每台电脑：Aristra Desktop、Aristra CLI和云电脑。每一项都会显示它是否在线，以及最后一次在线的时间。
+
+**Sign out**会把一台电脑从你的账户中移除。它的对话和文件仍保留在它上面；要使用你的账户，它必须重新登录。
+
+## 下载
+
+**Downloads**提供Mac版Aristra Desktop，以及安装Aristra CLI的命令：
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+```
+
+两者都是免费的，并且可以搭配你自己的模型使用。参见[安装Aristra Code](/zh/code/setup)。
+
+## 导出
+
+**Import and export**会把你账户的数据打包成一个zip文件。它不需要套餐，所以你随时都可以带走你创建的内容，套餐结束后也可以。
+
+| 文件中的内容 | |
+|---|---|
+| `chats/` | 保存到你账户中的每个对话，每个都是一个Markdown文件，并附有全部对话的列表 |
+| `memory/` | Aristra记住的关于你和你工作的内容，包括一个可读文件和数据 |
+| `files/files.csv` | 你的文件列表：名称、类型、大小和日期，以及文件所附加到的对话 |
+| `usage.csv` | 一年的用量记录 |
+| `README.txt` | 文件中包含什么，以及不包含什么 |
+
+一个文件最多包含5,000个对话（最新的）、20,000条记忆、20,000个文件和50,000行用量记录，有内容被省略时`README.txt`会说明。你每小时最多可以导出6次。
+
+保存在其他地方的内容：
+
+- **你的文件本身**从**Files**下载。
+- **Craft文档**从每个文档的菜单中导出，格式为Markdown、Word或PDF。
+- 你没有共享的**电脑上的对话**保存在那台电脑的`~/.aristra`中。它们从未进入你的账户。
+- **云电脑**的对话和记忆从它自己的页面导出。参见[云电脑](/zh/surfaces/cloud-computer)。

@@ -1,0 +1,134 @@
+---
+title: "Référence des paramètres"
+description: "Toutes les clés des fichiers de paramètres d'Aristra Code, avec leur valeur par défaut et ce qu'elles font."
+---
+
+Les paramètres se trouvent dans `~/.aristra/settings.json` (les vôtres), `<folder>/.aristra/settings.json` (ceux du projet) et `<folder>/.aristra/settings.local.json` (les vôtres, pour le projet). La façon dont les couches se combinent, et les clés qu'un dépôt ne peut pas définir, sont décrites dans [Paramètres](/fr/code/configure/settings). Les clés marquées *votre fichier uniquement* ne sont lues que dans votre propre fichier.
+
+## Modèle
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `model.source` | `aristra` | La provenance du modèle des nouveaux chats : `aristra`, `chatgpt`, un fournisseur, `ollama`, `lmstudio`, `custom` |
+| `model.model` | Celui du forfait | L'identifiant du modèle |
+| `model.effort` | Celui du modèle | Le niveau de raisonnement, pour les modèles qui en acceptent un |
+| `model.fallback` | `[]` | Jusqu'à 10 `{source, model, effort}` essayés dans l'ordre quand un appel échoue. *Votre fichier uniquement* |
+| `autoCompactWindow` | La fenêtre du modèle | Le taux de remplissage du contexte avant son résumé : `"auto"` ou de 100 000 à 1 000 000 tokens |
+| `modelSettings.<model>.autoCompactWindow` | aucun | La même chose, pour un seul modèle. `/autocompact` l'écrit |
+| `auxiliary.title`, `auxiliary.summary`, `auxiliary.memory` | Le modèle d'arrière-plan du forfait, sinon celui du chat | `{source, model}` provenant de l'une de vos propres sources (pas `aristra`) pour les titres, les résumés et le filet de sécurité de la mémoire. `auxiliary.title: "off"` garde vos premiers mots. *Votre fichier uniquement* |
+
+## Autorisations
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `permissions.defaultMode` | `default` | Le mode de départ des nouveaux chats : `default` (Manual), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`, `read_only` |
+| `permissions.allow`, `ask`, `deny` | `[]` | Les [règles d'autorisation](/fr/code/configure/permissions) |
+| `permissions.additionalDirectories` | `[]` | D'autres dossiers dans lesquels le chat peut travailler |
+| `permissions.trustedMcpServers` | `[]` | Les serveurs MCP dont les outils s'exécutent sans demander. *Votre fichier uniquement* |
+| `permissions.disableAutoMode` | aucun | `"disable"` désactive le mode Auto |
+| `skipDangerousModePermissionPrompt` | `false` | Défini quand vous acceptez l'avertissement de Bypass permissions. Pas lu dans le `settings.json` d'un projet |
+| `skipAutoPermissionPrompt` | `false` | Vous avez choisi d'activer le mode Auto ; le mode Plan conserve alors son relecteur. Pas lu dans le `settings.json` d'un projet |
+| `useAutoModeDuringPlan` | `true` | `false` : le mode Plan vous demande même quand vous avez choisi Auto. Pas lu dans le `settings.json` d'un projet |
+| `approvals.timeoutMinutes` | `30` | Le temps d'attente d'une demande d'approbation avant son refus (de 1 à 1440) |
+| `projects["<folder>"].trusted` | aucun | Si un dossier (et ses sous-dossiers) est de confiance. Défini par la question de confiance. *Votre fichier uniquement* |
+| `projects["<folder>"].permissions` | aucun | Des règles pour un seul dossier. *Votre fichier uniquement* |
+| `projects["<folder>"].mcpServers`, `.disabledMcpServers`, `.trustedMcpServers` | aucun | Des serveurs MCP propres à ce dossier, désactivés ou de confiance pour ce dossier. *Votre fichier uniquement* |
+
+## Le relecteur du mode Auto
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `review.enabled` | `true` | `false` : en mode Auto, ce que le relecteur déciderait vous est soumis à la place. *Votre fichier uniquement* |
+| `review.policy` | `""` | Vos propres consignes pour le relecteur, jusqu'à 8 000 caractères. *Votre fichier uniquement* |
+| `review.model` | aucun | Le modèle relecteur pour les chats avec votre propre clé ou un modèle local. *Votre fichier uniquement* |
+| `autoMode` | aucun | Les listes `allow`, `soft_deny` et `environment` pour le relecteur, comme dans Claude Code. Pas lu dans le `settings.json` d'un projet |
+
+## Bac à sable
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `sandbox.enabled` | `false` | Les commandes s'exécutent dans le [bac à sable](/fr/code/configure/sandbox) (`/sandbox`) |
+| `sandbox.failIfUnavailable` | `false` | Avec `enabled` : un tour ne démarre pas quand le bac à sable ne peut pas démarrer, au lieu d'exécuter les commandes hors du bac à sable |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | Une commande dans le bac à sable s'exécute sans demander, sauf si une règle la couvre |
+| `sandbox.allowUnsandboxedCommands` | `true` | Si Aristra Code peut demander à exécuter une commande hors du bac à sable |
+| `sandbox.excludedCommands` | `[]` | Les commandes qui s'exécutent toujours hors du bac à sable, en passant par les vérifications |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | D'autres chemins à ouvrir ou à fermer |
+| `sandbox.filesystem.allowGitConfig` | `false` | Permettre aux commandes d'écrire dans `.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | Les hôtes que les commandes joignent sans demander |
+| `sandbox.network.allowLocalBinding` | `false` | Permettre aux commandes d'écouter sur `localhost` et de le joindre |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | aucun | Votre propre proxy sur `localhost`, à la place de celui du bac à sable |
+| `sandbox.network.allowUnixSockets`, `allowAllUnixSockets` | `[]`, `false` | `allowUnixSockets` : les chemins de sockets auxquels les commandes peuvent se connecter (macOS). `allowAllUnixSockets` : tous les sockets Unix (macOS et Linux) |
+| `sandbox.ignoreViolations` | `{}` | Les refus à ne pas signaler, par commande |
+| `sandbox.enableWeakerNestedSandbox` | `false` | Dans un conteneur qui ne peut pas monter `/proc` (Linux) |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Ouvrir le service de certificats de macOS pour les outils Go comme `gh` derrière un proxy doté de sa propre autorité de certification |
+
+## Extensions
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `mcp.servers` | `{}` | Vos [serveurs MCP](/fr/code/extend/mcp). *Votre fichier uniquement* |
+| `mcp.toolSearch` | `true` | `false` envoie les outils MCP dans chaque requête au lieu de les placer derrière la recherche d'outils. *Votre fichier uniquement* |
+| `enabledMcpjsonServers`, `disabledMcpjsonServers` | `[]` | Les [serveurs du `.mcp.json`](/fr/code/extend/mcp) d'un projet approuvés ou rejetés. Les approbations propres à un dossier comptent une fois que vous lui faites confiance |
+| `enableAllProjectMcpServers` | `false` | Approuver tous les serveurs du `.mcp.json` d'un projet |
+| `hooks` | `{}` | Vos [hooks](/fr/code/extend/hooks), par événement |
+| `disableAllHooks` | `false` | Désactiver tous les hooks sauf ceux d'une politique gérée |
+| `allowedHttpHookUrls` | toutes | Où les hooks HTTP peuvent envoyer (`*` est un joker ; `[]` n'autorise rien). Les listes de tous les fichiers de paramètres comptent ensemble |
+| `httpHookAllowedEnvVars` | aucun | Les variables que peuvent utiliser les en-têtes d'un hook HTTP, en plus du propre `allowedEnvVars` du hook |
+| `enabledPlugins` | `{}` | Les plugins activés ou désactivés, par `plugin@marketplace` |
+| `pluginConfigs` | `{}` | Les options de chaque plugin. Uniquement votre propre fichier et une politique gérée |
+| `extraKnownMarketplaces` | `{}` | Les marketplaces à ajouter, par nom, avec leur `source` |
+| `agent` | aucun | L'[agent personnalisé](/fr/code/guides/subagents) en tant que lequel s'exécutent les nouveaux chats |
+| `enableWorkflows` | `true` | `false` désactive les [workflows](/fr/code/guides/subagents) |
+| `disableWorkflows` | aucun | `true` désactive les workflows |
+| `workflowSizeGuideline` | `"medium"` | Le nombre d'agents que visent les workflows : `"small"`, `"medium"`, `"large"`, `"unrestricted"` |
+
+## Git
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `worktree.baseRef` | `"fresh"` | Le point de départ d'un nouveau worktree : `fresh` (la branche par défaut de l'origin) ou `head` (le commit courant) |
+| `worktree.symlinkDirectories` | aucun | Les dossiers liés dans un nouveau worktree au lieu d'être copiés, comme `["node_modules"]` |
+| `worktree.sparsePaths` | aucun | Les chemins qu'un nouveau worktree extrait seuls |
+| `includeGitInstructions` | `true` | `false` retire les consignes git des instructions de l'outil shell |
+| `prStatusFooterEnabled` | `true` | Afficher la pull request de la branche dans le pied de page |
+| `prUrlTemplate` | aucun | Envoyer ailleurs le lien de pull request du pied de page, avec `{host}`, `{owner}`, `{repo}`, `{number}` et `{url}` |
+
+## Terminal
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` pour le rendu plein écran |
+| `statusLine` | aucun | `{"type": "command", "command": "...", "padding": 1, "refreshInterval": 10}` : [votre propre ligne d'état](/fr/code/configure/terminal) |
+| `subagentStatusLine` | aucun | `{"type": "command", "command": "..."}` : une ligne pour chaque agent en cours dans `/tasks` |
+| `copyOnSelect` | `true` | En plein écran, copier une sélection quand vous relâchez |
+| `copyFullResponse` | `false` | `/copy` prend toute la réponse |
+| `promptSuggestionEnabled` | `true` | Suggérer votre prochain message après une réponse |
+| `awaySummaryEnabled` | `true` | Laisser un récapitulatif dans un chat auquel vous revenez |
+| `spinnerTipsEnabled` | `true` | Afficher des astuces pendant qu'Aristra Code travaille |
+| `terminalProgressBarEnabled` | `true` | Une barre de progression dans l'onglet du terminal pendant l'exécution d'une étape |
+| `permissionExplainerEnabled` | `true` | Ctrl+E explique une commande lors de sa demande d'approbation |
+| `disableDeepLinkRegistration` | aucun | `"disable"` : ne pas enregistrer le gestionnaire de liens `aristra-cli://` |
+
+## Runtime et confidentialité
+
+`runtime`, `approvals`, `telemetry` et `web` ne sont lus que dans votre propre fichier et dans une politique gérée ; le fichier d'un projet ne peut pas les modifier. `runtime.maxRunningTurns` et `runtime.notifications` ne viennent que de votre propre fichier.
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `runtime.idleExitMinutes` | `10` | Les minutes d'inactivité avant l'arrêt du runtime (de 1 à 1440) |
+| `runtime.keepRunningAfterClientsLeave` | `true` | Un tour continue de s'exécuter après la fermeture de toutes les surfaces |
+| `runtime.maxRunningTurns` | aucune limite | Le nombre de tours qui peuvent s'exécuter en même temps ; les autres attendent |
+| `runtime.notifications` | `true` | Afficher une notification quand aucune surface connectée ne peut le faire |
+| `memory.enabled` | `true` | Les nouveaux chats démarrent avec la mémoire activée |
+| `web.keylessFallback` | `true` | Quand la recherche d'Aristra n'est pas disponible (solde épuisé, ou service en panne), les recherches passent par la recherche publique gratuite d'Exa, Parallel, Firecrawl ou Keenable, avec seulement les mots de la recherche envoyés (ces services peuvent les conserver). `false` les garde sur votre clé ou sur Aristra |
+| `remoteControl.allowStart` | `false` | Permettre au web et au téléphone de démarrer des chats sur cet ordinateur (nécessite un forfait Aristra). *Votre fichier uniquement* |
+| `remoteControl.startFolders` | `[]` | Les dossiers de confiance dans lesquels ils peuvent démarrer des chats ; jamais le dossier personnel, un dossier caché qu'il contient ou la racine. *Votre fichier uniquement* |
+| `telemetry.usage` | `true` | Des événements d'utilisation sans contenu |
+| `telemetry.errors` | `true` | Les rapports d'erreurs |
+| `credentials.store` | `auto` | Où sont conservés les secrets : `auto`, `keychain`, `file`. *Votre fichier uniquement* |
+| `ui.theme` | `system` | L'apparence d'Aristra Desktop : `system`, `light`, `dark` |
+| `ui.notifications` | `true` | Les notifications d'Aristra Desktop |
+
+## Politique gérée uniquement
+
+Ces clés ne comptent que dans une [politique gérée](/fr/code/configure/managed-policy) : `permissions.allowManagedPermissionRulesOnly`, `permissions.disableBypassPermissionsMode`, `sandbox.network.allowManagedDomainsOnly`, `sandbox.filesystem.allowManagedReadPathsOnly`, `allowedMcpServers`, `deniedMcpServers`, `allowManagedHooksOnly`, `strictKnownMarketplaces` (ou `allowedMarketplaces`), `blockedMarketplaces`, `pluginTrustMessage` et `disableSideloadFlags`.

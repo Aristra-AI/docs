@@ -1,0 +1,133 @@
+---
+title: "Sandbox"
+description: "El sandbox, desactivado de forma predeterminada: cómo activarlo con /sandbox o en Settings, y cómo limita los comandos en macOS y Linux: qué pueden leer, escribir y alcanzar, la pregunta de red, localhost, tu propio proxy y cómo ejecutar un comando fuera de él."
+---
+
+El sandbox está desactivado de forma predeterminada: los comandos que Aristra Code ejecuta en tu computadora se ejecutan con tu propio acceso, y las [comprobaciones de permisos](/es/code/configure/permissions) deciden cuáles se ejecutan sin preguntar y cuáles preguntan antes.
+
+Actívalo y los comandos se ejecutarán en un sandbox. Una aprobación responde a "¿debería ejecutarse esto?"; el sandbox decide a qué puede llegar un comando una vez que se ejecuta. Como un comando dentro del sandbox solo puede escribir en las carpetas del chat y solo llega a los hosts que permites, se ejecuta sin preguntar (`sandbox.autoAllowBashIfSandboxed`, activado de forma predeterminada). Las reglas de denegación y de pregunta siguen aplicándose, y algunos comandos siguen pasando por las comprobaciones normales: uno que define una variable desconocida delante, pasa un argumento `NAME=value`, nombra la carpeta personal de otro usuario, redirige a `/dev/tcp` o `/dev/udp`, o que a la vez elimina archivos y cambia de carpeta. Los comandos `rm` arriesgados y los comandos demasiado complejos para comprobarlos siempre preguntan.
+
+## Activarlo
+
+- **En la terminal:** ejecuta `/sandbox` y elige un modo: **with auto-allow** (los comandos dentro del sandbox se ejecutan sin preguntar), **with regular permissions** (siguen preguntando como lo harían sin él) o **No sandbox**. Se guarda en el `.aristra/settings.local.json` de la carpeta. `/sandbox exclude "npm run test:*"` añade un patrón de comando que siempre se ejecuta fuera de él, en el mismo archivo. Cuando la [política](/es/code/configure/managed-policy) de un equipo fija el sandbox, `/sandbox` lo indica y no cambia nada.
+- **En Aristra Desktop:** Settings > Permissions > **Run commands in a sandbox**, para todas las carpetas.
+- **En la configuración:** `"sandbox": {"enabled": true}`.
+
+Si el sandbox no puede iniciarse (por ejemplo, porque falta bubblewrap en Linux), los comandos se ejecutan fuera de él y el chat lo indica una vez. Con `sandbox.failIfUnavailable`, el turno ni siquiera empieza.
+
+## Qué puede hacer un comando
+
+| | Permitido | Rechazado |
+|---|---|---|
+| **Leer** | Todo, salvo lo que nombre una regla de denegación `read(...)` o `sandbox.filesystem.denyRead` | Esas rutas |
+| **Escribir** | Las carpetas del chat, `$TMPDIR`, las rutas de tus reglas de permitir `edit(...)` y `sandbox.filesystem.allowWrite` | Todo lo demás |
+| **Red** | A través del proxy del sandbox: los hosts que permites pasan, por los demás se pregunta | Toda conexión directa, y `localhost` salvo que lo permitas |
+
+**Nunca se puede escribir**, digan lo que digan las reglas, en: los archivos de configuración, los `.aristra/settings*.json` y las skills de la carpeta, los archivos de inicio del shell (`.bashrc`, `.zshrc` y similares), `.claude/skills`, `.claude/commands`, `.claude/agents`, `.gitconfig`, `.gitmodules`, `.ripgreprc`, `.mcp.json`, los archivos de un repositorio bare en la raíz de la carpeta, `.vscode`, `.idea`, `.git/hooks` y `.git/config`, salvo que `sandbox.filesystem.allowGitConfig` esté activado. El resto de `.git` sigue siendo escribible, así que git funciona. Un comando tampoco puede cambiar el nombre de estos ni de las carpetas que los contienen.
+
+## Cómo se ejecuta un comando
+
+- **En el entorno de tu shell.** Aristra Code lee tu `.zshrc` (o `.bashrc`) una vez y conserva sus funciones, alias, `PATH` y variables, así que `nvm`, `pyenv`, las herramientas de Homebrew y tus alias funcionan, incluso cuando Aristra Desktop inició el runtime.
+- **`$TMPDIR` se conserva entre comandos**, así que un archivo que un comando deja allí está ahí para el siguiente. En macOS, `/tmp` en sí no es escribible; Aristra Code usa `$TMPDIR`.
+- **Tiempos límite.** Un comando tiene 2 minutos de forma predeterminada (el modelo puede pedir hasta 10). Uno que sigue ejecutándose al llegar a su tiempo límite pasa a segundo plano en lugar de detenerse, y el agente recibe la salida que lleve hasta ese momento. Consulta [Trabajo en segundo plano](/es/code/guides/background).
+- **Detención.** Un comando que se detiene (Esc, `/tasks`, eliminar su chat, que se detenga el runtime) termina junto con todo lo que inició: SIGTERM y, a los 2 segundos, SIGKILL. Si el propio runtime falla, lo que iniciaron sus comandos también termina.
+
+## La red
+
+Un comando dentro del sandbox solo llega a la red a través del proxy del sandbox, que se ejecuta en tu computadora. Su entorno hace que las herramientas habituales apunten allí (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, git por ssh y otras). Para cada host:
+
+1. Un host que nombran tus reglas de denegación `web_fetch(domain:...)` se rechaza.
+2. Un host de `sandbox.network.allowedDomains` o de tus reglas de permitir `web_fetch(domain:...)` pasa. `*.example.com` cubre los subdominios.
+3. Por cualquier otro host se pregunta, en el paso del comando:
+
+   > **Network request outside of sandbox**
+   > Host: registry.npmjs.org
+   > Do you want to allow this connection?
+   > 1. Yes
+   > 2. Yes, and don't ask again for registry.npmjs.org
+   > 3. No, and tell Aristra what to do differently (esc)
+
+**Yes** deja pasar esa conexión; una posterior vuelve a preguntar. **Yes, and don't ask again** guarda `web_fetch(domain:registry.npmjs.org)` en el `.aristra/settings.local.json` de la carpeta. **No** rechaza la conexión; el comando ve el fallo.
+
+El proxy rechaza los nombres que se resuelven a tu propia computadora, a direcciones link-local o a direcciones de metadatos de la nube. Nunca descifra el tráfico. Los scripts y las tareas programadas rechazan los hosts que no cubre ninguna regla en lugar de preguntar.
+
+Cuando el sandbox rechaza una conexión, el resultado del comando termina con lo que rechazó, que el agente lee:
+
+```text
+<sandbox_violations>
+deny network-outbound example.org:443 (user denied)
+</sandbox_violations>
+```
+
+## Permitir que un comando use localhost
+
+Un servidor de desarrollo, un servidor de pruebas o una base de datos local necesitan escuchar en un puerto, algo que el sandbox rechaza de forma predeterminada:
+
+```sh
+aristra config set sandbox.network.allowLocalBinding true
+```
+
+Esto permite que los comandos escuchen en `localhost` y se conecten a él, y a nada más. En Linux este ajuste no tiene efecto: cada comando tiene su propia red, así que puede escuchar en su propio `localhost` y llegar a él, pero no a un servidor en el `localhost` de tu computadora ni a uno que haya iniciado otro comando.
+
+## Usar tu propio proxy
+
+Si tu red pasa por el proxy de filtrado de tu organización:
+
+```sh
+aristra config set sandbox.network.httpProxyPort 8080
+```
+
+Entonces el tráfico HTTP y HTTPS de los comandos va a `localhost:8080`, y ese proxy decide a qué llegan. `sandbox.network.socksProxyPort` hace lo mismo para SOCKS.
+
+## Ejecutar un comando fuera del sandbox
+
+Algunos comandos necesitan lo que el sandbox rechaza: escribir fuera de la carpeta, una herramienta que ignora la configuración del proxy, un servicio en un socket Unix (macOS). Aristra Code puede pedir entonces ejecutar un comando fuera del sandbox, con su motivo. Pasa por las comprobaciones normales de un comando fuera del sandbox: en Manual pregunta salvo que solo lea o que una regla lo permita, en Auto se envía al revisor lo que preguntaría, y en Read only se rechaza.
+
+- `sandbox.allowUnsandboxedCommands: false` lo desactiva.
+- `sandbox.excludedCommands` muestra los comandos que siempre se ejecutan fuera del sandbox (`docker:*`, `make`), pasando igualmente por las comprobaciones. Es una comodidad, no un límite de seguridad.
+- `aristra run --dangerously-skip-sandbox` ejecuta fuera del sandbox todos los comandos de una ejecución de script. Úsalo solo donde la propia máquina es el límite: un runner de CI, un contenedor, una VM desechable.
+
+## macOS
+
+El sandbox es Seatbelt, que deniega de forma predeterminada.
+
+- **El llavero no está accesible** desde dentro del sandbox. El asistente de credenciales del llavero de git no puede leer los inicios de sesión guardados, así que un push o un fetch que necesite uno pide ejecutarse fuera.
+- **Comprobaciones de certificados a través del sistema.** `pip` 24.2 y posteriores, y las herramientas de Go como `gh`, comprueban los certificados mediante un servicio del sistema de macOS que el sandbox cierra, así que dentro de él fallan con un error de certificado o de red. Aristra Code solo ve ese error, no el motivo, así que si no pide por su cuenta ejecutar el comando fuera del sandbox, díselo tú. `sandbox.enableWeakerNetworkIsolation: true` abre ese servicio para todos los comandos, lo que también abre una vía de salida a través de él.
+
+## Linux
+
+El sandbox es bubblewrap (`bwrap`): todo el sistema de archivos en solo lectura salvo las rutas escribibles, con su propio espacio de nombres de red y la red reenviada al proxy. Cuando no puede iniciarse, los comandos se ejecutan fuera de él y el chat indica el motivo una vez (con `sandbox.failIfUnavailable`, el turno no empieza), y `aristra doctor` lo muestra en Sandbox:
+
+| Problema | Solución |
+|---|---|
+| bubblewrap no está instalado | `sudo apt-get install bubblewrap` o `sudo dnf install bubblewrap` |
+| El sistema bloquea los espacios de nombres de usuario que necesita bubblewrap (Ubuntu 24.04 y posteriores) | Permítelos para bubblewrap con un perfil de AppArmor |
+| Dentro de un contenedor, bubblewrap no puede montar `/proc` | Cuando el contenedor es tu límite, define `sandbox.enableWeakerNestedSandbox: true` |
+
+## Servidores MCP
+
+Los servidores MCP que se ejecutan como programas se inician sin sandbox; uno cuya entrada indica `"sandbox": true` recibe un sandbox propio. Consulta [Servidores MCP](/es/code/extend/mcp).
+
+## Ajustes
+
+Los ajustes del sandbox vienen de tu propia configuración, de la configuración de una carpeta de confianza y de una política gestionada. Las listas se unen entre ellas.
+
+| Clave | Predeterminado | Hace |
+|---|---|---|
+| `sandbox.enabled` | `false` | Los comandos se ejecutan en el sandbox (`/sandbox`) |
+| `sandbox.failIfUnavailable` | `false` | Con `enabled`: un turno no empieza cuando el sandbox no puede iniciarse, en lugar de ejecutar los comandos fuera de él |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | Un comando dentro del sandbox se ejecuta sin preguntar, salvo que lo cubra una regla de denegación o de pregunta |
+| `sandbox.allowUnsandboxedCommands` | `true` | Si Aristra Code puede pedir ejecutar un comando fuera del sandbox |
+| `sandbox.excludedCommands` | `[]` | Comandos que siempre se ejecutan fuera del sandbox, pasando por las comprobaciones |
+| `sandbox.filesystem.allowWrite`, `denyWrite`, `denyRead`, `allowRead` | `[]` | Más rutas que abrir o cerrar |
+| `sandbox.filesystem.allowGitConfig` | `false` | Permitir que los comandos escriban en `.git/config` |
+| `sandbox.network.allowedDomains` | `[]` | Hosts a los que llegan los comandos sin preguntar |
+| `sandbox.network.allowLocalBinding` | `false` | Permitir que los comandos escuchen en `localhost` y lleguen a él |
+| `sandbox.network.httpProxyPort`, `socksProxyPort` | ninguno | Enviar el tráfico de los comandos a tu propio proxy |
+| `sandbox.network.allowUnixSockets` | `[]` | Sockets Unix a los que se puede conectar un comando (macOS) |
+| `sandbox.ignoreViolations` | `{}` | Rechazos que no se comunican al agente |
+| `sandbox.enableWeakerNestedSandbox` | `false` | Dentro de un contenedor que no puede montar `/proc` (Linux) |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | Abrir el servicio de certificados de macOS para herramientas de Go como `gh` detrás de un proxy con su propia autoridad de certificación |
+| `sandbox.network.allowAllUnixSockets` | `false` | Permitir que los comandos se conecten a cualquier socket Unix |
+
+Las políticas gestionadas tienen además `sandbox.filesystem.allowManagedReadPathsOnly` y `sandbox.network.allowManagedDomainsOnly`. Consulta [Política gestionada](/es/code/configure/managed-policy).

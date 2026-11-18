@@ -1,0 +1,39 @@
+---
+title: "远程机器"
+description: "从你自己的终端，通过SSH在另一台机器上运行Aristra Code，使用那台机器的文件、沙箱和对话。"
+---
+
+```sh
+aristra --remote dev-box                       # Aristra Code, working on dev-box
+aristra --remote dev-box --folder code/api
+aristra --remote me@10.0.0.5 run "run the test suite and summarize failures" -o json
+aristra --remote dev-box login                 # sign the remote machine in, with a code
+aristra --remote dev-box sessions --all
+```
+
+`--remote <host>`和`ssh`一样接受SSH目标（主机名、`user@host`或`~/.ssh/config`中的别名），适用于使用运行时的命令：对话、`run`、`sessions`、`login`、`status`、`models`、`keys`、`tasks`、`doctor`以及用户级设置。`logs`、`install`、`update`、`serve`和`acp`作用于这台电脑，`runtime status`和`runtime stop`只能看到这个连接在那台机器上的运行时。对于项目级的`config`、`mcp`、`hooks`和`plugin`更改，以及`service`，请在那台机器上运行`aristra`。你的终端通过`ssh`连接，并与那台机器上的Aristra Code通信：使用它的文件、它的沙箱、它的设置、它的对话和它的登录。你的终端只是显示屏。两台机器都不会打开任何端口，它们之间也不会复制任何内容。
+
+## 设置
+
+1. **在远程机器上安装Aristra Code**：
+
+   ```sh
+   curl -fsSL https://aristralabs.com/install.sh | sh
+   ```
+
+2. **让它登录**。你电脑上的浏览器无法访问远程机器，所以请用验证码登录：
+
+   ```sh
+   aristra --remote dev-box login
+   ```
+
+   在任意设备上前往它打印出的地址（在app.aristralabs.com上），并输入验证码。远程机器会保留它自己的登录。
+
+3. **开始工作**：`aristra --remote dev-box`。标题栏会显示机器的名称。
+
+## 注意事项
+
+- **文件夹**是SSH登录后所在的位置（通常是你的主文件夹），除非`--folder`指定了一个。相对的`--folder`从那里开始。请相对于SSH登录后的位置给出`--folder`，或者使用那台机器上的绝对路径：你自己的shell会把`~`展开为这台电脑上你的主文件夹。
+- **附加文件**：拖入或粘贴的文件会先在你的电脑上检查，然后在远程机器上读取，所以只有当两台机器上都存在相同路径时才会附加。粘贴的图片和只在你电脑上的文件，目前还无法发送到远程对话中。要使用远程机器上的文件，请在消息中写出它的路径。
+- **连接承载着对话**。连接断开时，在那里运行的一轮会停止。如果想让工作在远程机器上继续运行，请改为在那台机器上的`tmux`或`screen`中运行`aristra`。
+- `ARISTRA_SSH`可以指定一个程序来代替`ssh`。

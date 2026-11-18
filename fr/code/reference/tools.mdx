@@ -1,0 +1,98 @@
+---
+title: "Outils"
+description: "Tous les outils qu'Aristra Code peut utiliser : les fichiers, les commandes, le travail en arrière-plan, la planification, le web, la mémoire, les agents, les workflows, MCP, et comment les autorisations s'appliquent à chacun."
+---
+
+Les outils sont les actions qu'Aristra Code peut effectuer. Chaque appel passe par vos [autorisations](/fr/code/configure/permissions) : il s'exécute, vous est soumis, passe par le relecteur du mode Auto, ou est refusé. Dans les règles d'autorisation, utilisez le nom de l'outil (`shell(npm test:*)`), un groupe (`read(...)` pour `read_file`, `list_dir`, `glob` et `grep` ; `edit(...)` pour `edit_file`, `write_file`, `notebook_edit` et `apply_patch`), ou les noms de Claude Code (`Bash`, `Edit`, `WebFetch`).
+
+Certains outils ne sont envoyés au modèle que lorsqu'il les cherche, pour que chaque requête reste légère. Ils sont marqués *à la demande*. Cela s'applique tant que `mcp.toolSearch` est activé, ce qui est le cas par défaut.
+
+## Fichiers
+
+| Outil | Effet | Demande en Manual |
+|---|---|---|
+| `read_file` | Lire un fichier, ou une plage de ses lignes. Les images aussi, ainsi que les fichiers PDF, Word, Excel, PowerPoint, OpenDocument, RTF et EPUB sous forme de texte, lus sur votre ordinateur | Non, dans les dossiers du chat |
+| `list_dir` | Lister un dossier | Non, dans les dossiers du chat |
+| `glob` | Trouver des fichiers par motif (100 à la fois, avec « Showing N of M ») | Non, dans les dossiers du chat |
+| `grep` | Chercher dans le contenu des fichiers | Non, dans les dossiers du chat |
+| `edit_file` | Remplacer du texte dans un fichier. Le fichier doit avoir été lu d'abord (les modèles Claude récents peuvent s'en dispenser pour un fichier qu'ils peuvent lire). Une modification d'un fichier changé entre-temps est refusée, sauf si elle s'applique encore exactement une fois | Oui |
+| `write_file` | Créer ou écraser un fichier | Oui |
+| `apply_patch` | Appliquer un patch au format de Codex. Les modèles GPT le reçoivent à la place de `edit_file` et `write_file` | Oui |
+| `notebook_edit` | Remplacer, insérer ou supprimer une cellule d'un notebook Jupyter (*à la demande*) | Oui |
+
+Une modification qui casse la syntaxe d'un fichier Python, JSON ou TOML est signalée au modèle. Les fichiers en UTF-8 ou en UTF-16 (little-endian, avec son indicateur d'ordre des octets) conservent leur encodage ; les outils de modification refusent un fichier dans tout autre encodage. Les outils de modification n'écrivent jamais dans un fichier Word, Excel, PowerPoint, OpenDocument, RTF ou EPUB, ni par-dessus un PDF, puisque le modèle n'en a vu que le texte : Aristra Code les modifie avec une bibliothèque, via une commande.
+
+## Commandes et travail en arrière-plan
+
+| Outil | Effet |
+|---|---|
+| `shell` | Exécuter une commande, dans le [bac à sable](/fr/code/configure/sandbox) quand il est activé (désactivé par défaut). Elle peut s'exécuter en arrière-plan, ou demander à s'exécuter hors du bac à sable avec une raison |
+| `process_list`, `process_read`, `process_stop` | Lister, lire et arrêter les commandes en arrière-plan, les agents, les exécutions de workflows et les moniteurs |
+| `monitor` | Exécuter un script dont les lignes de sortie arrivent dans le chat sous forme d'événements, pendant 30 minutes au plus (5 par défaut) (*à la demande*) |
+| `cron_create`, `cron_delete`, `cron_list` | Planifier des prompts dans ce chat, une fois ou selon un calendrier cron (*à la demande*) |
+| `schedule_wakeup` | Choisir quand revérifier, pour un `/loop` à son propre rythme |
+| `schedule_task` | Enregistrer une [tâche planifiée](/fr/code/guides/background) sur cet ordinateur, ou en modifier une. Vous demande toujours d'abord (*à la demande*) |
+| `scheduled_tasks` | Lister les tâches planifiées enregistrées, ou en mettre une en pause, la reprendre, l'exécuter ou la supprimer (*à la demande*) |
+| `session_search` | Chercher, lire ou lister vos anciens chats sur cet ordinateur, pour reprendre un travail précédent. Pas dans un chat incognito, dans un chat avec la mémoire désactivée, ni quand **Memory** ou **Search and reference past chats** est désactivé dans votre compte (*à la demande*) |
+| `push_notification` | Vous envoyer une notification sur cet ordinateur, quand vous êtes absent (*à la demande*) |
+| `enter_worktree`, `exit_worktree` | Déplacer le chat dans un worktree git et l'en ressortir, uniquement quand vous ou vos instructions le demandez (*à la demande*) |
+
+## Vous poser des questions
+
+| Outil | Effet |
+|---|---|
+| `ask_user_question` | Vous poser une à quatre questions à choix multiples. Toujours posées, dans tous les modes |
+| `enter_plan_mode`, `exit_plan_mode` | Passer en mode Plan, et vous demander d'approuver le plan |
+
+## Le web
+
+| Outil | Effet |
+|---|---|
+| `web_fetch` | Lire une page, récupérée depuis votre ordinateur. Les pages sont mises en cache pendant 15 minutes |
+| `web_search` | Chercher sur le web : avec votre propre clé Brave si vous en avez défini une, sinon via la recherche d'Aristra ($0.0075 par recherche sur votre solde ; consultez [Consommation et prix](/fr/account/usage)). Quand la recherche d'Aristra n'est pas disponible (solde épuisé, ou service en panne), la recherche publique gratuite d'Exa, Parallel, Firecrawl ou Keenable répond, avec seulement les mots de la recherche envoyés (ces services peuvent les conserver) ; désactivez ce comportement avec `web.keylessFallback: false` dans les paramètres. Jusqu'à 200 recherches par chat |
+| `cloud_browser_*` | Un navigateur qu'Aristra exécute dans le cloud, pour les pages qui en ont besoin |
+| `browser_*` | Le panneau navigateur d'Aristra Desktop : naviguer, revenir en arrière, lire, chercher, cliquer, taper, appuyer sur des touches, faire défiler, sélectionner et gérer les onglets, avec votre consentement site par site |
+
+## Agents et workflows
+
+| Outil | Effet |
+|---|---|
+| `agent` | Lancer un [sous-agent](/fr/code/guides/subagents) ou un fork en arrière-plan |
+| `send_message` | Envoyer un message à un sous-agent, ou à un autre de vos chats actifs sur cet ordinateur par son nom (*à la demande*) |
+| `list_agents` | Lister les agents de ce chat et vos autres chats actifs |
+| `workflow` | Exécuter un script de [workflow](/fr/code/guides/subagents), ou un workflow enregistré par son nom |
+| `skill` | Charger l'un de vos [skills](/fr/code/extend/skills) |
+| `task_create`, `task_get`, `task_update`, `task_list` | Tenir la liste de tâches du chat, pour les modèles qui en ont besoin (pas les modèles Claude actuels, sauf avec `ARISTRA_ENABLE_TODO_TOOLS=1`) ; `todo_write` les remplace avec `ARISTRA_ENABLE_TASKS=false` (*à la demande*) |
+| `update_plan`, `wrap_up` | Dans les chats créés dans Aristra Desktop : la liste de tâches affichée au-dessus de la zone de saisie, et le récapitulatif final avec les étapes suivantes |
+
+## Mémoire, fichiers de votre compte et Craft
+
+| Outil | Effet |
+|---|---|
+| `memory_save`, `memory_update`, `memory_forget`, `memory_search` | La [mémoire de votre compte](/fr/code/guides/memory) |
+| `library_search`, `library_read` | Les fichiers de votre compte (**Files** sur le site web) |
+| `library_save` | Enregistrer une copie d'un fichier de cet ordinateur dans les fichiers de votre compte, uniquement quand vous le demandez ; l'enregistrer de nouveau remplace cette copie |
+| `craft_list`, `craft_create`, `craft_read`, `craft_edit`, `craft_comment` | Les documents Craft, dans Aristra Desktop |
+| `present_files` | Vous montrer des fichiers sous forme de cartes |
+| `send_user_file` | Envoyer des fichiers sur votre téléphone ou le web, dans un chat partagé avec [Remote Control](/fr/code/remote-control) (*à la demande*) |
+
+## MCP, connecteurs et intelligence du code
+
+| Outil | Effet |
+|---|---|
+| `mcp__<server>__<tool>` | Un outil de l'un de vos [serveurs MCP](/fr/code/extend/mcp) |
+| `connectors__<app>__<action>` | Une action d'une app connectée à votre compte Aristra (nécessite un forfait avec les connecteurs) |
+| `tool_search`, `tool_describe`, `tool_call` | Trouver et utiliser les outils MCP et de connecteurs sans tous les envoyer à chaque tour |
+| `list_mcp_resources`, `read_mcp_resource` | Les ressources de vos serveurs MCP (*à la demande*) |
+| `refresh_mcp_tools` | Relister les outils de vos serveurs MCP, après la modification de l'un d'eux (*à la demande*) |
+| `lsp` | Aller aux définitions, trouver les références et lire les diagnostics via le serveur de langage d'un plugin (*à la demande*) |
+
+## Scripts
+
+| Outil | Effet |
+|---|---|
+| `structured_output` | Renvoyer la réponse conforme à `aristra run --json-schema` |
+
+## À quoi ressemble un résultat pour le modèle
+
+Un résultat d'outil de plus de 50 000 caractères, ou au-delà de la limite propre à l'outil, est enregistré dans un fichier que le modèle peut ouvrir, et le modèle voit un aperçu de 2 000 caractères. Le contenu venant de l'extérieur (pages, fichiers, sorties d'outils) parvient au modèle marqué comme donnée non fiable, et les valeurs qui ressemblent à des secrets sont masquées.
