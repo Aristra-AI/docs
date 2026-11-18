@@ -30,130 +30,692 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Aristra",
-        "groups": [
+        "language": "en",
+        "default": true,
+        "tabs": [
           {
-            "group": "Get started",
-            "pages": [
-              "index",
-              "quickstart",
-              "own-models",
-              "how-it-works",
-              "glossary"
+            "tab": "Aristra",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "index",
+                  "quickstart",
+                  "own-models",
+                  "how-it-works",
+                  "glossary"
+                ]
+              },
+              {
+                "group": "Use Aristra",
+                "pages": [
+                  "chats",
+                  "memory",
+                  "projects",
+                  "files",
+                  "craft",
+                  "connectors",
+                  "scheduled-tasks"
+                ]
+              },
+              {
+                "group": "Surfaces",
+                "pages": [
+                  "surfaces/web",
+                  "surfaces/desktop",
+                  "surfaces/aristra-code",
+                  "surfaces/telegram",
+                  "surfaces/cloud-computer"
+                ]
+              }
             ]
           },
           {
-            "group": "Use Aristra",
-            "pages": [
-              "chats",
-              "memory",
-              "projects",
-              "files",
-              "craft",
-              "connectors",
-              "scheduled-tasks"
+            "tab": "Aristra Code",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "code/index",
+                  "code/quickstart",
+                  "code/setup",
+                  "code/how-it-works"
+                ]
+              },
+              {
+                "group": "Where it runs",
+                "pages": [
+                  "code/terminal",
+                  "code/desktop",
+                  "code/editors",
+                  "code/remote-control",
+                  "code/cloud-chats",
+                  "code/non-interactive",
+                  "code/remote-machines"
+                ]
+              },
+              {
+                "group": "Use Aristra Code",
+                "pages": [
+                  "code/guides/chats",
+                  "code/guides/memory",
+                  "code/guides/context",
+                  "code/guides/git",
+                  "code/guides/background",
+                  "code/guides/goals",
+                  "code/guides/subagents"
+                ]
+              },
+              {
+                "group": "Extend",
+                "pages": [
+                  "code/extend/mcp",
+                  "code/extend/skills",
+                  "code/extend/hooks",
+                  "code/extend/plugins"
+                ]
+              },
+              {
+                "group": "Configure",
+                "pages": [
+                  "code/configure/settings",
+                  "code/configure/permissions",
+                  "code/configure/sandbox",
+                  "code/configure/models",
+                  "code/configure/terminal",
+                  "code/configure/managed-policy"
+                ]
+              },
+              {
+                "group": "Reference",
+                "pages": [
+                  "code/reference/cli",
+                  "code/reference/commands",
+                  "code/reference/tools",
+                  "code/reference/settings",
+                  "code/reference/environment"
+                ]
+              },
+              {
+                "group": "Help",
+                "pages": [
+                  "code/security",
+                  "code/troubleshooting"
+                ]
+              }
             ]
           },
           {
-            "group": "Surfaces",
-            "pages": [
-              "surfaces/web",
-              "surfaces/desktop",
-              "surfaces/aristra-code",
-              "surfaces/telegram",
-              "surfaces/cloud-computer"
+            "tab": "Account and plans",
+            "groups": [
+              {
+                "group": "Aristra One",
+                "pages": [
+                  "account/overview",
+                  "account/plans",
+                  "account/credits",
+                  "account/usage",
+                  "account/export"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Aristra Code",
-        "groups": [
+        "language": "zh",
+        "navbar": {
+          "primary": {
+            "type": "button",
+            "label": "打开Aristra",
+            "href": "https://app.aristralabs.com"
+          }
+        },
+        "tabs": [
           {
-            "group": "Get started",
-            "pages": [
-              "code/index",
-              "code/quickstart",
-              "code/setup",
-              "code/how-it-works"
+            "tab": "Aristra",
+            "groups": [
+              {
+                "group": "入门",
+                "pages": [
+                  "zh/index",
+                  "zh/quickstart",
+                  "zh/own-models",
+                  "zh/how-it-works",
+                  "zh/glossary"
+                ]
+              },
+              {
+                "group": "使用Aristra",
+                "pages": [
+                  "zh/chats",
+                  "zh/memory",
+                  "zh/projects",
+                  "zh/files",
+                  "zh/craft",
+                  "zh/connectors",
+                  "zh/scheduled-tasks"
+                ]
+              },
+              {
+                "group": "使用端",
+                "pages": [
+                  "zh/surfaces/web",
+                  "zh/surfaces/desktop",
+                  "zh/surfaces/aristra-code",
+                  "zh/surfaces/telegram",
+                  "zh/surfaces/cloud-computer"
+                ]
+              }
             ]
           },
           {
-            "group": "Where it runs",
-            "pages": [
-              "code/terminal",
-              "code/desktop",
-              "code/editors",
-              "code/remote-control",
-              "code/cloud-chats",
-              "code/non-interactive",
-              "code/remote-machines"
+            "tab": "Aristra Code",
+            "groups": [
+              {
+                "group": "入门",
+                "pages": [
+                  "zh/code/index",
+                  "zh/code/quickstart",
+                  "zh/code/setup",
+                  "zh/code/how-it-works"
+                ]
+              },
+              {
+                "group": "在哪里运行",
+                "pages": [
+                  "zh/code/terminal",
+                  "zh/code/desktop",
+                  "zh/code/editors",
+                  "zh/code/remote-control",
+                  "zh/code/cloud-chats",
+                  "zh/code/non-interactive",
+                  "zh/code/remote-machines"
+                ]
+              },
+              {
+                "group": "使用Aristra Code",
+                "pages": [
+                  "zh/code/guides/chats",
+                  "zh/code/guides/memory",
+                  "zh/code/guides/context",
+                  "zh/code/guides/git",
+                  "zh/code/guides/background",
+                  "zh/code/guides/goals",
+                  "zh/code/guides/subagents"
+                ]
+              },
+              {
+                "group": "扩展",
+                "pages": [
+                  "zh/code/extend/mcp",
+                  "zh/code/extend/skills",
+                  "zh/code/extend/hooks",
+                  "zh/code/extend/plugins"
+                ]
+              },
+              {
+                "group": "配置",
+                "pages": [
+                  "zh/code/configure/settings",
+                  "zh/code/configure/permissions",
+                  "zh/code/configure/sandbox",
+                  "zh/code/configure/models",
+                  "zh/code/configure/terminal",
+                  "zh/code/configure/managed-policy"
+                ]
+              },
+              {
+                "group": "参考",
+                "pages": [
+                  "zh/code/reference/cli",
+                  "zh/code/reference/commands",
+                  "zh/code/reference/tools",
+                  "zh/code/reference/settings",
+                  "zh/code/reference/environment"
+                ]
+              },
+              {
+                "group": "帮助",
+                "pages": [
+                  "zh/code/security",
+                  "zh/code/troubleshooting"
+                ]
+              }
             ]
           },
           {
-            "group": "Use Aristra Code",
-            "pages": [
-              "code/guides/chats",
-              "code/guides/memory",
-              "code/guides/context",
-              "code/guides/git",
-              "code/guides/background",
-              "code/guides/goals",
-              "code/guides/subagents"
-            ]
-          },
-          {
-            "group": "Extend",
-            "pages": [
-              "code/extend/mcp",
-              "code/extend/skills",
-              "code/extend/hooks",
-              "code/extend/plugins"
-            ]
-          },
-          {
-            "group": "Configure",
-            "pages": [
-              "code/configure/settings",
-              "code/configure/permissions",
-              "code/configure/sandbox",
-              "code/configure/models",
-              "code/configure/terminal",
-              "code/configure/managed-policy"
-            ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "code/reference/cli",
-              "code/reference/commands",
-              "code/reference/tools",
-              "code/reference/settings",
-              "code/reference/environment"
-            ]
-          },
-          {
-            "group": "Help",
-            "pages": [
-              "code/security",
-              "code/troubleshooting"
+            "tab": "账户与套餐",
+            "groups": [
+              {
+                "group": "Aristra One",
+                "pages": [
+                  "zh/account/overview",
+                  "zh/account/plans",
+                  "zh/account/credits",
+                  "zh/account/usage",
+                  "zh/account/export"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Account and plans",
-        "groups": [
+        "language": "ja",
+        "navbar": {
+          "primary": {
+            "type": "button",
+            "label": "Aristra を開く",
+            "href": "https://app.aristralabs.com"
+          }
+        },
+        "tabs": [
           {
-            "group": "Aristra One",
-            "pages": [
-              "account/overview",
-              "account/plans",
-              "account/credits",
-              "account/usage",
-              "account/export"
+            "tab": "Aristra",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/index",
+                  "ja/quickstart",
+                  "ja/own-models",
+                  "ja/how-it-works",
+                  "ja/glossary"
+                ]
+              },
+              {
+                "group": "Aristra を使う",
+                "pages": [
+                  "ja/chats",
+                  "ja/memory",
+                  "ja/projects",
+                  "ja/files",
+                  "ja/craft",
+                  "ja/connectors",
+                  "ja/scheduled-tasks"
+                ]
+              },
+              {
+                "group": "サーフェス",
+                "pages": [
+                  "ja/surfaces/web",
+                  "ja/surfaces/desktop",
+                  "ja/surfaces/aristra-code",
+                  "ja/surfaces/telegram",
+                  "ja/surfaces/cloud-computer"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Aristra Code",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/code/index",
+                  "ja/code/quickstart",
+                  "ja/code/setup",
+                  "ja/code/how-it-works"
+                ]
+              },
+              {
+                "group": "実行環境",
+                "pages": [
+                  "ja/code/terminal",
+                  "ja/code/desktop",
+                  "ja/code/editors",
+                  "ja/code/remote-control",
+                  "ja/code/cloud-chats",
+                  "ja/code/non-interactive",
+                  "ja/code/remote-machines"
+                ]
+              },
+              {
+                "group": "Aristra Code を使う",
+                "pages": [
+                  "ja/code/guides/chats",
+                  "ja/code/guides/memory",
+                  "ja/code/guides/context",
+                  "ja/code/guides/git",
+                  "ja/code/guides/background",
+                  "ja/code/guides/goals",
+                  "ja/code/guides/subagents"
+                ]
+              },
+              {
+                "group": "拡張",
+                "pages": [
+                  "ja/code/extend/mcp",
+                  "ja/code/extend/skills",
+                  "ja/code/extend/hooks",
+                  "ja/code/extend/plugins"
+                ]
+              },
+              {
+                "group": "設定",
+                "pages": [
+                  "ja/code/configure/settings",
+                  "ja/code/configure/permissions",
+                  "ja/code/configure/sandbox",
+                  "ja/code/configure/models",
+                  "ja/code/configure/terminal",
+                  "ja/code/configure/managed-policy"
+                ]
+              },
+              {
+                "group": "リファレンス",
+                "pages": [
+                  "ja/code/reference/cli",
+                  "ja/code/reference/commands",
+                  "ja/code/reference/tools",
+                  "ja/code/reference/settings",
+                  "ja/code/reference/environment"
+                ]
+              },
+              {
+                "group": "ヘルプ",
+                "pages": [
+                  "ja/code/security",
+                  "ja/code/troubleshooting"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "アカウントとプラン",
+            "groups": [
+              {
+                "group": "Aristra One",
+                "pages": [
+                  "ja/account/overview",
+                  "ja/account/plans",
+                  "ja/account/credits",
+                  "ja/account/usage",
+                  "ja/account/export"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "fr",
+        "navbar": {
+          "primary": {
+            "type": "button",
+            "label": "Ouvrir Aristra",
+            "href": "https://app.aristralabs.com"
+          }
+        },
+        "tabs": [
+          {
+            "tab": "Aristra",
+            "groups": [
+              {
+                "group": "Premiers pas",
+                "pages": [
+                  "fr/index",
+                  "fr/quickstart",
+                  "fr/own-models",
+                  "fr/how-it-works",
+                  "fr/glossary"
+                ]
+              },
+              {
+                "group": "Utiliser Aristra",
+                "pages": [
+                  "fr/chats",
+                  "fr/memory",
+                  "fr/projects",
+                  "fr/files",
+                  "fr/craft",
+                  "fr/connectors",
+                  "fr/scheduled-tasks"
+                ]
+              },
+              {
+                "group": "Surfaces",
+                "pages": [
+                  "fr/surfaces/web",
+                  "fr/surfaces/desktop",
+                  "fr/surfaces/aristra-code",
+                  "fr/surfaces/telegram",
+                  "fr/surfaces/cloud-computer"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Aristra Code",
+            "groups": [
+              {
+                "group": "Premiers pas",
+                "pages": [
+                  "fr/code/index",
+                  "fr/code/quickstart",
+                  "fr/code/setup",
+                  "fr/code/how-it-works"
+                ]
+              },
+              {
+                "group": "Où il s'exécute",
+                "pages": [
+                  "fr/code/terminal",
+                  "fr/code/desktop",
+                  "fr/code/editors",
+                  "fr/code/remote-control",
+                  "fr/code/cloud-chats",
+                  "fr/code/non-interactive",
+                  "fr/code/remote-machines"
+                ]
+              },
+              {
+                "group": "Utiliser Aristra Code",
+                "pages": [
+                  "fr/code/guides/chats",
+                  "fr/code/guides/memory",
+                  "fr/code/guides/context",
+                  "fr/code/guides/git",
+                  "fr/code/guides/background",
+                  "fr/code/guides/goals",
+                  "fr/code/guides/subagents"
+                ]
+              },
+              {
+                "group": "Étendre",
+                "pages": [
+                  "fr/code/extend/mcp",
+                  "fr/code/extend/skills",
+                  "fr/code/extend/hooks",
+                  "fr/code/extend/plugins"
+                ]
+              },
+              {
+                "group": "Configurer",
+                "pages": [
+                  "fr/code/configure/settings",
+                  "fr/code/configure/permissions",
+                  "fr/code/configure/sandbox",
+                  "fr/code/configure/models",
+                  "fr/code/configure/terminal",
+                  "fr/code/configure/managed-policy"
+                ]
+              },
+              {
+                "group": "Référence",
+                "pages": [
+                  "fr/code/reference/cli",
+                  "fr/code/reference/commands",
+                  "fr/code/reference/tools",
+                  "fr/code/reference/settings",
+                  "fr/code/reference/environment"
+                ]
+              },
+              {
+                "group": "Aide",
+                "pages": [
+                  "fr/code/security",
+                  "fr/code/troubleshooting"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Compte et forfaits",
+            "groups": [
+              {
+                "group": "Aristra One",
+                "pages": [
+                  "fr/account/overview",
+                  "fr/account/plans",
+                  "fr/account/credits",
+                  "fr/account/usage",
+                  "fr/account/export"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "navbar": {
+          "primary": {
+            "type": "button",
+            "label": "Abrir Aristra",
+            "href": "https://app.aristralabs.com"
+          }
+        },
+        "tabs": [
+          {
+            "tab": "Aristra",
+            "groups": [
+              {
+                "group": "Primeros pasos",
+                "pages": [
+                  "es/index",
+                  "es/quickstart",
+                  "es/own-models",
+                  "es/how-it-works",
+                  "es/glossary"
+                ]
+              },
+              {
+                "group": "Usar Aristra",
+                "pages": [
+                  "es/chats",
+                  "es/memory",
+                  "es/projects",
+                  "es/files",
+                  "es/craft",
+                  "es/connectors",
+                  "es/scheduled-tasks"
+                ]
+              },
+              {
+                "group": "Superficies",
+                "pages": [
+                  "es/surfaces/web",
+                  "es/surfaces/desktop",
+                  "es/surfaces/aristra-code",
+                  "es/surfaces/telegram",
+                  "es/surfaces/cloud-computer"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Aristra Code",
+            "groups": [
+              {
+                "group": "Primeros pasos",
+                "pages": [
+                  "es/code/index",
+                  "es/code/quickstart",
+                  "es/code/setup",
+                  "es/code/how-it-works"
+                ]
+              },
+              {
+                "group": "Dónde se ejecuta",
+                "pages": [
+                  "es/code/terminal",
+                  "es/code/desktop",
+                  "es/code/editors",
+                  "es/code/remote-control",
+                  "es/code/cloud-chats",
+                  "es/code/non-interactive",
+                  "es/code/remote-machines"
+                ]
+              },
+              {
+                "group": "Usar Aristra Code",
+                "pages": [
+                  "es/code/guides/chats",
+                  "es/code/guides/memory",
+                  "es/code/guides/context",
+                  "es/code/guides/git",
+                  "es/code/guides/background",
+                  "es/code/guides/goals",
+                  "es/code/guides/subagents"
+                ]
+              },
+              {
+                "group": "Ampliar",
+                "pages": [
+                  "es/code/extend/mcp",
+                  "es/code/extend/skills",
+                  "es/code/extend/hooks",
+                  "es/code/extend/plugins"
+                ]
+              },
+              {
+                "group": "Configurar",
+                "pages": [
+                  "es/code/configure/settings",
+                  "es/code/configure/permissions",
+                  "es/code/configure/sandbox",
+                  "es/code/configure/models",
+                  "es/code/configure/terminal",
+                  "es/code/configure/managed-policy"
+                ]
+              },
+              {
+                "group": "Referencia",
+                "pages": [
+                  "es/code/reference/cli",
+                  "es/code/reference/commands",
+                  "es/code/reference/tools",
+                  "es/code/reference/settings",
+                  "es/code/reference/environment"
+                ]
+              },
+              {
+                "group": "Ayuda",
+                "pages": [
+                  "es/code/security",
+                  "es/code/troubleshooting"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Cuenta y planes",
+            "groups": [
+              {
+                "group": "Aristra One",
+                "pages": [
+                  "es/account/overview",
+                  "es/account/plans",
+                  "es/account/credits",
+                  "es/account/usage",
+                  "es/account/export"
+                ]
+              }
             ]
           }
         ]
