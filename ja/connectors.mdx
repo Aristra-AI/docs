@@ -1,0 +1,36 @@
+---
+title: "コネクター"
+description: "Gmail、Google Calendar、Google Drive、Slack、Notion、GitHub などを接続し、チャット、Aristra Code、スケジュールタスクから Aristra がそれらのアプリの情報を読み、操作できるようにします。プランが必要です。"
+---
+
+コネクターは、使っているアプリを Aristra のアカウントにつなぎ、Aristra がそのアプリの情報を読んで操作できるようにします。たとえば、メールを探す、カレンダーに予定を追加する、Notion のページを更新する、GitHub の issue を作成するといった操作です。コネクターは[プラン](/ja/account/plans)に含まれます。
+
+## 対応アプリ
+
+Gmail、Google Calendar、Google Drive、Google Docs、Google Sheets、Outlook、Slack、Discord、Notion、Airtable、Linear、Jira、Trello、GitHub、Sentry、Datadog、Databricks、Supabase、Figma、Canva、Dropbox、Calendly、Zoom、YouTube、HubSpot、Attio、Mailchimp、Stripe、LinkedIn、Facebook、Reddit、X。
+
+## アプリを接続する
+
+1. ウェブサイトで **Customize › Connectors** を開きます。
+2. アプリを選び、**Connect** を選択します。
+3. アプリのページでサインインし、アクセスを許可します。完了すると Connectors に戻ります。
+
+アクセスの期限が切れたアプリには **Needs reconnect** と表示されるので、**Reconnect** を選択します。**Disconnect** を選択すると、そのアプリへの Aristra のアクセスが削除されます。
+
+アプリの操作ごとに、**Always allow**、**Needs approval**、**Blocked** のいずれかを選べます。
+
+## Aristra がコネクターを使う場所
+
+- ウェブサイト、スマートフォン、Aristra Desktop の Chat タブ、[Telegram](/ja/surfaces/telegram) の**チャット**。
+- サインインしたコンピューター上の **[Aristra Code](/ja/surfaces/aristra-code)**。各呼び出しは Aristra のサーバーが行うため、アプリのサインイン情報がコンピューターに届くことはありません。
+- **[スケジュールタスク](/ja/scheduled-tasks)**。接続したアプリで何かが起きたときに開始することもできます。
+
+## チャット用の MCP サーバー
+
+**Customize › Connectors** では、自分の MCP サーバーをアドレスで追加することもできます。ヘッダーか、サーバー自体のサインインを使います。信頼するまでは、ツールを実行するたびに Aristra が確認を求めます。信頼すると、読み取り専用のツールは確認なしで実行されます。ウェブサイトと Telegram のチャットで使われます。
+
+Aristra Code 用の MCP サーバーとスキルは、コンピューター上で設定します。[MCP サーバー](/ja/code/extend/mcp)と[スキル](/ja/code/extend/skills)を参照してください。
+
+## 他の AI アプリから Aristra を使う
+
+**Customize › MCP** では、ChatGPT、Claude など、カスタムコネクターを追加できるアシスタントに貼り付けるアドレスが表示されます。これを使うと、そのアシスタントが Aristra のメモリとファイルを使えるようになります。利用料金は残高から支払われます。

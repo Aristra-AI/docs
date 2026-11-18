@@ -1,0 +1,133 @@
+---
+title: "サンドボックス"
+description: "既定でオフのサンドボックスについて、/sandbox や Settings でオンにする方法と、macOS と Linux でコマンドを閉じ込めるしくみ（読み取り、書き込み、接続できる範囲、ネットワークの確認、localhost、独自のプロキシ、サンドボックスの外でのコマンドの実行）を説明します。"
+---
+
+サンドボックスは既定でオフです。Aristra Code がコンピューター上で実行するコマンドは自分と同じアクセス権で動き、どれを確認なしで実行し、どれで先に確認を求めるかは[権限のチェック](/ja/code/configure/permissions)で決まります。
+
+オンにすると、コマンドはサンドボックス内で実行されます。承認は「これを実行してよいか」に答えるもので、サンドボックスは実行後にコマンドが何にアクセスできるかを決めます。サンドボックス内のコマンドはチャットのフォルダーにしか書き込めず、許可したホストにしか接続できないため、確認なしで実行されます（`sandbox.autoAllowBashIfSandboxed`。既定でオン）。拒否ルールと確認ルールは引き続き適用され、一部のコマンドには通常のチェックが行われます。先頭で不明な変数を設定するもの、`NAME=value` の引数を渡すもの、他のユーザーのホームを指定するもの、`/dev/tcp` や `/dev/udp` にリダイレクトするもの、ファイルの削除とフォルダーの移動の両方を行うものです。危険な `rm` コマンドと、確認するには複雑すぎるコマンドは、常に確認を求めます。
+
+## オンにする
+
+- **ターミナルで**：`/sandbox` を実行し、モードを選びます。**with auto-allow**（サンドボックス内のコマンドは確認なしで実行）、**with regular permissions**（サンドボックスがない場合と同じく確認を求める）、**No sandbox** のいずれかです。選択はフォルダーの `.aristra/settings.local.json` に保存されます。`/sandbox exclude "npm run test:*"` で、常にサンドボックスの外で実行するコマンドのパターンを同じファイルに追加します。チームの[ポリシー](/ja/code/configure/managed-policy)でサンドボックスが設定されている場合、`/sandbox` はそのことを表示するだけで、何も変更しません。
+- **Aristra Desktop で**：Settings > Permissions > **Run commands in a sandbox** で、すべてのフォルダーについてオンにします。
+- **設定で**：`"sandbox": {"enabled": true}`。
+
+サンドボックスを起動できない場合（たとえば Linux で bubblewrap がない場合）、コマンドはサンドボックスの外で実行され、チャットに一度そのことが表示されます。`sandbox.failIfUnavailable` を設定すると、ターン自体が始まりません。
+
+## コマンドができること
+
+| | 許可 | 拒否 |
+|---|---|---|
+| **読み取り** | `read(...)` の拒否ルールや `sandbox.filesystem.denyRead` で指定したもの以外のすべて | それらのパス |
+| **書き込み** | チャットのフォルダー、`$TMPDIR`、`edit(...)` の許可ルールと `sandbox.filesystem.allowWrite` のパス | それ以外のすべて |
+| **ネットワーク** | サンドボックスのプロキシを経由。許可したホストには接続でき、それ以外は確認を求めます | すべての直接接続と、許可しない限り `localhost` |
+
+**ルールにかかわらず書き込めないもの**：設定ファイル、フォルダーの `.aristra/settings*.json` とスキル、シェルの起動ファイル（`.bashrc`、`.zshrc` など）、`.claude/skills`、`.claude/commands`、`.claude/agents`、`.gitconfig`、`.gitmodules`、`.ripgreprc`、`.mcp.json`、フォルダーのルートにあるベアリポジトリのファイル、`.vscode`、`.idea`、`.git/hooks`、そして `sandbox.filesystem.allowGitConfig` がオンでない限り `.git/config`。`.git` のそれ以外の部分は書き込めるため、git は動作します。コマンドがこれらやその上位のフォルダーの名前を変更することもできません。
+
+## コマンドの実行のしかた
+
+- **シェルの環境で実行されます**。Aristra Code は `.zshrc`（または `.bashrc`）を一度読み込み、その関数、エイリアス、`PATH`、変数を保持します。そのため、Aristra Desktop がランタイムを起動した場合でも、`nvm`、`pyenv`、Homebrew のツール、自分のエイリアスが動作します。
+- **`$TMPDIR` はコマンド間で保持されます**。あるコマンドがそこに残したファイルは、次のコマンドでも使えます。macOS では `/tmp` 自体には書き込めないため、Aristra Code は `$TMPDIR` を使います。
+- **タイムアウト**：コマンドの既定のタイムアウトは 2 分です（モデルが求めれば最大 10 分）。タイムアウトの時点でまだ実行中のコマンドは、停止されずにバックグラウンドに移り、エージェントはそれまでの出力を受け取ります。[バックグラウンド処理](/ja/code/guides/background)を参照してください。
+- **停止**：停止されたコマンド（Esc、`/tasks`、チャットの削除、ランタイムの停止）は、それが起動したものもすべて含めて終了します。SIGTERM を送り、2 秒後に SIGKILL を送ります。ランタイム自体がクラッシュした場合も、そのコマンドが起動したものは終了します。
+
+## ネットワーク
+
+サンドボックス内のコマンドは、コンピューター上で動くサンドボックスのプロキシを経由してのみネットワークに接続します。その環境では、よく使われるツールがプロキシを向くように設定されています（`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、ssh 経由の git など）。各ホストについて、次のように判断します。
+
+1. `web_fetch(domain:...)` の拒否ルールで指定したホストは拒否されます。
+2. `sandbox.network.allowedDomains` か、`web_fetch(domain:...)` の許可ルールにあるホストは通過します。`*.example.com` はサブドメインも対象にします。
+3. それ以外のホストは、コマンドのステップで確認を求めます。
+
+   > **Network request outside of sandbox**
+   > Host: registry.npmjs.org
+   > Do you want to allow this connection?
+   > 1. Yes
+   > 2. Yes, and don't ask again for registry.npmjs.org
+   > 3. No, and tell Aristra what to do differently (esc)
+
+**Yes** はその接続を通過させます。以降の接続では再び確認を求めます。**Yes, and don't ask again** は、`web_fetch(domain:registry.npmjs.org)` をフォルダーの `.aristra/settings.local.json` に保存します。**No** は接続を拒否し、コマンドには失敗が返されます。
+
+プロキシは、自分のコンピューター、リンクローカル、クラウドのメタデータのアドレスに解決される名前を拒否します。通信を復号することはありません。スクリプトとスケジュールタスクでは、どのルールにも該当しないホストは、確認を求めずに拒否されます。
+
+サンドボックスが接続を拒否すると、コマンドの結果の末尾に拒否した内容が付き、エージェントはそれを読みます。
+
+```text
+<sandbox_violations>
+deny network-outbound example.org:443 (user denied)
+</sandbox_violations>
+```
+
+## コマンドに localhost を使わせる
+
+開発サーバー、テスト用のフィクスチャサーバー、ローカルのデータベースはポートで待ち受ける必要がありますが、サンドボックスは既定でそれを拒否します。
+
+```sh
+aristra config set sandbox.network.allowLocalBinding true
+```
+
+これにより、コマンドは `localhost` で待ち受けたり接続したりできるようになりますが、それ以外は何も許可されません。Linux ではこの設定は効果がありません。各コマンドが独自のネットワークを持つため、自分自身の `localhost` では待ち受けたり接続したりできますが、コンピューターの `localhost` のサーバーや、別のコマンドが起動したサーバーには接続できません。
+
+## 独自のプロキシを使う
+
+ネットワークが組織のフィルタリングプロキシを経由している場合は、次のようにします。
+
+```sh
+aristra config set sandbox.network.httpProxyPort 8080
+```
+
+すると、コマンドの HTTP と HTTPS は `localhost:8080` に送られ、何に接続できるかはそのプロキシが決めます。`sandbox.network.socksProxyPort` は SOCKS について同じことをします。
+
+## サンドボックスの外でコマンドを実行する
+
+コマンドによっては、サンドボックスが拒否するものが必要です。フォルダーの外への書き込み、プロキシの設定を無視するツール、Unix ソケット上のサービス（macOS）などです。その場合、Aristra Code は理由を添えて、1 つのコマンドをサンドボックスの外で実行するよう求めることがあります。そのコマンドには、サンドボックスの外のコマンドに対する通常のチェックが行われます。Manual では、読み取りだけのものかルールで許可されたものでない限り確認を求め、Auto では確認が必要なものをレビュアーに回し、Read only では拒否します。
+
+- `sandbox.allowUnsandboxedCommands: false` でこれをオフにします。
+- `sandbox.excludedCommands` には、常にサンドボックスの外で実行するコマンド（`docker:*`、`make`）を列挙します。これらにもチェックは行われます。これは利便性のためのもので、セキュリティの境界ではありません。
+- `aristra run --dangerously-skip-sandbox` は、スクリプト実行のすべてのコマンドをサンドボックスの外で実行します。CI のランナー、コンテナー、使い捨ての VM など、マシン自体が境界になっている場合にだけ使ってください。
+
+## macOS
+
+サンドボックスは Seatbelt で、既定ですべて拒否します。
+
+- **キーチェーンには**サンドボックス内からアクセスできません。git のキーチェーン認証情報ヘルパーは保存されたログイン情報を読めないため、それが必要なプッシュやフェッチは、サンドボックスの外での実行を求めます。
+- **システムを通じた証明書の確認**：`pip` 24.2 以降と、`gh` などの Go のツールは、サンドボックスが閉じている macOS のシステムサービスを通じて証明書を確認するため、サンドボックス内では証明書エラーやネットワークエラーで失敗します。Aristra Code に見えるのはそのエラーだけで、理由はわかりません。そのため、Aristra Code が自分からサンドボックスの外での実行を求めない場合は、そうするよう伝えてください。`sandbox.enableWeakerNetworkIsolation: true` にすると、代わりにすべてのコマンドに対してそのサービスが開きますが、そこを通じた抜け道も開くことになります。
+
+## Linux
+
+サンドボックスは bubblewrap（`bwrap`）です。書き込めるパス以外のファイルシステム全体を読み取り専用にし、独自のネットワーク名前空間を持ち、ネットワークはプロキシに中継されます。起動できない場合、コマンドはサンドボックスの外で実行され、チャットに一度その理由が表示されます（`sandbox.failIfUnavailable` の場合はターンが始まりません）。`aristra doctor` では Sandbox の下に表示されます。
+
+| 問題 | 解決方法 |
+|---|---|
+| bubblewrap がインストールされていない | `sudo apt-get install bubblewrap` または `sudo dnf install bubblewrap` |
+| bubblewrap が必要とするユーザー名前空間を、システムがブロックしている（Ubuntu 24.04 以降） | AppArmor のプロファイルで bubblewrap に許可します |
+| コンテナー内で、bubblewrap が `/proc` をマウントできない | コンテナーが境界になっている場合は、`sandbox.enableWeakerNestedSandbox: true` を設定します |
+
+## MCP サーバー
+
+プログラムとして動く MCP サーバーは、サンドボックスなしで起動します。エントリに `"sandbox": true` と書いたサーバーには、専用のサンドボックスが割り当てられます。[MCP サーバー](/ja/code/extend/mcp)を参照してください。
+
+## 設定
+
+サンドボックスの設定は、自分の設定、信頼したフォルダーの設定、管理ポリシーから読み込まれます。リストはそれらをまたいで結合されます。
+
+| キー | 既定値 | 動作 |
+|---|---|---|
+| `sandbox.enabled` | `false` | コマンドをサンドボックス内で実行します（`/sandbox`） |
+| `sandbox.failIfUnavailable` | `false` | `enabled` と一緒に使うと、サンドボックスを起動できないときに、コマンドを外で実行する代わりにターンを始めません |
+| `sandbox.autoAllowBashIfSandboxed` | `true` | 拒否ルールや確認ルールの対象でない限り、サンドボックス内のコマンドを確認なしで実行します |
+| `sandbox.allowUnsandboxedCommands` | `true` | Aristra Code がサンドボックスの外でのコマンドの実行を求めてよいかどうか |
+| `sandbox.excludedCommands` | `[]` | 常にサンドボックスの外で、チェックを経て実行するコマンド |
+| `sandbox.filesystem.allowWrite`、`denyWrite`、`denyRead`、`allowRead` | `[]` | 追加で開く、または閉じるパス |
+| `sandbox.filesystem.allowGitConfig` | `false` | コマンドが `.git/config` に書き込めるようにします |
+| `sandbox.network.allowedDomains` | `[]` | コマンドが確認なしで接続できるホスト |
+| `sandbox.network.allowLocalBinding` | `false` | コマンドが `localhost` で待ち受けたり接続したりできるようにします |
+| `sandbox.network.httpProxyPort`、`socksProxyPort` | なし | 代わりに、コマンドの通信を独自のプロキシに送ります |
+| `sandbox.network.allowUnixSockets` | `[]` | コマンドが接続してよい Unix ソケット（macOS） |
+| `sandbox.ignoreViolations` | `{}` | エージェントに報告しない拒否 |
+| `sandbox.enableWeakerNestedSandbox` | `false` | `/proc` をマウントできないコンテナー内で使います（Linux） |
+| `sandbox.enableWeakerNetworkIsolation` | `false` | 独自の認証局を持つプロキシの背後で `gh` などの Go のツールを使うために、macOS の証明書サービスを開きます |
+| `sandbox.network.allowAllUnixSockets` | `false` | コマンドが任意の Unix ソケットに接続できるようにします |
+
+管理ポリシーには、`sandbox.filesystem.allowManagedReadPathsOnly` と `sandbox.network.allowManagedDomainsOnly` もあります。[管理ポリシー](/ja/code/configure/managed-policy)を参照してください。

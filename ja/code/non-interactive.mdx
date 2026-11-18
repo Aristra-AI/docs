@@ -1,0 +1,155 @@
+---
+title: "非対話モード"
+description: "aristra run または aristra -p で、スクリプトや CI から Aristra Code を実行します。1 つのターン、テキストまたは JSON の出力、判定に使える終了ステータスについて説明します。"
+---
+
+`aristra run`（または `aristra -p`）は、1 つのターンを実行して終了します。確認のために待機することはありません。承認が必要なステップは拒否され、モデルにはその理由が伝えられ、実行はステータス 3 で終了します。
+
+```sh
+aristra run "fix the failing test"
+git diff | aristra run "write a commit message for this" -o json
+aristra run -o stream-json --partial --permission-mode auto --allow "shell(npm test:*)" "make the tests pass"
+```
+
+標準入力にパイプで渡したテキストは、空行を挟んでプロンプトのあとに追加されます。プロンプトを指定している場合、3 秒間何も送られてこない標準入力はスキップされます（標準エラー出力にその旨が表示されます）。`< /dev/null` を付けると待機を省略できます。
+
+`aristra run` で始めた新しいチャットはそのフォルダーを信頼するため、Claude Code の `-p` と同じく、フォルダーの `.aristra` の設定が適用されます。
+
+## オプション
+
+| オプション | 意味 |
+|---|---|
+| `-o, --output text\|json\|stream-json` | `text` は最終的な返信を出力します。`json` は 1 つの `result` オブジェクトを出力します。`stream-json` は、イベントを発生した順に 1 行 1 つの JSON オブジェクトで出力します（`--output-format` も使えます） |
+| `--partial` | `stream-json` と一緒に使うと、テキストが書かれるたびに `delta` イベントも出力します |
+| `-m, --model <id>`、`--source <id>` | モデルとその提供元。指定しない場合は既定のものを使います |
+| `--permission-mode <mode>` | `manual`（または `default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`、`read_only` |
+| `--permission-prompts host\|none` | 確認が必要なステップの扱い。どちらも、応答する人がいないため拒否します |
+| `--allow-dangerously-skip-permissions` | あとからチャットを `bypassPermissions` に切り替えられるようにします |
+| `--allow <rule>`、`--deny <rule>` | この実行だけに適用する権限のルール。`shell(npm test *)` などです。繰り返し指定できます。どこかに拒否があれば、それが優先されます |
+| `--add-dir <path>` | チャットが作業してよい追加のフォルダー。繰り返し指定できます |
+| `--folder <path>` | 作業するフォルダー。既定は現在のフォルダーです |
+| `--plugin-dir <path>` | この実行に限り、フォルダーか `.zip` からプラグインを読み込みます。複数のプラグインを含むフォルダーなら、それぞれを読み込みます。繰り返し指定できます |
+| `-c, --continue`、`-r, --resume <id>` | このフォルダーの最新のチャット、または指定したチャットで続けます |
+| `--fork-session` | `--continue` または `--resume` と一緒に使うと、チャットを元のまま残し、コピーで続けます |
+| `--no-session-persistence` | 何も保存しません。実行が終わると、実行のチャットは削除されます |
+| `-w, --worktree [name]` | リポジトリの git ワークツリーで作業します。作成または再利用し、終了後も残します |
+| `--max-turns <n>` | モデルのラウンドが `n` 回に達したら終了します（`ARISTRA_MAX_TURNS` も使えます） |
+| `--run-budget <seconds>` | この時間の 80% に達すると、エージェントに調査をやめて今ある成果を提出するよう伝えます |
+| `--json-schema <schema>` | 返信は、この JSON Schema に一致する値でなければなりません。値は `structuredOutput` として返されます |
+| `--system-prompt <text>`、`--system-prompt-file <path>` | 新しいチャットで、Aristra のシステムプロンプトを置き換えます。`AGENTS.md` は引き続き適用されます |
+| `--append-system-prompt <text>`、`--append-system-prompt-file <path>` | 新しいチャットのシステムプロンプトの末尾に追加します |
+| `--agent <agent>` | 新しいチャットを、自分の[カスタムエージェント](/ja/code/guides/subagents)の 1 つとして実行します |
+| `--settings <file-or-json>` | この実行だけに使う追加の設定。自分の設定とプロジェクトの設定より優先されます |
+| `--setting-sources <list>` | 読み込む設定ファイル。`user`、`project`、`local` をカンマ区切りで指定します。何も読まない場合は `""` |
+| `--mcp-config <config>` | この実行で使う MCP サーバー。JSON かファイルで `{"mcpServers": {...}}` を指定します。繰り返し指定できます |
+| `--strict-mcp-config` | `--mcp-config` のサーバーだけを使います |
+| `--input-format stream-json` | 標準入力から、1 行 1 つの JSON オブジェクトでユーザーメッセージを読み込みます。それぞれがターンを始めます |
+| `--usage-file <path>` | 実行のトークン使用量を JSON でそこに書き込みます |
+| `--no-daemon` | 実行とともに終了する独自のランタイムを使います |
+| `--dangerously-skip-sandbox` | サンドボックスの外でコマンドを実行します。CI のランナー、コンテナー、VM など、マシン自体が境界になっている場合にだけ使ってください |
+| `--dangerously-skip-permissions` | `bypassPermissions` で開始します。`IS_SANDBOX=1` でない限り、root では拒否されます |
+| `--verbose` | `--output json` と一緒に使うと、すべてのイベントを 1 つの JSON 配列で出力します |
+
+`run` の前に `--remote <host>` を付けると、SSH 経由で別のマシンで実行します。[リモートマシン](/ja/code/remote-machines)を参照してください。
+
+## CI で使う
+
+Aristra にサインインしたコンピューターで `aristra setup-token` を実行すると、1 年間、アカウントの Aristra の残高でモデルを実行することだけができるトークンが表示されます。これを `ARISTRA_TOKEN` という名前で CI のシークレットに保存します。
+
+```sh
+export ARISTRA_TOKEN=...   # from aristra setup-token
+aristra run --source aristra "summarize the failing tests" < test-output.txt
+```
+
+取り消すには、Aristra のウェブサイトでそのデバイスをサインアウトします。
+
+<Warning>
+CI にはステップを承認する人がいません。`--allow` でジョブに必要なものだけを正確に許可するか、`--permission-mode auto` で Aristra のレビュアーに判断を任せ、終了ステータスを確認してください。
+</Warning>
+
+## 終了ステータス
+
+| ステータス | 条件 |
+|---|---|
+| 0 | ターンが完了した |
+| 1 | 失敗した。エラー、ランタイムに接続できない、`--max-turns` に達した、`--json-schema` に一致する値がない |
+| 2 | 使い方の誤り。不明なオプション、プロンプトがない |
+| 3 | 完了したが、承認できる人がいなかったため、少なくとも 1 つのステップが拒否された |
+| 130 | Ctrl+C で停止した |
+
+`--permission-mode dontAsk` では、確認が必要なものは拒否されますが数に入らないため、ステータスは 0 のままです。
+
+拒否ルールで拒否されたステップでは、ステータスは 3 になりません。ルールが記述どおりに動作しただけだからです。どちらの種類も `result.permissionDenials` に一覧表示されます。`--permission-mode auto` では、確認が必要なものをレビュアーが判断します。レビュアーが 3 ステップ連続で、またはチャット内で 20 ステップをブロックすると、実行はステータス 1 で停止します。
+
+## 標準入力からのメッセージ
+
+`--output stream-json --input-format stream-json` を使うと、標準入力の各行が 1 つのメッセージになり、同じチャットでターンが順に実行されます。
+
+```json
+{"type":"user","message":{"role":"user","content":"Fix the failing test"}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Now run the linter"}]}}
+{"type":"control_request","request_id":"r1","request":{"subtype":"interrupt"}}
+```
+
+`interrupt` は実行中のターンを停止し、`end_session` はターンが終わった時点で実行を終了します。標準入力が終わると実行も終わります。
+
+## 出力イベント
+
+すべての `stream-json` イベントには、`"schema": "aristra.run.v1"` と `type` があります。フィールドは今後のバージョンで追加されることがありますが、削除や名前の変更はされません。
+
+<AccordionGroup>
+  <Accordion title="init：実行で使われるもの">
+    ```json
+    {"schema":"aristra.run.v1","type":"init","version":"1.2.1","session":"ses_8f1c…","source":"aristra","model":"gemini-3.8-flash","payer":"aristra_credits","mode":"default","folder":"/home/ci/repo","sandbox":true}
+    ```
+
+    `payer` は、`aristra_credits`（Aristra の残高。スクリプトのためにこの名前のままです）、`own_key`、`subscription`、`local`、`none` のいずれかです。
+  </Accordion>
+  <Accordion title="item：ターン内の何かが完了した">
+    `item.kind` は、`user`、`reply`、`reasoning`、`step`、`notice`、`compaction` のいずれかです。ステップには、`tool`、`type`、`title`、`status`、`output`、`durationMs`、加えたファイルの `changes`、`attachments`（出力が長かった場合の出力全体）、Auto モードではレビュアーの `review` があります。
+
+    ```json
+    {"schema":"aristra.run.v1","type":"item","item":{"kind":"step","id":"itm_51a2…","tool":"shell","type":"command","title":"npm test","status":"completed","output":"Tests: 42 passed","durationMs":5120}}
+    ```
+  </Accordion>
+  <Accordion title="delta：書かれていくテキスト（--partial 使用時）">
+    返信に追加されるテキスト（`stream` は `text`）、推論の要約（`reasoning`）、ステップの出力（`output`）を、書かれるたびに出力します。`text` には新しい部分だけが入ります。
+
+    ```json
+    {"schema":"aristra.run.v1","type":"delta","item":"itm_9c0e…","stream":"text","text":"The test failed because "}
+    ```
+  </Accordion>
+  <Accordion title="approval：確認が必要だったステップと、その判断">
+    ```json
+    {"schema":"aristra.run.v1","type":"approval","step":"itm_77b3…","tool":"shell","title":"git push","decision":"declined","reason":"No one was there to approve this (an unattended run), so it did not run. This command requires approval"}
+    ```
+  </Accordion>
+  <Accordion title="notice：ステップではない実行の知らせ">
+    たとえば、モデルの呼び出しを再試行しようとしていることなどです。`level` と `text` があります。テキストモードでは標準エラー出力に出力されます。
+  </Accordion>
+  <Accordion title="control_response：制御リクエストへの応答">
+    `--input-format stream-json` を使うと、各制御リクエストへの応答が出力されます。`requestId`、`subtype`（`success` または `error`）、`error` があります。
+  </Accordion>
+  <Accordion title="result：最後に出力（--output json では唯一の行）">
+    ```json
+    {"schema":"aristra.run.v1","type":"result","status":"completed","exitCode":0,"session":"ses_8f1c…","turn":"trn_2d4a…","result":"The test now passes: …","usage":{"input":18234,"output":912,"cached":12000,"cacheWrite":0,"reasoning":256},"payer":"aristra_credits","durationMs":48211,"unanswered":0,"permissionDenials":[]}
+    ```
+
+    | フィールド | 意味 |
+    |---|---|
+    | `status` | `completed`、`failed`、`interrupted` のいずれか |
+    | `exitCode` | プロセスの終了ステータス |
+    | `session`、`turn` | `--resume` と `aristra attach` に使う ID |
+    | `result` | 最終的な返信 |
+    | `usage` | トークン。`input`、`output`、`cached`、`cacheWrite`、`reasoning` |
+    | `unanswered` | 承認できる人がいなかったため拒否されたステップの数 |
+    | `permissionDenials` | 拒否された各ステップ。`step`、`tool`、`title`、`reason` |
+    | `payer` | 支払い元 |
+    | `durationMs` | ターンの実行時間 |
+    | `error` | 失敗または停止した理由 |
+    | `errorKind` | モデルの呼び出しが原因で失敗した場合の種類。`auth`、`entitlement`、`rate_limited`、`overloaded`、`context_overflow`、`invalid_request`、`network`、`refused`、`unknown` のいずれか |
+    | `retryAt` | プロバイダーが再試行してよいとした時刻（Unix ミリ秒） |
+    | `structuredOutput` | `--json-schema` を使った場合に、モデルが返した値 |
+    | `terminalReason` | 上限によってターンが終了した場合の `max_turns` または `structured_output_retries` |
+  </Accordion>
+</AccordionGroup>

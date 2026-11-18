@@ -1,0 +1,105 @@
+---
+title: "Git とプルリクエスト"
+description: "git のワークツリーで作業し、差分を確認し、コミットし、プルリクエストを作成し、/pr でチェックとレビューを追い、/autofix-pr で指摘された内容を Aristra Code に修正させます。"
+---
+
+Aristra Code は git を直接扱います。各チャットの開始時にリポジトリの状態を読み、リポジトリのスタイルに合わせてコミットし、自分の `gh` のログインでプルリクエストを作成し、プルリクエストを監視してチェックやレビュアーが指摘したことを修正できます。
+
+## ワークツリー
+
+ワークツリーは、リポジトリを独自のブランチで別にチェックアウトしたものです。これにより、チャットはフォルダーに触れずに作業でき、複数のチャットが同時に作業できます。
+
+<Tabs>
+  <Tab title="ターミナル">
+    ```sh
+    aristra -w                 # a new worktree with a random name
+    aristra -w auth-refactor   # .aristra/worktrees/auth-refactor on branch worktree-auth-refactor
+    aristra -w '#412'          # start from pull request 412, or paste its link (named pr-412)
+    aristra -w auth-refactor --resume <id>   # move an existing chat into it
+    ```
+
+    終了するとき、変更のないワークツリーは削除されます。変更がある場合は残すかどうかを尋ねられ、再開用のコマンドにそのワークツリーの名前が表示されます。
+  </Tab>
+  <Tab title="Aristra Desktop">
+    Code の新しいチャットで、メッセージ欄の下にある **+** メニューを開き、**Work in a new worktree** を選択します。チャットのターミナル、Review、ファイルの操作はすべてワークツリーを使います。このオプションは、チャットのフォルダーが git リポジトリ内にある場合にだけ表示されます。
+
+    メッセージ欄の下のブランチメニューには、フォルダーのリポジトリのブランチが一覧表示されます。別のワークツリーがチェックアウトしているブランチには **Open its worktree** と表示されます。これを選ぶと、そのワークツリーがフォルダーとして追加され、そこで新しいチャットが始まります。git では、1 つのブランチに切り替えられるワークツリーは一度に 1 つだからです。
+  </Tab>
+</Tabs>
+
+新しいワークツリーは、origin の既定のブランチから始まります（1 日以上経っている場合はフェッチします）。`worktree` の設定は次のとおりです。
+
+| 設定 | 動作 |
+|---|---|
+| `worktree.baseRef` | `"fresh"`（既定）：origin の既定のブランチから始めます。`"head"`：現在のコミットから始めます |
+| `worktree.symlinkDirectories` | コピーする代わりに、メインのチェックアウトからリンクするフォルダー。`node_modules` など |
+| `worktree.sparsePaths` | 大きなリポジトリ向けに、git のスパースチェックアウトで、それだけをチェックアウトするパス |
+
+新しいワークツリーには `.aristra/settings.local.json` が引き継がれ、リポジトリの `.worktreeinclude` に記載された無視対象のファイル（`.env` など）がコピーされます。
+
+サブエージェントも独自のワークツリーで作業できます。[サブエージェント](/ja/code/guides/subagents)を参照してください。Aristra Code がチャットをワークツリーに移すのは、自分や指示がそう求めた場合だけです。
+
+## 差分
+
+```text
+/diff
+```
+
+を実行すると、コミットしていない変更と、各ターンで変更された内容が新しい順に表示されます。左右の矢印キーで切り替え、Enter キーでファイルの差分を表示します。
+
+[フルスクリーンレンダラー](/ja/code/terminal)では、`/diff` でチャットの横にパネルが開き、Aristra Code が編集するたびに更新されます。このチャットの変更、コミットしていない変更、ブランチの変更を表示できます（Ctrl+X B で切り替え）。ファイルをクリックするとそのファイルに移動し、**ask** を選ぶとその差分を次のメッセージに添付します。
+
+Aristra Desktop では、**Review**（⌥⌘B）で同じ内容を表示できます。コミットしていない変更、ベースに対するブランチの変更、直前のターンの編集です。各ファイルはワンクリックでエディターで開けます。
+
+## コミット
+
+コミットを依頼するか、次のコマンドを実行します。
+
+```text
+/commit [guidance]
+```
+
+Aristra Code は `git status`、差分、ブランチ、最近のコミットを読み、ファイルを名前を指定してステージし、リポジトリのスタイルでメッセージを書きます。依頼しない限り、git の設定の変更、フックのスキップ、amend、シークレットのコミット、プッシュは行いません。
+
+## プルリクエスト
+
+```text
+/create-pr            # commit what's uncommitted, push, and open a pull request
+/create-pr --draft    # as a draft
+```
+
+開いているプルリクエストがあるブランチでは、フッターに `PR #412` が表示され、レビューの状態に応じて色分けされます。承認済みなら緑、変更が要求されていれば赤、レビュー待ちなら黄色、ドラフトなら淡色です。自分の `gh` のログイン（GitLab のマージリクエストでは `glab`）を使います。`prStatusFooterEnabled: false` で非表示にできます。
+
+```text
+/pr [number]
+```
+
+を実行すると、ブランチのプルリクエストが開きます。ステータス、チェック、レビュアーに続いて、Overview、Checks、Files、Commits が表示されます。
+
+| キー | 動作 |
+|---|---|
+| `m` | マージします（確認あり）。マージキューを使う場合はその操作 |
+| `a` | 承認します |
+| `w` | 自動マージのオンとオフを切り替えます |
+| `d` | ドラフトに変換します |
+| `o` | GitHub で開きます |
+| `x`、`X` | 失敗したチェックを 1 つ、またはすべて再実行します |
+| `s` | 失敗したチェックを Aristra Code へのプロンプトに入れます |
+| `f` | マージのコンフリクトをプロンプトに入れます |
+| `g` | 更新します |
+
+Aristra Desktop では、ヘッダーの **PR #N** で同じプルリクエストがチャットの横に開き、レビューコメントに Reply と Resolve で対応できます。プルリクエストのないブランチでは、ヘッダーに **Create PR**、**Create draft PR**、**Manually create PR** が表示されます。
+
+## 自動修正
+
+```text
+/autofix-pr           # watch the branch's pull request
+/autofix-pr 412       # watch that one
+/autofix-pr stop
+```
+
+自動修正をオンにすると、Aristra Code は 1 分ごとに GitHub を確認し、チェックが失敗したとき、マージのコンフリクトが発生したとき、リポジトリにプッシュできる人（またはアプリ）が新しいレビューコメントを残したときに、チャットを再開します。再開のたびにチャットに 1 行が表示され、開くと GitHub の内容が表示されます。Aristra Code は修正してプッシュします。Aristra Desktop では、自分のプルリクエストの Pull request パネルで **Auto-fix CI & address comments** をオンにします。
+
+<Note>
+`/pr`、フッター、自動修正は、自分の `gh` のログインで GitHub の API を呼び出します。まだの場合は、一度 `gh auth login` を実行してください。
+</Note>

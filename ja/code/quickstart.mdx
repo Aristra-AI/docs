@@ -1,0 +1,97 @@
+---
+title: "クイックスタート"
+description: "Aristra Code をインストールしてサインインし、モデルを選んで、自分のプロジェクトで最初のタスクを終えます。"
+---
+
+このガイドでは、何もインストールしていない状態から、最初の変更を終えるまでを説明します。ここではターミナルを使いますが、同じチャットは [Aristra Desktop](/ja/code/desktop) でも使えます。
+
+<Steps>
+  <Step title="インストールする">
+    ```sh
+    curl -fsSL https://aristralabs.com/install.sh | sh
+    ```
+
+    マシンに合った最新のリリース（Apple シリコンまたは Intel の macOS、x64 または arm64 の Linux）が、root 権限なしでホームフォルダーにインストールされます。`~/.local/bin` がまだ `PATH` にない場合は、インストーラーがシェルのプロファイルに追加し、そのことを知らせます。インストール後は新しいターミナルを開いてください。
+
+    インストールを確認します。
+
+    ```sh
+    aristra --version
+    aristra doctor
+    ```
+
+    `aristra doctor` は環境を確認し、各行に `ok` か `fix` を付けて、修正方法を示します。Windows では WSL2 を使ってください。[セットアップ](/ja/code/setup)を参照してください。
+  </Step>
+
+  <Step title="プロジェクトで起動する">
+    ```sh
+    cd ~/code/my-project
+    aristra
+    ```
+
+    初回の実行では、まだ必要なことだけを 1 画面ずつ尋ねます。
+
+    1. **Aristra にサインインします**。自分のキーやローカルモデルを使うチャットも含め、すべてのチャットに Aristra のアカウントが必要です。アカウントは無料です。[無料で使えるものとプランで追加されるもの](/ja/account/overview)を参照してください。Enter キーを押すと **In your browser** でサインインします。ブラウザーでサインインページが開くので（開かない場合は、ターミナルに表示されたリンクを開きます）、**Approve** を選択します。ブラウザーがない場合（SSH 経由など）は、**With a code, on another device** が最初に表示されます。任意のデバイスで app.aristralabs.com/desktop/device を開いてコードを入力します。ブラウザーでのサインインを待っている間に c を押すと、コードに切り替えられます。Esc でスキップでき、あとから `/login` でサインインできます。すべての手順は[サインイン](/ja/quickstart)にあります。
+    2. **新しいチャットで最初に使うモデルを選びます**。各選択肢には支払い元が表示されます。Aristra の残高、ChatGPT のプラン、自分のキー、または「runs on this computer」です。`/model` でいつでも変更できます。ChatGPT のプラン、キー、ローカルモデルを使う方法は、[自分のモデルを使う](/ja/own-models)を参照してください。
+    3. **フォルダーを信頼します**。Aristra Code は、信頼したフォルダーでファイルを読み、編集し、実行します。最初は「No, exit」が選択されています。下矢印キーを押してから Enter キーを押すと、フォルダーを信頼します。回答はリポジトリとそのサブフォルダーに対して保存されます。ホームフォルダーの場合は、今回の実行に限り信頼されます。
+    4. **新しい MCP サーバー**。フォルダーの `.mcp.json` にまだ回答していないサーバーがある場合は、どれを使うかを尋ねます。Bypass permissions で起動した場合は、先に承諾が必要な警告が表示されます。
+  </Step>
+
+  <Step title="変更を依頼する">
+    やりたいことを入力して Enter キーを押します。
+
+    ```text
+    › Find why the date parser fails on leap years and fix it. Run the tests when you are done.
+    ```
+
+    次のように表示されます。
+    - 返信が Markdown でストリーミング表示されます。
+    - 各ステップが 1 行で表示されます：`Read src/date.ts`、`Search for leap`、`Edit src/date.ts`、`$ npm test`。
+    - 各編集の差分と各コマンドの出力が、数行に切り詰めて表示されます。Ctrl+O で最新のステップの出力全体を開けます。
+    - ステータス行には実行中の内容とモデルのコンテキストの使用状況が、フッターにはモード、ブランチのプルリクエスト、モデル、支払い元が表示されます。
+  </Step>
+
+  <Step title="確認に答える">
+    新しいチャットは **Manual** モードで始まります。読み取り、検索、読み取りだけのコマンドは自動で実行され（サンドボックスがオンなら、サンドボックス内のコマンドも同様です）、それ以外の変更の前には確認を求めます。承認の画面には、実際のコマンドか差分と、3 つの回答が表示されます。
+
+    - **Yes**：このステップだけを許可します。
+    - **Yes, and don't ask again**：この種類のステップを許可し、ルールを保存します（またはチャットの残りの間、編集を許可します）。
+    - **No**。
+
+    Yes か No で Tab キーを押すと、モデルが読むメモを追加できます。
+
+    Shift+Tab を押すとモードが順に切り替わります。**Accept edits**（フォルダー内の編集は自動で実行）、**Plan**（まず調査して提案）、**Auto**（確認が必要な操作を Aristra のレビュアーが判断）の順で、Manual に戻ります。[権限](/ja/code/configure/permissions)を参照してください。
+  </Step>
+</Steps>
+
+## モデルを設定する
+
+Aristra のモデルは、サインインするとすぐに使えます。ChatGPT のプラン、自分のプロバイダーキー、コンピューター上のモデル（Ollama、LM Studio、その他のサーバー）で動かすには、[自分のモデルを使う](/ja/own-models)の手順に従ってください。それぞれ Aristra Desktop とターミナルの手順があります。そのあと `/model` で選択すると、新しいチャットの既定になります。
+
+## 日常の使い方
+
+| やりたいこと | 方法 |
+|---|---|
+| このフォルダーで起動する | `aristra` |
+| プロンプトを指定して起動する | `aristra "explain the build system"` |
+| このフォルダーの最新のチャットを続ける | `aristra -c` |
+| 以前のチャットに戻る | `aristra resume`、またはチャットで `/resume` |
+| 別の場所で実行中のチャットを開く | `aristra attach <id>` |
+| スクリプトや CI で 1 つのターンを実行する | `aristra run "fix the lint errors" -o json` |
+| このフォルダーのチャットを確認する | `aristra sessions`（すべてのフォルダーなら `--all`） |
+| 別のモデルを選ぶ | `/model`、または一覧を表示する `aristra models` |
+| プロバイダーキーを追加する | `aristra keys add openai`（または `anthropic`、`gemini`、`openrouter`） |
+| 設定を変更する | `aristra config set permissions.defaultMode acceptEdits` |
+| Claude Code や Codex の設定を持ち込む | `aristra import claude-code`（または `codex`）。先にプレビューが表示されます |
+| 環境を確認する | `aristra doctor` |
+
+チャットで `/help` を実行すると、すべてのコマンドとキー操作が表示されます。
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="ターミナルアプリ" icon="terminal" href="/ja/code/terminal">キー操作、実行中のターンへの指示、キューへの追加、前に戻る操作。</Card>
+  <Card title="指示とメモリ" icon="brain" href="/ja/code/guides/memory">`AGENTS.md` でプロジェクトのことを教えます。</Card>
+  <Card title="Git とプルリクエスト" icon="code-branch" href="/ja/code/guides/git">ワークツリー、差分、`/pr`、自動修正。</Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/ja/code/desktop">Mac アプリの Code タブで使う同じチャット。</Card>
+</CardGroup>

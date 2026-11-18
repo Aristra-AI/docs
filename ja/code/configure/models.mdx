@@ -1,0 +1,132 @@
+---
+title: "モデル"
+description: "Aristra Code が使うモデルと支払い元を選びます。Aristra の残高から支払う Aristra のモデル、ChatGPT のプラン、自分のプロバイダーキー、コンピューター上のモデル、カスタムエンドポイントから選べます。フォールバックと使用量についても説明します。"
+---
+
+すべてのチャットは、ある**ソース**のモデルで実行され、すべてのソースには**支払い元**があります。Aristra Code は、ターンを実行する前に、フッター、`/model`、`aristra status`、`aristra models` で支払い元を表示します。
+
+| 支払い元 | 表示 | ソース |
+|---|---|---|
+| Aristra | Aristra の残高（各モデルのプロバイダー価格） | `aristra` |
+| ChatGPT のプラン | your plan | `chatgpt` |
+| 自分（自分のキー） | your key | 追加したプロバイダーキー、カスタムエンドポイント |
+| なし | this computer（Aristra Desktop では **This Mac**） | Ollama、LM Studio、コンピューター上またはネットワーク内のカスタムエンドポイント |
+
+ソースにかかわらず、すべてのチャットで Aristra へのサインインが必要です。アカウントがデバイスをまたいでメモリと設定を保持します。各ソースの設定手順は[自分のモデルを使う](/ja/own-models)にあります。
+
+## ソース
+
+<AccordionGroup>
+  <Accordion title="Aristra">
+    Aristra のモデルです。料金は残高から支払われ、最初に新規アカウントの $1 のスタータークレジット、次にプランの毎月の利用枠、その次にチャージした残高が使われます。どのプランでもすべてのモデルを使え、コンテキストウィンドウと推論のレベルとともに一覧表示されます。高価なモデルほど残高を早く消費します。[残高とチャージ](/ja/account/credits)を参照してください。各モデルの料金は [Models and prices](https://app.aristralabs.com/models) に掲載されています。ファイルとコマンドはコンピューター上にとどまり、モデルが読むものはモデルの呼び出しで送信されます。他に何が外部に送られるかは、[セキュリティ](/ja/code/security)を参照してください。
+
+    各モデルではウィンドウ全体を使えます。プロバイダーによっては長いプロンプトに高い料金を課しており、Aristra もそのリクエストに限り同じように課金します。Claude Haiku 5.5 では 100K トークン超、GPT-5.4 以降（mini と nano を除く）では 272K 超、Gemini 3.1 Pro では 200K 超です。
+  </Accordion>
+  <Accordion title="ChatGPT のプラン">
+    ChatGPT のサブスクリプションがモデルを提供し、Aristra Code は独自のツールと承認の仕組みでターンを実行します。`/model` からサインインします。**Sign in with your ChatGPT plan** を選び、表示されたページを開いてコードを入力します。`/usage` で、プランの 5 時間と週ごとの上限を確認できます。`aristra logout chatgpt`（または `/logout chatgpt`）でプランからサインアウトしても、Aristra へのサインインは残ります。
+  </Accordion>
+  <Accordion title="自分のプロバイダーキー">
+    ```sh
+    aristra keys add openai        # asks for the key, hidden
+    aristra keys list              # which are set, never the key itself
+    aristra keys remove openai
+    ```
+
+    | ソース | プロバイダー |
+    |---|---|
+    | `openai` | OpenAI |
+    | `anthropic` | Anthropic |
+    | `gemini` | Google Gemini |
+    | `openrouter` | OpenRouter |
+    | `fireworks` | Fireworks AI |
+    | `deepseek` | DeepSeek |
+    | `xai` | xAI |
+    | `moonshot` | Kimi (Moonshot) |
+    | `zai` | Z.AI (GLM) |
+    | `minimax` | MiniMax |
+
+    キーは Aristra の認証情報ストアに保存され、設定ファイルには書き込まれません。キーを変更すると、チャットは次のターンから新しいキーを使います。
+  </Accordion>
+  <Accordion title="コンピューター上のモデル">
+    Ollama と LM Studio にはキーは不要です。それらのサーバーが応答するまでは、ターミナルには動いていないことが表示され、Aristra Desktop の Settings には **Not running** が表示され（Ollama でモデルがない場合も同様）、モデルメニューには表示されません。
+
+    - **Ollama** は、`OLLAMA_HOST` で指定された場所（Ollama と同じ方法で読み取ります）、なければ `localhost:11434` で見つけます。`OLLAMA_HOST` はランタイムが起動する前に設定してください。変更したあとは `aristra runtime stop` を実行します。
+    - **LM Studio** は、`localhost:1234` でのみ見つけます。
+    - **ツール**：Aristra Code はツールを通じて作業するため、ツールを呼び出せるモデルを選んでください。呼び出せないモデルは、サーバーのエラーで失敗します。
+    - **コンテキストウィンドウ**：16,384 トークン以上が必要です。Ollama の既定値はこれより小さいことが多く、その場合はターンが停止し、増やす方法（Ollama アプリの Context length、または `OLLAMA_CONTEXT_LENGTH=16384`）が表示されます。LM Studio はモデルの読み込み後に確認されるので、16K 以上で読み込んでください。Ollama では、各ターンの前に、Aristra はモデルの読み込みを待ちます。
+    - **収まり具合**：`aristra models` は、各モデルについて **fits this computer**、**tight on memory**、**too big for this computer** のいずれかを表示します（`/model` では **fits**、**tight on memory**、**too big for this computer** とメモリ量、Aristra Desktop では **Fits**、**Tight fit**、**Too big**）。見積もりは、モデルと 16K 以上のウィンドウでの作業用メモリの合計を、コンピューターの総メモリと比べたものです。75% までなら fits、90% までなら tight です。あくまで目安で、どのモデルでも選べます。
+    - **使える場所**：ローカルモデルは、このコンピューター上のチャットで動きます。クラウドチャットでは Aristra のモデルが使われます。Aristra Desktop では、フォルダーがあり **On this Mac** に設定した Code のチャットで使えます。
+    - **制限**：画像を受け付けないモデルでは画像が除外されます。また、ローカルモデルには推論のレベルがないため、`/effort` は適用されません。
+    - `aristra doctor` は、各ローカルサーバーに 5 秒間問い合わせ、応答したものを準備完了として一覧表示します。応答しないローカルサーバーが `fix` と表示されるのは、それが既定のモデル（ターミナルの既定）のソースである場合だけです。
+  </Accordion>
+  <Accordion title="カスタムエンドポイント">
+    Chat Completions、Responses、Anthropic の Messages に対応したサーバーなら何でも使えます。vLLM、llama.cpp のサーバー、社内ゲートウェイ、プロキシなどです。設定できるのは一度に 1 つです。
+
+    - **Aristra Desktop**：**Settings › Models** の **On this Mac** の下で、**Custom endpoint › Set up** を選び、名前、API、**Base URL**、必要に応じてキーとモデル ID を入力します。
+    - **ターミナル**：`aristra keys add custom` を実行すると、アドレス、対応する API、モデル、名前、キーを尋ねられます。または、`--url`、`--wire chat_completions|responses|anthropic`、`--name`、`--model`（モデルごとに繰り返す）で指定し、キーが不要なサーバーには `--no-key` を付けます。`aristra keys remove custom` でエンドポイントを削除します。
+
+    Chat Completions と Responses では、アドレスに API のパス（通常は `/v1`）を含めます。Anthropic Messages では `/v1` を含めません。アドレスは `https://` である必要があり、`http://` が使えるのは `localhost`、`127.0.0.1`、`::1` だけです。モデルはサーバーの一覧から取得されます。指定した名前は、その一覧を読み取れない場合に使われ、Anthropic Messages では常に使われます。
+
+    エンドポイントは `~/.aristra/sources.json` に保存され、そのキーはアドレスに結び付けて認証情報ストアに保存されます。アドレスを変えると、キーをもう一度入力する必要があります。アドレスがコンピューター上かネットワーク内にあれば支払い元は「this computer」に、それ以外は「your key」になります。Aristra はウィンドウを 128K と想定し、確認は行いません。会話が長すぎるとサーバーが返した場合は、要約して再試行します。
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+Claude のサブスクリプションでのサインインには対応していません。Claude のモデルは、Aristra 経由か自分の Anthropic キーで使ってください。Google のモデルは、API キーか Aristra のプランで使います。
+</Note>
+
+## モデルを選ぶ
+
+- チャットで `/model` を実行すると、すべてのソースが支払い元とモデルとともに一覧表示されます。1 つ選ぶとチャットのモデルが切り替わり、新しいチャットの既定にもなります。
+- `/effort [level|auto]` で、モデルがどの程度深く考えるかを設定します。`low`、`medium`、`high`、一部のモデルでは `xhigh` か `max` です。ローカルモデルとカスタムエンドポイントにはレベルはありません。
+- `aristra -m <model> --source <source>` で、1 つのチャットのモデルを選びます。`--source` だけを指定すると、そのソースの既定のモデルを使います。
+- Aristra Desktop では、入力欄の下のモデルメニューで新しいチャットのモデルを選び、**Settings › Models › Default model** で新しいチャットの既定を設定します。Aristra Desktop は、ターミナルとは別に独自の既定を持ちます。
+
+既定は設定に保存されます。
+
+```json ~/.aristra/settings.json
+{ "model": { "source": "anthropic", "model": "claude-sonnet-5-5", "effort": "high" } }
+```
+
+## モデルの呼び出しが失敗した場合
+
+サーバーのエラー、過負荷、接続の切断は、テキストのストリーミングが始まる前であれば最大 10 回まで再試行され（`ARISTRA_MAX_RETRIES`。最大 15）、ステータス行にそのことが表示されます。フォールバックが用意されていれば、3 回連続で過負荷になった時点でそちらに切り替わります。フォールバックがない場合、レート制限は、各待ち時間が 1 分以内であれば待機します。それ以降の動作は、失敗の種類によって異なります。
+
+| 失敗 | その後の動作 |
+|---|---|
+| 過負荷、ネットワーク | 再試行し、その後フォールバックリストの次のモデルに切り替えます |
+| レート制限 | リストの次のモデルに切り替えます。なければターンは失敗し、上限がリセットされる時刻が表示されます |
+| サインアウト、残高を使い切った | 別のソースの、リストの次のモデルに切り替えます |
+| コンテキストが長すぎる | 要約して再試行します |
+| リクエストが拒否された、その他のエラー | フォールバックリストの次のモデルに切り替えます |
+| 回答を拒否された | ターンは失敗します。あるモデルが拒否したことを、別のモデルに尋ねることはありません |
+
+フォールバックリストは、自分の設定の `model.fallback` です。
+
+```json ~/.aristra/settings.json
+{
+  "model": {
+    "source": "anthropic", "model": "claude-sonnet-5-5",
+    "fallback": [
+      { "source": "openrouter", "model": "anthropic/claude-sonnet-5-5" },
+      { "source": "aristra", "model": "gemini-3.8-flash" }
+    ]
+  }
+}
+```
+
+**支払い元が黙って変わることはありません**。ターンが自動で切り替わるのは、同じ支払い元が支払うモデルだけです。別の支払い元に切り替える場合は先に確認を求め、スクリプトでは支払い元を切り替えません。フォールバックリストは自分の設定からしか読み込まれないため、リポジトリがチャットを自分の別のキーに移すことはできません。
+
+## チャットの周辺作業に使うモデル
+
+タイトル、長いチャットの要約、メモリの補完もモデルを呼び出します。使われるモデルの順序は次のとおりです。
+
+1. 設定の `auxiliary.title`、`auxiliary.summary`、`auxiliary.memory` で指定した自分のモデル。それぞれ自分のソース（`aristra` 以外）から `{"source": ..., "model": ...}` で指定します（`auxiliary.title: "off"` にすると、最初の語句がタイトルになります）。
+2. Aristra のモデルを使っている場合は、Aristra のバックグラウンドモデル。タイトルとメモリの補完に使う、安価で高速なモデルです。要約にはチャット自体のモデルを使います。
+3. チャット自体のモデル。
+
+ローカルモデルでは、タイトルはターンが終わるまで待ちます。サイドモデルが失敗しても、チャットが失敗することはありません。Auto モードのレビュアーには独自のモデルがあります。[権限](/ja/code/configure/permissions)を参照してください。
+
+## 使用量
+
+`/usage` では、このチャットのモデル別のトークン数と支払い元、コンテキストの使用状況、サインインしている各プランが表示されます。Aristra の残高（ドル建て）と更新日、ChatGPT のプランの上限です。また、直近 1 日と 1 週間で使用量に影響しているものも表示されます。`aristra run --usage-file <path>` で、スクリプト実行の使用量を書き出せます。

@@ -1,0 +1,82 @@
+---
+title: "ターミナルの設定"
+description: "Aristra Code 用にターミナルを設定します。改行、キーの割り当て、独自のステータス行、フルスクリーンレンダラー、表示の設定について説明します。"
+---
+
+## 改行
+
+Ghostty、kitty、WezTerm では、最初から Shift+Enter で改行できます。それ以外では、次のコマンドを実行します。
+
+```text
+/terminal-setup
+```
+
+VS Code、Cursor、Windsurf では、キーの割り当てをバックアップしたうえで Shift+Enter の割り当てを追加します。Apple のターミナルでは「Use Option as Meta key」をオンにし、Option+Enter で改行できるようにします。Alt+Enter、Ctrl+J、`\` のあとに Enter は、どこでも使えます。
+
+## キーの割り当て
+
+`~/.aristra/keybindings.json` で Aristra Code のキーを変更できます。形式は Claude Code のファイルと同じです。`/keybindings` を実行すると、すべての割り当てを含むファイルが作成されて開きます。変更は保存して少しすると反映されます。
+
+```json ~/.aristra/keybindings.json
+{
+  "bindings": [
+    { "context": "Chat", "bindings": { "meta+s": "chat:stash", "ctrl+s": null } },
+    { "context": "Global", "bindings": { "ctrl+f": "history:search" } }
+  ]
+}
+```
+
+キーは、文字や `enter`、`escape`、`tab`、`up`、`pageup` などの名前の前に `ctrl+`、`shift+`、`meta+`（または `alt+`、`option+`）を付けて書きます。2 つのキーをスペースで区切るとコードになります。キーを `null` に割り当てるとオフになります。Ctrl+C、Ctrl+D、Ctrl+M、Ctrl+[、Ctrl+I、Ctrl+H は割り当てを変更できません（ターミナルでは、最後の 4 つは Enter、Esc、Tab、Backspace と同じです）。
+
+| コンテキスト | 有効なとき | 操作（既定のキー） |
+|---|---|---|
+| `Global` | 常に | `app:interrupt`（Ctrl+C）、`app:exit`（Ctrl+D）、`app:redraw`（Ctrl+L）、`app:toggleTodos`（Ctrl+T）、`app:toggleTranscript`（Ctrl+O）、`history:search`（Ctrl+R）、`abovePrompt:focus`（Ctrl+X Tab）、`app:diffFileListUp`（Ctrl+Up、Alt+Up）、`app:diffFileListDown`（Ctrl+Down、Alt+Down） |
+| `Chat` | 入力欄 | `chat:cancel`（Esc）、`chat:cycleMode`（Shift+Tab）、`chat:modelPicker`（Alt+P）、`chat:submit`（Enter）、`history:previous`（Up）、`history:next`（Down）、`chat:externalEditor`（Ctrl+G、Ctrl+X Ctrl+E）、`chat:stash`（Ctrl+S）、`chat:imagePaste`（Ctrl+V） |
+| `HistorySearch` | Ctrl+R の検索 | `historySearch:next`（Ctrl+R）、`historySearch:accept`（Esc、Tab）、`historySearch:execute`（Enter）、`historySearch:cancel`（Ctrl+C。固定） |
+| `Task` | コマンドの実行中 | `task:background`（Ctrl+B） |
+| `Confirmation` | 承認 | `confirm:yes`（Enter）、`confirm:no`（Esc）、`confirm:previous`（Up）、`confirm:next`（Down）、`confirm:nextField`（Tab）、`confirm:cycleMode`（Shift+Tab）、`confirm:toggleExplanation`（Ctrl+E） |
+| `Scroll` | フルスクリーンのトランスクリプト | `scroll:pageUp`（PgUp）、`scroll:pageDown`（PgDn）、`scroll:top`（Ctrl+Home）、`scroll:bottom`（Ctrl+End） |
+| `DiffPanel` | フルスクリーンの差分パネル | `app:cycleDiffBase`（Ctrl+X B） |
+| `Pane` | キー操作を受け取っている差分パネル | `pane:grow`（Ctrl+X Left、Ctrl+X Up）、`pane:shrink`（Ctrl+X Right、Ctrl+X Down）、`pane:close`（Ctrl+X X） |
+
+行編集のキー（Ctrl+A、Ctrl+E、Ctrl+K、Ctrl+U、Ctrl+W、Ctrl+Y）は readline に従い、このファイルには含まれません。
+
+## 独自のステータス行
+
+`statusLine` はコマンドを実行し、その出力を入力欄の下に表示します。
+
+```json ~/.aristra/settings.json
+{
+  "statusLine": { "type": "command", "command": "~/bin/status.sh", "padding": 1, "refreshInterval": 10 }
+}
+```
+
+コマンドは、標準入力からチャットを JSON（`session_id`、`cwd`、`permission_mode`、`session_name`、`model`、`workspace`、`version`、`context_window`、`effort` など）として読み、チャットが変わったときと `refreshInterval` 秒ごとに再実行され、5 秒以内に応答する必要があります。出力の色は保持されます。
+
+`subagentStatusLine`（`{"type": "command", "command": …}`）は、`/tasks` のエージェントの行について同じことをします。同じ JSON に `columns` と `tasks` を加えたものを読み、行ごとに `{"id", "content"}` を 1 行出力します。`""` を出力すると行が非表示になります。
+
+## フルスクリーン
+
+```text
+/tui fullscreen      # saved in your settings
+/tui default         # back to the classic renderer
+```
+
+`aristra --fullscreen` を使うと、1 回の起動に限りフルスクリーンになります。フルスクリーンは画面全体を使って描画し、スクロールできるトランスクリプト、マウスでの選択、トランスクリプト画面（Ctrl+O）、差分パネル（`/diff`）を備えています。[ターミナル](/ja/code/terminal)を参照してください。
+
+## 表示の設定
+
+| 設定 | 既定値 | 動作 |
+|---|---|---|
+| `tui` | `"default"` | `"fullscreen"` でフルスクリーンレンダラーを使います |
+| `copyOnSelect` | `true` | フルスクリーンで、選択を離したときにコピーします |
+| `promptSuggestionEnabled` | `true` | 返信のあとに、次のメッセージの候補を表示します |
+| `awaySummaryEnabled` | `true` | 戻ってきたチャットに要約を残します |
+| `spinnerTipsEnabled` | `true` | Aristra Code の作業中にヒントを表示します |
+| `prStatusFooterEnabled` | `true` | フッターにブランチのプルリクエストを表示します |
+| `terminalProgressBarEnabled` | `true` | ステップの実行中、ターミナルのタブに進行状況バーを表示します（Ghostty 1.2 以降、iTerm2 3.6.6 以降、ConEmu） |
+| `permissionExplainerEnabled` | `true` | 承認で Ctrl+E を押すと、コマンドを説明します（自分の `~/.aristra/settings.json` からのみ読み込まれます） |
+| `copyFullResponse` | `false` | `/copy` で、どのコードブロックかを尋ねずに返信全体をコピーします |
+| `prUrlTemplate` | なし | フッターのプルリクエストのリンクを開く場所。`{host}`、`{owner}`、`{repo}`、`{number}`、`{url}` を使えます |
+
+ターミナル用の環境変数（`ARISTRA_NO_NOTIFY`、`ARISTRA_DISABLE_MOUSE`、`ARISTRA_SCROLL_SPEED` など）は、[ファイルと環境変数](/ja/code/reference/environment)に記載されています。

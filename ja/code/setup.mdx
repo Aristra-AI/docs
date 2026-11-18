@@ -1,0 +1,96 @@
+---
+title: "セットアップ"
+description: "macOS、Linux、WSL 経由の Windows で、Aristra Code のインストール、更新、バージョンの切り替え、アンインストールを行います。"
+---
+
+## システム要件
+
+| システム | 対応状況 |
+|---|---|
+| macOS | Apple シリコンと Intel。Apple シリコン版は、Rosetta で動くシェルからもインストールできます |
+| Linux | glibc を使う x64 と arm64。サンドボックスをオンにする場合は bubblewrap（`bwrap`）が必要です。Alpine（musl）にはまだ対応していません |
+| Windows | Ubuntu などの Linux ディストリビューションを入れた WSL2 経由で、Linux 版を使います。サインインページは `$BROWSER` に指定したプログラム（WSL では通常 `wslview`）で開きます。指定がない場合は、コードでサインインしてください |
+
+各ビルドには、独自の Node と Python を含め必要なものがすべて入っているため、`curl` か `wget` 以外に事前にインストールするものはありません。
+
+## インストール
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh              # the latest release
+curl -fsSL https://aristralabs.com/install.sh | sh -s stable    # the stable channel
+curl -fsSL https://aristralabs.com/install.sh | sh -s 1.2.1     # one version
+```
+
+スクリプトは次のことを行います。
+
+1. マシンに合ったビルドを選びます。
+2. ビルドをダウンロードし、SHA-256 チェックサムをリリースのマニフェストと照合します。
+3. `~/.local/share/aristra/versions/<version>/` にインストールし、`~/.local/bin/aristra` がそこを指すようにします。
+4. `~/.local/bin` が `PATH` にない場合や、別の `aristra` が先に見つかる場合は、シェルのプロファイルにそれを追加します（fish の場合は、実行する `fish_add_path` コマンドを表示します）。
+5. npm や bun でインストールされた古い `aristra` が `PATH` で先に見つかる場合は、削除するかどうかを尋ねます。
+6. `aristra` を起動するかどうかを尋ねます。
+
+質問はターミナルで行われるため、`curl | sh` 経由でも機能します。ターミナルがない場合や `ARISTRA_NON_INTERACTIVE=1` の場合は、何も尋ねずに安全な回答を選びます。
+
+<Warning>
+自分のシェルから `sudo` で実行すると、root のホームフォルダーにインストールされてしまうため、インストーラーは実行を拒否します。意図して sudo で root 用にインストールする場合は、`ARISTRA_INSTALL_ALLOW_SUDO=1` を設定します。root として動くコンテナーや CI では、通常どおり root 用にインストールされます。
+</Warning>
+
+## リリースチャネル
+
+| チャネル | 内容 |
+|---|---|
+| `latest` | 最新のリリース。既定のチャネルです |
+| `stable` | 公開から 1 週間ほど問題なく使われているリリース |
+
+インストールに使ったチャネルは記憶され、`aristra update` はそのチャネルに従います。リリースはほぼ毎週公開されます。
+
+## 更新、切り替え、ロールバック
+
+```sh
+aristra update            # the newest release on your channel
+aristra update --check    # only say whether there is one
+aristra install latest    # switch to the latest channel
+aristra install stable    # switch to the stable channel
+aristra install 1.2.1     # switch to exactly that version (a rollback when it is older)
+```
+
+使用中のバージョンと最新の 2 つのバージョンはディスクに残るため、そのいずれかへのロールバックでは何もダウンロードしません。更新によって実行中のチャットが中断されることはありません。すでに動いているランタイムはアイドル状態になると停止し、次のコマンドで新しいランタイムが起動します。
+
+[Aristra Desktop](/ja/code/desktop) には、独自の Aristra Code が含まれています。ターミナルとデスクトップアプリは、インストール済みのうち互換性のある最新のランタイムを、常に 1 つ共有します。
+
+## インストールされるもの
+
+```text
+~/.local/bin/aristra                 a link to the version in use
+~/.local/share/aristra/
+  channel                            latest or stable
+  versions/<version>/                the program, its runtime and their licenses
+```
+
+データはここにはありません。チャット、設定、ログ、シークレットは `~/.aristra` に保存されます。[ファイルと環境変数](/ja/code/reference/environment)を参照してください。
+
+## アンインストール
+
+アンインストール用のコマンドはまだありません。Aristra Code と保存されたすべてのものを削除するには、次のようにします。
+
+```sh
+aristra logout                    # sign out and remove this computer from your account
+aristra service uninstall         # if you turned on the background service
+aristra runtime stop --now        # stop the runtime
+rm ~/.local/bin/aristra
+rm -rf ~/.local/share/aristra      # every installed version
+rm -rf ~/.aristra                 # your data: chats, settings, logs, secrets
+```
+
+Mac では、シークレットを暗号化したキーもログインキーチェーンから削除します。
+
+```sh
+security delete-generic-password -s Aristra-credentials
+```
+
+キーリングのある Linux では、`secret-tool clear service Aristra-credentials` を実行します。最後に、インストーラーがシェルのプロファイルに追加したブロックがあれば削除します。
+
+<Note>
+Aristra Desktop も同じ `~/.aristra` フォルダーを使います。このフォルダーを削除すると、この Mac 上のデスクトップアプリのチャットも削除されます。
+</Note>

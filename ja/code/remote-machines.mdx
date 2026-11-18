@@ -1,0 +1,39 @@
+---
+title: "リモートマシン"
+description: "自分のターミナルから、SSH 経由で別のマシン上の Aristra Code を、そのマシンのファイル、サンドボックス、チャットとともに実行します。"
+---
+
+```sh
+aristra --remote dev-box                       # Aristra Code, working on dev-box
+aristra --remote dev-box --folder code/api
+aristra --remote me@10.0.0.5 run "run the test suite and summarize failures" -o json
+aristra --remote dev-box login                 # sign the remote machine in, with a code
+aristra --remote dev-box sessions --all
+```
+
+`--remote <host>` は、`ssh` と同じ形式で SSH の接続先（ホスト、`user@host`、`~/.ssh/config` のエイリアス）を受け取り、ランタイムを使うコマンドで動作します。チャット、`run`、`sessions`、`login`、`status`、`models`、`keys`、`tasks`、`doctor`、ユーザーレベルの設定です。`logs`、`install`、`update`、`serve`、`acp` はこのコンピューターで動作し、`runtime status` と `runtime stop` は、相手のマシン上にあるこの接続のランタイムだけを対象にします。プロジェクトレベルの `config`、`mcp`、`hooks`、`plugin` の変更と `service` は、そのマシンで `aristra` を実行してください。ターミナルは `ssh` で接続し、そのマシン上の Aristra Code とやり取りします。使われるのは、そのマシンのファイル、サンドボックス、設定、チャット、サインインです。ターミナルは画面の役割だけを担います。どちらのマシンでもポートは開かず、マシン間で何もコピーされません。
+
+## 設定する
+
+1. **リモートマシンに Aristra Code をインストールします。**
+
+   ```sh
+   curl -fsSL https://aristralabs.com/install.sh | sh
+   ```
+
+2. **サインインします**。コンピューター上のブラウザーはリモートマシンに接続できないため、コードでサインインします。
+
+   ```sh
+   aristra --remote dev-box login
+   ```
+
+   任意のデバイスで、表示されたアドレス（app.aristralabs.com 上）を開き、コードを入力します。リモートマシンは独自のサインインを保持します。
+
+3. **作業を始めます**。`aristra --remote dev-box` を実行します。ヘッダーにマシンの名前が表示されます。
+
+## 知っておくと便利なこと
+
+- **フォルダー**は、`--folder` で指定しない限り、SSH で接続した先（通常はホームフォルダー）です。相対パスの `--folder` はそこから始まります。`--folder` は SSH の接続先からの相対パスか、そのマシンでの絶対パスで指定してください。自分のシェルは `~` をこちらのホームフォルダーに展開します。
+- **ファイルの添付**：ドラッグしたファイルや貼り付けたファイルは、自分のコンピューターで確認されたあと、リモートマシンで読み込まれます。そのため、同じパスが両方に存在する場合にだけ添付されます。貼り付けた画像や、自分のコンピューターにしかないファイルは、まだリモートのチャットに送れません。リモートマシン上のファイルを使うには、メッセージでそのパスを指定します。
+- **接続がチャットを運びます**。接続が切れると、そこで実行中のターンは停止します。リモートマシンで作業を動かしたままにするには、代わりにそのマシンの `tmux` や `screen` の中で `aristra` を実行してください。
+- `ARISTRA_SSH` で、`ssh` の代わりに使う別のプログラムを指定できます。

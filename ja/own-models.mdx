@@ -1,0 +1,201 @@
+---
+title: "自分のモデルを使う"
+description: "ChatGPT のプラン、自分のプロバイダーキー、または Ollama、LM Studio などのサーバーで動かすコンピューター上のモデルで Aristra を使う方法です。それぞれが使える場所と、Aristra Desktop とターミナルでの設定手順を説明します。"
+---
+
+Aristra のモデルは、サインインするとすぐに使え、料金は残高から支払われます。自分のモデルを持ち込むこともできます。使えるのは **ChatGPT のプラン**、プロバイダーの **API キー**、**コンピューター上のモデル**です。自分のモデルには Aristra での料金はかかりません。その場合も Aristra にはサインインします。メモリと設定は Aristra が保持します。
+
+## 自分のモデルを使える場所
+
+自分のモデルは、コンピューター上のチャットで動きます。そこでは Aristra がモデルを直接呼び出します。
+
+| チャットする場所 | モデル |
+|---|---|
+| ウェブサイトとスマートフォン | Aristra のモデル |
+| Aristra Desktop の **Chat** タブ | Aristra のモデル。この Mac に保存したドキュメントの横で開き、**On this Mac** に設定したチャットでは、自分のモデルも使えます |
+| Aristra Desktop の **Code** タブ | Aristra のモデル。フォルダーがあり **On this Mac** に設定したチャットでは、自分のモデルも使えます |
+| ターミナルとエディター（[Aristra Code](/ja/surfaces/aristra-code)） | コンピューター上のチャットでは、Aristra のモデルと自分のモデル。クラウドチャット（`aristra --cloud`）では Aristra のモデルのみ |
+| [クラウドコンピューター](/ja/surfaces/cloud-computer) | Aristra のモデル、または ChatGPT のプラン |
+
+Aristra Desktop は Mac 用です。ターミナルは macOS、Linux、WSL2 経由の Windows で動きます。インストール方法は [Aristra Code のクイックスタート](/ja/code/quickstart)を参照してください。
+
+## 設定する
+
+<Tabs>
+  <Tab title="ChatGPT のプラン">
+    ChatGPT のサブスクリプションがモデルを提供し、Aristra は独自のツールと承認の仕組みでチャットを実行します。
+
+    **Aristra Desktop で設定する**
+
+    1. **Aristra › Settings…**（⌘,）を開き、**Models** を選択します。
+    2. **Accounts** の **ChatGPT plan** で **Sign in with ChatGPT** を選択します。ブラウザーで OpenAI のページが開きます。
+    3. 設定画面に表示されたコードを入力します（**Copy** でコピーできます）。コードの有効期間は 15 分です。
+    4. 行にメールアドレスとプランが表示されます。この Mac 上のチャットのモデルメニューで、ChatGPT のモデルを選択します。
+
+    **ターミナルで設定する**
+
+    1. チャットで `/model` を実行します。
+    2. **ChatGPT plan** の下にある **Sign in with your ChatGPT plan (a code you enter in a browser)** を選択します。
+    3. ターミナルに OpenAI のページ（`https://auth.openai.com/codex/device`）とコードが表示されます。任意のデバイスでそのページを開き、ChatGPT にサインインしてコードを入力します。
+    4. `/model` に戻り、ChatGPT のモデルを選択します。
+
+    同じコンピューター上の Codex CLI のサインインは再利用されません。プランからサインアウトするには、Aristra Desktop でその行の **Sign out** を選択するか、ターミナルで `aristra logout chatgpt` を実行します（チャットでは `/logout chatgpt`）。Aristra はサインインしたままです。
+  </Tab>
+
+  <Tab title="自分のキー">
+    モデルの呼び出し料金はプロバイダーから請求されます。Aristra は、OpenAI、Anthropic、Google Gemini、OpenRouter、Fireworks AI、DeepSeek、xAI、Kimi (Moonshot)、Z.AI (GLM)、MiniMax のキーに対応しています。
+
+    **Aristra Desktop で設定する**
+
+    1. **Settings › Models** を開きます。
+    2. **API keys** の **Add a provider** を開き、プロバイダーの **Add key** を選択します。
+    3. キーを貼り付けて **Save** を選択します。
+    4. この Mac 上のチャットのモデルメニューで、そのプロバイダーのモデルを選択します。
+
+    **ターミナルで設定する**
+
+    1. プロバイダーのソース（`openai`、`anthropic`、`gemini`、`openrouter`、`fireworks`、`deepseek`、`xai`、`moonshot`、`zai`、`minimax`）を指定して `aristra keys add` を実行します。例：
+
+       ```sh
+       aristra keys add anthropic
+       ```
+
+    2. 求められたらキーを貼り付けます。入力中のキーは表示されません。
+    3. **Saved the Anthropic key** と表示されます。`aristra models --source anthropic` でモデルを確認します。
+    4. チャットで `/model` を実行し、そのプロバイダーの下にあるモデルを選択します。
+
+    キーはコンピューター上の Aristra の認証情報ストアに保存され、設定ファイルには書き込まれません。また、キーは対応するプロバイダーにしか送信されません。`aristra keys list` で設定済みのキーを確認でき、`aristra keys remove <source>` で削除できます。
+  </Tab>
+
+  <Tab title="Ollama">
+    [Ollama](https://ollama.com) のモデルはコンピューター上で動くため、呼び出しに料金はかかりません。
+
+    **始める前に**
+
+    - **ツールを呼び出せる**モデルを選んでください。Aristra はツールを通じて作業するため、ツールを使えないモデルでは失敗します。
+    - Aristra には **16,384 トークン**以上のコンテキストウィンドウが必要です。Ollama の既定値はこれより小さいことがよくあります。
+
+    **Ollama とモデルをインストールする**
+
+    1. [ollama.com/download](https://ollama.com/download) から Ollama をインストールして起動します。Ollama アプリを開くか、`ollama serve` を実行します。
+    2. ツールを呼び出せるモデルをダウンロードします。例：
+
+       ```sh
+       ollama pull qwen3:8b
+       ```
+
+    3. コンテキストを 16K 以上にします。Ollama アプリの設定で **Context length** を 16k 以上にするか、次のように Ollama を起動します。
+
+       ```sh
+       OLLAMA_CONTEXT_LENGTH=16384 ollama serve
+       ```
+
+    **Aristra Desktop で設定する**
+
+    1. **Settings › Models** を開きます。**On this Mac** の下で、**Ollama** に **Connected** とインストール済みのモデル数が表示されます。**Not running** と表示されている場合は、Ollama を起動して（モデルがない場合は pull して）、**Check again** を選択します。
+    2. **Code** タブで新しいチャットを始め、**Folder** を選んで **Where it runs** を **On this Mac** に設定します。
+    3. モデルメニューの **Ollama** の下でモデルを選択します。この Mac のメモリに対して **Fits**、**Tight fit**、**Too big** のいずれかが表示されます。
+
+    既定のモデルにするには、**Settings › Models › Default model** で選択します。チャットを始めるときに Ollama が起動していないと、準備のできている最初のソースでチャットが始まるため、モデルメニューを確認してください。
+
+    **ターミナルで設定する**
+
+    1. Aristra がモデルを見つけられるか確認します。
+
+       ```sh
+       aristra models --source ollama
+       ```
+
+       **Ollama (ollama): runs on this computer** の下にモデルが一覧表示されます。それぞれに、**fits this computer**、**tight on memory**、**too big for this computer** のいずれかと、16K のウィンドウで必要なメモリが表示されます。収まるものを選んでください。
+    2. チャットで `/model` を実行し、**Ollama** の下にあるモデルを選択します。これが新しいチャットの既定になり、フッターには支払い元として **this computer** が表示されます。1 つのチャットだけで使う場合は、`aristra --source ollama -m qwen3:8b` で始めます。
+
+    最初のメッセージには時間がかかることがあります。Aristra は Ollama がモデルを読み込むまで待つためです。
+
+    **別のアドレスで動く Ollama**
+
+    Aristra は Ollama と同じように `OLLAMA_HOST` を使い、設定がなければ `localhost:11434` を使います。ターミナルでは、`aristra` を起動する前に設定してください。Aristra がすでに動いている場合は、`aristra runtime stop` を実行してから、もう一度 `aristra` を起動します。
+  </Tab>
+
+  <Tab title="LM Studio">
+    [LM Studio](https://lmstudio.ai) のモデルはコンピューター上で動くため、呼び出しに料金はかかりません。Ollama と同じく、**ツールを呼び出せる**モデルを、**16,384 トークン**以上のコンテキストで使ってください。
+
+    **LM Studio とモデルをインストールする**
+
+    1. [lmstudio.ai](https://lmstudio.ai) から LM Studio をインストールし、ツールを呼び出せるモデルをダウンロードします。
+    2. **コンテキスト長を 16,384 以上**にしてモデルを読み込みます。Aristra は読み込み済みのモデルのウィンドウを確認します。初めて使うときに Aristra が読み込むモデルには、LM Studio 自体の設定が使われます。
+    3. LM Studio のサーバーを通常のポート 1234 で起動します。アプリから起動するか、`lms server start` を実行します。Aristra が探すのは `localhost:1234` だけです。
+
+    **Aristra Desktop で設定する**
+
+    1. **Settings › Models** を開きます。**On this Mac** の下で、**LM Studio** に **Connected** と表示されます。**Not running** と表示されている場合は、サーバーを起動して **Check again** を選択します。
+    2. **Code** タブで、**Folder** を選び **Where it runs** を **On this Mac** に設定したチャットを始め、**LM Studio** の下でモデルを選択します。
+
+    **ターミナルで設定する**
+
+    1. Aristra がモデルを見つけられるか確認します：`aristra models --source lmstudio`。
+    2. チャットで `/model` を実行し、**LM Studio** の下にあるモデルを選択します。1 つのチャットだけで使う場合は、`aristra --source lmstudio -m <model>` で始めます。
+
+    LM Studio 0.4 以降では、各モデルのサイズとウィンドウも Aristra に伝わるため、収まり具合の表示とウィンドウの確認に使われます。
+  </Tab>
+
+  <Tab title="その他のサーバー">
+    Chat Completions、Responses、Anthropic の Messages に対応したサーバーなら何でも使えます。vLLM、llama.cpp のサーバー、MLX、社内ゲートウェイ、プロキシなどです。設定できるのは一度に 1 つです。
+
+    **Aristra Desktop で設定する**
+
+    1. **Settings › Models** を開きます。**On this Mac** の下にある **Custom endpoint** で **Set up** を選択します。
+    2. **Name**、サーバーが対応する API（**Chat Completions**、**Responses**、**Anthropic Messages**）、**Base URL** を入力し、必要に応じて API キーとモデル ID も入力します。
+    3. **Save** を選択します。行に名前と **Connected** が表示されます。
+    4. この Mac 上のチャットのモデルメニューで、そのサーバーのモデルを選択します。
+
+    **ターミナルで設定する**
+
+    1. サーバーを追加します。たとえば、キーのいらないこのコンピューター上のサーバーなら次のようにします。
+
+       ```sh
+       aristra keys add custom --url http://localhost:8000/v1 --wire chat_completions --name "My server" --model qwen3-coder --no-key
+       ```
+
+       または、`aristra keys add custom` を実行して、アドレス、対応する API（`chat_completions`、`responses`、`anthropic`）、モデル名、名前、キーの質問に順に答えます。指定しなかったフラグは質問されます。Enter キーを押すと既定値になります。
+    2. 名前とアドレスとともに **Saved** と表示されます。`aristra models --source custom` でモデルを確認します。
+    3. チャットで `/model` を実行し、サーバーの名前の下にあるモデルを選択します。
+
+    **アドレスについて**
+
+    - Chat Completions と Responses では、API のパス（通常は `/v1`）を含めます。Anthropic Messages では `/v1` を含めません。
+    - `https://` を使ってください。`http://` が使えるのは `localhost`、`127.0.0.1`、`::1` だけなので、別のマシン上のサーバーには `https://` が必要です。
+    - 指定したモデル名は、サーバーのモデル一覧を読み取れない場合に使われます。Anthropic Messages では常に使われます。
+    - アドレスがコンピューター上かネットワーク内にあれば、支払い元は **this computer** になります。それ以外は **your key** になります。
+
+    `aristra keys remove custom` でサーバーを削除できます。
+  </Tab>
+</Tabs>
+
+<Note>
+Claude のサブスクリプションでのサインインには対応していません。Claude のモデルは、Aristra 経由か自分の Anthropic キーで使ってください。
+</Note>
+
+## ローカルモデルが動かない場合
+
+<AccordionGroup>
+  <Accordion title="Ollama is not running on this computer">
+    Ollama を起動して（アプリか `ollama serve`）、もう一度試してください。Aristra Desktop では **Check again** を選択します。LM Studio の場合は、そのサーバーを起動します。Ollama が別のアドレスで動いている場合は、`OLLAMA_HOST` を設定して Aristra を再起動します（`aristra runtime stop`）。
+  </Accordion>
+  <Accordion title="No models are installed in Ollama yet">
+    `ollama pull` でモデルをダウンロードしてから、Aristra Desktop で **Check again** を選択するか、もう一度 `/model` を実行します。
+  </Accordion>
+  <Accordion title="コンテキストウィンドウが小さすぎる">
+    チャットが停止し、モデルのウィンドウが 16,384 トークン未満であると表示されます。Ollama では、アプリの設定で **Context length** を 16k 以上にするか、`OLLAMA_CONTEXT_LENGTH=16384` を付けて起動します。LM Studio では、コンテキスト長を 16k 以上にしてモデルを読み込み直します。
+  </Accordion>
+  <Accordion title="最初のメッセージでサーバーがエラーを返す">
+    多くの場合、モデルがツールを呼び出せないことが原因です。ツールを呼び出せるモデルを選び、サーバー自体のログを確認してください。
+  </Accordion>
+  <Accordion title="Use an https:// address, or http:// for a server on this computer">
+    別のマシン上のカスタムサーバーには `https://` が必要です。このコンピューター上のサーバーなら、アドレスに `localhost` か `127.0.0.1` を使ってください。
+  </Accordion>
+  <Accordion title="チャットが別のモデルで動く">
+    Aristra Desktop では、既定のソースの準備ができていないチャットは、準備のできている最初のソースで始まります。ローカルサーバーを起動して **Check again** を選択し、モデルメニューでモデルを選んでください。クラウドのチャットでは常に Aristra のモデルが使われます。
+  </Accordion>
+</AccordionGroup>
+
+フォールバック、サイドモデル、収まり具合の見積もり、使用量など、すべての詳細は[モデル](/ja/code/configure/models)を参照してください。

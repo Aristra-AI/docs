@@ -1,0 +1,110 @@
+---
+title: "コマンド"
+description: "ターミナルの Aristra Code で入力できるすべてのコマンド。/help から /remote-control まで。"
+---
+
+ターミナルでは、入力欄の先頭で `/` を入力するとコマンドメニューが開きます。コマンドと自分の[スキル](/ja/code/extend/skills)が、入力に合わせて絞り込まれて表示されます。上下の矢印キーで選び、Tab キーで補完し、Enter キーで実行します（引数が必要なコマンドは、入力するまで待機します）。Esc キーでメニューを閉じて入力欄をクリアします。不明なコマンドは送信されません。`/` で始まるメッセージを送るには、先頭にスペースを入れてください。
+
+Aristra Desktop の `/` メニューには、独自の短い一覧があります。[Aristra Desktop の Code タブ](/ja/code/desktop)を参照してください。`aristra` のサブコマンドとフラグについては、[CLI リファレンス](/ja/code/reference/cli)を参照してください。
+
+## チャット
+
+| コマンド | 動作 |
+|---|---|
+| `/new`（または `/clear`、`/reset`） | このフォルダーで新しいチャットを始めます |
+| `/resume` | 以前のチャットに戻ります |
+| `/search <words>` | このコンピューター上のすべてのチャットのメッセージから語句を探します。`/search #2` で 2 番目の結果のチャットを開きます |
+| `/rename <title>` | このチャットの名前を変更します |
+| `/branch [name]` | このチャットを現時点の状態で新しいチャットにコピーし、コピーで続けます |
+| `/fork <directive>` | このチャットのコンテキストをすべて持つバックグラウンドエージェントを起動し、指示を実行して報告させます |
+| `/btw <question>` | 実行中のターンを中断せずに補足の質問をします。回答はチャットに追加されません |
+| `/queue <message>` | 実行中のターンが終わったあとに、これを送ります |
+| `/rewind`（または `/checkpoint`） | コードと会話の両方、またはどちらかを、自分のメッセージの前の状態に戻します |
+| `/export [md\|json]` | このチャットを `~/.aristra/exports/` のファイルに保存します |
+| `/copy [N]` | 最新の返信（または N 番目に新しい返信）をクリップボードにコピーします |
+| `/files [words \| find WORDS \| open N \| save PATH \| update N]` | チャットで共有、作成、変更されたファイル、添付したファイル、サインインしていればアカウントのファイルを、新しい順に表示します。words は名前、フォルダー、チャットのタイトルを検索し、`find WORDS` はファイルの中を検索し（PDF ならページも示します）、`open N` はファイルを対応するアプリで開き（アカウントのファイルは先にダウンロードされます）、`save PATH` はここにあるファイルのコピーをアカウントに保存し、`update N [replace\|keep-both]` は変更されたファイルについて保存済みのコピーを置き換えます |
+| `/recap` | 現時点のチャットの 1 行の要約 |
+| `/exit`（`/quit`） | 終了します。実行中のターンは続けられます |
+
+## コンテキストとメモリ
+
+| コマンド | 動作 |
+|---|---|
+| `/context [all]` | モデルのコンテキストを占めるものを、提案とともにグリッドで表示します |
+| `/compact [instructions]` | 指示で示した内容を残して、それまでの会話を要約します |
+| `/autocompact [auto\|<tokens>]` | このモデルについて、要約を始めるまでにコンテキストをどこまで使うかを設定します |
+| `/memory` | 指示ファイル（`AGENTS.md`）を編集するか、リポジトリのメモを開きます |
+| `/init` | コードからこのフォルダーの `AGENTS.md` を書きます |
+| `/goal [<condition> \| clear]` | Aristra Code が停止する前に確認する条件を設定します。[ゴール](/ja/code/guides/goals)を参照してください |
+
+## モデルと権限
+
+| コマンド | 動作 |
+|---|---|
+| `/model` | 支払い元を確認しながらモデルを選びます |
+| `/effort [level\|auto]` | モデルがどの程度深く考えるか。`low`、`medium`、`high`、一部のモデルでは `xhigh` か `max` |
+| `/mode [mode]` | 権限モードを設定します。`manual`（または `default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`（`--dangerously-skip-permissions` か `--allow-dangerously-skip-permissions` を付けて `aristra` を起動した場合）、`read_only`。モードを指定しない場合は次のモードに切り替えます。クラウドチャットには `manual` と `auto` があります |
+| `/permissions` | 出どころごとのルール、チャットのフォルダー、Auto モードが最近ブロックしたステップ |
+| `/sandbox [exclude <pattern>]` | コマンドを[サンドボックス](/ja/code/configure/sandbox)（既定はオフ）で実行します。自動許可あり、通常の権限、またはサンドボックスなしを選べます。`exclude` は、常にサンドボックスの外で実行するコマンドを追加します |
+| `/add-dir <path>` | このチャットが別のフォルダーで作業できるようにします |
+| `/retry` | Auto モードのレビュアーが直前にブロックしたステップを、そのままの内容で 1 回だけ実行させます |
+| `/folder` | このチャットのフォルダーと、それが信頼されているかどうか |
+
+## Git とプルリクエスト
+
+| コマンド | 動作 |
+|---|---|
+| `/diff` | コミットしていない変更と、各ターンの変更。フルスクリーンでは、チャットの横に差分パネルを表示します |
+| `/pr [number]` | ブランチのプルリクエスト。ステータス、チェック、ファイル、レビュー、マージ |
+| `/create-pr [--draft]` | コミットしてプッシュし、プルリクエストを作成します |
+| `/commit [guidance]` | リポジトリのスタイルのメッセージで変更をコミットします |
+| `/autofix-pr [number\|stop]` | プルリクエストを監視し、失敗したチェック、コンフリクト、レビューコメントに対応します |
+
+[Git とプルリクエスト](/ja/code/guides/git)を参照してください。
+
+## バックグラウンド処理
+
+| コマンド | 動作 |
+|---|---|
+| `/tasks`（または `/bashes`） | バックグラウンドで動いているものすべて。エージェント、ワークフロー、コマンドです。x キーで停止します |
+| `/schedule [pause\|resume\|run\|remove N]`（または `/scheduled`） | このコンピューターに保存された[スケジュールタスク](/ja/code/guides/background)を番号付きで表示します。番号で変更します。作成するには、普段の言葉で頼みます |
+| `/workflows` | 実行中と完了したワークフロー。そのフェーズとエージェント |
+
+[バックグラウンド処理](/ja/code/guides/background)を参照してください。
+
+## 拡張機能
+
+| コマンド | 動作 |
+|---|---|
+| `/mcp [reconnect\|enable\|disable [<server>\|all]]` | MCP サーバーを管理します。プロジェクトのサーバーの承認、サインイン、再接続、このプロジェクトでのオフ、ツールの表示 |
+| `/hooks` | イベントごとのフックと、まだ承認が必要なもの |
+| `/plugin [subcommand]`（または `/plugins`、`/marketplace`） | プラグインとマーケットプレイスを管理します |
+| `/reload-plugins` | プラグインを読み直し、このチャットで変更を反映します |
+| `/<skill> [args]` | 自分のスキルか保存したワークフローを実行します（プラグインのものは `/<plugin>:<name>`） |
+| `/mcp__<server>__<prompt> [args]` | MCP サーバーのプロンプトを実行します |
+
+## アカウントと設定
+
+| コマンド | 動作 |
+|---|---|
+| `/help` | すべてのコマンド、自分のスキル、キー操作 |
+| `/status` | アカウントとそのプラン、ランタイム、モデルのソース |
+| `/usage` | このチャットで使ったトークンと支払い元、ドル建ての Aristra の残高とプランの上限、使用量に影響しているもの。Aristra のプランがない場合は、何が何の支払いに使われるか |
+| `/config` | 有効な設定と、それぞれがどのファイルから来ているか |
+| `/login [code]`、`/logout` | Aristra にサインイン（`code`：別のデバイスでコードを使って）、またはこのコンピューターでサインアウトします |
+| `/remote-control [off]`（または `/rc`） | このチャットをスマートフォンとウェブで続けます。プランに含まれます。[Remote Control](/ja/code/remote-control) を参照してください |
+| `/remote-control computer [on\|off]` | ウェブとスマートフォンからこのコンピューターでチャットを始められるようにします。既定はオフです |
+| `/remote-control folder [on\|off]` | ウェブとスマートフォンからのチャットを、今いるフォルダーで始められるようにします |
+| `/release-notes` | 各バージョンの変更内容 |
+
+## ターミナル
+
+| コマンド | 動作 |
+|---|---|
+| `/tui [default\|fullscreen]` | レンダラーを選びます。従来のものか、フルスクリーンか |
+| `/keybindings` | キーボードショートカットのファイルを開きます |
+| `/terminal-setup` | ターミナルで改行するキー（Shift+Enter または Option+Enter）を設定します |
+
+## 組み込みのスキル
+
+次のコマンドは[スキル](/ja/code/extend/skills)として実行されます。`/init`、`/code-review`（または `/review`）、`/simplify`、`/security-review`、`/update-config`、`/fewer-permission-prompts`、`/debug`、`/verify`、`/commit`、`/create-pr`、`/loop`（または `/proactive`）、そして Aristra Code がワークフローを書くときに読むリファレンスの `workflow-authoring` です。`/deep-research <question>` は、Aristra Code に組み込まれた[ワークフロー](/ja/code/guides/subagents)を実行します。

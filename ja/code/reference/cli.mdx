@@ -1,0 +1,156 @@
+---
+title: "CLI リファレンス"
+description: "aristra のすべてのサブコマンドとフラグ。チャット、スクリプト、アカウント、モデル、拡張機能、設定、サポートのための Aristra CLI です。"
+---
+
+Aristra CLI は `aristra` コマンドで、ターミナルで使う Aristra Code です。すべてのサブコマンドは `--help` で使い方を表示します。一部は使い方の誤り（ステータス 2）として表示します。チャット内で入力するコマンドについては、[コマンド](/ja/code/reference/commands)を参照してください。
+
+```text
+aristra [options] [prompt]          Aristra Code in this folder
+aristra run [options] [prompt]      one turn, non-interactive (also: aristra -p or --print, as the first argument)
+aristra <command> ...
+```
+
+サブコマンドでないものはすべてプロンプトになります。`aristra fix the build` は、「fix the build」でチャットを始めます。
+
+## グローバルオプション
+
+| オプション | 動作 |
+|---|---|
+| `--remote <host>` | SSH 経由で別のマシンで実行します。コマンドの前後どちらにも置けます。このコンピューターで動作するコマンドについては[リモートマシン](/ja/code/remote-machines)を参照してください |
+| `-v`、`--version` | バージョンを表示します |
+| `-h`、`--help` | サブコマンドを一覧表示します |
+| `--help-agent` | 対話モードのオプションを一覧表示します |
+
+サブコマンドは、成功すると `0`、失敗すると `1`（メッセージは標準エラー出力）、使い方の誤りでは `2` で終了します。`aristra run` では `3` と `130` が加わります。[非対話モード](/ja/code/non-interactive)を参照してください。`aristra serve` はランタイム自体のステータスで終了します（`3`：このホームですでにランタイムが動いている）。`aristra` は、「No, exit」の場合と同じく、初回の画面を抜けると `130` で終了します。
+
+## チャットを始める
+
+```text
+aristra [options] [prompt...]
+aristra resume [id]
+aristra attach <id>
+```
+
+| オプション | 動作 |
+|---|---|
+| `-c`、`--continue` | このフォルダーの最新のチャットを続けます |
+| `-r`、`--resume <id>` | 指定したチャットを続けます |
+| `-m`、`--model <id>` | 新しいチャットのモデル |
+| `--source <id>` | モデルの提供元。`aristra`、`chatgpt`、`openai`、`anthropic`、`gemini`、`ollama`、`lmstudio`、`custom` など |
+| `--agent <agent>` | チャットを、自分の[カスタムエージェント](/ja/code/guides/subagents)の 1 つとして実行します |
+| `-w`、`--worktree [name]` | git のワークツリーで作業します。[ワークツリー](/ja/code/guides/git)を参照してください |
+| `--permission-mode <mode>` | 開始時のモード。`manual`（または `default`）、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions`、`read_only` |
+| `--dangerously-skip-permissions` | Bypass permissions で開始します。`IS_SANDBOX=1` でない限り、root では拒否されます |
+| `--allow-dangerously-skip-permissions` | あとからチャットを Bypass permissions に切り替えられるようにします |
+| `--add-dir <path>` | チャットが作業してよい追加のフォルダー。繰り返し指定できます |
+| `--plugin-dir <path>` | このチャットに限り、フォルダーか `.zip` からプラグインを読み込みます。繰り返し指定できます |
+| `--fullscreen` | この起動に限り、フルスクリーンレンダラーを使います |
+| `--folder <path>` | 作業するフォルダー |
+| `--cloud` | Aristra のクラウドエージェントが実行する[クラウドチャット](/ja/code/cloud-chats) |
+| `--incognito` | `--cloud` と一緒に使うと、アカウントの一覧に含めません |
+| `--project <name>` | `--cloud` と一緒に使うと、そのプロジェクトでチャットを始めます |
+
+ID を指定せずに `aristra resume` を実行すると、選択画面が開きます。`aristra resume <id>` と `aristra attach <id>` は、チャットがアイドル状態、実行中、承認待ちのいずれであっても、そのチャットを開きます。
+
+## 非対話の実行
+
+`aristra run`（または `-p`）は、スクリプトや CI のために 1 つのターンを実行します。オプションと出力については[非対話モード](/ja/code/non-interactive)を参照してください。
+
+## チャット
+
+```text
+aristra sessions [--all | --cloud] [--limit <n>] [--json]
+aristra sessions export <id> [--format md|json]
+aristra sessions delete <id> [--yes]
+aristra sessions import <id> [--folder <path>] [--source <id> --model <id>]
+aristra sessions connect-folder <id> [--folder <path>]
+aristra sessions download <id> [<key>]
+```
+
+| 形式 | 動作 |
+|---|---|
+| `sessions` | すべてのサーフェスの、このフォルダーのチャットを新しい順に表示します。`--all` ですべてのフォルダー、`--cloud` でアカウントのクラウドチャット |
+| `sessions export <id>` | チャットを `~/.aristra/exports/` に書き出します |
+| `sessions delete <id>` | チャットとそのファイルを削除します。`--yes` で確認を省略します |
+| `sessions import <id>` | クラウドチャットを、このコンピューター上の新しいチャットにコピーします |
+| `sessions connect-folder <id>` | クラウドチャットに、このコンピューター上のフォルダーを割り当てます |
+| `sessions download <id>` | クラウドチャットのエージェントが作成したファイルをダウンロードします |
+
+## アカウント
+
+| コマンド | 動作 |
+|---|---|
+| `aristra login [--device-code \| --browser]` | ブラウザーかコードでサインインします（SSH 経由やブラウザーがない場合は、コードが既定です）。ブラウザーでのサインインを待っている間に c を押すと、代わりにコードを使えます |
+| `aristra logout` | サインアウトし、このコンピューターをアカウントから外します |
+| `aristra setup-token [--name <name>]` | 1 年間、Aristra の残高でモデルを実行できる CI 用のトークンを表示します。[CI で使う](/ja/code/non-interactive)を参照してください |
+| `aristra status [--json]` | アカウント、ランタイム、モデルのソース |
+
+## モデルとキー
+
+| コマンド | 動作 |
+|---|---|
+| `aristra models [--source <id>] [--json]` | 各ソースが提供するモデル。支払い元と、ローカルモデルでは収まり具合も表示します |
+| `aristra keys add <provider>` | プロバイダーキー、またはツールのキーを追加します。ウェブ検索なら `brave`、サンドボックスなら `e2b` です（入力は非表示、または標準入力からパイプで渡します） |
+| `aristra keys add custom [--url <address>] [--wire chat_completions\|responses\|anthropic] [--name <name>] [--model <id>]... [--no-key]` | OpenAI か Anthropic の API に対応した自分のサーバー |
+| `aristra keys list` | 設定済みのキー。キー自体は表示しません |
+| `aristra keys remove <provider>` | キーを削除します |
+
+## 拡張機能
+
+| コマンド | 動作 |
+|---|---|
+| `aristra mcp add [-s scope] <name> [--env K=V]... [--secret K=V]... [--cwd <folder>] [--writable <folder>]... [--sandbox] -- <command> [args]` | プログラムとして動く MCP サーバーを追加します。`-s` は `local`（既定）、`project`、`user` のいずれかです。`--secret` は値を認証情報ストアに保存し、`--sandbox` はネットワークを許可したサンドボックスで実行し、書き込めるのは自身のフォルダー（`--cwd`、またはプロジェクト）、`--writable` のフォルダー、パッケージランチャーのキャッシュだけになります |
+| `aristra mcp add [-s scope] <name> --url <url> [--header K=V]... [--client-id <id>] [--client-secret <secret>]` | アドレスで接続する MCP サーバーを追加します |
+| `aristra mcp add-json [-s scope] <name> <json> [--client-secret <secret>]` | JSON からサーバーを追加します |
+| `aristra mcp add-from-claude-desktop [-s scope] [name...]` | Claude Desktop のプログラム（stdio）のサーバーを取り込みます（macOS） |
+| `aristra mcp list [--json]`、`get <name>`、`test <name>`、`remove [-s scope] <name>` | サーバーの一覧表示、確認、テスト、削除 |
+| `aristra mcp reset-project-choices` | このプロジェクトの `.mcp.json` のサーバーに対する承認を消去します |
+| `aristra mcp trust <name>`、`untrust <name>` | サーバーのツールを確認なしで実行できるようにするか、元に戻します（local または project のサーバーはこのプロジェクトでのみ） |
+| `aristra mcp login <name> [--device-code]`、`logout <name>` | OAuth でサーバーにサインインします |
+| `aristra hooks list [--json]`、`approve <event> <command>`、`revoke <event> <command>` | フックの一覧と承認 |
+| `aristra hooks test <event> [--tool <name> --input <json> \| --prompt <text>]` | サンプルでイベントのフックを実行します |
+| `aristra plugin install <plugin> [-s scope] [--config KEY=VALUE]` | プラグインをインストールします |
+| `aristra plugin uninstall`、`enable`、`disable`、`update`、`list`、`prune` | プラグインを管理します |
+| `aristra plugin configure <plugin>` | プラグインのオプション |
+| `aristra plugin validate <path>` | プラグインやマーケットプレイスを検証します |
+| `aristra plugin marketplace add <source>`、`list`、`remove <name>`、`update [name]` | マーケットプレイスを管理します |
+
+[MCP サーバー](/ja/code/extend/mcp)、[フック](/ja/code/extend/hooks)、[プラグイン](/ja/code/extend/plugins)を参照してください。
+
+## 設定
+
+| コマンド | 動作 |
+|---|---|
+| `aristra config get [key] [--json]` | 有効な設定と、それぞれの出どころ |
+| `aristra config set <key> <value> [--project \| --local]` | 自分のファイルかプロジェクトのファイルで、設定を変更します |
+| `aristra config edit [--project \| --local]` | 設定ファイルをエディターで開きます |
+| `aristra import <claude-code\|codex>` | Claude Code か Codex から、指示、MCP サーバー、権限のルール、既定のモード、フック、スキル、エージェント、コマンドを取り込みます。先にプレビューを表示します。`--yes=<digest>` はチェックした項目（自分のもの。スキルは除く）を適用し、`--only <id>` はスキルやフォルダー自体のものも含めて項目を選び、`--dry-run` は結果を表示し、`--json` は結果を JSON で出力します |
+
+## サポート
+
+| コマンド | 動作 |
+|---|---|
+| `aristra doctor [--json]` | 環境を確認し、各問題の修正方法を示します |
+| `aristra logs [-n <lines>] [-f]` | ランタイムのログ |
+| `aristra diagnostics export [--no-logs]` | シークレットを取り除いたサポート用のバンドルを `~/.aristra/diagnostics/` に書き出します |
+
+## ランタイム
+
+| コマンド | 動作 |
+|---|---|
+| `aristra runtime status [--json]` | ランタイムが動いているかどうかと、保持しているもの。ランタイムは起動しません |
+| `aristra runtime stop [--now]` | 何も実行されていない状態になったら停止します。`--now` では実行中のターンも停止します |
+| `aristra tasks [list] [--json]`、`tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（または `--every hour --at <minute>`、`--once "<date> <time>"`）、`tasks pause\|resume\|run\|remove <id>` | このコンピューターに保存されたスケジュールタスク。`add` には `--name`、`--folder`、`--source`、`--model`、`--mode`、`--skip-missed` も指定できます。[スケジュールタスク](/ja/code/guides/background)を参照してください |
+| `aristra service install`、`uninstall [--now]`、`status [--json]` | バックグラウンドサービス。[バックグラウンド処理](/ja/code/guides/background)を参照してください |
+| `aristra serve` | ランタイムを自分で実行します（`--socket` または `--stdio`）。通常はサーフェスが起動します |
+| `aristra acp` | Agent Client Protocol でエディターに機能を提供します。[エディター](/ja/code/editors)を参照してください |
+
+## インストール
+
+| コマンド | 動作 |
+|---|---|
+| `aristra update [--check]` | チャネルの最新のリリースに更新します |
+| `aristra install [latest\|stable\|<version>]` | チャネルやバージョンを切り替えます（既定は `latest`） |
+
+[セットアップ](/ja/code/setup)を参照してください。

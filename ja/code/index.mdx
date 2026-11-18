@@ -1,0 +1,75 @@
+---
+title: "Aristra Code の概要"
+sidebarTitle: "概要"
+description: "Aristra Code は Aristra のコーディングエージェントです。ターミナル、Aristra Desktop、エディター、スマートフォンから、コードを読み、ファイルを編集し、コマンドを実行し、git を扱います。"
+---
+
+Aristra Code は、コンピューター上のフォルダーで作業します。やりたいことを普段の言葉で伝えると、必要なコードを読み、複数のファイルにまたがって変更を加え、テストやコマンドを実行します。許可していない操作の前には確認を求めます。プロジェクトの指示をチャットをまたいで覚えておき、git とプルリクエストを扱い、選んだモデルで動きます。
+
+```sh
+curl -fsSL https://aristralabs.com/install.sh | sh
+cd ~/code/my-project
+aristra
+```
+
+初回の実行では、Aristra へのサインイン、新しいチャットで最初に使うモデルの選択、フォルダーを信頼するかどうかの確認が行われます。そのあと、やりたいことを入力します。[クイックスタート](/ja/code/quickstart)では、最初の実際のタスクを順に説明しています。
+
+## 実行できる場所
+
+ターミナル、Aristra Desktop、エディターは、コンピューター上の同じエージェントである Aristra Runtime とやり取りします。そのため、どこかで始めたチャットは他の場所にも表示され、どこからでも次のステップを承認できます。プランがあれば、Remote Control でチャットをスマートフォンとウェブに共有できます。
+
+<CardGroup cols={2}>
+  <Card title="ターミナル" icon="terminal" href="/ja/code/terminal">
+    `aristra` コマンド。すべてのコマンドとキー操作を備えた、ターミナルで使うフル機能のアプリです。
+  </Card>
+  <Card title="Aristra Desktop" icon="desktop" href="/ja/code/desktop">
+    Mac アプリの Code タブ。チャットはフォルダーごとにまとめられ、チャットの横にターミナル、ブラウザー、変更内容、プルリクエストが並びます。
+  </Card>
+  <Card title="エディター" icon="code" href="/ja/code/editors">
+    Zed をはじめ、Agent Client Protocol に対応したエディターの中で使う Aristra Code。
+  </Card>
+  <Card title="スマートフォンとウェブ" icon="mobile" href="/ja/code/remote-control">
+    Remote Control。作業をコンピューターに残したまま、スマートフォンや app.aristralabs.com からチャットを続けられます。
+  </Card>
+</CardGroup>
+
+## できること
+
+<AccordionGroup>
+  <Accordion title="機能を作り、バグを直す">
+    変更内容を説明するか、エラーを貼り付けます。Aristra Code は関係するコードを見つけ、変更を計画し、ファイルを編集し、テストが通るまで実行します。
+
+    ```sh
+    aristra "the date parser fails on leap years: find why, fix it, and run the tests"
+    ```
+  </Accordion>
+  <Accordion title="git とプルリクエストを扱う">
+    コミットを書き、頼めば専用の git ワークツリーで作業します。`/pr` で開いているプルリクエストのチェックとレビューを表示し、`/autofix-pr` でプルリクエストを監視して、チェックやレビュアーが指摘したことを修正できます。[Git とプルリクエスト](/ja/code/guides/git)を参照してください。
+  </Accordion>
+  <Accordion title="バックグラウンドで作業を続ける">
+    時間のかかるコマンドはバックグラウンドに移り、終了するとチャットに知らせます。`/loop` はプロンプトを繰り返し、スケジュールタスクは予定どおりに実行され、`/goal` は設定した条件が満たされるまで作業を続けさせます。[バックグラウンド処理](/ja/code/guides/background)を参照してください。
+  </Accordion>
+  <Accordion title="ツールを接続する">
+    MCP サーバーを追加し、Aristra アカウントのコネクターを使い、繰り返す作業のためのスキルを書き、フックでイベントに応じて自分のコマンドを実行し、これらをまとめたプラグインをインストールできます。[拡張](/ja/code/extend/mcp)を参照してください。
+  </Accordion>
+  <Accordion title="スクリプトから使う">
+    `aristra run` と `aristra -p` は、アプリを使わずに 1 つのターンを実行し、JSON で出力します。スクリプトや CI 向けです。[非対話モード](/ja/code/non-interactive)を参照してください。
+  </Accordion>
+</AccordionGroup>
+
+## 自分のモデル、自分のルール
+
+- **モデル**：Aristra のモデルをプロバイダー自身の価格で Aristra の残高から使うことも、ChatGPT のプラン、自分のプロバイダーキー（OpenAI、Anthropic、Gemini、OpenRouter など）、コンピューター上で動くモデルを使うこともできます。各チャットには支払い元が表示されます。[モデル](/ja/code/configure/models)を参照してください。
+- **コンピューター上では無料**：自分のモデルを使う Aristra Code には料金はかかりません。すべてのデバイスで使えるアカウントのメモリは、すべてのアカウントに含まれます。プランにすると、Aristra がホストするその他の機能が加わります。モデルの毎月の利用枠、Remote Control、コネクター、クラウドコンピューターです。プランがない場合、クラウドのチャットと Aristra のモデルは残高から支払われ、最初は $1 のスタータークレジットが使われます。クラウドコンピューターはチャージした残高で動きます。[アカウントと Aristra One](/ja/account/overview) を参照してください。
+- **権限**：チャットは Manual モードで始まります。読み取り、検索、読み取りだけのコマンドは自動で実行され、変更の前には確認を求めます。Accept edits、Plan、Auto には Shift+Tab ですぐに切り替えられます。[権限](/ja/code/configure/permissions)を参照してください。
+- **サンドボックス**：既定ではオフです。`/sandbox` でオンにすると、コマンドはオペレーティングシステムのサンドボックスで実行され、書き込める場所と接続できる先が制限されます。[サンドボックス](/ja/code/configure/sandbox)を参照してください。
+- **指示**：リポジトリに置いた `AGENTS.md` ファイルで、プロジェクトの進め方を Aristra Code に伝えます。他のコーディングエージェントが読むのと同じファイルです。[指示とメモリ](/ja/code/guides/memory)を参照してください。
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="クイックスタート" icon="play" href="/ja/code/quickstart">インストールしてサインインし、最初のタスクを終えます。</Card>
+  <Card title="しくみ" icon="diagram-project" href="/ja/code/how-it-works">ランタイム、サーフェス、データの保存場所。</Card>
+  <Card title="コマンド" icon="slash" href="/ja/code/reference/commands">チャットで入力できるすべてのコマンド。</Card>
+  <Card title="CLI リファレンス" icon="rectangle-terminal" href="/ja/code/reference/cli">`aristra` のすべてのサブコマンドとフラグ。</Card>
+</CardGroup>
