@@ -141,7 +141,7 @@ Consultez [Serveurs MCP](/fr/code/extend/mcp), [Hooks](/fr/code/extend/hooks) et
 |---|---|
 | `aristra runtime status [--json]` | Si le runtime tourne, et ce qu'il contient. N'en démarre pas |
 | `aristra runtime stop [--now]` | L'arrêter une fois que plus rien ne tourne ; `--now` arrête aussi les tours en cours |
-| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (ou `--every hour --at <minute>`, ou `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | Les tâches planifiées enregistrées sur cet ordinateur. `add` accepte aussi `--name`, `--folder`, `--source`, `--model`, `--mode` et `--skip-missed`. Consultez [Tâches planifiées](/fr/code/guides/background) |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (ou `--every hour --at <minute>`, ou `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | Les tâches planifiées enregistrées sur cet ordinateur. `add` accepte aussi `--name`, `--folder`, `--source`, `--model`, `--mode`, `--skip-missed` et `--send` (`telegram`, `email` ou les deux, avec un forfait). Consultez [Tâches planifiées](/fr/code/guides/background) |
 | `aristra service install`, `uninstall [--now]`, `status [--json]` | Le service en arrière-plan. Consultez [Travail en arrière-plan](/fr/code/guides/background) |
 | `aristra serve` | Exécuter vous-même le runtime (`--socket` ou `--stdio`) ; les surfaces le démarrent pour vous |
 | `aristra acp` | Servir un éditeur via l'Agent Client Protocol. Consultez [Éditeurs](/fr/code/editors) |

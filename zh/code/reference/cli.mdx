@@ -141,7 +141,7 @@ aristra sessions download <id> [<key>]
 |---|---|
 | `aristra runtime status [--json]` | 运行时是否在运行，以及它持有什么。不会启动运行时 |
 | `aristra runtime stop [--now]` | 在没有任何内容运行时停止它；`--now`也会停止正在运行的轮次 |
-| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（或`--every hour --at <minute>`，或`--once "<date> <time>"`）, `tasks pause\|resume\|run\|remove <id>` | 保存在这台电脑上的定时任务。`add`还接受`--name`、`--folder`、`--source`、`--model`、`--mode`和`--skip-missed`。参见[定时任务](/zh/code/guides/background) |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（或`--every hour --at <minute>`，或`--once "<date> <time>"`）, `tasks pause\|resume\|run\|remove <id>` | 保存在这台电脑上的定时任务。`add`还接受`--name`、`--folder`、`--source`、`--model`、`--mode`、`--skip-missed`和`--send`（`telegram`、`email`或两者，需要套餐）。参见[定时任务](/zh/code/guides/background) |
 | `aristra service install`, `uninstall [--now]`, `status [--json]` | 后台服务。参见[后台工作](/zh/code/guides/background) |
 | `aristra serve` | 自己运行运行时（`--socket`或`--stdio`）；各使用端会替你启动它 |
 | `aristra acp` | 通过Agent Client Protocol为编辑器提供服务。参见[编辑器](/zh/code/editors) |
