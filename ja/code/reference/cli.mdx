@@ -141,7 +141,7 @@ aristra sessions download <id> [<key>]
 |---|---|
 | `aristra runtime status [--json]` | ランタイムが動いているかどうかと、保持しているもの。ランタイムは起動しません |
 | `aristra runtime stop [--now]` | 何も実行されていない状態になったら停止します。`--now` では実行中のターンも停止します |
-| `aristra tasks [list] [--json]`、`tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（または `--every hour --at <minute>`、`--once "<date> <time>"`）、`tasks pause\|resume\|run\|remove <id>` | このコンピューターに保存されたスケジュールタスク。`add` には `--name`、`--folder`、`--source`、`--model`、`--mode`、`--skip-missed` も指定できます。[スケジュールタスク](/ja/code/guides/background)を参照してください |
+| `aristra tasks [list] [--json]`、`tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>`（または `--every hour --at <minute>`、`--once "<date> <time>"`）、`tasks pause\|resume\|run\|remove <id>` | このコンピューターに保存されたスケジュールタスク。`add` には `--name`、`--folder`、`--source`、`--model`、`--mode`、`--skip-missed`、`--send`（`telegram`、`email` またはその両方。プランが必要）も指定できます。[スケジュールタスク](/ja/code/guides/background)を参照してください |
 | `aristra service install`、`uninstall [--now]`、`status [--json]` | バックグラウンドサービス。[バックグラウンド処理](/ja/code/guides/background)を参照してください |
 | `aristra serve` | ランタイムを自分で実行します（`--socket` または `--stdio`）。通常はサーフェスが起動します |
 | `aristra acp` | Agent Client Protocol でエディターに機能を提供します。[エディター](/ja/code/editors)を参照してください |

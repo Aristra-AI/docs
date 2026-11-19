@@ -141,7 +141,7 @@ See [MCP servers](/code/extend/mcp), [Hooks](/code/extend/hooks) and [Plugins](/
 |---|---|
 | `aristra runtime status [--json]` | Whether the runtime is running, and what it holds. Doesn't start one |
 | `aristra runtime stop [--now]` | Stop it once nothing runs; `--now` stops running turns too |
-| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (or `--every hour --at <minute>`, or `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | The scheduled tasks saved on this computer. `add` also takes `--name`, `--folder`, `--source`, `--model`, `--mode` and `--skip-missed`. See [Scheduled tasks](/code/guides/background#scheduled-tasks) |
+| `aristra tasks [list] [--json]`, `tasks add "<prompt>" --every day\|weekday\|<day> --at <HH:MM>` (or `--every hour --at <minute>`, or `--once "<date> <time>"`), `tasks pause\|resume\|run\|remove <id>` | The scheduled tasks saved on this computer. `add` also takes `--name`, `--folder`, `--source`, `--model`, `--mode`, `--skip-missed` and `--send` (`telegram`, `email` or both, with a plan). See [Scheduled tasks](/code/guides/background#scheduled-tasks) |
 | `aristra service install`, `uninstall [--now]`, `status [--json]` | The background service. See [Background work](/code/guides/background#the-background-service) |
 | `aristra serve` | Run the runtime yourself (`--socket` or `--stdio`); surfaces start it for you |
 | `aristra acp` | Serve an editor over the Agent Client Protocol. See [Editors](/code/editors) |
