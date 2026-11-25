@@ -1,9 +1,9 @@
 ---
 title: "Ordinateur cloud"
-description: "Votre propre ordinateur dans Aristra Cloud, avec un forfait ou avec des recharges : un vrai shell, des fichiers qui restent, des outils que vous installez. Il se met en veille quand il est inactif et se réveille pour votre message. Le temps d'activité et son disque sont payés depuis votre solde."
+description: "Votre propre ordinateur dans Aristra Cloud, avec un forfait ou avec des recharges : un système Ubuntu dont vous êtes root, des fichiers qui restent, et des applications à une adresse que vous seul pouvez ouvrir. Il se met en veille quand il est inactif et se réveille pour votre message. Le temps d'activité et son disque sont payés depuis votre solde."
 ---
 
-Un ordinateur cloud est votre propre machine Linux dans le cloud d'Aristra, qui exécute le même agent Aristra Code que votre terminal et Aristra Desktop. Les chats qui s'y trouvent fonctionnent comme les chats sur votre Mac : un vrai shell, des fichiers qui persistent, des outils que vous installez, de longues tâches laissées en cours. Il est toujours joignable depuis le web et votre téléphone, et depuis Telegram avec un forfait, parce qu'il se réveille quand vous lui envoyez quelque chose.
+Un ordinateur cloud est votre propre machine Linux dans le cloud d'Aristra, qui exécute le même agent Aristra Code que votre terminal et Aristra Desktop. Les chats qui s'y trouvent fonctionnent comme les chats sur votre Mac : un vrai shell, des fichiers qui persistent, des outils que vous installez, de longues tâches laissées en cours. Son système est Ubuntu, et vous y êtes root. Il est toujours joignable depuis le web et votre téléphone, et depuis Telegram avec un forfait, parce qu'il se réveille quand vous lui envoyez quelque chose.
 
 <Note>
 Un ordinateur cloud est différent d'un [chat cloud](/fr/code/cloud-chats). Un chat cloud s'exécute sur l'agent cloud partagé d'Aristra et ne conserve rien d'un chat à l'autre, à part votre compte. Un ordinateur cloud est une machine à vous, avec un disque qui conserve vos fichiers et les outils installés.
@@ -30,6 +30,29 @@ Medium suffit pour la plupart des travaux d'agent. Small convient aux messages, 
 
 Les appels de modèles et les outils sont facturés comme partout ailleurs dans Aristra.
 
+## Son système
+
+Un ordinateur cloud tourne sous Ubuntu 24.04, et ce système est à vous : modifiez-le comme vous voulez. Vous et Aristra y travaillez en tant que `user`, avec `sudo` sans mot de passe : installez des paquets avec `apt`, lancez des serveurs, changez ses réglages. Node 24 est déjà installé.
+
+Son disque garde deux choses séparées :
+
+- **Votre dossier personnel**, `/home/user`. Les chats démarrent dans `/home/user/workspace`. Rien de ce qui suit ne le modifie.
+- **Le système** : tout ce qui se trouve hors de votre dossier personnel, comme les paquets que vous installez.
+
+**System**, sur sa page, s'occupe du second. Quand l'ordinateur est en veille, **Show its system** le réveille un instant.
+
+| | Ce que cela fait |
+|---|---|
+| **Save a checkpoint** | Enregistre le système tel qu'il est maintenant, sous un nom si vous en donnez un. Les trois plus récents sont conservés. |
+| **Go back to this** | Remet le système tel qu'il était à ce point de contrôle. Ce qui a été installé ou modifié dans le système depuis est perdu. |
+| **Security updates** | Les correctifs de sécurité d'Ubuntu s'installent environ une fois par semaine, quand l'ordinateur est inactif. Si vous désactivez l'interrupteur, le système n'en reçoit aucun, sauf si vous les installez vous-même. |
+| **Download files** | Télécharge votre dossier personnel et les listes de ce qui est installé, en une seule archive. Gardez aussi votre code dans git : un push est la copie la plus rapide. |
+| **Reset the system** | Donne à l'ordinateur un système neuf. Tout ce qui y était installé et tous les points de contrôle sont perdus. |
+
+Enregistrer un point de contrôle, revenir à l'un d'eux et réinitialiser le système le redémarrent, ce qui arrête toutes les commandes en cours sur l'ordinateur. Aucune de ces actions ne touche à votre dossier personnel.
+
+Les programmes du système accèdent à Internet. Ils ne peuvent joindre ni les réseaux privés ni les ports qu'utilisent les serveurs de messagerie (25, 465, 587 et 2525) : envoyez donc vos e-mails par l'API d'un fournisseur.
+
 ## Où il conserve ses données
 
 Vous choisissez à la création, et vous pouvez changer sur sa page. Un changement s'applique aux nouveaux messages.
@@ -54,11 +77,36 @@ Quand vous passez à **Kept on the computer only**, la page propose de supprimer
 
 ## Veille et réveil
 
-- **Il se met en veille après deux minutes d'inactivité** : aucune réponse en cours, aucune approbation en attente, aucune commande en arrière-plan, rien de votre part. Tout ce qu'il ne peut pas vérifier compte comme une activité : il ne se met donc jamais en veille au milieu d'un travail.
+- **Il se met en veille après deux minutes d'inactivité** : aucune réponse en cours, aucune approbation en attente, aucune commande en arrière-plan, rien de votre part, et aucune visite sur l'une de ses applications. Tout ce qu'il ne peut pas vérifier compte comme une activité : il ne se met donc jamais en veille au milieu d'un travail.
 - **Il se réveille quand vous lui envoyez quelque chose** : un message depuis le web, votre téléphone ou Telegram, ou une approbation. Un message envoyé pendant sa veille attend et reçoit une réponse une fois l'ordinateur réveillé, généralement en quelques secondes. Small, Medium et Large gardent en mémoire ce qui tournait pendant la veille ; Extra large s'éteint à la place et redémarre à neuf, ce qui rend son réveil un peu plus long. Vos fichiers et vos chats sont sur son disque dans tous les cas.
+- **Une visite sur l'une de ses applications le réveille aussi.** La première page après une veille prend environ une seconde. Un Extra large met plus longtemps, parce qu'il redémarre à neuf.
 - **Les prompts planifiés s'exécutent quand même à l'heure.** L'ordinateur les conserve sur son disque et n'indique à Aristra que l'heure du prochain, pour qu'Aristra puisse le démarrer juste avant. Aristra ne sait jamais ce que disent les prompts.
 - Pendant sa veille, vous ne payez que son disque.
 - S'il s'arrête pour une autre raison (un plantage, une maintenance de son hôte), il redémarre de lui-même, ou bien son prochain prompt planifié ou votre prochain message le démarre.
+
+## Des applications avec une adresse
+
+Demandez à Aristra de faire tourner ce que vous avez construit sur l'ordinateur : une application web, une API, un bot, tout ce qui écoute sur un port. Aristra le fait tourner comme une application :
+
+- **Elle continue de tourner.** L'ordinateur la relance si elle s'arrête, et après un redémarrage de l'ordinateur. Elle survit au chat qui l'a créée.
+- **Elle reçoit une adresse** sous `aristra.app` que vous seul pouvez ouvrir, dans un navigateur connecté à Aristra. Elle n'est pas publique : ce n'est donc pas un lien à donner à d'autres personnes.
+- **Une visite réveille l'ordinateur.** Pendant sa veille, la première page prend environ une seconde (plus longtemps sur un Extra large).
+
+**Apps**, dans votre compte, à l'adresse `app.aristralabs.com/account/apps`, liste vos applications et leurs adresses. **Take down** met fin à une adresse : elle cesse de fonctionner et n'est plus jamais attribuée. L'application elle-même continue de tourner jusqu'à ce qu'Aristra l'arrête : demandez-le à Aristra dans un chat sur l'ordinateur. Un ordinateur fait tourner jusqu'à huit applications.
+
+Aristra peut aussi publier un dossier de fichiers web comme un site, à une adresse du même genre, sans rien laisser tourner. Voir [Sites](/fr/sites).
+
+### Toujours active (always on)
+
+Demandez à Aristra de régler une application sur « always on » quand elle doit répondre sans cette attente, ou travailler quand personne ne la visite, comme le fait un bot. L'ordinateur ne se met alors plus en veille tant que l'application existe, et son temps d'exécution est facturé pour chaque heure. **Apps** indique à peu près ce que cela représente par mois.
+
+### Ce qu'Aristra demande d'abord
+
+Quand Aristra vous demande avant de démarrer ou d'arrêter une application, **Allow** vaut pour cette seule fois. La réponse qui commence par **Allow, and don't ask again for running and stopping apps** vaut pour tous les démarrages, redémarrages et arrêts suivants dans ce dossier.
+
+L'activation de « always on » est toujours demandée, quel que soit le mode du chat et quoi que vous ayez autorisé par ailleurs, parce qu'elle change ce que vous payez. Cette question a sa propre réponse **don't ask again**, qui couvre aussi « always on ».
+
+Si une application s'arrête sans cesse dès qu'elle démarre, Aristra vous prévient une fois : sur Telegram si vous l'avez lié, sinon par e-mail.
 
 ## L'utiliser de partout
 
@@ -82,6 +130,7 @@ Les serveurs d'Aristra transmettent le code et ne voient jamais la connexion. Le
 
 - **Pendant l'activité**, le temps d'exécution est facturé à la seconde sur la consommation mensuelle de votre forfait si vous en avez un, puis sur votre solde rechargé.
 - **Le disque** est facturé que l'ordinateur soit actif ou en veille.
+- **Une application réglée sur « always on »** garde l'ordinateur actif : le temps d'exécution est donc facturé pour chaque heure tant que l'application existe.
 - Quand votre solde est bas, vous recevez un e-mail (au plus une fois par jour).
 - **Avec un forfait, à solde nul, il se met en veille.** Rien de ce qu'il contient n'est supprimé tant que vous avez un forfait. Il se réveille de lui-même pour votre prochain message une fois votre solde rétabli, par une [recharge](/fr/account/credits) ou le renouvellement mensuel de votre forfait. Le coût du disque pour cette période est prélevé sur le prochain argent qui arrive.
 - **Sans forfait, quand votre solde rechargé est épuisé**, il est arrêté, et son disque est conservé 30 jours. Vous recevez un e-mail une semaine avant la suppression du disque. Rechargez pendant cette période pour le faire revenir avec tout ce qu'il contient, ou exportez d'abord ses données.
@@ -91,6 +140,7 @@ Les serveurs d'Aristra transmettent le code et ne voient jamais la connexion. Le
 ## Sécurité
 
 - Chaque ordinateur cloud est une machine à part sur son propre réseau privé : il ne peut joindre ni les machines des autres utilisateurs ni les serveurs d'Aristra, sauf par l'API publique, comme votre Mac.
-- Aristra Code y tourne en tant qu'utilisateur non privilégié, sans `sudo`. Installez les outils dans votre dossier personnel (`pip install --user`, `npm install -g` ou `~/bin`).
-- Rien n'y écoute : il se connecte en sortie à votre compte en HTTPS, authentifié par sa propre clé d'appareil, comme votre Mac.
+- L'ordinateur a deux côtés. L'un est votre système Ubuntu, où vous et Aristra travaillez en root. L'autre contient sa connexion, ses clés, ainsi que ses chats, sa mémoire et ses réglages. Aucun programme de votre système ne peut lire ni modifier ce côté-là, pas même root.
+- Il n'a qu'une porte, pour les adresses de vos applications. Une requête n'entre qu'après qu'Aristra a vérifié que c'est bien vous, connecté. Vos applications écoutent à l'intérieur de votre système et ne sont joignables par aucun autre chemin.
+- Pour tout le reste, il se connecte en sortie à votre compte en HTTPS, authentifié par sa propre clé d'appareil, comme votre Mac.
 - Il ne détient aucun identifiant d'Aristra. Il se connecte avec un jeton à usage unique lors de sa création, et avec un nouveau jeton s'il a été en veille pendant des semaines ou s'il passe sur un autre hôte.

@@ -56,6 +56,7 @@
                   "projects",
                   "files",
                   "craft",
+                  "sites",
                   "connectors",
                   "scheduled-tasks"
                 ]
@@ -195,6 +196,7 @@
                   "zh/projects",
                   "zh/files",
                   "zh/craft",
+                  "zh/sites",
                   "zh/connectors",
                   "zh/scheduled-tasks"
                 ]
@@ -334,6 +336,7 @@
                   "ja/projects",
                   "ja/files",
                   "ja/craft",
+                  "ja/sites",
                   "ja/connectors",
                   "ja/scheduled-tasks"
                 ]
@@ -473,6 +476,7 @@
                   "fr/projects",
                   "fr/files",
                   "fr/craft",
+                  "fr/sites",
                   "fr/connectors",
                   "fr/scheduled-tasks"
                 ]
@@ -612,6 +616,7 @@
                   "es/projects",
                   "es/files",
                   "es/craft",
+                  "es/sites",
                   "es/connectors",
                   "es/scheduled-tasks"
                 ]
