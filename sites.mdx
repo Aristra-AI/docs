@@ -1,0 +1,37 @@
+---
+title: "Sites"
+description: "Aristra publishes a folder of web files as a site at an address only you can open: what a site is, publishing again at the same address, going back to an earlier release, and taking it down."
+---
+
+When Aristra has built something made of web files, such as a small web app, a report or a set of pages, it can publish the folder as a site. The site gets its own address under `aristra.app`, and only you can open it.
+
+Ask for it in a chat: "publish this as a site". It works in chats on the web and your phone, and in chats on your [cloud computer](/surfaces/cloud-computer). Every account has it.
+
+<Note>
+A site is files and nothing else: nothing runs for it. For something that has to keep running, such as an API or a bot, see [Apps with an address](/surfaces/cloud-computer#apps-with-an-address) on a cloud computer.
+</Note>
+
+## What a site is
+
+- **A folder with an `index.html` at its top.** A project that needs building is built first; Aristra publishes the folder it built.
+- **An address of its own**, such as `https://k3x9zz-7hm2qd.aristra.app/`.
+- **Private.** It opens in a browser signed in to your Aristra account. Anyone else is sent to sign in, and is then told the site is private. It can't be shared with other people.
+
+| Limit | |
+|---|---|
+| Files | 2,000 |
+| One file | 25 MB |
+| The whole site | 100 MB |
+
+Hidden files and folders and `node_modules` are left out.
+
+## Publish again
+
+When Aristra publishes the same folder again, the address stays the same and serves the new files. Each time is a release, and the last five are kept.
+
+## Go back, or take it down
+
+**Apps** in your account, at `app.aristralabs.com/account/apps`, lists your sites with their addresses.
+
+- **Serve this release** on an earlier release puts the site back as it was then.
+- **Take down** ends the site. Its address stops working and is not given out again.

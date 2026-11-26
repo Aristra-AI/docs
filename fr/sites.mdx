@@ -1,0 +1,37 @@
+---
+title: "Sites"
+description: "Aristra publie un dossier de fichiers web comme un site, à une adresse que vous seul pouvez ouvrir : ce qu'est un site, republier à la même adresse, revenir à une version antérieure et le retirer."
+---
+
+Quand Aristra a construit quelque chose fait de fichiers web, comme une petite application web, un rapport ou un ensemble de pages, il peut publier le dossier comme un site. Le site reçoit sa propre adresse sous `aristra.app`, et vous seul pouvez l'ouvrir.
+
+Demandez-le dans un chat : « publie ça comme un site ». Cela fonctionne dans les chats sur le web et sur votre téléphone, et dans les chats sur votre [ordinateur cloud](/fr/surfaces/cloud-computer). Tout compte en dispose.
+
+<Note>
+Un site, ce sont des fichiers et rien d'autre : rien ne tourne pour lui. Pour quelque chose qui doit continuer de tourner, comme une API ou un bot, voir [Des applications avec une adresse](/fr/surfaces/cloud-computer) sur un ordinateur cloud.
+</Note>
+
+## Ce qu'est un site
+
+- **Un dossier avec un `index.html` à sa racine.** Un projet qui doit être compilé l'est d'abord ; Aristra publie le dossier ainsi produit.
+- **Une adresse à lui**, par exemple `https://k3x9zz-7hm2qd.aristra.app/`.
+- **Privé.** Il s'ouvre dans un navigateur connecté à votre compte Aristra. Toute autre personne est envoyée vers la connexion, puis apprend que le site est privé. Il ne peut pas être partagé avec d'autres personnes.
+
+| Limite | |
+|---|---|
+| Fichiers | 2 000 |
+| Un fichier | 25 Mo |
+| Le site entier | 100 Mo |
+
+Les fichiers et dossiers cachés ainsi que `node_modules` sont laissés de côté.
+
+## Republier
+
+Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et sert les nouveaux fichiers. Chaque publication est une version, et les cinq dernières sont conservées.
+
+## Revenir en arrière, ou le retirer
+
+**Apps**, dans votre compte, à l'adresse `app.aristralabs.com/account/apps`, liste vos sites et leurs adresses.
+
+- **Serve this release**, sur une version antérieure, remet le site tel qu'il était alors.
+- **Take down** met fin au site. Son adresse cesse de fonctionner et n'est plus jamais attribuée.

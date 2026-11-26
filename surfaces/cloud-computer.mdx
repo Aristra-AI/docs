@@ -1,9 +1,9 @@
 ---
 title: "Cloud computer"
-description: "Your own computer in Aristra Cloud, with a plan or on top-ups: a real shell, files that stay, tools you install. It sleeps when idle and wakes for your message. Running time and its disk are paid from your balance."
+description: "Your own computer in Aristra Cloud, with a plan or on top-ups: an Ubuntu system you have root on, files that stay, and apps at an address only you can open. It sleeps when idle and wakes for your message. Running time and its disk are paid from your balance."
 ---
 
-A cloud computer is your own Linux machine in Aristra's cloud, running the same Aristra Code agent as your terminal and Aristra Desktop. Chats on it work like chats on your Mac: a real shell, files that persist, tools you install, long jobs left running. It is always reachable from the web and your phone, and from Telegram with a plan, because it wakes when you send it something.
+A cloud computer is your own Linux machine in Aristra's cloud, running the same Aristra Code agent as your terminal and Aristra Desktop. Chats on it work like chats on your Mac: a real shell, files that persist, tools you install, long jobs left running. Its system is Ubuntu, and you have root on it. It is always reachable from the web and your phone, and from Telegram with a plan, because it wakes when you send it something.
 
 <Note>
 A cloud computer is different from a [cloud chat](/code/cloud-chats). A cloud chat runs on Aristra's shared cloud agent and keeps nothing between chats but your account. A cloud computer is a machine of your own, with a disk that keeps your files and installed tools.
@@ -30,6 +30,29 @@ Medium is enough for most agent work. Small suits messages, scripts and schedule
 
 Model calls and tools are charged as they are anywhere else in Aristra.
 
+## Its system
+
+A cloud computer runs Ubuntu 24.04, and the system is yours to change. You and Aristra work in it as `user`, with `sudo` and no password: install packages with `apt`, run servers, change its settings. Node 24 comes installed.
+
+Its disk keeps two things apart:
+
+- **Your home folder**, `/home/user`. Chats start in `/home/user/workspace`. Nothing below changes it.
+- **The system**: everything outside your home folder, such as the packages you install.
+
+**System** on its page looks after the second. While the computer sleeps, **Show its system** wakes it for a moment.
+
+| | What it does |
+|---|---|
+| **Save a checkpoint** | Saves the system as it is now, under a name if you give one. The newest three are kept. |
+| **Go back to this** | Puts the system back as it was at that checkpoint. What was installed or changed in the system since then is lost. |
+| **Security updates** | Ubuntu's security fixes install about once a week, while the computer is idle. With the switch off, the system gets none unless you install them yourself. |
+| **Download files** | Downloads your home folder and the lists of what is installed, as one archive. Keep code in git as well: a push is the quickest copy. |
+| **Reset the system** | Gives the computer a fresh system. Everything installed on it and every checkpoint is lost. |
+
+Saving a checkpoint, going back to one and a reset each restart the system, which stops every command running on the computer. None of them touches your home folder.
+
+Programs in the system reach the internet. They can't reach private networks or the ports mail servers use (25, 465, 587 and 2525), so send mail through a provider's API.
+
 ## Where it keeps its data
 
 You choose when you create it, and can change it on its page. A change applies to new messages.
@@ -54,11 +77,36 @@ When you switch to **Kept on the computer only**, the page offers to delete the 
 
 ## Sleeping and waking
 
-- **It sleeps after two minutes idle**: no reply running, no approval waiting, no background command, nothing from you. Anything it can't check counts as busy, so it never sleeps in the middle of work.
+- **It sleeps after two minutes idle**: no reply running, no approval waiting, no background command, nothing from you, and no visit to one of its [apps](#apps-with-an-address). Anything it can't check counts as busy, so it never sleeps in the middle of work.
 - **It wakes when you send it something**: a message from the web, your phone or Telegram, or an approval. A message sent while it sleeps waits and is answered once it is up, usually within seconds. Small, Medium and Large keep what was running in memory while asleep; Extra large shuts down instead and starts fresh, so it takes a little longer to wake. Your files and chats are on its disk either way.
+- **A visit to one of its apps wakes it too.** The first page after a sleep takes about a second. An Extra large takes longer, because it starts fresh.
 - **Scheduled prompts still run on time.** The computer keeps them on its disk and tells Aristra only when the next one is due, so Aristra can start it just before. Aristra never learns what the prompts say.
 - While it sleeps you pay only for its disk.
 - If it stops for another reason (a crash, maintenance on its host), it restarts by itself, or its next scheduled prompt or your next message starts it.
+
+## Apps with an address
+
+Ask Aristra to run something you built on the computer: a web app, an API, a bot, anything that listens on a port. Aristra runs it as an app:
+
+- **It keeps running.** The computer starts it again if it ends, and after the computer restarts. It outlives the chat that made it.
+- **It gets an address** under `aristra.app` that only you can open, in a browser signed in to Aristra. It is not public, so it is not a link for other people.
+- **A visit wakes the computer.** While it sleeps, the first page takes about a second (longer on an Extra large).
+
+**Apps** in your account, at `app.aristralabs.com/account/apps`, lists your apps and their addresses. **Take down** ends an address: it stops working and is not given out again. The app itself keeps running until Aristra stops it, so ask Aristra in a chat on the computer to stop it. A computer runs up to eight apps.
+
+Aristra can also publish a folder of web files as a site at an address of the same kind, with nothing left running. See [Sites](/sites).
+
+### Always on
+
+Ask Aristra to set an app to always on when it must answer without that wait, or work while nobody visits it, as a bot does. The computer then does not sleep while the app exists, and its running time is charged for every hour. **Apps** shows about what that comes to in a month.
+
+### What Aristra asks first
+
+When Aristra asks before it starts or stops an app, **Allow** covers that one time. The answer that begins **Allow, and don't ask again for running and stopping apps** covers every later start, restart and stop in that folder.
+
+Turning always on on is always asked, whatever the chat's mode and whatever else you allowed, because it changes what you pay. That question has its own **don't ask again** answer, which covers always on too.
+
+If an app keeps ending as soon as it starts, Aristra tells you once: on Telegram if you linked it, otherwise by email.
 
 ## Use it from anywhere
 
@@ -82,6 +130,7 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 
 - **While awake**, running time is charged by the second from your plan's monthly usage when you have a plan, then from your top-up balance.
 - **The disk** is charged whether the computer is awake or asleep.
+- **An app set to always on** keeps the computer awake, so running time is charged for every hour while the app exists.
 - When your balance is low, you get an email (at most once a day).
 - **With a plan, at a zero balance it goes to sleep.** Nothing on it is deleted while you have a plan. It wakes by itself for your next message once your balance is back, from a [top-up](/account/credits) or your plan's monthly reset. The disk's charge for that time is taken from the next money that arrives.
 - **Without a plan, when your top-up balance runs out** it is stopped, and its disk is kept for 30 days. You get an email a week before the disk is deleted. Top up within that time to bring it back with everything on it, or export its data first.
@@ -91,6 +140,7 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 ## Security
 
 - Each cloud computer is its own machine on its own private network: it can't reach other users' machines or Aristra's servers except through the public API, as your Mac does.
-- Aristra Code runs on it as an unprivileged user without `sudo`. Install tools into your home folder (`pip install --user`, `npm install -g`, or `~/bin`).
-- Nothing listens on it: it connects out to your account over HTTPS, authenticated with its own device key, as your Mac does.
+- The machine has two sides. One is your Ubuntu system, where you and Aristra work with root. The other holds its sign-in, its keys, and its chats, memory and settings. No program in your system can read or change that side, root included.
+- It has one door, for your apps' addresses. A request comes through only after Aristra has checked that it is you, signed in. Your apps listen inside your system and are reached no other way.
+- For everything else it connects out to your account over HTTPS, authenticated with its own device key, as your Mac does.
 - It holds no credentials of Aristra's. It signs in with a one-time token when it is first made, and with a new one if it has slept for weeks or moves to another host.

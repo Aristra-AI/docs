@@ -1,9 +1,9 @@
 ---
 title: "Computadora en la nube"
-description: "Tu propia computadora en Aristra Cloud, con un plan o con recargas: un shell real, archivos que se conservan y las herramientas que instales. Se duerme cuando está inactiva y despierta con tu mensaje. El tiempo de ejecución y su disco se pagan con tu saldo."
+description: "Tu propia computadora en Aristra Cloud, con un plan o con recargas: un sistema Ubuntu en el que eres root, archivos que se conservan y aplicaciones en una dirección que solo tú puedes abrir. Se duerme cuando está inactiva y despierta con tu mensaje. El tiempo de ejecución y su disco se pagan con tu saldo."
 ---
 
-Una computadora en la nube es tu propia máquina Linux en la nube de Aristra, con el mismo agente de Aristra Code que tu terminal y Aristra Desktop. Los chats en ella funcionan como los chats en tu Mac: un shell real, archivos que se conservan, las herramientas que instales y trabajos largos que se quedan en ejecución. Siempre está accesible desde la web y tu teléfono, y desde Telegram con un plan, porque despierta cuando le envías algo.
+Una computadora en la nube es tu propia máquina Linux en la nube de Aristra, con el mismo agente de Aristra Code que tu terminal y Aristra Desktop. Los chats en ella funcionan como los chats en tu Mac: un shell real, archivos que se conservan, las herramientas que instales y trabajos largos que se quedan en ejecución. Su sistema es Ubuntu, y en él eres root. Siempre está accesible desde la web y tu teléfono, y desde Telegram con un plan, porque despierta cuando le envías algo.
 
 <Note>
 Una computadora en la nube es distinta de un [chat en la nube](/es/code/cloud-chats). Un chat en la nube se ejecuta en el agente en la nube compartido de Aristra y no conserva nada entre chats salvo tu cuenta. Una computadora en la nube es una máquina propia, con un disco que conserva tus archivos y las herramientas instaladas.
@@ -30,6 +30,29 @@ Medium basta para la mayoría del trabajo del agente. Small sirve para mensajes,
 
 Las llamadas a modelos y las herramientas se cobran igual que en cualquier otro lugar de Aristra.
 
+## Su sistema
+
+Una computadora en la nube ejecuta Ubuntu 24.04, y el sistema es tuyo para cambiarlo. Tú y Aristra trabajan en él como `user`, con `sudo` y sin contraseña: instala paquetes con `apt`, ejecuta servidores, cambia su configuración. Node 24 viene instalado.
+
+Su disco mantiene dos cosas separadas:
+
+- **Tu carpeta personal**, `/home/user`. Los chats empiezan en `/home/user/workspace`. Nada de lo que sigue la cambia.
+- **El sistema**: todo lo que está fuera de tu carpeta personal, como los paquetes que instalas.
+
+**System**, en su página, se encarga de lo segundo. Cuando la computadora duerme, **Show its system** la despierta por un momento.
+
+| | Qué hace |
+|---|---|
+| **Save a checkpoint** | Guarda el sistema tal como está ahora, con un nombre si le das uno. Se conservan los tres más recientes. |
+| **Go back to this** | Deja el sistema como estaba en ese punto de control. Lo que se instaló o cambió en el sistema desde entonces se pierde. |
+| **Security updates** | Las correcciones de seguridad de Ubuntu se instalan más o menos una vez por semana, mientras la computadora está inactiva. Con el interruptor apagado, el sistema no recibe ninguna a menos que las instales tú. |
+| **Download files** | Descarga tu carpeta personal y las listas de lo que está instalado, en un solo archivo comprimido. Guarda también tu código en git: un push es la copia más rápida. |
+| **Reset the system** | Le da a la computadora un sistema nuevo. Todo lo instalado en él y todos los puntos de control se pierden. |
+
+Guardar un punto de control, volver a uno y restablecer el sistema lo reinician, lo que detiene todos los comandos en ejecución en la computadora. Ninguna de estas acciones toca tu carpeta personal.
+
+Los programas del sistema tienen acceso a internet. No pueden llegar a redes privadas ni a los puertos que usan los servidores de correo (25, 465, 587 y 2525), así que envía el correo mediante la API de un proveedor.
+
 ## Dónde guarda sus datos
 
 Lo eliges al crearla, y puedes cambiarlo en su página. Un cambio se aplica a los mensajes nuevos.
@@ -54,11 +77,36 @@ Cuando cambias a **Kept on the computer only**, la página ofrece eliminar las c
 
 ## Dormir y despertar
 
-- **Se duerme tras dos minutos de inactividad**: ninguna respuesta en curso, ninguna aprobación pendiente, ningún comando en segundo plano, nada de tu parte. Todo lo que no puede comprobar cuenta como ocupado, así que nunca se duerme a mitad de un trabajo.
+- **Se duerme tras dos minutos de inactividad**: ninguna respuesta en curso, ninguna aprobación pendiente, ningún comando en segundo plano, nada de tu parte y ninguna visita a una de sus aplicaciones. Todo lo que no puede comprobar cuenta como ocupado, así que nunca se duerme a mitad de un trabajo.
 - **Despierta cuando le envías algo**: un mensaje desde la web, tu teléfono o Telegram, o una aprobación. Un mensaje enviado mientras duerme espera y se responde cuando está lista, normalmente en segundos. Small, Medium y Large conservan en memoria lo que se estaba ejecutando mientras duermen; Extra large, en cambio, se apaga y arranca de cero, así que tarda un poco más en despertar. Tus archivos y chats están en su disco en cualquier caso.
+- **Una visita a una de sus aplicaciones también la despierta.** La primera página después de dormir tarda cerca de un segundo. Una Extra large tarda más, porque arranca de cero.
 - **Los prompts programados se siguen ejecutando a su hora.** La computadora los guarda en su disco y solo le indica a Aristra cuándo toca el siguiente, para que Aristra pueda arrancarla justo antes. Aristra nunca sabe qué dicen los prompts.
 - Mientras duerme, solo pagas su disco.
 - Si se detiene por otro motivo (un fallo, mantenimiento en su host), se reinicia sola, o la arranca su siguiente prompt programado o tu siguiente mensaje.
+
+## Aplicaciones con una dirección
+
+Pídele a Aristra que ejecute algo que construiste en la computadora: una aplicación web, una API, un bot, cualquier cosa que escuche en un puerto. Aristra lo ejecuta como una aplicación:
+
+- **Sigue en ejecución.** La computadora la vuelve a iniciar si termina, y después de que la computadora se reinicia. Dura más que el chat que la creó.
+- **Recibe una dirección** bajo `aristra.app` que solo tú puedes abrir, en un navegador con la sesión iniciada en Aristra. No es pública, así que no es un enlace para otras personas.
+- **Una visita despierta a la computadora.** Mientras duerme, la primera página tarda cerca de un segundo (más en una Extra large).
+
+**Apps**, en tu cuenta, en `app.aristralabs.com/account/apps`, muestra tus aplicaciones y sus direcciones. **Take down** da de baja una dirección: deja de funcionar y no se vuelve a asignar. La aplicación en sí sigue en ejecución hasta que Aristra la detiene, así que pídeselo a Aristra en un chat en la computadora. Una computadora ejecuta hasta ocho aplicaciones.
+
+Aristra también puede publicar una carpeta de archivos web como un sitio, en una dirección del mismo tipo, sin dejar nada en ejecución. Consulta [Sitios](/es/sites).
+
+### Siempre activa (always on)
+
+Pídele a Aristra que configure una aplicación como «always on» cuando deba responder sin esa espera, o trabajar mientras nadie la visita, como hace un bot. La computadora entonces no se duerme mientras la aplicación exista, y su tiempo de ejecución se cobra por cada hora. **Apps** muestra aproximadamente cuánto supone al mes.
+
+### Qué pregunta Aristra primero
+
+Cuando Aristra te pregunta antes de iniciar o detener una aplicación, **Allow** vale solo para esa vez. La respuesta que empieza por **Allow, and don't ask again for running and stopping apps** vale para todos los inicios, reinicios y paradas posteriores en esa carpeta.
+
+Activar «always on» se pregunta siempre, sea cual sea el modo del chat y lo que hayas permitido, porque cambia lo que pagas. Esa pregunta tiene su propia respuesta **don't ask again**, que también cubre «always on».
+
+Si una aplicación termina una y otra vez en cuanto se inicia, Aristra te avisa una vez: por Telegram si lo vinculaste, o si no por correo.
 
 ## Úsala desde cualquier lugar
 
@@ -82,6 +130,7 @@ Los servidores de Aristra transmiten el código y nunca ven el inicio de sesión
 
 - **Mientras está despierta**, el tiempo de ejecución se cobra por segundos del uso mensual de tu plan, si tienes uno, y después de tu saldo de recargas.
 - **El disco** se cobra tanto si la computadora está despierta como dormida.
+- **Una aplicación configurada como «always on»** mantiene despierta a la computadora, así que el tiempo de ejecución se cobra por cada hora mientras la aplicación exista.
 - Cuando tu saldo es bajo, recibes un correo (como máximo uno al día).
 - **Con un plan, si el saldo llega a cero, se duerme.** No se elimina nada de ella mientras tengas un plan. Despierta sola con tu siguiente mensaje cuando vuelvas a tener saldo, por una [recarga](/es/account/credits) o por el reinicio mensual de tu plan. El cargo del disco por ese tiempo se descuenta del siguiente dinero que llegue.
 - **Sin plan, cuando se acaba tu saldo de recargas**, se detiene y su disco se conserva durante 30 días. Recibes un correo una semana antes de que se elimine el disco. Recarga dentro de ese plazo para recuperarla con todo lo que tenía, o exporta antes sus datos.
@@ -91,6 +140,7 @@ Los servidores de Aristra transmiten el código y nunca ven el inicio de sesión
 ## Seguridad
 
 - Cada computadora en la nube es su propia máquina en su propia red privada: no puede llegar a las máquinas de otros usuarios ni a los servidores de Aristra, salvo mediante la API pública, igual que tu Mac.
-- Aristra Code se ejecuta en ella como un usuario sin privilegios y sin `sudo`. Instala las herramientas en tu carpeta personal (`pip install --user`, `npm install -g` o `~/bin`).
-- Nada escucha en ella: se conecta hacia fuera con tu cuenta por HTTPS, autenticada con su propia clave del dispositivo, igual que tu Mac.
+- La máquina tiene dos lados. Uno es tu sistema Ubuntu, donde tú y Aristra trabajan como root. El otro guarda su inicio de sesión, sus claves, y sus chats, memoria y configuración. Ningún programa de tu sistema puede leer ni cambiar ese lado, ni siquiera root.
+- Tiene una sola puerta, para las direcciones de tus aplicaciones. Una solicitud entra solo después de que Aristra comprueba que eres tú, con la sesión iniciada. Tus aplicaciones escuchan dentro de tu sistema y no se llega a ellas de ninguna otra forma.
+- Para todo lo demás se conecta hacia fuera con tu cuenta por HTTPS, autenticada con su propia clave del dispositivo, igual que tu Mac.
 - No guarda ninguna credencial de Aristra. Inicia sesión con un token de un solo uso cuando se crea, y con uno nuevo si ha estado dormida durante semanas o pasa a otro host.
