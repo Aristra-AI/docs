@@ -53,6 +53,34 @@ Saving a checkpoint, going back to one and a reset each restart the system, whic
 
 Programs in the system reach the internet. They can't reach private networks or the ports mail servers use (25, 465, 587 and 2525), so send mail through a provider's API.
 
+## Files and the terminal
+
+Two more cards on its page let you work on the computer yourself, without a chat. Both act as `user`, as Aristra does, and both wake a sleeping computer.
+
+### Files
+
+**Files** shows one folder at a time, starting at your home folder. Open a folder, download a file, upload files into the folder you're in, make a folder, rename or delete.
+
+- Up to 500 MB a file. An upload appears only once all of it has arrived, and replacing a file there asks first.
+- A folder your user can't read says so. For the system's own files, use the terminal and `sudo`.
+- Files pass through Aristra on their way, and are not kept there.
+- While the computer sleeps, **Show its files** wakes it for a moment.
+
+### Terminal
+
+**Open terminal** gives you a shell on the computer, as `user`; `sudo` makes you root. It suits what doesn't belong in a chat:
+
+- Signing in to a tool, such as `gh auth login`, or putting a key in a file without writing it in a chat.
+- Programs you drive yourself, such as `psql`, `htop`, `vim` or a log you follow.
+- A quick command, with no model's time spent on it.
+
+What you type goes to the computer and back, and Aristra keeps none of it. Only you can open it, from the website.
+
+- **One at a time.** Opening it in another tab closes the first.
+- **It keeps the computer awake** while it is open, and you pay for that time. It closes after 30 minutes with nothing typed or shown.
+- **Closing it ends what runs in it**, as closing a terminal window does. To keep something running, start it with `nohup` or in `tmux`, or ask Aristra to run it as an [app](#apps-with-an-address).
+- A stopped computer has to be started first.
+
 ## Where it keeps its data
 
 You choose when you create it, and can change it on its page. A change applies to new messages.
@@ -77,7 +105,7 @@ When you switch to **Kept on the computer only**, the page offers to delete the 
 
 ## Sleeping and waking
 
-- **It sleeps after two minutes idle**: no reply running, no approval waiting, no background command, nothing from you, and no visit to one of its [apps](#apps-with-an-address). Anything it can't check counts as busy, so it never sleeps in the middle of work.
+- **It sleeps after two minutes idle**: no reply running, no approval waiting, no background command, nothing from you, no visit to one of its [apps](#apps-with-an-address), and no [terminal](#terminal) open. Anything it can't check counts as busy, so it never sleeps in the middle of work.
 - **It wakes when you send it something**: a message from the web, your phone or Telegram, or an approval. A message sent while it sleeps waits and is answered once it is up, usually within seconds. Small, Medium and Large keep what was running in memory while asleep; Extra large shuts down instead and starts fresh, so it takes a little longer to wake. Your files and chats are on its disk either way.
 - **A visit to one of its apps wakes it too.** The first page after a sleep takes about a second. An Extra large takes longer, because it starts fresh.
 - **Scheduled prompts still run on time.** The computer keeps them on its disk and tells Aristra only when the next one is due, so Aristra can start it just before. Aristra never learns what the prompts say.
@@ -158,6 +186,6 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 
 - Each cloud computer is its own machine on its own private network: it can't reach other users' machines or Aristra's servers except through the public API, as your Mac does.
 - The machine has two sides. One is your Ubuntu system, where you and Aristra work with root. The other holds its sign-in, its keys, and its chats, memory and settings. No program in your system can read or change that side, root included.
-- It has one door, for your apps' addresses. A request comes through only after Aristra has checked that it comes from you, or from someone you shared the app with, unless you made the app public. Your apps listen inside your system and are reached no other way.
+- It has one door, for your apps' addresses and your terminal. A request comes through only after Aristra has checked that it comes from you, or from someone you shared the app with, unless you made the app public. The terminal is yours alone. Your apps listen inside your system and are reached no other way.
 - For everything else it connects out to your account over HTTPS, authenticated with its own device key, as your Mac does.
 - It holds no credentials of Aristra's. It signs in with a one-time token when it is first made, and with a new one if it has slept for weeks or moves to another host.
