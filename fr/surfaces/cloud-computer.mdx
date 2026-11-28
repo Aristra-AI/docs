@@ -53,6 +53,34 @@ Enregistrer un point de contrôle, revenir à l'un d'eux et réinitialiser le sy
 
 Les programmes du système accèdent à Internet. Ils ne peuvent joindre ni les réseaux privés ni les ports qu'utilisent les serveurs de messagerie (25, 465, 587 et 2525) : envoyez donc vos e-mails par l'API d'un fournisseur.
 
+## Les fichiers et le terminal
+
+Deux autres cartes de sa page vous permettent de travailler vous-même sur l'ordinateur, sans chat. Toutes deux agissent en tant que `user`, comme Aristra, et réveillent un ordinateur en veille.
+
+### Fichiers
+
+**Files** affiche un dossier à la fois, en commençant par votre dossier personnel. Ouvrez un dossier, téléchargez un fichier, envoyez des fichiers dans le dossier où vous êtes, créez un dossier, renommez ou supprimez.
+
+- Jusqu'à 500 Mo par fichier. Un envoi n'apparaît qu'une fois arrivé en entier, et remplacer un fichier déjà là demande d'abord votre accord.
+- Un dossier que votre utilisateur ne peut pas lire le dit. Pour les fichiers du système lui-même, utilisez le terminal et `sudo`.
+- Les fichiers passent par Aristra en chemin, et n'y sont pas conservés.
+- Pendant que l'ordinateur est en veille, **Show its files** le réveille un instant.
+
+### Terminal
+
+**Open terminal** vous donne un shell sur l'ordinateur, en tant que `user` ; `sudo` vous rend root. Il convient à ce qui n'a pas sa place dans un chat :
+
+- Se connecter à un outil, par exemple `gh auth login`, ou mettre une clé dans un fichier sans l'écrire dans un chat.
+- Les programmes que vous pilotez vous-même, comme `psql`, `htop`, `vim` ou un journal que vous suivez.
+- Une commande rapide, sans dépenser de temps de modèle.
+
+Ce que vous tapez va à l'ordinateur et en revient, et Aristra n'en garde rien. Vous seul pouvez l'ouvrir, depuis le site web.
+
+- **Un seul à la fois.** L'ouvrir dans un autre onglet ferme le premier.
+- **Il garde l'ordinateur éveillé** tant qu'il est ouvert, et vous payez ce temps. Il se ferme après 30 minutes sans rien de tapé ni d'affiché.
+- **Le fermer met fin à ce qui y tourne**, comme fermer une fenêtre de terminal. Pour qu'un programme continue, lancez-le avec `nohup` ou dans `tmux`, ou demandez à Aristra de le faire tourner comme une application.
+- Un ordinateur arrêté doit d'abord être démarré.
+
 ## Où il conserve ses données
 
 Vous choisissez à la création, et vous pouvez changer sur sa page. Un changement s'applique aux nouveaux messages.
@@ -77,7 +105,7 @@ Quand vous passez à **Kept on the computer only**, la page propose de supprimer
 
 ## Veille et réveil
 
-- **Il se met en veille après deux minutes d'inactivité** : aucune réponse en cours, aucune approbation en attente, aucune commande en arrière-plan, rien de votre part, et aucune visite sur l'une de ses applications. Tout ce qu'il ne peut pas vérifier compte comme une activité : il ne se met donc jamais en veille au milieu d'un travail.
+- **Il se met en veille après deux minutes d'inactivité** : aucune réponse en cours, aucune approbation en attente, aucune commande en arrière-plan, rien de votre part, aucune visite sur l'une de ses applications, et aucun terminal ouvert. Tout ce qu'il ne peut pas vérifier compte comme une activité : il ne se met donc jamais en veille au milieu d'un travail.
 - **Il se réveille quand vous lui envoyez quelque chose** : un message depuis le web, votre téléphone ou Telegram, ou une approbation. Un message envoyé pendant sa veille attend et reçoit une réponse une fois l'ordinateur réveillé, généralement en quelques secondes. Small, Medium et Large gardent en mémoire ce qui tournait pendant la veille ; Extra large s'éteint à la place et redémarre à neuf, ce qui rend son réveil un peu plus long. Vos fichiers et vos chats sont sur son disque dans tous les cas.
 - **Une visite sur l'une de ses applications le réveille aussi.** La première page après une veille prend environ une seconde. Un Extra large met plus longtemps, parce qu'il redémarre à neuf.
 - **Les prompts planifiés s'exécutent quand même à l'heure.** L'ordinateur les conserve sur son disque et n'indique à Aristra que l'heure du prochain, pour qu'Aristra puisse le démarrer juste avant. Aristra ne sait jamais ce que disent les prompts.
@@ -158,6 +186,6 @@ Les serveurs d'Aristra transmettent le code et ne voient jamais la connexion. Le
 
 - Chaque ordinateur cloud est une machine à part sur son propre réseau privé : il ne peut joindre ni les machines des autres utilisateurs ni les serveurs d'Aristra, sauf par l'API publique, comme votre Mac.
 - L'ordinateur a deux côtés. L'un est votre système Ubuntu, où vous et Aristra travaillez en root. L'autre contient sa connexion, ses clés, ainsi que ses chats, sa mémoire et ses réglages. Aucun programme de votre système ne peut lire ni modifier ce côté-là, pas même root.
-- Il n'a qu'une porte, pour les adresses de vos applications. Une requête n'entre qu'après qu'Aristra a vérifié qu'elle vient de vous, ou d'une personne avec qui vous avez partagé l'application, sauf si vous avez rendu l'application publique. Vos applications écoutent à l'intérieur de votre système et ne sont joignables par aucun autre chemin.
+- Il n'a qu'une porte, pour les adresses de vos applications et votre terminal. Une requête n'entre qu'après qu'Aristra a vérifié qu'elle vient de vous, ou d'une personne avec qui vous avez partagé l'application, sauf si vous avez rendu l'application publique. Le terminal n'est qu'à vous. Vos applications écoutent à l'intérieur de votre système et ne sont joignables par aucun autre chemin.
 - Pour tout le reste, il se connecte en sortie à votre compte en HTTPS, authentifié par sa propre clé d'appareil, comme votre Mac.
 - Il ne détient aucun identifiant d'Aristra. Il se connecte avec un jeton à usage unique lors de sa création, et avec un nouveau jeton s'il a été en veille pendant des semaines ou s'il passe sur un autre hôte.

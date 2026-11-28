@@ -53,6 +53,34 @@ Guardar un punto de control, volver a uno y restablecer el sistema lo reinician,
 
 Los programas del sistema tienen acceso a internet. No pueden llegar a redes privadas ni a los puertos que usan los servidores de correo (25, 465, 587 y 2525), así que envía el correo mediante la API de un proveedor.
 
+## Archivos y terminal
+
+Otras dos tarjetas de su página te permiten trabajar tú mismo en la computadora, sin un chat. Las dos actúan como `user`, igual que Aristra, y las dos despiertan una computadora dormida.
+
+### Archivos
+
+**Files** muestra una carpeta cada vez, empezando por tu carpeta personal. Abre una carpeta, descarga un archivo, sube archivos a la carpeta en la que estás, crea una carpeta, cambia un nombre o borra.
+
+- Hasta 500 MB por archivo. Lo que subes aparece solo cuando ha llegado entero, y reemplazar un archivo que ya está pide confirmación antes.
+- Una carpeta que tu usuario no puede leer lo dice. Para los archivos del propio sistema, usa la terminal y `sudo`.
+- Los archivos pasan por Aristra de camino, y no se guardan allí.
+- Mientras la computadora duerme, **Show its files** la despierta un momento.
+
+### Terminal
+
+**Open terminal** te da una shell en la computadora, como `user`; `sudo` te hace root. Sirve para lo que no tiene sitio en un chat:
+
+- Iniciar sesión en una herramienta, como `gh auth login`, o guardar una clave en un archivo sin escribirla en un chat.
+- Programas que manejas tú, como `psql`, `htop`, `vim` o un registro que sigues en vivo.
+- Un comando rápido, sin gastar tiempo de un modelo.
+
+Lo que escribes va a la computadora y vuelve, y Aristra no guarda nada. Solo tú puedes abrirla, desde el sitio web.
+
+- **Una a la vez.** Abrirla en otra pestaña cierra la primera.
+- **Mantiene la computadora despierta** mientras está abierta, y pagas ese tiempo. Se cierra tras 30 minutos sin nada escrito ni mostrado.
+- **Cerrarla termina lo que se ejecuta en ella**, como cerrar una ventana de terminal. Para que algo siga en ejecución, inícialo con `nohup` o en `tmux`, o pide a Aristra que lo ejecute como una aplicación.
+- Una computadora detenida tiene que iniciarse primero.
+
 ## Dónde guarda sus datos
 
 Lo eliges al crearla, y puedes cambiarlo en su página. Un cambio se aplica a los mensajes nuevos.
@@ -77,7 +105,7 @@ Cuando cambias a **Kept on the computer only**, la página ofrece eliminar las c
 
 ## Dormir y despertar
 
-- **Se duerme tras dos minutos de inactividad**: ninguna respuesta en curso, ninguna aprobación pendiente, ningún comando en segundo plano, nada de tu parte y ninguna visita a una de sus aplicaciones. Todo lo que no puede comprobar cuenta como ocupado, así que nunca se duerme a mitad de un trabajo.
+- **Se duerme tras dos minutos de inactividad**: ninguna respuesta en curso, ninguna aprobación pendiente, ningún comando en segundo plano, nada de tu parte, ninguna visita a una de sus aplicaciones y ninguna terminal abierta. Todo lo que no puede comprobar cuenta como ocupado, así que nunca se duerme a mitad de un trabajo.
 - **Despierta cuando le envías algo**: un mensaje desde la web, tu teléfono o Telegram, o una aprobación. Un mensaje enviado mientras duerme espera y se responde cuando está lista, normalmente en segundos. Small, Medium y Large conservan en memoria lo que se estaba ejecutando mientras duermen; Extra large, en cambio, se apaga y arranca de cero, así que tarda un poco más en despertar. Tus archivos y chats están en su disco en cualquier caso.
 - **Una visita a una de sus aplicaciones también la despierta.** La primera página después de dormir tarda cerca de un segundo. Una Extra large tarda más, porque arranca de cero.
 - **Los prompts programados se siguen ejecutando a su hora.** La computadora los guarda en su disco y solo le indica a Aristra cuándo toca el siguiente, para que Aristra pueda arrancarla justo antes. Aristra nunca sabe qué dicen los prompts.
@@ -158,6 +186,6 @@ Los servidores de Aristra transmiten el código y nunca ven el inicio de sesión
 
 - Cada computadora en la nube es su propia máquina en su propia red privada: no puede llegar a las máquinas de otros usuarios ni a los servidores de Aristra, salvo mediante la API pública, igual que tu Mac.
 - La máquina tiene dos lados. Uno es tu sistema Ubuntu, donde tú y Aristra trabajan como root. El otro guarda su inicio de sesión, sus claves, y sus chats, memoria y configuración. Ningún programa de tu sistema puede leer ni cambiar ese lado, ni siquiera root.
-- Tiene una sola puerta, para las direcciones de tus aplicaciones. Una solicitud entra solo después de que Aristra comprueba que viene de ti, o de alguien con quien compartiste la aplicación, salvo que hayas hecho pública la aplicación. Tus aplicaciones escuchan dentro de tu sistema y no se llega a ellas de ninguna otra forma.
+- Tiene una sola puerta, para las direcciones de tus aplicaciones y tu terminal. Una solicitud entra solo después de que Aristra comprueba que viene de ti, o de alguien con quien compartiste la aplicación, salvo que hayas hecho pública la aplicación. La terminal es solo tuya. Tus aplicaciones escuchan dentro de tu sistema y no se llega a ellas de ninguna otra forma.
 - Para todo lo demás se conecta hacia fuera con tu cuenta por HTTPS, autenticada con su propia clave del dispositivo, igual que tu Mac.
 - No guarda ninguna credencial de Aristra. Inicia sesión con un token de un solo uso cuando se crea, y con uno nuevo si ha estado dormida durante semanas o pasa a otro host.
