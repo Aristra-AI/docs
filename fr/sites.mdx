@@ -1,9 +1,9 @@
 ---
 title: "Sites"
-description: "Aristra publie un dossier de fichiers web comme un site, à une adresse que seuls vous et les personnes avec qui vous le partagez pouvez ouvrir : ce qu'est un site, le partager par e-mail, republier à la même adresse, revenir à une version antérieure et le retirer."
+description: "Aristra publie un dossier de fichiers web comme un site, à une adresse privée, partagée par e-mail ou, avec un forfait, publique : ce qu'est un site, le partager par e-mail, le rendre public sous un nom à vous, republier à la même adresse, revenir à une version antérieure et le retirer."
 ---
 
-Quand Aristra a construit quelque chose fait de fichiers web, comme une petite application web, un rapport ou un ensemble de pages, il peut publier le dossier comme un site. Le site reçoit sa propre adresse sous `aristra.app`. Vous seul pouvez l'ouvrir, jusqu'à ce que vous le partagiez avec des personnes par e-mail.
+Quand Aristra a construit quelque chose fait de fichiers web, comme une petite application web, un rapport ou un ensemble de pages, il peut publier le dossier comme un site. Le site reçoit sa propre adresse sous `aristra.app`. Vous seul pouvez l'ouvrir, jusqu'à ce que vous le partagiez avec des personnes par e-mail ou, avec un forfait, que vous le rendiez public.
 
 Demandez-le dans un chat : « publie ça comme un site ». Cela fonctionne dans les chats sur le web et sur votre téléphone, et dans les chats sur votre [ordinateur cloud](/fr/surfaces/cloud-computer). Tout compte en dispose.
 
@@ -15,7 +15,7 @@ Un site, ce sont des fichiers et rien d'autre : rien ne tourne pour lui. Pour qu
 
 - **Un dossier avec un `index.html` à sa racine.** Un projet qui doit être compilé l'est d'abord ; Aristra publie le dossier ainsi produit.
 - **Une adresse à lui**, par exemple `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Privé jusqu'à ce que vous le partagiez.** Il s'ouvre dans un navigateur connecté à votre compte Aristra. Toute autre personne qui ouvre l'adresse se voit demander qui elle est, et n'entre pas. Pour laisser entrer des personnes, voir « Le partager avec des personnes » ci-dessous.
+- **Privé jusqu'à ce que vous le partagiez.** Il s'ouvre dans un navigateur connecté à votre compte Aristra. Toute autre personne qui ouvre l'adresse se voit demander qui elle est, et n'entre pas. Pour laisser entrer des personnes, voir « Le partager avec des personnes » et « Le rendre public » ci-dessous.
 
 | Limite | |
 |---|---|
@@ -24,6 +24,14 @@ Un site, ce sont des fichiers et rien d'autre : rien ne tourne pour lui. Pour qu
 | Le site entier | 100 Mo |
 
 Les fichiers et dossiers cachés ainsi que `node_modules` sont laissés de côté.
+
+## Qui peut l'ouvrir
+
+| Dans **Sharing** | Qui peut l'ouvrir | Ce qu'il faut |
+|---|---|---|
+| **Only you** | Vous, connecté à Aristra | Tout compte |
+| **People you name** | Vous, et jusqu'à 50 personnes par adresse e-mail | Tout compte |
+| **Anyone** | Toute personne qui a l'adresse, sans connexion | Un forfait : Plus, Pro ou Max |
 
 ## Le partager avec des personnes
 
@@ -50,6 +58,48 @@ La page répond de la même façon quelle que soit l'adresse saisie : elle ne di
 
 Retirez son adresse de la liste et choisissez **Save**, ou choisissez **Only you** pour rendre le site de nouveau privé. Toute personne retirée est dehors à sa prochaine visite. Toutes les autres personnes qui l'avaient ouvert doivent entrer de nouveau, de la même façon que la première fois.
 
+## Le rendre public
+
+Avec un forfait, vous pouvez laisser n'importe qui ouvrir un site, sans connexion et sans code.
+
+1. Dans **Apps**, dans votre compte, choisissez **Sharing** sur le site.
+2. Choisissez **Anyone**.
+3. Si vous le souhaitez, donnez-lui **un nom à vous**, par exemple `team-notes`, pour l'adresse `https://team-notes.aristra.app/`.
+4. Choisissez **Save**.
+
+Vous pouvez aussi le demander à Aristra dans un chat : « rends ce site public sous le nom team-notes ». Aristra vous demande d'abord, comme pour tout changement de qui peut ouvrir une application.
+
+Sur un compte Free, **Anyone** n'est pas disponible. Vous pouvez toujours partager un site avec des personnes par e-mail.
+
+### Un nom à vous
+
+- **De 3 à 40 caractères** : lettres minuscules, chiffres et tirets simples, en commençant et en finissant par une lettre ou un chiffre.
+- **À vous pour de bon.** Une fois pris, un nom n'est jamais donné à une autre application, même après que vous l'avez abandonné ou que vous avez retiré le site. Le site qui l'avait peut le reprendre.
+- **À côté de l'adresse propre du site.** L'adresse `k3x9zz-7hm2qd` continue aussi de fonctionner. **Apps** affiche le nom en dessous.
+- **Seulement tant que le site est public.** Rendez le site privé ou partagé avec des personnes, et le nom ne répond plus. Rendez-le de nouveau public, et le nom revient avec lui.
+
+Aristra refuse un nom qui ressemble à une adresse qu'il crée, un nom qu'il garde pour son propre usage, et un nom qui pourrait passer pour la page d'une entreprise, celle d'Aristra ou une page de connexion.
+
+### Ce que voient les visiteurs
+
+- **Un lien Report** en bas à droite de chaque page. Il ouvre un formulaire sur le site web, où chacun peut signaler à Aristra ce qui ne va pas sur le site.
+- **D'abord un avis, tant que votre compte est nouveau.** Pendant les 14 premiers jours de votre compte, un navigateur qui ouvre votre site voit d'abord qui l'a fait (quelqu'un qui utilise Aristra), qu'Aristra ne l'a pas vérifié, et un lien pour le signaler. **Continue** mène au site, et ce navigateur n'est plus interrogé à cette adresse pendant 30 jours.
+- **Aucune connexion.** Après l'avis, s'il y en a un, les visiteurs arrivent directement sur le site.
+
+Il est demandé aux moteurs de recherche de ne pas référencer un site, public ou non.
+
+### Ce qui ne peut pas être public
+
+- **Un site avec une page de connexion.** Un site dont une page demande un mot de passe et ressemble à une page de connexion ne peut pas être public. Modifiez la page, ou gardez le site privé ou partagé avec des personnes.
+- **Un site publié avant que les sites publics soient vérifiés.** Aristra vous le dit quand vous choisissez **Save**. Demandez à Aristra de publier de nouveau le site, puis rendez-le public.
+- **Un aperçu depuis un chat.** Il reste privé.
+
+Les signalements vont à Aristra, qui peut retirer un site public pour hameçonnage, logiciel malveillant ou autre abus. Ses deux adresses cessent alors de fonctionner.
+
+### Quand votre forfait se termine
+
+En quelques minutes, chaque site et chaque application publics deviennent privés : vous seul pouvez les ouvrir. Leur liste de personnes et leur nom sont conservés. Quand vous renouvelez, choisissez de nouveau **People you name** ou **Anyone**.
+
 ## Republier
 
 Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et sert les nouveaux fichiers, aux mêmes personnes. Chaque publication est une version, et les cinq dernières sont conservées.
@@ -59,7 +109,7 @@ Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et se
 **Apps**, dans votre compte, à l'adresse `app.aristralabs.com/account/apps`, liste vos sites et leurs adresses.
 
 - **Serve this release**, sur une version antérieure, remet le site tel qu'il était alors.
-- **Take down** met fin au site. Son adresse cesse de fonctionner et n'est plus jamais attribuée.
+- **Take down** met fin au site. Son adresse, et son nom à vous s'il en a un, cessent de fonctionner et ne sont plus jamais attribués.
 
 ## Un aperçu depuis un chat
 

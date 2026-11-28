@@ -1,6 +1,6 @@
 ---
 title: "Computadora en la nube"
-description: "Tu propia computadora en Aristra Cloud, con un plan o con recargas: un sistema Ubuntu en el que eres root, archivos que se conservan y aplicaciones en una dirección que solo tú y las personas con quienes la compartes pueden abrir. Se duerme cuando está inactiva y despierta con tu mensaje. El tiempo de ejecución y su disco se pagan con tu saldo."
+description: "Tu propia computadora en Aristra Cloud, con un plan o con recargas: un sistema Ubuntu en el que eres root, archivos que se conservan y aplicaciones en una dirección privada, compartida por correo o, con un plan, pública. Se duerme cuando está inactiva y despierta con tu mensaje. El tiempo de ejecución y su disco se pagan con tu saldo."
 ---
 
 Una computadora en la nube es tu propia máquina Linux en la nube de Aristra, con el mismo agente de Aristra Code que tu terminal y Aristra Desktop. Los chats en ella funcionan como los chats en tu Mac: un shell real, archivos que se conservan, las herramientas que instales y trabajos largos que se quedan en ejecución. Su sistema es Ubuntu, y en él eres root. Siempre está accesible desde la web y tu teléfono, y desde Telegram con un plan, porque despierta cuando le envías algo.
@@ -89,13 +89,21 @@ Cuando cambias a **Kept on the computer only**, la página ofrece eliminar las c
 Pídele a Aristra que ejecute algo que construiste en la computadora: una aplicación web, una API, un bot, cualquier cosa que escuche en un puerto. Aristra lo ejecuta como una aplicación:
 
 - **Sigue en ejecución.** La computadora la vuelve a iniciar si termina, y después de que la computadora se reinicia. Dura más que el chat que la creó.
-- **Recibe una dirección** bajo `aristra.app` que solo tú puedes abrir, en un navegador con la sesión iniciada en Aristra, hasta que la compartas con otras personas por correo, igual que [compartes un sitio](/es/sites).
-- **Sabe quién la visita.** Cada solicitud llega a la aplicación con la dirección de correo de quien la visita en la cabecera `X-Aristra-Email`, la tuya o la de alguien con quien la compartiste, así que la aplicación no necesita un inicio de sesión propio.
+- **Recibe una dirección** bajo `aristra.app` que solo tú puedes abrir, en un navegador con la sesión iniciada en Aristra, hasta que la compartas con otras personas por correo, igual que [compartes un sitio](/es/sites), o, con un plan, la [hagas pública](/es/sites).
+- **Sabe quién la visita.** Cada solicitud llega a la aplicación con la dirección de correo de quien la visita en la cabecera `X-Aristra-Email`, la tuya o la de alguien con quien la compartiste, así que la aplicación no necesita un inicio de sesión propio. A una aplicación pública no se le dice el nombre de nadie: sus solicitudes llegan sin esa cabecera.
 - **Una visita despierta a la computadora.** Mientras duerme, la primera página tarda cerca de un segundo (más en una Extra large).
 
-**Apps**, en tu cuenta, en `app.aristralabs.com/account/apps`, muestra tus aplicaciones y sus direcciones. **Take down** da de baja una dirección: deja de funcionar y no se vuelve a asignar. La aplicación en sí sigue en ejecución hasta que Aristra la detiene, así que pídeselo a Aristra en un chat en la computadora. Una computadora ejecuta hasta ocho aplicaciones.
+**Apps**, en tu cuenta, en `app.aristralabs.com/account/apps`, muestra tus aplicaciones y sus direcciones. **Take down** da de baja las direcciones de una aplicación: dejan de funcionar y no se vuelven a asignar. La aplicación en sí sigue en ejecución hasta que Aristra la detiene, así que pídeselo a Aristra en un chat en la computadora. Una computadora ejecuta hasta ocho aplicaciones.
 
 Aristra también puede publicar una carpeta de archivos web como un sitio, en una dirección del mismo tipo, sin dejar nada en ejecución. Consulta [Sitios](/es/sites).
+
+### Una aplicación pública
+
+Una aplicación pública funciona como un [sitio público](/es/sites): cualquiera que tenga la dirección puede abrirla, con un nombre propio si quieres. Sus páginas HTML llevan un enlace Report y, mientras tu cuenta es nueva, un navegador que la abre ve primero un aviso. Algunas cosas cambian porque es un programa:
+
+- **Cualquier sitio puede llamarla.** Una solicitud que hace la página de otro sitio llega a la aplicación, sin cookies, así que una aplicación pública puede servir una API a otros sitios; ella envía sus propias cabeceras CORS. El aviso es para las páginas que abre un navegador, no para las llamadas que piden datos. Una aplicación privada o compartida rechaza esas solicitudes.
+- **Sus cookies cambian de nombre.** Cada cookie que define la aplicación llega al navegador como `__Host-` seguido de su nombre, con `Path=/` y sin `Domain`, y vuelve a la aplicación con el nombre que ella le dio. Solo esas cookies llegan a la aplicación, así que una página en otra dirección de `aristra.app` no puede colocarle una cookie. El código de la página que lee `document.cookie` ve las cookies con el nombre cambiado.
+- **Cada visita despierta a la computadora**, y la mantiene despierta dos minutos después. Una aplicación que visita mucha gente puede mantener la computadora despierta gran parte del día, y pagas el tiempo que está despierta.
 
 ### Siempre activa (always on)
 
@@ -150,6 +158,6 @@ Los servidores de Aristra transmiten el código y nunca ven el inicio de sesión
 
 - Cada computadora en la nube es su propia máquina en su propia red privada: no puede llegar a las máquinas de otros usuarios ni a los servidores de Aristra, salvo mediante la API pública, igual que tu Mac.
 - La máquina tiene dos lados. Uno es tu sistema Ubuntu, donde tú y Aristra trabajan como root. El otro guarda su inicio de sesión, sus claves, y sus chats, memoria y configuración. Ningún programa de tu sistema puede leer ni cambiar ese lado, ni siquiera root.
-- Tiene una sola puerta, para las direcciones de tus aplicaciones. Una solicitud entra solo después de que Aristra comprueba que viene de ti, o de alguien con quien compartiste la aplicación. Tus aplicaciones escuchan dentro de tu sistema y no se llega a ellas de ninguna otra forma.
+- Tiene una sola puerta, para las direcciones de tus aplicaciones. Una solicitud entra solo después de que Aristra comprueba que viene de ti, o de alguien con quien compartiste la aplicación, salvo que hayas hecho pública la aplicación. Tus aplicaciones escuchan dentro de tu sistema y no se llega a ellas de ninguna otra forma.
 - Para todo lo demás se conecta hacia fuera con tu cuenta por HTTPS, autenticada con su propia clave del dispositivo, igual que tu Mac.
 - No guarda ninguna credencial de Aristra. Inicia sesión con un token de un solo uso cuando se crea, y con uno nuevo si ha estado dormida durante semanas o pasa a otro host.
