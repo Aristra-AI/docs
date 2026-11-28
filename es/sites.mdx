@@ -100,6 +100,22 @@ Las denuncias llegan a Aristra, que puede dar de baja un sitio público por phis
 
 En pocos minutos, cada sitio y cada aplicación públicos pasan a ser privados: solo tú puedes abrirlos. Se conservan su lista de personas y su nombre. Cuando renueves, vuelve a elegir **People you name** o **Anyone**.
 
+## Un dominio propio
+
+Un sitio también puede responder en un dominio tuyo, como `app.example.com`. Quién puede abrirlo allí es lo mismo que en su propia dirección: solo tú, las personas con quienes lo compartiste, o cualquiera.
+
+1. En **Apps**, en tu cuenta, elige **Domains** en el sitio.
+2. Escribe el dominio y elige **Add**.
+3. En el proveedor de DNS de tu dominio, añade un registro CNAME de ese dominio a `domains.aristra.app`.
+
+Empieza a responder unos minutos después de que el registro esté listo, con su propio certificado. Hasta entonces, **Domains** dice **Waiting**, y qué espera.
+
+- **Cuántos:** 1 en una cuenta Free, 2 en Plus, 10 en Pro y 25 en Max, entre todas tus aplicaciones.
+- **Una aplicación a la vez.** Quítalo de una aplicación para usarlo en otra. Dar de baja un sitio libera sus dominios.
+- **Un dominio que no apunta aquí en 7 días** se quita, y vuelve a quedar libre.
+- Usa un nombre bajo tu dominio, como `app.example.com`: la mayoría de los proveedores de DNS no pueden dar un registro CNAME a `example.com` mismo.
+- No se pueden añadir los dominios de Aristra, y una vista previa desde un chat no puede tener uno.
+
 ## Publicar de nuevo
 
 Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la misma y sirve los archivos nuevos, a las mismas personas. Cada vez es una versión, y se conservan las cinco últimas.

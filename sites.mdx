@@ -100,6 +100,22 @@ Reports go to Aristra, which can take a public site down for phishing, malware o
 
 Within a few minutes, each public site and app becomes private: only you can open it. Its list of people and its name are kept. When you renew, choose **People you name** or **Anyone** again.
 
+## A domain of your own
+
+A site can also answer at a domain of yours, such as `app.example.com`. Who can open it there is the same as at its own address: only you, the people you shared it with, or anyone.
+
+1. In **Apps** in your account, choose **Domains** on the site.
+2. Enter the domain and choose **Add**.
+3. At your domain's DNS provider, add a CNAME record from that domain to `domains.aristra.app`.
+
+It serves a few minutes after the record is in place, with its own certificate. Until then **Domains** says **Waiting**, and what it waits for.
+
+- **How many:** 1 on a Free account, 2 on Plus, 10 on Pro and 25 on Max, across all your apps.
+- **One app at a time.** Remove it from one app to use it on another. Taking a site down frees its domains.
+- **A domain not pointed here within 7 days** is removed, so it is free again.
+- Use a name under your domain, such as `app.example.com`: most DNS providers can't give a bare `example.com` a CNAME record.
+- Aristra's own domains can't be added, and a chat's preview can't have one.
+
 ## Publish again
 
 When Aristra publishes the same folder again, the address stays the same and serves the new files, to the same people. Each time is a release, and the last five are kept.

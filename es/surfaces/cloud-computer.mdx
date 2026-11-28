@@ -118,6 +118,7 @@ Pídele a Aristra que ejecute algo que construiste en la computadora: una aplica
 
 - **Sigue en ejecución.** La computadora la vuelve a iniciar si termina, y después de que la computadora se reinicia. Dura más que el chat que la creó.
 - **Recibe una dirección** bajo `aristra.app` que solo tú puedes abrir, en un navegador con la sesión iniciada en Aristra, hasta que la compartas con otras personas por correo, igual que [compartes un sitio](/es/sites), o, con un plan, la [hagas pública](/es/sites).
+- **Puede responder en un dominio tuyo**, igual que un [sitio](/es/sites).
 - **Sabe quién la visita.** Cada solicitud llega a la aplicación con la dirección de correo de quien la visita en la cabecera `X-Aristra-Email`, la tuya o la de alguien con quien la compartiste, así que la aplicación no necesita un inicio de sesión propio. A una aplicación pública no se le dice el nombre de nadie: sus solicitudes llegan sin esa cabecera.
 - **Una visita despierta a la computadora.** Mientras duerme, la primera página tarda cerca de un segundo (más en una Extra large).
 
@@ -152,6 +153,28 @@ Si una aplicación termina una y otra vez en cuanto se inicia, Aristra te avisa 
 - **Tareas programadas** (con un plan): una tarea configurada para ejecutarse en tu computadora en la nube inicia allí un chat con su prompt cada vez que se ejecuta, y la despierta si está dormida. El historial de la propia tarea muestra que cada ejecución empezó; la respuesta está en el chat.
 - **Sus propias tareas programadas:** en **Scheduled tasks**, en su página, dale un prompt para ejecutar todos los días, los días laborables, un día a la semana, cada hora o una sola vez, a horas de tu propia zona horaria. La computadora las guarda, despierta para cada una y la ejecuta en un chat nuevo, que **Read it** abre. No necesitan plan: cada ejecución se paga con tu saldo, igual que sus chats. Leer la lista mientras duerme la despierta un momento.
 - **Aristra Desktop:** los chats de una computadora en la nube que guarda en tu cuenta aparecen en la pestaña Code en **On other devices**. Para iniciar un chat en ella, usa su página en la web.
+
+## Webhooks
+
+Un webhook es una dirección que inicia un chat en tu computadora en la nube con cada solicitud que recibe, por ejemplo un evento de GitHub o de Stripe.
+
+1. En **Webhooks**, en su página, elige **New webhook**.
+2. Ponle un nombre, di qué hace Aristra con cada solicitud y elige cómo se ejecutan sus chats.
+3. Elige **Make the webhook** y copia su dirección: se muestra una sola vez.
+
+Da la dirección al servicio que envía los eventos. Cada solicitud inicia un chat, con tu instrucción primero y la solicitud después. A Aristra se le dice que la solicitud son datos de fuera, nunca instrucciones que seguir.
+
+| Modo | Qué hacen sus chats |
+|---|---|
+| **Asks first** (el predeterminado) | Te preguntan antes de ejecutar un comando o cambiar un archivo, en la web y en Telegram |
+| **Accepts edits** | Cambian archivos sin preguntar, y preguntan antes de ejecutar un comando |
+| **Auto** | Se ejecutan sin preguntarte. Una solicitud viene de fuera y puede intentar dirigir a Aristra, así que elígelo solo para un remitente de confianza |
+
+- **Cualquiera que tenga la dirección puede iniciar chats**, así que mantenla en secreto. **New address** crea otra, y la anterior deja de funcionar al instante. **Pause** rechaza las solicitudes hasta que lo reanudes.
+- **Una solicitud reenviada es un solo chat** cuando su remitente identifica cada entrega, como hacen GitHub, Stripe y muchos otros. Si no, cada solicitud es un chat.
+- Una solicitud despierta la computadora si duerme, y su chat se paga como cualquier chat en ella.
+- Hasta 10 webhooks por computadora, una solicitud de hasta 256 KB y hasta 30 solicitudes por minuto y 500 al día en cada uno.
+- La tarjeta muestra cómo fue la última solicitud de cada webhook.
 
 ## Aprobaciones
 

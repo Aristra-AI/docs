@@ -118,6 +118,7 @@ Demandez à Aristra de faire tourner ce que vous avez construit sur l'ordinateur
 
 - **Elle continue de tourner.** L'ordinateur la relance si elle s'arrête, et après un redémarrage de l'ordinateur. Elle survit au chat qui l'a créée.
 - **Elle reçoit une adresse** sous `aristra.app` que vous seul pouvez ouvrir, dans un navigateur connecté à Aristra, jusqu'à ce que vous la partagiez avec des personnes par e-mail, comme vous [partagez un site](/fr/sites), ou, avec un forfait, que vous la [rendiez publique](/fr/sites).
+- **Elle peut répondre sur un domaine à vous**, comme un [site](/fr/sites).
 - **Elle sait qui la visite.** Chaque requête arrive à l'application avec l'adresse e-mail du visiteur dans l'en-tête `X-Aristra-Email`, la vôtre ou celle d'une personne avec qui vous l'avez partagée : l'application n'a donc pas besoin de sa propre connexion. Une application publique ne connaît le nom de personne : ses requêtes arrivent sans cet en-tête.
 - **Une visite réveille l'ordinateur.** Pendant sa veille, la première page prend environ une seconde (plus longtemps sur un Extra large).
 
@@ -152,6 +153,28 @@ Si une application s'arrête sans cesse dès qu'elle démarre, Aristra vous pré
 - **Les tâches planifiées** (avec un forfait) : une tâche réglée pour s'exécuter sur votre ordinateur cloud y démarre un chat avec son prompt à chaque exécution, en le réveillant s'il est en veille. L'historique de la tâche indique que chaque exécution a démarré ; la réponse se trouve dans le chat.
 - **Ses propres tâches planifiées :** sous **Scheduled tasks** sur sa page, donnez-lui un prompt à exécuter tous les jours, en semaine, un jour par semaine, toutes les heures ou une seule fois, à des heures de votre propre fuseau horaire. L'ordinateur les conserve, se réveille pour chacune et l'exécute dans un nouveau chat, que **Read it** ouvre. Elles ne nécessitent pas de forfait : chaque exécution est payée depuis votre solde, comme ses chats. Consulter la liste pendant sa veille le réveille un instant.
 - **Aristra Desktop :** les chats d'un ordinateur cloud qui enregistre dans votre compte apparaissent dans l'onglet Code sous **On other devices**. Pour y démarrer un chat, utilisez sa page sur le web.
+
+## Webhooks
+
+Un webhook est une adresse qui démarre un chat sur votre ordinateur cloud à chaque requête qu'elle reçoit, par exemple un événement de GitHub ou de Stripe.
+
+1. Sous **Webhooks**, sur sa page, choisissez **New webhook**.
+2. Donnez-lui un nom, dites ce qu'Aristra fait de chaque requête, et choisissez comment ses chats s'exécutent.
+3. Choisissez **Make the webhook**, puis copiez son adresse : elle n'est montrée qu'une fois.
+
+Donnez l'adresse au service qui envoie les événements. Chaque requête démarre un chat, avec d'abord votre instruction, puis la requête. Aristra est prévenu que la requête est une donnée venue de l'extérieur, jamais une instruction à suivre.
+
+| Mode | Ce que font ses chats |
+|---|---|
+| **Asks first** (par défaut) | Vous demandent avant d'exécuter une commande ou de modifier un fichier, sur le web et Telegram |
+| **Accepts edits** | Modifient les fichiers sans demander, et demandent avant d'exécuter une commande |
+| **Auto** | S'exécutent sans vous demander. Une requête vient de l'extérieur et peut tenter d'orienter Aristra : ne le choisissez que pour un expéditeur de confiance |
+
+- **Toute personne qui a l'adresse peut démarrer des chats** : gardez-la secrète. **New address** en crée une autre, et l'ancienne cesse de fonctionner aussitôt. **Pause** refuse les requêtes jusqu'à ce que vous le relanciez.
+- **Une requête renvoyée ne fait qu'un chat** quand son expéditeur numérote chaque envoi, comme GitHub, Stripe et bien d'autres. Sinon, chaque requête est un chat.
+- Une requête réveille l'ordinateur s'il est en veille, et son chat est payé comme tout chat sur l'ordinateur.
+- Jusqu'à 10 webhooks par ordinateur, une requête jusqu'à 256 Ko, et jusqu'à 30 requêtes par minute et 500 par jour pour chacun.
+- La carte indique comment s'est passée la dernière requête de chaque webhook.
 
 ## Les approbations
 

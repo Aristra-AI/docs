@@ -118,6 +118,7 @@ Ask Aristra to run something you built on the computer: a web app, an API, a bot
 
 - **It keeps running.** The computer starts it again if it ends, and after the computer restarts. It outlives the chat that made it.
 - **It gets an address** under `aristra.app` that only you can open, in a browser signed in to Aristra, until you share it with people by email, as you [share a site](/sites#share-it-with-people), or, with a plan, [make it public](/sites#make-it-public).
+- **It can answer at a domain of yours**, as a [site can](/sites#a-domain-of-your-own).
 - **It is told who is asking.** Each request reaches the app with the visitor's email address in the `X-Aristra-Email` header, yours or that of someone you shared it with, so the app needs no sign-in of its own. A public app is told nobody's: its requests come without that header.
 - **A visit wakes the computer.** While it sleeps, the first page takes about a second (longer on an Extra large).
 
@@ -152,6 +153,28 @@ If an app keeps ending as soon as it starts, Aristra tells you once: on Telegram
 - **Scheduled tasks** (with a plan): a task set to run on your cloud computer starts a chat there with its prompt each time it runs, waking it if it sleeps. The task's own history shows that each run started; the reply is in the chat.
 - **Its own scheduled tasks:** under **Scheduled tasks** on its page, give it a prompt to run every day, on weekdays, one day a week, every hour or once, at times in your own time zone. The computer keeps them, wakes for each one, and runs it in a new chat, which **Read it** opens. They need no plan: each run is paid from your balance, as its chats are. Reading the list while it sleeps wakes it for a moment.
 - **Aristra Desktop:** the chats of a cloud computer that saves to your account show in the Code tab under **On other devices**. To start a chat on it, use its page on the web.
+
+## Webhooks
+
+A webhook is an address that starts a chat on your cloud computer with each request it receives, such as an event from GitHub or Stripe.
+
+1. Under **Webhooks** on its page, choose **New webhook**.
+2. Give it a name, say what Aristra does with each request, and choose how its chats run.
+3. Choose **Make the webhook**, and copy its address: it is shown once.
+
+Give the address to the service that sends the events. Each request starts a chat, with your instruction first and the request after it. Aristra is told that the request is data from outside, never instructions to follow.
+
+| Mode | What its chats do |
+|---|---|
+| **Asks first** (the default) | Ask you before running a command or changing a file, on the web and Telegram |
+| **Accepts edits** | Change files without asking, and ask before running a command |
+| **Auto** | Run without asking you first. A request comes from outside and may try to steer Aristra, so choose it only for a sender you trust |
+
+- **Anyone with the address can start chats**, so keep it secret. **New address** makes another, and the old one stops working at once. **Pause** refuses requests until you resume it.
+- **A retried request is one chat** when its sender names each delivery, as GitHub, Stripe and many others do. Otherwise each request is a chat.
+- A request wakes the computer if it sleeps, and its chat is paid for as any chat on it.
+- Up to 10 webhooks a computer, a request of up to 256 KB, and up to 30 requests a minute and 500 a day for each.
+- The card shows how each webhook's last request went.
 
 ## Approvals
 

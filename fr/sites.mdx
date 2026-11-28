@@ -100,6 +100,22 @@ Les signalements vont à Aristra, qui peut retirer un site public pour hameçonn
 
 En quelques minutes, chaque site et chaque application publics deviennent privés : vous seul pouvez les ouvrir. Leur liste de personnes et leur nom sont conservés. Quand vous renouvelez, choisissez de nouveau **People you name** ou **Anyone**.
 
+## Un domaine à vous
+
+Un site peut aussi répondre sur un domaine à vous, par exemple `app.example.com`. Qui peut l'y ouvrir est le même qu'à sa propre adresse : vous seul, les personnes avec qui vous l'avez partagé, ou tout le monde.
+
+1. Dans **Apps**, dans votre compte, choisissez **Domains** sur le site.
+2. Saisissez le domaine et choisissez **Add**.
+3. Chez le fournisseur DNS de votre domaine, ajoutez un enregistrement CNAME de ce domaine vers `domains.aristra.app`.
+
+Il répond quelques minutes après que l'enregistrement est en place, avec son propre certificat. D'ici là, **Domains** indique **Waiting**, et ce qu'il attend.
+
+- **Combien :** 1 sur un compte Free, 2 sur Plus, 10 sur Pro et 25 sur Max, pour l'ensemble de vos applications.
+- **Une application à la fois.** Retirez-le d'une application pour l'utiliser sur une autre. Retirer un site libère ses domaines.
+- **Un domaine qui ne pointe pas ici dans les 7 jours** est retiré, et redevient libre.
+- Utilisez un nom sous votre domaine, comme `app.example.com` : la plupart des fournisseurs DNS ne peuvent pas donner un enregistrement CNAME à `example.com` lui-même.
+- Les domaines d'Aristra ne peuvent pas être ajoutés, et un aperçu depuis un chat ne peut pas en avoir.
+
 ## Republier
 
 Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et sert les nouveaux fichiers, aux mêmes personnes. Chaque publication est une version, et les cinq dernières sont conservées.
