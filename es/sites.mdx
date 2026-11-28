@@ -1,9 +1,9 @@
 ---
 title: "Sitios"
-description: "Aristra publica una carpeta de archivos web como un sitio en una dirección que solo tú puedes abrir: qué es un sitio, publicar de nuevo en la misma dirección, volver a una versión anterior y darlo de baja."
+description: "Aristra publica una carpeta de archivos web como un sitio en una dirección que solo tú y las personas con quienes lo compartes pueden abrir: qué es un sitio, compartirlo por correo, publicar de nuevo en la misma dirección, volver a una versión anterior y darlo de baja."
 ---
 
-Cuando Aristra ha construido algo hecho de archivos web, como una pequeña aplicación web, un informe o un conjunto de páginas, puede publicar la carpeta como un sitio. El sitio recibe su propia dirección bajo `aristra.app`, y solo tú puedes abrirlo.
+Cuando Aristra ha construido algo hecho de archivos web, como una pequeña aplicación web, un informe o un conjunto de páginas, puede publicar la carpeta como un sitio. El sitio recibe su propia dirección bajo `aristra.app`. Solo tú puedes abrirlo, hasta que lo compartas con otras personas por correo.
 
 Pídelo en un chat: «publica esto como un sitio». Funciona en los chats en la web y en tu teléfono, y en los chats en tu [computadora en la nube](/es/surfaces/cloud-computer). Todas las cuentas lo tienen.
 
@@ -15,7 +15,7 @@ Un sitio son archivos y nada más: nada se ejecuta para él. Para algo que tiene
 
 - **Una carpeta con un `index.html` en su raíz.** Un proyecto que necesita compilarse se compila primero; Aristra publica la carpeta resultante.
 - **Una dirección propia**, como `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Privado.** Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra. A cualquier otra persona se le pide iniciar sesión, y luego se le dice que el sitio es privado. No se puede compartir con otras personas.
+- **Privado hasta que lo compartas.** Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra. A cualquier otra persona que abra la dirección se le pregunta quién es, y no entra. Para dejar entrar a otras personas, consulta «Compartirlo con otras personas» más abajo.
 
 | Límite | |
 |---|---|
@@ -25,9 +25,34 @@ Un sitio son archivos y nada más: nada se ejecuta para él. Para algo que tiene
 
 Los archivos y carpetas ocultos y `node_modules` se dejan fuera.
 
+## Compartirlo con otras personas
+
+Puedes dejar que otras personas abran un sitio indicando sus direcciones de correo. No necesitan una cuenta de Aristra. Todas las cuentas pueden compartir.
+
+1. En **Apps**, en tu cuenta, elige **Sharing** en el sitio.
+2. Elige **People you name** y escribe sus direcciones de correo, una por línea, hasta 50.
+3. Elige **Save**.
+
+También puedes pedírselo a Aristra en un chat: «comparte este sitio con ann@example.com». Aristra te pregunta antes de cambiar quién puede abrir una de tus aplicaciones.
+
+Aristra no envía correos a las personas que añades. Envíales tú la dirección del sitio.
+
+### Cómo entran
+
+Cuando alguien abre la dirección, ve **Open this app**:
+
+- **Con la sesión iniciada en Aristra** con una dirección de correo de tu lista, entra directamente. Su cuenta debe haber verificado esa dirección.
+- **Si no**, escribe su dirección de correo y elige **Send code**. Si la dirección está en tu lista, Aristra le envía por correo un código de seis dígitos, que sirve una vez, durante 10 minutos. Lo escribe y elige **Open**.
+
+La página responde igual sea cual sea la dirección que se escriba, así que nunca le dice a nadie quién está en tu lista. Una vez dentro, un navegador sigue dentro 12 horas, y después se le pregunta de nuevo.
+
+### Quitar a alguien
+
+Quita su dirección de la lista y elige **Save**, o elige **Only you** para que el sitio vuelva a ser privado. Quien quites queda fuera en su próxima visita. Todos los demás que lo habían abierto tienen que volver a entrar, igual que la primera vez.
+
 ## Publicar de nuevo
 
-Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la misma y sirve los archivos nuevos. Cada vez es una versión, y se conservan las cinco últimas.
+Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la misma y sirve los archivos nuevos, a las mismas personas. Cada vez es una versión, y se conservan las cinco últimas.
 
 ## Volver atrás o darlo de baja
 
@@ -40,7 +65,7 @@ Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la 
 
 En un chat en la web o en tu teléfono, Aristra también puede iniciar un programa en su sandbox cuando lo que pediste necesita un servidor de verdad, como una aplicación web con una API detrás. Ese programa también recibe una dirección bajo `aristra.app`:
 
-- **Privada**, como un sitio. Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra, y no es un enlace para otras personas.
+- **Privada**, siempre. Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra, y no se puede compartir.
 - **Temporal.** Responde mientras el sandbox del chat está en ejecución. Cuando el sandbox se duerme, la dirección lo dice. Continúa el chat y pide a Aristra que lo inicie de nuevo: la dirección sigue siendo la misma.
 - **Aparece en Apps**, donde **Take down** da de baja su dirección. Un chat tiene hasta cuatro vistas previas.
 

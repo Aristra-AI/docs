@@ -1,9 +1,9 @@
 ---
 title: "Sites"
-description: "Aristra publishes a folder of web files as a site at an address only you can open: what a site is, publishing again at the same address, going back to an earlier release, and taking it down."
+description: "Aristra publishes a folder of web files as a site at an address only you, and the people you share it with, can open: what a site is, sharing it by email, publishing again at the same address, going back to an earlier release, and taking it down."
 ---
 
-When Aristra has built something made of web files, such as a small web app, a report or a set of pages, it can publish the folder as a site. The site gets its own address under `aristra.app`, and only you can open it.
+When Aristra has built something made of web files, such as a small web app, a report or a set of pages, it can publish the folder as a site. The site gets its own address under `aristra.app`. Only you can open it, until you share it with people by email.
 
 Ask for it in a chat: "publish this as a site". It works in chats on the web and your phone, and in chats on your [cloud computer](/surfaces/cloud-computer). Every account has it.
 
@@ -15,7 +15,7 @@ A site is files and nothing else: nothing runs for it. For something that has to
 
 - **A folder with an `index.html` at its top.** A project that needs building is built first; Aristra publishes the folder it built.
 - **An address of its own**, such as `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Private.** It opens in a browser signed in to your Aristra account. Anyone else is sent to sign in, and is then told the site is private. It can't be shared with other people.
+- **Private until you share it.** It opens in a browser signed in to your Aristra account. Anyone else who opens the address is asked who they are, and doesn't get in. To let people in, [share it](#share-it-with-people).
 
 | Limit | |
 |---|---|
@@ -25,9 +25,34 @@ A site is files and nothing else: nothing runs for it. For something that has to
 
 Hidden files and folders and `node_modules` are left out.
 
+## Share it with people
+
+You can let people open a site by naming their email addresses. They don't need an Aristra account. Every account can share.
+
+1. In **Apps** in your account, choose **Sharing** on the site.
+2. Choose **People you name** and enter their email addresses, one a line, up to 50.
+3. Choose **Save**.
+
+You can also ask Aristra in a chat: "share this site with ann@example.com". Aristra asks you before it changes who can open one of your apps.
+
+Aristra doesn't email the people you add. Send them the site's address yourself.
+
+### How they get in
+
+When someone opens the address, they see **Open this app**:
+
+- **Signed in to Aristra** with an email address on your list, they go straight in. Their account must have verified that address.
+- **Otherwise** they enter their email address and choose **Send code**. If the address is on your list, Aristra emails it a six-digit code, which works once, for 10 minutes. They enter it and choose **Open**.
+
+The page answers the same whatever address is entered, so it never tells anyone who is on your list. Once in, a browser stays in for 12 hours, and is then asked again.
+
+### Remove someone
+
+Take their address off the list and choose **Save**, or choose **Only you** to make the site private again. Anyone you remove is out at their next visit. Everyone else who had opened it is asked to get in again, the same way as the first time.
+
 ## Publish again
 
-When Aristra publishes the same folder again, the address stays the same and serves the new files. Each time is a release, and the last five are kept.
+When Aristra publishes the same folder again, the address stays the same and serves the new files, to the same people. Each time is a release, and the last five are kept.
 
 ## Go back, or take it down
 
@@ -40,7 +65,7 @@ When Aristra publishes the same folder again, the address stays the same and ser
 
 In a chat on the web or your phone, Aristra can also start a program in its sandbox when what you asked for needs a real server, such as a web app with an API behind it. The program gets an address under `aristra.app` too:
 
-- **Private**, like a site. It opens in a browser signed in to your Aristra account, and it is not a link for other people.
+- **Private**, always. It opens in a browser signed in to your Aristra account, and it can't be shared.
 - **Temporary.** It answers while the chat's sandbox is running. When the sandbox sleeps, the address says so. Continue the chat and ask Aristra to start it again: the address stays the same.
 - **Listed under Apps**, where **Take down** ends its address. A chat has up to four previews.
 

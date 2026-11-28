@@ -1,6 +1,6 @@
 ---
 title: "Cloud computer"
-description: "Your own computer in Aristra Cloud, with a plan or on top-ups: an Ubuntu system you have root on, files that stay, and apps at an address only you can open. It sleeps when idle and wakes for your message. Running time and its disk are paid from your balance."
+description: "Your own computer in Aristra Cloud, with a plan or on top-ups: an Ubuntu system you have root on, files that stay, and apps at an address only you, and the people you share it with, can open. It sleeps when idle and wakes for your message. Running time and its disk are paid from your balance."
 ---
 
 A cloud computer is your own Linux machine in Aristra's cloud, running the same Aristra Code agent as your terminal and Aristra Desktop. Chats on it work like chats on your Mac: a real shell, files that persist, tools you install, long jobs left running. Its system is Ubuntu, and you have root on it. It is always reachable from the web and your phone, and from Telegram with a plan, because it wakes when you send it something.
@@ -89,7 +89,8 @@ When you switch to **Kept on the computer only**, the page offers to delete the 
 Ask Aristra to run something you built on the computer: a web app, an API, a bot, anything that listens on a port. Aristra runs it as an app:
 
 - **It keeps running.** The computer starts it again if it ends, and after the computer restarts. It outlives the chat that made it.
-- **It gets an address** under `aristra.app` that only you can open, in a browser signed in to Aristra. It is not public, so it is not a link for other people.
+- **It gets an address** under `aristra.app` that only you can open, in a browser signed in to Aristra, until you share it with people by email, as you [share a site](/sites#share-it-with-people).
+- **It is told who is asking.** Each request reaches the app with the visitor's email address in the `X-Aristra-Email` header, yours or that of someone you shared it with, so the app needs no sign-in of its own.
 - **A visit wakes the computer.** While it sleeps, the first page takes about a second (longer on an Extra large).
 
 **Apps** in your account, at `app.aristralabs.com/account/apps`, lists your apps and their addresses. **Take down** ends an address: it stops working and is not given out again. The app itself keeps running until Aristra stops it, so ask Aristra in a chat on the computer to stop it. A computer runs up to eight apps.
@@ -149,6 +150,6 @@ Aristra's servers pass the code along and never see the sign-in. Aristra's model
 
 - Each cloud computer is its own machine on its own private network: it can't reach other users' machines or Aristra's servers except through the public API, as your Mac does.
 - The machine has two sides. One is your Ubuntu system, where you and Aristra work with root. The other holds its sign-in, its keys, and its chats, memory and settings. No program in your system can read or change that side, root included.
-- It has one door, for your apps' addresses. A request comes through only after Aristra has checked that it is you, signed in. Your apps listen inside your system and are reached no other way.
+- It has one door, for your apps' addresses. A request comes through only after Aristra has checked that it comes from you, or from someone you shared the app with. Your apps listen inside your system and are reached no other way.
 - For everything else it connects out to your account over HTTPS, authenticated with its own device key, as your Mac does.
 - It holds no credentials of Aristra's. It signs in with a one-time token when it is first made, and with a new one if it has slept for weeks or moves to another host.

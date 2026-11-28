@@ -1,9 +1,9 @@
 ---
 title: "Sites"
-description: "Aristra publie un dossier de fichiers web comme un site, à une adresse que vous seul pouvez ouvrir : ce qu'est un site, republier à la même adresse, revenir à une version antérieure et le retirer."
+description: "Aristra publie un dossier de fichiers web comme un site, à une adresse que seuls vous et les personnes avec qui vous le partagez pouvez ouvrir : ce qu'est un site, le partager par e-mail, republier à la même adresse, revenir à une version antérieure et le retirer."
 ---
 
-Quand Aristra a construit quelque chose fait de fichiers web, comme une petite application web, un rapport ou un ensemble de pages, il peut publier le dossier comme un site. Le site reçoit sa propre adresse sous `aristra.app`, et vous seul pouvez l'ouvrir.
+Quand Aristra a construit quelque chose fait de fichiers web, comme une petite application web, un rapport ou un ensemble de pages, il peut publier le dossier comme un site. Le site reçoit sa propre adresse sous `aristra.app`. Vous seul pouvez l'ouvrir, jusqu'à ce que vous le partagiez avec des personnes par e-mail.
 
 Demandez-le dans un chat : « publie ça comme un site ». Cela fonctionne dans les chats sur le web et sur votre téléphone, et dans les chats sur votre [ordinateur cloud](/fr/surfaces/cloud-computer). Tout compte en dispose.
 
@@ -15,7 +15,7 @@ Un site, ce sont des fichiers et rien d'autre : rien ne tourne pour lui. Pour qu
 
 - **Un dossier avec un `index.html` à sa racine.** Un projet qui doit être compilé l'est d'abord ; Aristra publie le dossier ainsi produit.
 - **Une adresse à lui**, par exemple `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Privé.** Il s'ouvre dans un navigateur connecté à votre compte Aristra. Toute autre personne est envoyée vers la connexion, puis apprend que le site est privé. Il ne peut pas être partagé avec d'autres personnes.
+- **Privé jusqu'à ce que vous le partagiez.** Il s'ouvre dans un navigateur connecté à votre compte Aristra. Toute autre personne qui ouvre l'adresse se voit demander qui elle est, et n'entre pas. Pour laisser entrer des personnes, voir « Le partager avec des personnes » ci-dessous.
 
 | Limite | |
 |---|---|
@@ -25,9 +25,34 @@ Un site, ce sont des fichiers et rien d'autre : rien ne tourne pour lui. Pour qu
 
 Les fichiers et dossiers cachés ainsi que `node_modules` sont laissés de côté.
 
+## Le partager avec des personnes
+
+Vous pouvez laisser des personnes ouvrir un site en indiquant leur adresse e-mail. Elles n'ont pas besoin d'un compte Aristra. Tout compte peut partager.
+
+1. Dans **Apps**, dans votre compte, choisissez **Sharing** sur le site.
+2. Choisissez **People you name** et saisissez leurs adresses e-mail, une par ligne, jusqu'à 50.
+3. Choisissez **Save**.
+
+Vous pouvez aussi le demander à Aristra dans un chat : « partage ce site avec ann@example.com ». Aristra vous demande avant de changer qui peut ouvrir l'une de vos applications.
+
+Aristra n'envoie pas d'e-mail aux personnes que vous ajoutez. Envoyez-leur vous-même l'adresse du site.
+
+### Comment elles entrent
+
+Quand quelqu'un ouvre l'adresse, il voit **Open this app** :
+
+- **Connecté à Aristra** avec une adresse e-mail de votre liste, il entre directement. Son compte doit avoir vérifié cette adresse.
+- **Sinon**, il saisit son adresse e-mail et choisit **Send code**. Si l'adresse est sur votre liste, Aristra lui envoie par e-mail un code à six chiffres, valable une fois, pendant 10 minutes. Il le saisit et choisit **Open**.
+
+La page répond de la même façon quelle que soit l'adresse saisie : elle ne dit donc jamais à personne qui est sur votre liste. Une fois entré, un navigateur le reste 12 heures, puis la question est posée de nouveau.
+
+### Retirer quelqu'un
+
+Retirez son adresse de la liste et choisissez **Save**, ou choisissez **Only you** pour rendre le site de nouveau privé. Toute personne retirée est dehors à sa prochaine visite. Toutes les autres personnes qui l'avaient ouvert doivent entrer de nouveau, de la même façon que la première fois.
+
 ## Republier
 
-Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et sert les nouveaux fichiers. Chaque publication est une version, et les cinq dernières sont conservées.
+Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et sert les nouveaux fichiers, aux mêmes personnes. Chaque publication est une version, et les cinq dernières sont conservées.
 
 ## Revenir en arrière, ou le retirer
 
@@ -40,7 +65,7 @@ Quand Aristra publie de nouveau le même dossier, l'adresse reste la même et se
 
 Dans un chat sur le web ou sur votre téléphone, Aristra peut aussi démarrer un programme dans son bac à sable quand ce que vous avez demandé a besoin d'un vrai serveur, par exemple une application web avec une API derrière. Ce programme reçoit lui aussi une adresse sous `aristra.app` :
 
-- **Privé**, comme un site. Il s'ouvre dans un navigateur connecté à votre compte Aristra, et ce n'est pas un lien pour d'autres personnes.
+- **Privé**, toujours. Il s'ouvre dans un navigateur connecté à votre compte Aristra, et il ne peut pas être partagé.
 - **Temporaire.** Il répond tant que le bac à sable du chat tourne. Quand le bac à sable s'endort, l'adresse le dit. Poursuivez le chat et demandez à Aristra de le redémarrer : l'adresse reste la même.
 - **Listé sous Apps**, où **Take down** met fin à son adresse. Un chat a jusqu'à quatre aperçus.
 
