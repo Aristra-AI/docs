@@ -1,9 +1,9 @@
 ---
 title: "Sitios"
-description: "Aristra publica una carpeta de archivos web como un sitio en una dirección que solo tú puedes abrir: qué es un sitio, publicar de nuevo en la misma dirección, volver a una versión anterior y darlo de baja."
+description: "Aristra publica una carpeta de archivos web como un sitio en una dirección privada, compartida por correo o, con un plan, pública: qué es un sitio, compartirlo por correo, hacerlo público con un nombre propio, publicar de nuevo en la misma dirección, volver a una versión anterior y darlo de baja."
 ---
 
-Cuando Aristra ha construido algo hecho de archivos web, como una pequeña aplicación web, un informe o un conjunto de páginas, puede publicar la carpeta como un sitio. El sitio recibe su propia dirección bajo `aristra.app`, y solo tú puedes abrirlo.
+Cuando Aristra ha construido algo hecho de archivos web, como una pequeña aplicación web, un informe o un conjunto de páginas, puede publicar la carpeta como un sitio. El sitio recibe su propia dirección bajo `aristra.app`. Solo tú puedes abrirlo, hasta que lo compartas con otras personas por correo o, con un plan, lo hagas público.
 
 Pídelo en un chat: «publica esto como un sitio». Funciona en los chats en la web y en tu teléfono, y en los chats en tu [computadora en la nube](/es/surfaces/cloud-computer). Todas las cuentas lo tienen.
 
@@ -15,7 +15,7 @@ Un sitio son archivos y nada más: nada se ejecuta para él. Para algo que tiene
 
 - **Una carpeta con un `index.html` en su raíz.** Un proyecto que necesita compilarse se compila primero; Aristra publica la carpeta resultante.
 - **Una dirección propia**, como `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Privado.** Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra. A cualquier otra persona se le pide iniciar sesión, y luego se le dice que el sitio es privado. No se puede compartir con otras personas.
+- **Privado hasta que lo compartas.** Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra. A cualquier otra persona que abra la dirección se le pregunta quién es, y no entra. Para dejar entrar a otras personas, consulta «Compartirlo con otras personas» y «Hacerlo público» más abajo.
 
 | Límite | |
 |---|---|
@@ -25,22 +25,97 @@ Un sitio son archivos y nada más: nada se ejecuta para él. Para algo que tiene
 
 Los archivos y carpetas ocultos y `node_modules` se dejan fuera.
 
+## Quién puede abrirlo
+
+| En **Sharing** | Quién puede abrirlo | Requisito |
+|---|---|---|
+| **Only you** | Tú, con la sesión iniciada en Aristra | Todas las cuentas |
+| **People you name** | Tú y hasta 50 personas, por su dirección de correo | Todas las cuentas |
+| **Anyone** | Cualquiera que tenga la dirección, sin iniciar sesión | Un plan: Plus, Pro o Max |
+
+## Compartirlo con otras personas
+
+Puedes dejar que otras personas abran un sitio indicando sus direcciones de correo. No necesitan una cuenta de Aristra. Todas las cuentas pueden compartir.
+
+1. En **Apps**, en tu cuenta, elige **Sharing** en el sitio.
+2. Elige **People you name** y escribe sus direcciones de correo, una por línea, hasta 50.
+3. Elige **Save**.
+
+También puedes pedírselo a Aristra en un chat: «comparte este sitio con ann@example.com». Aristra te pregunta antes de cambiar quién puede abrir una de tus aplicaciones.
+
+Aristra no envía correos a las personas que añades. Envíales tú la dirección del sitio.
+
+### Cómo entran
+
+Cuando alguien abre la dirección, ve **Open this app**:
+
+- **Con la sesión iniciada en Aristra** con una dirección de correo de tu lista, entra directamente. Su cuenta debe haber verificado esa dirección.
+- **Si no**, escribe su dirección de correo y elige **Send code**. Si la dirección está en tu lista, Aristra le envía por correo un código de seis dígitos, que sirve una vez, durante 10 minutos. Lo escribe y elige **Open**.
+
+La página responde igual sea cual sea la dirección que se escriba, así que nunca le dice a nadie quién está en tu lista. Una vez dentro, un navegador sigue dentro 12 horas, y después se le pregunta de nuevo.
+
+### Quitar a alguien
+
+Quita su dirección de la lista y elige **Save**, o elige **Only you** para que el sitio vuelva a ser privado. Quien quites queda fuera en su próxima visita. Todos los demás que lo habían abierto tienen que volver a entrar, igual que la primera vez.
+
+## Hacerlo público
+
+Con un plan, puedes dejar que cualquiera abra un sitio, sin iniciar sesión y sin código.
+
+1. En **Apps**, en tu cuenta, elige **Sharing** en el sitio.
+2. Elige **Anyone**.
+3. Si quieres, dale **un nombre propio**, como `team-notes`, para la dirección `https://team-notes.aristra.app/`.
+4. Elige **Save**.
+
+También puedes pedírselo a Aristra en un chat: «haz público este sitio con el nombre team-notes». Aristra te pregunta primero, como en cualquier cambio de quién puede abrir una aplicación.
+
+En una cuenta Free, **Anyone** no está disponible. Puedes seguir compartiendo un sitio con otras personas por correo.
+
+### Un nombre propio
+
+- **De 3 a 40 caracteres**: letras minúsculas, dígitos y guiones sueltos, empezando y terminando con una letra o un dígito.
+- **Tuyo para siempre.** Una vez tomado, un nombre nunca se asigna a otra aplicación, aunque lo dejes o des de baja el sitio. El sitio que lo tenía puede recuperarlo.
+- **Junto a la dirección propia del sitio.** La dirección `k3x9zz-7hm2qd` también sigue funcionando. **Apps** muestra el nombre debajo.
+- **Solo mientras el sitio es público.** Si haces el sitio privado o compartido con personas, el nombre deja de responder. Si vuelves a hacerlo público, el nombre vuelve con él.
+
+Aristra rechaza un nombre que parece una dirección de las que crea, un nombre que reserva para su propio uso y un nombre que podría pasar por la página de una empresa, la de Aristra o una página de inicio de sesión.
+
+### Qué ven los visitantes
+
+- **Un enlace Report** abajo a la derecha de cada página. Abre un formulario en el sitio web donde cualquiera puede contarle a Aristra qué problema tiene el sitio.
+- **Primero un aviso, mientras tu cuenta es nueva.** En los primeros 14 días de tu cuenta, un navegador que abre tu sitio ve primero quién lo hizo (alguien que usa Aristra), que Aristra no lo ha revisado y un enlace para denunciarlo. **Continue** lleva al sitio, y a ese navegador no se le vuelve a preguntar en esa dirección durante 30 días.
+- **Sin iniciar sesión.** Después del aviso, si lo hay, los visitantes entran directamente al sitio.
+
+Se pide a los buscadores que no incluyan ningún sitio, sea público o no.
+
+### Qué no puede ser público
+
+- **Un sitio con una página de inicio de sesión.** Un sitio con una página que pide una contraseña y parece una página de inicio de sesión no puede ser público. Cambia la página, o deja el sitio privado o compartido con personas.
+- **Un sitio publicado antes de que se revisaran los sitios públicos.** Aristra te lo dice cuando eliges **Save**. Pide a Aristra que publique el sitio de nuevo y luego hazlo público.
+- **Una vista previa desde un chat.** Sigue siendo privada.
+
+Las denuncias llegan a Aristra, que puede dar de baja un sitio público por phishing, malware u otros abusos. Entonces sus dos direcciones dejan de funcionar.
+
+### Cuando termina tu plan
+
+En pocos minutos, cada sitio y cada aplicación públicos pasan a ser privados: solo tú puedes abrirlos. Se conservan su lista de personas y su nombre. Cuando renueves, vuelve a elegir **People you name** o **Anyone**.
+
 ## Publicar de nuevo
 
-Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la misma y sirve los archivos nuevos. Cada vez es una versión, y se conservan las cinco últimas.
+Cuando Aristra publica otra vez la misma carpeta, la dirección sigue siendo la misma y sirve los archivos nuevos, a las mismas personas. Cada vez es una versión, y se conservan las cinco últimas.
 
 ## Volver atrás o darlo de baja
 
 **Apps**, en tu cuenta, en `app.aristralabs.com/account/apps`, muestra tus sitios y sus direcciones.
 
 - **Serve this release**, en una versión anterior, deja el sitio como estaba entonces.
-- **Take down** da de baja el sitio. Su dirección deja de funcionar y no se vuelve a asignar.
+- **Take down** da de baja el sitio. Su dirección, y su nombre propio si lo tiene, dejan de funcionar y no se vuelven a asignar.
 
 ## Una vista previa desde un chat
 
 En un chat en la web o en tu teléfono, Aristra también puede iniciar un programa en su sandbox cuando lo que pediste necesita un servidor de verdad, como una aplicación web con una API detrás. Ese programa también recibe una dirección bajo `aristra.app`:
 
-- **Privada**, como un sitio. Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra, y no es un enlace para otras personas.
+- **Privada**, siempre. Se abre en un navegador con la sesión iniciada en tu cuenta de Aristra, y no se puede compartir.
 - **Temporal.** Responde mientras el sandbox del chat está en ejecución. Cuando el sandbox se duerme, la dirección lo dice. Continúa el chat y pide a Aristra que lo inicie de nuevo: la dirección sigue siendo la misma.
 - **Aparece en Apps**, donde **Take down** da de baja su dirección. Un chat tiene hasta cuatro vistas previas.
 

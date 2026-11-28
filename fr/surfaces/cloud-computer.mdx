@@ -1,6 +1,6 @@
 ---
 title: "Ordinateur cloud"
-description: "Votre propre ordinateur dans Aristra Cloud, avec un forfait ou avec des recharges : un système Ubuntu dont vous êtes root, des fichiers qui restent, et des applications à une adresse que vous seul pouvez ouvrir. Il se met en veille quand il est inactif et se réveille pour votre message. Le temps d'activité et son disque sont payés depuis votre solde."
+description: "Votre propre ordinateur dans Aristra Cloud, avec un forfait ou avec des recharges : un système Ubuntu dont vous êtes root, des fichiers qui restent, et des applications à une adresse privée, partagée par e-mail ou, avec un forfait, publique. Il se met en veille quand il est inactif et se réveille pour votre message. Le temps d'activité et son disque sont payés depuis votre solde."
 ---
 
 Un ordinateur cloud est votre propre machine Linux dans le cloud d'Aristra, qui exécute le même agent Aristra Code que votre terminal et Aristra Desktop. Les chats qui s'y trouvent fonctionnent comme les chats sur votre Mac : un vrai shell, des fichiers qui persistent, des outils que vous installez, de longues tâches laissées en cours. Son système est Ubuntu, et vous y êtes root. Il est toujours joignable depuis le web et votre téléphone, et depuis Telegram avec un forfait, parce qu'il se réveille quand vous lui envoyez quelque chose.
@@ -89,12 +89,21 @@ Quand vous passez à **Kept on the computer only**, la page propose de supprimer
 Demandez à Aristra de faire tourner ce que vous avez construit sur l'ordinateur : une application web, une API, un bot, tout ce qui écoute sur un port. Aristra le fait tourner comme une application :
 
 - **Elle continue de tourner.** L'ordinateur la relance si elle s'arrête, et après un redémarrage de l'ordinateur. Elle survit au chat qui l'a créée.
-- **Elle reçoit une adresse** sous `aristra.app` que vous seul pouvez ouvrir, dans un navigateur connecté à Aristra. Elle n'est pas publique : ce n'est donc pas un lien à donner à d'autres personnes.
+- **Elle reçoit une adresse** sous `aristra.app` que vous seul pouvez ouvrir, dans un navigateur connecté à Aristra, jusqu'à ce que vous la partagiez avec des personnes par e-mail, comme vous [partagez un site](/fr/sites), ou, avec un forfait, que vous la [rendiez publique](/fr/sites).
+- **Elle sait qui la visite.** Chaque requête arrive à l'application avec l'adresse e-mail du visiteur dans l'en-tête `X-Aristra-Email`, la vôtre ou celle d'une personne avec qui vous l'avez partagée : l'application n'a donc pas besoin de sa propre connexion. Une application publique ne connaît le nom de personne : ses requêtes arrivent sans cet en-tête.
 - **Une visite réveille l'ordinateur.** Pendant sa veille, la première page prend environ une seconde (plus longtemps sur un Extra large).
 
-**Apps**, dans votre compte, à l'adresse `app.aristralabs.com/account/apps`, liste vos applications et leurs adresses. **Take down** met fin à une adresse : elle cesse de fonctionner et n'est plus jamais attribuée. L'application elle-même continue de tourner jusqu'à ce qu'Aristra l'arrête : demandez-le à Aristra dans un chat sur l'ordinateur. Un ordinateur fait tourner jusqu'à huit applications.
+**Apps**, dans votre compte, à l'adresse `app.aristralabs.com/account/apps`, liste vos applications et leurs adresses. **Take down** met fin aux adresses d'une application : elles cessent de fonctionner et ne sont plus jamais attribuées. L'application elle-même continue de tourner jusqu'à ce qu'Aristra l'arrête : demandez-le à Aristra dans un chat sur l'ordinateur. Un ordinateur fait tourner jusqu'à huit applications.
 
 Aristra peut aussi publier un dossier de fichiers web comme un site, à une adresse du même genre, sans rien laisser tourner. Voir [Sites](/fr/sites).
+
+### Une application publique
+
+Une application publique fonctionne comme un [site public](/fr/sites) : toute personne qui a l'adresse peut l'ouvrir, sous un nom à vous si vous le souhaitez. Ses pages HTML portent un lien Report, et tant que votre compte est nouveau, un navigateur qui l'ouvre voit d'abord un avis. Quelques points diffèrent, parce que c'est un programme :
+
+- **N'importe quel site peut l'appeler.** Une requête faite par la page d'un autre site arrive à l'application, sans cookies : une application publique peut donc servir une API à d'autres sites ; elle envoie ses propres en-têtes CORS. L'avis concerne les pages qu'un navigateur ouvre, pas les appels qui demandent des données. Une application privée ou partagée refuse de telles requêtes.
+- **Ses cookies sont renommés.** Chaque cookie que l'application définit arrive au navigateur sous le nom `__Host-` suivi de son nom, avec `Path=/` et sans `Domain`, et revient à l'application sous le nom qu'elle lui a donné. Seuls ces cookies atteignent l'application : une page à une autre adresse `aristra.app` ne peut donc pas lui imposer un cookie. Le code de la page qui lit `document.cookie` voit les cookies renommés.
+- **Chaque visite réveille l'ordinateur**, et le garde éveillé deux minutes après. Une application que beaucoup de gens visitent peut garder l'ordinateur éveillé une grande partie de la journée, et vous payez le temps où il est éveillé.
 
 ### Toujours active (always on)
 
@@ -149,6 +158,6 @@ Les serveurs d'Aristra transmettent le code et ne voient jamais la connexion. Le
 
 - Chaque ordinateur cloud est une machine à part sur son propre réseau privé : il ne peut joindre ni les machines des autres utilisateurs ni les serveurs d'Aristra, sauf par l'API publique, comme votre Mac.
 - L'ordinateur a deux côtés. L'un est votre système Ubuntu, où vous et Aristra travaillez en root. L'autre contient sa connexion, ses clés, ainsi que ses chats, sa mémoire et ses réglages. Aucun programme de votre système ne peut lire ni modifier ce côté-là, pas même root.
-- Il n'a qu'une porte, pour les adresses de vos applications. Une requête n'entre qu'après qu'Aristra a vérifié que c'est bien vous, connecté. Vos applications écoutent à l'intérieur de votre système et ne sont joignables par aucun autre chemin.
+- Il n'a qu'une porte, pour les adresses de vos applications. Une requête n'entre qu'après qu'Aristra a vérifié qu'elle vient de vous, ou d'une personne avec qui vous avez partagé l'application, sauf si vous avez rendu l'application publique. Vos applications écoutent à l'intérieur de votre système et ne sont joignables par aucun autre chemin.
 - Pour tout le reste, il se connecte en sortie à votre compte en HTTPS, authentifié par sa propre clé d'appareil, comme votre Mac.
 - Il ne détient aucun identifiant d'Aristra. Il se connecte avec un jeton à usage unique lors de sa création, et avec un nouveau jeton s'il a été en veille pendant des semaines ou s'il passe sur un autre hôte.

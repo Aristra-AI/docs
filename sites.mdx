@@ -1,9 +1,9 @@
 ---
 title: "Sites"
-description: "Aristra publishes a folder of web files as a site at an address only you can open: what a site is, publishing again at the same address, going back to an earlier release, and taking it down."
+description: "Aristra publishes a folder of web files as a site at an address only you, the people you share it with or, with a plan, anyone can open: what a site is, sharing it by email, making it public at a name of your own, publishing again at the same address, going back to an earlier release, and taking it down."
 ---
 
-When Aristra has built something made of web files, such as a small web app, a report or a set of pages, it can publish the folder as a site. The site gets its own address under `aristra.app`, and only you can open it.
+When Aristra has built something made of web files, such as a small web app, a report or a set of pages, it can publish the folder as a site. The site gets its own address under `aristra.app`. Only you can open it, until you share it with people by email or, with a plan, make it public.
 
 Ask for it in a chat: "publish this as a site". It works in chats on the web and your phone, and in chats on your [cloud computer](/surfaces/cloud-computer). Every account has it.
 
@@ -15,7 +15,7 @@ A site is files and nothing else: nothing runs for it. For something that has to
 
 - **A folder with an `index.html` at its top.** A project that needs building is built first; Aristra publishes the folder it built.
 - **An address of its own**, such as `https://k3x9zz-7hm2qd.aristra.app/`.
-- **Private.** It opens in a browser signed in to your Aristra account. Anyone else is sent to sign in, and is then told the site is private. It can't be shared with other people.
+- **Private until you share it.** It opens in a browser signed in to your Aristra account. Anyone else who opens the address is asked who they are, and doesn't get in. To let people in, [share it](#share-it-with-people) or [make it public](#make-it-public).
 
 | Limit | |
 |---|---|
@@ -25,22 +25,97 @@ A site is files and nothing else: nothing runs for it. For something that has to
 
 Hidden files and folders and `node_modules` are left out.
 
+## Who can open it
+
+| In **Sharing** | Who can open it | Needs |
+|---|---|---|
+| **Only you** | You, signed in to Aristra | Every account |
+| **People you name** | You, and up to 50 people by email address | Every account |
+| **Anyone** | Anyone with the address, with no sign-in | A plan: Plus, Pro or Max |
+
+## Share it with people
+
+You can let people open a site by naming their email addresses. They don't need an Aristra account. Every account can share.
+
+1. In **Apps** in your account, choose **Sharing** on the site.
+2. Choose **People you name** and enter their email addresses, one a line, up to 50.
+3. Choose **Save**.
+
+You can also ask Aristra in a chat: "share this site with ann@example.com". Aristra asks you before it changes who can open one of your apps.
+
+Aristra doesn't email the people you add. Send them the site's address yourself.
+
+### How they get in
+
+When someone opens the address, they see **Open this app**:
+
+- **Signed in to Aristra** with an email address on your list, they go straight in. Their account must have verified that address.
+- **Otherwise** they enter their email address and choose **Send code**. If the address is on your list, Aristra emails it a six-digit code, which works once, for 10 minutes. They enter it and choose **Open**.
+
+The page answers the same whatever address is entered, so it never tells anyone who is on your list. Once in, a browser stays in for 12 hours, and is then asked again.
+
+### Remove someone
+
+Take their address off the list and choose **Save**, or choose **Only you** to make the site private again. Anyone you remove is out at their next visit. Everyone else who had opened it is asked to get in again, the same way as the first time.
+
+## Make it public
+
+With a plan, you can let anyone open a site, with no sign-in and no code.
+
+1. In **Apps** in your account, choose **Sharing** on the site.
+2. Choose **Anyone**.
+3. If you like, give it **a name of your own**, such as `team-notes`, for the address `https://team-notes.aristra.app/`.
+4. Choose **Save**.
+
+You can also ask Aristra in a chat: "make this site public at team-notes". Aristra asks you first, as it does for any change to who can open an app.
+
+On a Free account, **Anyone** isn't available. You can still share a site with people by email.
+
+### A name of your own
+
+- **3 to 40 characters**: lowercase letters, digits and single hyphens, starting and ending with a letter or digit.
+- **Yours for good.** Once taken, a name is never given to another app, even after you give it up or take the site down. The site that had it can take it back.
+- **Beside the site's own address.** The `k3x9zz-7hm2qd` address keeps working too. **Apps** shows the name under it.
+- **Only while the site is public.** Make the site private or shared with people, and the name stops answering. Make it public again, and the name comes back with it.
+
+Aristra refuses a name that looks like an address it makes, a name it keeps for its own use, and a name that could pass for a company's page, Aristra's own or a sign-in page.
+
+### What visitors see
+
+- **A Report link** at the bottom right of every page. It opens a form on the website where anyone can tell Aristra what is wrong with the site.
+- **A notice first, while your account is new.** In your account's first 14 days, a browser that opens your site is first shown who made it (someone using Aristra), that Aristra hasn't checked it, and a link to report it. **Continue** goes on to the site, and that browser isn't asked again at that address for 30 days.
+- **No sign-in.** After the notice, if there is one, visitors go straight to the site.
+
+Search engines are asked not to list a site, public or not.
+
+### What can't be public
+
+- **A site with a sign-in page.** A site with a page that asks for a password and looks like a sign-in page can't be public. Change the page, or keep the site private or shared with people.
+- **A site published before public sites were checked.** Aristra says so when you choose **Save**. Ask Aristra to publish the site again, then make it public.
+- **A preview from a chat.** It stays private.
+
+Reports go to Aristra, which can take a public site down for phishing, malware or other abuse. Both its addresses then stop working.
+
+### When your plan ends
+
+Within a few minutes, each public site and app becomes private: only you can open it. Its list of people and its name are kept. When you renew, choose **People you name** or **Anyone** again.
+
 ## Publish again
 
-When Aristra publishes the same folder again, the address stays the same and serves the new files. Each time is a release, and the last five are kept.
+When Aristra publishes the same folder again, the address stays the same and serves the new files, to the same people. Each time is a release, and the last five are kept.
 
 ## Go back, or take it down
 
 **Apps** in your account, at `app.aristralabs.com/account/apps`, lists your sites with their addresses.
 
 - **Serve this release** on an earlier release puts the site back as it was then.
-- **Take down** ends the site. Its address stops working and is not given out again.
+- **Take down** ends the site. Its address, and its name of your own if it has one, stop working and are not given out again.
 
 ## A preview from a chat
 
 In a chat on the web or your phone, Aristra can also start a program in its sandbox when what you asked for needs a real server, such as a web app with an API behind it. The program gets an address under `aristra.app` too:
 
-- **Private**, like a site. It opens in a browser signed in to your Aristra account, and it is not a link for other people.
+- **Private**, always. It opens in a browser signed in to your Aristra account, and it can't be shared.
 - **Temporary.** It answers while the chat's sandbox is running. When the sandbox sleeps, the address says so. Continue the chat and ask Aristra to start it again: the address stays the same.
 - **Listed under Apps**, where **Take down** ends its address. A chat has up to four previews.
 
